@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 
 // You'll set these in your .env.local file
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const OPENAI_ORG_ID = process.env.OPENAI_ORG_ID || "";
-const PROJECT_ID = process.env.PROJECT_ID || "";
+const OPENAI_ORGANIZATION_ID = process.env.OPENAI_ORGANIZATION_ID || "";
+const OPENAI_PROJECT_ID = process.env.OPENAI_PROJECT_ID || "";
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
   .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "OpenAI-Organization": OPENAI_ORG_ID || "",
-        "X-Project-ID": PROJECT_ID || "",
+        "OpenAI-Organization": OPENAI_ORGANIZATION_ID,
+        "X-Project-ID": OPENAI_PROJECT_ID,
       },
       body: JSON.stringify(body),
     });
