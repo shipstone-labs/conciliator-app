@@ -13,54 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { v4 } from "uuid";
-
-// Tutorial exchanges from requirements
-const TUTORIAL_EXCHANGES = [
-  {
-    question: "Does this invention involve a chemical process?",
-    answer: "Yes",
-  },
-  {
-    question: "Can this be applied to existing products?",
-    answer: "Yes",
-  },
-  {
-    question: "Does it work on all types of materials?",
-    answer: "No",
-  },
-  {
-    question: "Is it primarily designed for metal surfaces?",
-    answer: "No",
-  },
-  {
-    question: "Does it work on polymer-based materials?",
-    answer: "Yes",
-  },
-  {
-    question:
-      "Does the healing process require external energy input like heat?",
-    answer: "No",
-  },
-  {
-    question: "Can it repair damages larger than 1cm?",
-    answer: "No",
-  },
-  {
-    question: "Does the repair process take longer than 24 hours?",
-    answer: "No",
-  },
-  {
-    question: "Is the healing mechanism triggered by the damage itself?",
-    answer: "Yes",
-  },
-  {
-    question: "Does it require specific environmental conditions to work?",
-    answer: "STOP: Question reveals too much",
-  },
-];
-
-const DEFAULT_INVENTION =
-  "A self-healing material that automatically repairs minor damage and scratches";
+import { DEFAULT_INVENTION, TUTORIAL_EXCHANGES } from "@/lib/constants";
+import { makeOpenAIRequest } from "@/lib/utils";
 
 const Logo = () => (
   <svg viewBox="0 0 400 120" className="w-full max-w-md mx-auto mb-8">
@@ -115,61 +69,6 @@ const ConciliateApp = () => {
   const [error, setError] = useState<string | null>(null);
   const [tutorialIndex, setTutorialIndex] = useState(0);
 
-  const makeOpenAIRequest = async (
-    messages: Array<{
-      role: string;
-      content: string;
-    }>
-  ) => {
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4",
-          messages: messages,
-          max_tokens: messages.length === 1 ? 5 : undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 401) {
-          throw new Error(
-            "Invalid API key. Please check your key and try again."
-          );
-        }
-        if (response.status === 429) {
-          throw new Error(
-            "Rate limit exceeded. Please wait a moment and try again."
-          );
-        }
-        if (response.status === 500) {
-          throw new Error("OpenAI service error. Please try again later.");
-        }
-        throw new Error(
-          errorData.error?.message ||
-            `API error (${response.status}): ${response.statusText}`
-        );
-      }
-
-      return await response.json();
-    } catch (err) {
-      if (
-        (err as { name: string }).name === "TypeError" &&
-        (err as { message: string }).message === "Failed to fetch"
-      ) {
-        throw new Error(
-          "Network error: Unable to reach OpenAI API. Please check your internet connection and try again."
-        );
-      }
-      throw err;
-    }
-  };
-
   const handleStart = async () => {
     setError(null);
     setIsLoading(true);
@@ -206,7 +105,7 @@ const ConciliateApp = () => {
           {
             role: "system",
             content: `You are the Matcher in an invention value discovery session.
-                     The innovation you're presenting is: "${invention}"
+                     The innovation you're presenting is: \`${invention}\`
                      
                      Your Goals:
                      - Demonstrate value while preserving market worth
