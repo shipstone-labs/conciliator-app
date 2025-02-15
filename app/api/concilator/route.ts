@@ -11,6 +11,8 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
+export const runtime = "edge";
+
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")

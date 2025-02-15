@@ -5,6 +5,8 @@ import { privateKeyToAccount } from "viem/accounts";
 import { filecoinCalibration } from "viem/chains";
 import { waitForTransactionReceipt } from "viem/actions";
 
+export const runtime = "edge";
+
 export async function POST(req: NextRequest) {
   try {
     const origin = req.headers.get("origin") || "";

@@ -1,5 +1,7 @@
 "use client";
 
+export const runtime = "edge";
+
 import ConciliateApp from "@/components/conciliate-app";
 import { useParams } from "next/navigation";
 
