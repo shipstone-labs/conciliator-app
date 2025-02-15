@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@pinecone-database/pinecone':
-        specifier: ^4.1.0
-        version: 4.1.0
       '@radix-ui/react-slot':
         specifier: ^1.1.2
         version: 1.1.2(@types/react@19.0.8)(react@19.0.0)
@@ -382,10 +379,6 @@ packages:
 
   '@perma/map@1.0.3':
     resolution: {integrity: sha512-Bf5njk0fnJGTFE2ETntq0N1oJ6YdCPIpTDn3R3KYZJQdeYSOCNL7mBrFlGnbqav8YQhJA/p81pvHINX9vAtHkQ==}
-
-  '@pinecone-database/pinecone@4.1.0':
-    resolution: {integrity: sha512-WoVsbvmCgvZfjm/nCasJXuQ/tw0es5BpedLHvRScAm6xJ/nL07s3B0TrsM8m8rACTiUgbdYsdLY1W6cEBhS9xA==}
-    engines: {node: '>=18.0.0'}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2516,8 +2509,6 @@ snapshots:
     dependencies:
       '@multiformats/murmur3': 2.1.8
       murmurhash3js-revisited: 3.0.0
-
-  '@pinecone-database/pinecone@4.1.0': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true

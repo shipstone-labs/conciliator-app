@@ -1,17 +1,8 @@
-import {
-  type Index,
-  type IndexModel,
-  Pinecone,
-} from "@pinecone-database/pinecone";
 import { OpenAI, type ClientOptions } from "openai";
 
 export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
   .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
-
-export const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY || "",
-});
 
 const configuration: ClientOptions = {
   apiKey: process.env.OPENAI_API_KEY || "",
@@ -22,73 +13,6 @@ const configuration: ClientOptions = {
 
 export const openai = new OpenAI(configuration);
 export const indexName = "ip-embeddings";
-
-export async function getIndex(
-  name: string,
-  dimension?: number
-): Promise<Index | null> {
-  let checkIndex: IndexModel | null = null;
-  try {
-    checkIndex = await pinecone.describeIndex(indexName);
-  } catch {}
-  if (!checkIndex) {
-    if (!dimension) {
-      return null;
-    }
-    await pinecone.createIndex({
-      name: indexName,
-      dimension, // Replace with your model dimensions
-      metric: "cosine", // Replace with your model metric
-      spec: {
-        serverless: {
-          cloud: "aws",
-          region: "us-east-1",
-        },
-      },
-    });
-    checkIndex = await pinecone.describeIndex(indexName);
-  }
-  return pinecone.index(indexName);
-}
-
-const localCache = new Map(); // In-memory cache for local development
-
-export const isCloudflare =
-  typeof caches !== "undefined" && caches.open("cache-name");
-
-// Define functions for cache operations
-export const getFromCache = async (key: string) => {
-  if (isCloudflare) {
-    const cache = await isCloudflare;
-    const cacheResponse = await cache.match(key);
-    if (cacheResponse) {
-      return await cacheResponse.json();
-    }
-    return null;
-  }
-  return localCache.get(key) || null;
-};
-
-export const putInCache = async (key: string, value: unknown) => {
-  if (isCloudflare) {
-    const cacheResponse = new Response(JSON.stringify(value), {
-      headers: { "Content-Type": "application/json" },
-    });
-    const cache = await isCloudflare;
-    await cache.put(key, cacheResponse);
-  } else {
-    localCache.set(key, value);
-  }
-};
-
-export const deleteFromCache = async (key: string) => {
-  if (isCloudflare) {
-    const cache = await isCloudflare;
-    await cache.delete(key);
-  } else {
-    localCache.delete(key);
-  }
-};
 
 export const abi = [
   {

@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@pinecone-database/pinecone": "^4.1.0",
     "@radix-ui/react-slot": "^1.1.2",
     "@web3-storage/w3up-client": "^17.1.2",
     "class-variance-authority": "^0.7.1",
