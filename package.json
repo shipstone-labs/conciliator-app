@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "pages:build": "pnpm dlx @cloudflare/next-on-pages@1"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
