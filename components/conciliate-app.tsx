@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { v4 } from "uuid";
-import { DEFAULT_INVENTION, TUTORIAL_EXCHANGES } from "@/lib/constants";
-import { makeOpenAIRequest } from "@/lib/utils";
+import { DEFAULT_INVENTION } from "@/lib/constants";
+import { Textarea } from "./ui/textarea";
+import Chat from "./chat";
 
 const Logo = () => (
   <svg viewBox="0 0 400 120" className="w-full max-w-md mx-auto mb-8">
@@ -57,27 +57,38 @@ const AppStates = {
   END: "end",
 };
 
-const ConciliateApp = () => {
+const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
   const [appState, setAppState] = useState(AppStates.START);
-  const [invention, setInvention] = useState(DEFAULT_INVENTION);
-  const [isTutorialMode, setIsTutorialMode] = useState(true);
-  const [exchanges, setExchanges] = useState<
-    Array<{ question: string; answer: string; id: string }>
-  >([]);
-  const [currentQuestion, setCurrentQuestion] = useState("");
+  const [content, setContent] = useState(DEFAULT_INVENTION);
+  const [name, setName] = useState("Untitled Invention");
+  const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tutorialIndex, setTutorialIndex] = useState(0);
-
+  const [messages, setMessages] = useState<
+    { role: "user" | "assistant" | "system"; content: string }[]
+  >([]);
   const handleStart = async () => {
     setError(null);
     setIsLoading(true);
     try {
-      await makeOpenAIRequest([{ role: "user", content: "Test" }]);
-      setIsTutorialMode(false);
-      setExchanges([]);
-      setTutorialIndex(0);
-      setAppState(AppStates.DISCUSSION);
+      const data = await fetch("/api/store", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          content,
+          description,
+        }),
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to store invention");
+        }
+        return res.json();
+      });
+      const { tokenId } = data;
+      window.location.href = `/${tokenId}`;
     } catch (err) {
       console.error("API Key validation error:", err);
       setError((err as { message: string }).message);
@@ -86,99 +97,97 @@ const ConciliateApp = () => {
     }
   };
 
-  const handleQuestionSubmit = async () => {
-    if (!currentQuestion.trim()) {
-      setError("Please enter a question");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      let answer = "";
-      if (isTutorialMode) {
-        answer = TUTORIAL_EXCHANGES[tutorialIndex].answer;
-        setTutorialIndex((prev) => prev + 1);
-      } else {
-        const matcherData = await makeOpenAIRequest([
-          {
-            role: "system",
-            content: `You are the Matcher in an invention value discovery session.
-                     The innovation you're presenting is: \`${invention}\`
-                     
-                     Your Goals:
-                     - Demonstrate value while preserving market worth
-                     - Use yes/no answers to control information flow
-                     - Stop when further details would risk devaluing the innovation
-                     
-                     Rules:
-                     1. Answer ONLY with "Yes", "No", or "STOP: Question reveals too much"
-                     2. Consider both individual answers and cumulative information revealed
-                     3. Balance between showing value and protecting implementation details`,
-          },
-          {
-            role: "user",
-            content: currentQuestion,
-          },
-        ]);
-
-        answer = matcherData.choices[0].message.content.trim();
-
-        if (!["Yes", "No"].includes(answer) && !answer.startsWith("STOP")) {
-          answer = "STOP: Invalid response format";
+  const handleAskQuestion = useCallback(
+    async (question: string) => {
+      setIsLoading(true);
+      const request = [...messages, { role: "user", content: question }];
+      const {
+        messages: _resultMessages,
+        name,
+        description,
+      } = await fetch("/api/concilator", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tokenId,
+          messages: request,
+        }),
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to store invention");
         }
-      }
+        return res.json();
+      });
+      setDescription(description);
+      setName(name);
+      setMessages(_resultMessages);
+      console.log(_resultMessages, description, name);
+    },
+    [messages, tokenId]
+  );
 
-      setExchanges((prev) => [
-        ...prev,
-        { question: currentQuestion, answer, id: v4() },
-      ]);
-      setCurrentQuestion("");
-
-      if (answer.startsWith("STOP") || exchanges.length >= 9) {
-        setAppState(AppStates.EVALUATION);
-      }
-    } catch (err) {
-      setError((err as { message: string }).message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGenerateQuestion = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      if (isTutorialMode) {
-        setCurrentQuestion(TUTORIAL_EXCHANGES[tutorialIndex].question);
-      } else {
-        const seekerData = await makeOpenAIRequest([
-          {
-            role: "system",
-            content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
-
-                     Context:
-                     - The Matcher requires yes/no questions to control information flow
-                     - Your goal is to understand the innovation's value and applicability
-                     - Craft questions strategically to build understanding within the yes/no format
-
-                     Previous exchanges: ${JSON.stringify(exchanges)}
-
-                     Generate your next strategic question. It must be answerable with yes/no. Respond with ONLY the question, no other text.`,
+  useEffect(() => {
+    if (tokenId && !messages.length) {
+      (async () => {
+        setAppState(AppStates.DISCUSSION);
+        setIsLoading(true);
+        const {
+          messages: _resultMessages,
+          name,
+          description,
+        } = await fetch("/api/concilator", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        ]);
-
-        const generatedQuestion = seekerData.choices[0].message.content.trim();
-        setCurrentQuestion(generatedQuestion);
-      }
-    } catch (err) {
-      setError((err as { message: string }).message);
-    } finally {
-      setIsLoading(false);
+          body: JSON.stringify({
+            tokenId,
+            messages,
+          }),
+        }).then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to store invention");
+          }
+          return res.json();
+        });
+        setDescription(description);
+        setName(name);
+        setMessages(_resultMessages);
+        console.log(_resultMessages, description, name);
+        setIsLoading(false);
+      })();
     }
-  };
+  }, [tokenId, messages]);
+
+  //   const handleGenerateQuestion = useCallback(async () => {
+  //     setIsLoading(true);
+  //     setError(null);
+
+  //     try {
+  //       const seekerData = await makeOpenAIRequest([
+  //         {
+  //           role: "system",
+  //           content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
+  // Context:
+  // - The Matcher requires yes/no questions to control information flow
+  // - Your goal is to understand the innovation's value and applicability
+  // - Craft questions strategically to build understanding within the yes/no format
+
+  // Previous exchanges: ${JSON.stringify(exchanges)}
+
+  // Generate your next strategic question. It must be answerable with yes/no. Respond with ONLY the question, no other text.`,
+  //         },
+  //       ]);
+
+  //       const generatedQuestion = seekerData.choices[0].message.content.trim();
+  //     } catch (err) {
+  //       setError((err as { message: string }).message);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   }, [exchanges]);
 
   const renderStartState = () => (
     <Card className="w-full max-w-2xl mx-auto">
@@ -191,9 +200,21 @@ const ConciliateApp = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <Input
-          placeholder="Invention Description"
-          value={invention}
-          onChange={(e) => setInvention(e.target.value)}
+          placeholder="Public Title"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={isLoading}
+        />
+        <Textarea
+          placeholder="Public Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          disabled={isLoading}
+        />
+        <Textarea
+          placeholder="IP Document"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
           disabled={isLoading}
         />
         {error && (
@@ -219,55 +240,12 @@ const ConciliateApp = () => {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-xl">Discovery Session</CardTitle>
-        <CardDescription>{invention}</CardDescription>
+        <CardDescription>
+          {name} - {description}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          {exchanges.map((exchange) => (
-            <div key={exchange.id} className="space-y-1">
-              <p className="font-medium">Q: {exchange.question}</p>
-              <p className="text-blue-600">A: {exchange.answer}</p>
-            </div>
-          ))}
-        </div>
-        <div className="space-y-2">
-          <Input
-            placeholder="Enter your question (yes/no answerable)"
-            value={currentQuestion}
-            onChange={(e) => setCurrentQuestion(e.target.value)}
-            disabled={isLoading}
-          />
-          <div className="flex space-x-2">
-            <Button
-              onClick={handleQuestionSubmit}
-              disabled={isLoading || !currentQuestion.trim()}
-              className="flex-1"
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Submit Question
-            </Button>
-            <Button
-              onClick={handleGenerateQuestion}
-              disabled={isLoading}
-              variant="outline"
-              className="flex-1"
-            >
-              Generate Question
-            </Button>
-          </div>
-        </div>
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        {isTutorialMode && (
-          <Alert>
-            <AlertDescription>
-              Tutorial Mode: Using preset exchanges ({exchanges.length}/10)
-            </AlertDescription>
-          </Alert>
-        )}
+        <Chat messages={messages} onSend={handleAskQuestion} />
       </CardContent>
     </Card>
   );
@@ -306,8 +284,6 @@ const ConciliateApp = () => {
         <Button
           onClick={() => {
             setAppState(AppStates.START);
-            setExchanges([]);
-            setCurrentQuestion("");
             setError(null);
           }}
           className="w-full"
