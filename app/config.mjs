@@ -1,5 +1,5 @@
 export const appConfig = {
-  appName: "Conciliate",
+  appName: "Concilliator",
   description: "IP Value Discovery through structured dialogue",
   themeColor: "#FFFFFF",
   icons: [

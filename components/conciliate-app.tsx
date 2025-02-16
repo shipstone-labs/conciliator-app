@@ -19,39 +19,26 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import Chat from "./chat";
+import Image from "next/image";
 
 const Logo = () => (
-  <svg viewBox="0 0 600 120" className="w-full max-w-md mx-auto mb-8">
-    <title>logo</title>
-    <circle cx="85" cy="60" r="28" fill="#60A5FA" opacity="0.15" />
-    <text
-      x="130"
-      y="75"
-      fontFamily="Arial, sans-serif"
-      fontSize="48"
-      fontWeight="bold"
-      fill="#3B82F6"
-    >
-      Conciliator Project
-    </text>
-    <path
-      d="M45 60 Q85 30 125 60"
-      stroke="#3B82F6"
-      fill="none"
-      strokeWidth="2.5"
-      opacity="0.7"
+  <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto mb-8">
+    {/* Logo Image */}
+    <Image
+      width={192} // 3 times larger than 64px (64 * 3)
+      height={192} // Maintain square aspect ratio
+      className="rounded-md" // Optional: Add rounded corners
+      priority // Ensures the image is loaded immediately
+      src="/logo.png"
+      alt="Logo"
     />
-    <circle cx="258" cy="45" r="5" fill="#3B82F6" />
-    <text
-      x="130"
-      y="95"
-      fontFamily="Arial, sans-serif"
-      fontSize="14"
-      fill="#3B82F6"
-    >
-      Valuing Agreement
-    </text>
-  </svg>
+
+    {/* Text Container */}
+    <div className="text-center mt-4">
+      <h1 className="text-4xl font-bold text-blue-500">Conciliator Project</h1>
+      <p className="mt-1 text-sm text-blue-500">Valuing Agreement</p>
+    </div>
+  </div>
 );
 
 const AppStates = {
@@ -250,7 +237,7 @@ const ConciliateApp = ({
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Connecting to the Consiliator (this make take a minute or so)
+              Connecting to the Conciliator (this make take a minute or so)
             </>
           ) : (
             "Start Discovery Session"
@@ -343,7 +330,7 @@ const ConciliateApp = ({
         <div className="text-center">
           <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
           <p className="mt-4 text-lg font-medium text-gray-700">
-            Loading IP Conciliate
+            Loading IP Conciliator
           </p>
         </div>
       </div>
@@ -351,7 +338,7 @@ const ConciliateApp = ({
   }
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-6">
         <Logo />
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}

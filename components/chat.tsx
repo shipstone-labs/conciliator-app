@@ -15,6 +15,13 @@ export default function ChatUI({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
 
+  const hasStop =
+    (messages || []).find((message) => {
+      return (
+        message?.role === "assistant" &&
+        /^(STOP),(\d+)$/i.test(message?.content)
+      );
+    }) != null;
   const handleSend = useCallback(async () => {
     if (input.trim()) {
       setSending(true);
@@ -89,7 +96,11 @@ export default function ChatUI({
                       A
                     </div>
                   )}
-                  <div>{answer}</div>
+                  <div>
+                    {/STOP/i.test(answer)
+                      ? "Thank you for your chat. My job as conciliator is to ensure that you have enough information to gauge your level of interest in this project, and you have reached that point. We look forward to your bid for this IP."
+                      : answer}
+                  </div>
                   <div className="text-sm">
                     <strong>Rating</strong> {rating}/10
                   </div>
@@ -126,9 +137,12 @@ export default function ChatUI({
       <div className="bg-gray-50 border-t p-4">
         <div className="flex items-center space-x-4">
           <Textarea
-            placeholder="Type your message..."
+            autoFocus
+            placeholder={
+              hasStop ? "The conversation has ended" : "Type your question..."
+            }
             value={input}
-            disabled={sending}
+            disabled={sending || hasStop}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
             className="flex-1 resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -137,7 +151,7 @@ export default function ChatUI({
             <button
               type="button"
               onClick={handleSend}
-              disabled={sending}
+              disabled={sending || hasStop}
               className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
             >
               Send

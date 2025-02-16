@@ -6,6 +6,10 @@ require("dotenv").config(); // Load environment variables from .env
 
 module.exports = {
   solidity: "0.8.20", // Specify the Solidity compiler version
+  optimize: {
+    enabled: true,
+    runs: 200,
+  },
   networks: {
     // Local Hardhat network (default for testing)
     hardhat: {},
