@@ -78,16 +78,13 @@ Rules:
       },
       ...messages,
     ];
-    console.log({ content, index, request });
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use the appropriate model
       messages: request,
     });
-    console.log(JSON.stringify(completion, null, "  "));
     for (const { message } of completion.choices) {
       messages.push(message);
     }
-    console.log(messages);
     return new Response(
       JSON.stringify({
         messages,

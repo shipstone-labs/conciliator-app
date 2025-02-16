@@ -127,10 +127,37 @@ const ConciliateApp = ({
       setDescription(description);
       setName(name);
       setMessages(_resultMessages);
-      console.log(_resultMessages, description, name);
     },
     [messages, tokenId]
   );
+
+  const handleSave = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetch("/api/store", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          content,
+          description,
+          messages,
+        }),
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to store invention");
+        }
+        return res.json();
+      });
+      return data as { IpfsHash: string };
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [content, description, messages, name]);
 
   useEffect(() => {
     if (tokenId) {
@@ -275,6 +302,7 @@ const ConciliateApp = ({
           messages={messages}
           onSend={handleAskQuestion}
           onNewIP={onNewIP}
+          onSave={handleSave}
         />
       </CardContent>
     </Card>

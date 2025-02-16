@@ -7,14 +7,20 @@ export default function ChatUI({
   messages,
   onSend,
   onNewIP,
+  onSave,
 }: {
   messages: { role: "user" | "assistant" | "system"; content: string }[];
   onSend: (message: string) => Promise<void>;
   onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void;
+  onSave?: (
+    event: MouseEvent<HTMLButtonElement>
+  ) => Promise<{ IpfsHash: string } | undefined>;
 }) {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-
+  const [downloads, setDownloads] = useState<{ url: string; title: string }[]>(
+    []
+  );
   const hasStop =
     (messages || []).find((message) => {
       return (
@@ -34,6 +40,40 @@ export default function ChatUI({
     }
   }, [input, onSend]);
 
+  const handleSave = useCallback(
+    async (event: MouseEvent<HTMLButtonElement>) => {
+      if (!onSave) {
+        return;
+      }
+      if (messages.length > 0) {
+        setSending(true);
+        try {
+          const result = await onSave(event);
+          if (!result) {
+            alert("Failed to save the snapshot.");
+            return;
+          }
+          const { IpfsHash } = result;
+          if (downloads.find((file) => file.title === IpfsHash)) {
+            alert("This snapshot has already been saved.");
+            return;
+          }
+
+          const newDownloads = [
+            ...downloads,
+            {
+              title: IpfsHash,
+              url: `/api/download/${IpfsHash}`,
+            },
+          ];
+          setDownloads(newDownloads);
+        } finally {
+          setSending(false);
+        }
+      }
+    },
+    [downloads, messages.length, onSave]
+  );
   const getHighlightClass = (answer: string) => {
     switch (answer) {
       case "YES":
@@ -79,7 +119,6 @@ export default function ChatUI({
             rating = extractedRating;
             answer = extractedAnswer;
           }
-          console.log(message, isSpecial, highlightClass, rating);
           return (
             <div
               key={`${message.role}-${message.content}-${index}`}
@@ -135,7 +174,8 @@ export default function ChatUI({
 
       {/* Input Area */}
       <div className="bg-gray-50 border-t p-4">
-        <div className="flex items-center space-x-4">
+        <div className="relative">
+          {/* Textarea */}
           <Textarea
             autoFocus
             placeholder={
@@ -145,29 +185,93 @@ export default function ChatUI({
             disabled={sending || hasStop}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
-            className="flex-1 resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            className="resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full h-[120px] pr-16 rounded-lg" // Adjust height and padding for the button
           />
-          <div className="flex-shrink-0 flex flex-col space-y-2">
+
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={sending || hasStop || input === ""} // Disable condition
+            className={`absolute bottom-3 right-3 flex items-center justify-center w-12 h-12 rounded-full border transition ${
+              sending || hasStop
+                ? "bg-gray-100 border-gray-300 cursor-not-allowed"
+                : "bg-white border-blue-500 hover:bg-blue-50"
+            }`}
+            aria-label="Send"
+          >
+            {sending ? (
+              // Stop Button
+              <div className="w-6 h-6 bg-black" /> // Black square for "Stop"
+            ) : (
+              // Up Arrow Button
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="h-5 w-5 transition"
+                fill="none"
+                stroke={
+                  sending || hasStop || input === "" ? "#A0AEC0" : "#3B82F6"
+                } // Gray when disabled, blue otherwise
+                strokeWidth="3" // Thicker arrow
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <title>Send</title>
+                <path d="M12 19V7M5 12l7-7 7 7" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Buttons Below */}
+        <div className="mt-4 flex space-x-2">
+          {onNewIP ? (
             <button
               type="button"
-              onClick={handleSend}
-              disabled={sending || hasStop}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+              onClick={onNewIP}
+              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
+      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
+      hover:bg-gray-300 
+      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
             >
-              Send
+              Create a New IP
             </button>
-            {onNewIP ? (
-              <button
-                type="button"
-                onClick={onNewIP}
-                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition"
-              >
-                Create a New IP
-              </button>
-            ) : null}
-          </div>
+          ) : null}
+          {onSave ? (
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={sending || messages.length < 2}
+              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
+      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
+      hover:bg-gray-300 
+      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+            >
+              Save Chat Snapshot
+            </button>
+          ) : null}
         </div>
       </div>
+      {downloads.length > 0 && (
+        <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+          <h3 className="text-lg font-bold text-gray-700 mb-2">
+            Download Snapshots:
+          </h3>
+          <ul className="space-y-2">
+            {downloads.map((file) => (
+              <li key={file.url}>
+                <a
+                  href={file.url}
+                  download={file.title}
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  {file.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
