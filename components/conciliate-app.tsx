@@ -134,7 +134,7 @@ const ConciliateApp = ({
   const handleSave = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await fetch("/api/store", {
+      const data = await fetch("/api/snapshot", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

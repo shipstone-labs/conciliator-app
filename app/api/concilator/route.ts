@@ -33,6 +33,12 @@ export async function POST(req: NextRequest) {
       account: privateKeyToAccount(
         (process.env.FILCOIN_PK || "") as `0x${string}`
       ),
+      // chain: {
+      //   ...filecoinCalibration,
+      //   rpcUrls: {
+      //     default: { http: ["https://api.calibration.node.glif.io"] },
+      //   },
+      // },
       chain: filecoinCalibration,
       transport: http(),
     });
