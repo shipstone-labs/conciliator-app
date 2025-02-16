@@ -3,7 +3,6 @@
 export const runtime = "edge";
 
 import ConciliateApp from "@/components/conciliate-app";
-import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 
 export default function Token() {

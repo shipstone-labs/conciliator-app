@@ -10,7 +10,7 @@ export default function ChatUI({
 }: {
   messages: { role: "user" | "assistant" | "system"; content: string }[];
   onSend: (message: string) => Promise<void>;
-  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void;
+  onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void;
 }) {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);

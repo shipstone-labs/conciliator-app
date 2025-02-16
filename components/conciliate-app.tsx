@@ -1,6 +1,11 @@
 "use client";
 
-import React, { MouseEvent, useCallback, useEffect, useState } from "react";
+import React, {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   Card,
   CardContent,
@@ -62,7 +67,7 @@ const ConciliateApp = ({
   onNewIP,
 }: {
   tokenId?: string;
-  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void;
+  onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void;
 }) => {
   const [appState, setAppState] = useState(AppStates.LOADING);
   const [content, setContent] = useState("");
