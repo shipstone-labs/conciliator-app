@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server";
 
+export const runtime = "edge";
+
 export async function GET(req: NextRequest) {
   const response = await fetch(
     `${process.env.PINATA_GATEWAY}/ipfs/${req.nextUrl.pathname.replace(
