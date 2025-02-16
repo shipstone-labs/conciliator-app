@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { MouseEvent, useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,12 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { DEFAULT_INVENTION } from "@/lib/constants";
 import { Textarea } from "./ui/textarea";
 import Chat from "./chat";
 
 const Logo = () => (
-  <svg viewBox="0 0 400 120" className="w-full max-w-md mx-auto mb-8">
+  <svg viewBox="0 0 600 120" className="w-full max-w-md mx-auto mb-8">
     <title>logo</title>
     <circle cx="85" cy="60" r="28" fill="#60A5FA" opacity="0.15" />
     <text
@@ -28,7 +27,7 @@ const Logo = () => (
       fontWeight="bold"
       fill="#3B82F6"
     >
-      Conciliate
+      Conciliator Project
     </text>
     <path
       d="M45 60 Q85 30 125 60"
@@ -51,23 +50,30 @@ const Logo = () => (
 );
 
 const AppStates = {
+  LOADING: "loading",
   START: "start",
   DISCUSSION: "discussion",
   EVALUATION: "evaluation",
   END: "end",
 };
 
-const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
-  const [appState, setAppState] = useState(AppStates.START);
-  const [content, setContent] = useState(DEFAULT_INVENTION);
-  const [name, setName] = useState("Untitled Invention");
+const ConciliateApp = ({
+  tokenId,
+  onNewIP,
+}: {
+  tokenId?: string;
+  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void;
+}) => {
+  const [appState, setAppState] = useState(AppStates.LOADING);
+  const [content, setContent] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<
     { role: "user" | "assistant" | "system"; content: string }[]
   >([]);
-  const handleStart = async () => {
+  const handleStart = useCallback(async () => {
     setError(null);
     setIsLoading(true);
     try {
@@ -95,7 +101,13 @@ const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [content, description, name]);
+
+  const handleClear = useCallback(() => {
+    setContent("");
+    setDescription("");
+    setName("");
+  }, []);
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
@@ -129,35 +141,38 @@ const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
   );
 
   useEffect(() => {
-    if (tokenId && !messages.length) {
-      (async () => {
-        setAppState(AppStates.DISCUSSION);
-        setIsLoading(true);
-        const {
-          messages: _resultMessages,
-          name,
-          description,
-        } = await fetch("/api/concilator", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            tokenId,
-            messages,
-          }),
-        }).then((res) => {
-          if (!res.ok) {
-            throw new Error("Failed to store invention");
-          }
-          return res.json();
-        });
-        setDescription(description);
-        setName(name);
-        setMessages(_resultMessages);
-        console.log(_resultMessages, description, name);
-        setIsLoading(false);
-      })();
+    if (tokenId) {
+      if (!messages.length) {
+        (async () => {
+          setIsLoading(true);
+          const {
+            messages: _resultMessages,
+            name,
+            description,
+          } = await fetch("/api/concilator", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              tokenId,
+              messages,
+            }),
+          }).then((res) => {
+            if (!res.ok) {
+              throw new Error("Failed to store invention");
+            }
+            return res.json();
+          });
+          setDescription(description);
+          setName(name);
+          setMessages(_resultMessages);
+          setIsLoading(false);
+          setAppState(AppStates.DISCUSSION);
+        })();
+      }
+    } else {
+      setAppState(AppStates.START);
     }
   }, [tokenId, messages]);
 
@@ -212,7 +227,7 @@ const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
           disabled={isLoading}
         />
         <Textarea
-          placeholder="IP Document"
+          placeholder="IP Document (Secret)"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={isLoading}
@@ -222,15 +237,34 @@ const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Button onClick={handleStart} className="w-full" disabled={isLoading}>
+        <Button
+          onClick={handleStart}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
+          disabled={isLoading}
+        >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Verifying connectivity to my brain...
+              Connecting to the Consiliator (this make take a minute or so)
             </>
           ) : (
             "Start Discovery Session"
           )}
+        </Button>
+        {/* Note below the Start Button */}
+        <div className="mt-2 p-4 rounded-lg border border-gray-200 bg-gray-50">
+          <p className="text-sm text-gray-700">
+            This creates a new page for your IP. Share the address to the new
+            page with others to test the Conciliator with the IP you added.
+          </p>
+        </div>
+        <Button
+          onClick={handleClear}
+          variant="ghost"
+          className="w-full border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounded-md"
+          disabled={isLoading}
+        >
+          Reset Fields
         </Button>
       </CardContent>
     </Card>
@@ -245,7 +279,11 @@ const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Chat messages={messages} onSend={handleAskQuestion} />
+        <Chat
+          messages={messages}
+          onSend={handleAskQuestion}
+          onNewIP={onNewIP}
+        />
       </CardContent>
     </Card>
   );
@@ -294,6 +332,18 @@ const ConciliateApp = ({ tokenId }: { tokenId?: string }) => {
     </Card>
   );
 
+  if (appState === AppStates.LOADING && tokenId) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
+          <p className="mt-4 text-lg font-medium text-gray-700">
+            Loading IP Conciliate
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
       <div className="max-w-4xl mx-auto space-y-6">

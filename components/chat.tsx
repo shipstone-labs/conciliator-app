@@ -1,14 +1,16 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { useCallback, useState } from "react";
+import { type MouseEvent, useCallback, useState } from "react";
 
 export default function ChatUI({
   messages,
   onSend,
+  onNewIP,
 }: {
   messages: { role: "user" | "assistant" | "system"; content: string }[];
   onSend: (message: string) => Promise<void>;
+  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void;
 }) {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -131,14 +133,25 @@ export default function ChatUI({
             onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
             className="flex-1 resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={sending}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
-          >
-            Send
-          </button>
+          <div className="flex-shrink-0 flex flex-col space-y-2">
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={sending}
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+            >
+              Send
+            </button>
+            {onNewIP ? (
+              <button
+                type="button"
+                onClick={onNewIP}
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition"
+              >
+                Create a New IP
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
