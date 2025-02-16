@@ -1,6 +1,7 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
+import Image from "next/image";
 import { type MouseEvent, useCallback, useState } from "react";
 
 export default function ChatUI({
@@ -132,7 +133,12 @@ export default function ChatUI({
                   {/* Optional Avatar for Assistant */}
                   {message.role === "assistant" && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                      A
+                      <Image
+                        src="/logo.png"
+                        alt="Logo"
+                        width={32}
+                        height={32}
+                      />
                     </div>
                   )}
                   <div>
@@ -149,7 +155,12 @@ export default function ChatUI({
                   {/* Optional Avatar for Assistant */}
                   {message.role === "assistant" && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                      A
+                      <Image
+                        src="/logo.png"
+                        alt="Logo"
+                        width={32}
+                        height={32}
+                      />
                     </div>
                   )}
 
