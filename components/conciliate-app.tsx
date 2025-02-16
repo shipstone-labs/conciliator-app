@@ -290,22 +290,14 @@ const ConciliateApp = ({
   );
 
   const renderDiscussionState = () => (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-xl">Discovery Session</CardTitle>
-        <CardDescription>
-          {name} - {description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Chat
-          messages={messages}
-          onSend={handleAskQuestion}
-          onNewIP={onNewIP}
-          onSave={handleSave}
-        />
-      </CardContent>
-    </Card>
+    <Chat
+      messages={messages}
+      onSend={handleAskQuestion}
+      onNewIP={onNewIP}
+      onSave={handleSave}
+      name={name}
+      description={description}
+    />
   );
 
   const renderEvaluationState = () => (
@@ -366,7 +358,7 @@ const ConciliateApp = ({
   }
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <Logo />
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}

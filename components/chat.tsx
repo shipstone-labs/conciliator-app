@@ -2,14 +2,32 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
-import { type MouseEvent, useCallback, useState } from "react";
+import {
+  type MouseEvent,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 
 export default function ChatUI({
   messages,
+  name,
+  description,
   onSend,
   onNewIP,
   onSave,
 }: {
+  name: string;
+  description: string;
   messages: { role: "user" | "assistant" | "system"; content: string }[];
   onSend: (message: string) => Promise<void>;
   onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void;
@@ -17,6 +35,7 @@ export default function ChatUI({
     event: MouseEvent<HTMLButtonElement>
   ) => Promise<{ IpfsHash: string } | undefined>;
 }) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [downloads, setDownloads] = useState<{ url: string; title: string }[]>(
@@ -102,10 +121,22 @@ export default function ChatUI({
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useLayoutEffect(() => {
+    if (cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [messages, downloads]); // Dependencies to trigger the effect
+
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* Chat Window */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+    <Card ref={cardRef} className="w-full mx-auto">
+      <CardHeader>
+        <CardTitle className="text-xl">Discovery Session</CardTitle>
+        <CardDescription>
+          {name} - {description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {(messages || []).map((message, index) => {
           const isSpecial =
             message?.role === "assistant" &&
@@ -181,108 +212,114 @@ export default function ChatUI({
             </div>
           );
         })}
-      </div>
+      </CardContent>
+      <CardFooter>
+        <div className="flex flex-col w-full">
+          <div className="p-4 w-full">
+            <div className="relative">
+              {/* Textarea */}
+              <Textarea
+                autoFocus
+                placeholder={
+                  hasStop
+                    ? "The conversation has ended"
+                    : "Type your question..."
+                }
+                value={input}
+                disabled={sending || hasStop}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
+                className="resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full h-[120px] pr-16 rounded-lg" // Adjust height and padding for the button
+              />
 
-      {/* Input Area */}
-      <div className="bg-gray-50 border-t p-4">
-        <div className="relative">
-          {/* Textarea */}
-          <Textarea
-            autoFocus
-            placeholder={
-              hasStop ? "The conversation has ended" : "Type your question..."
-            }
-            value={input}
-            disabled={sending || hasStop}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
-            className="resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full h-[120px] pr-16 rounded-lg" // Adjust height and padding for the button
-          />
-
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={sending || hasStop || input === ""} // Disable condition
-            className={`absolute bottom-3 right-3 flex items-center justify-center w-12 h-12 rounded-full border transition ${
-              sending || hasStop
-                ? "bg-gray-100 border-gray-300 cursor-not-allowed"
-                : "bg-white border-blue-500 hover:bg-blue-50"
-            }`}
-            aria-label="Send"
-          >
-            {sending ? (
-              // Stop Button
-              <div className="w-6 h-6 bg-black" /> // Black square for "Stop"
-            ) : (
-              // Up Arrow Button
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                className="h-5 w-5 transition"
-                fill="none"
-                stroke={
-                  sending || hasStop || input === "" ? "#A0AEC0" : "#3B82F6"
-                } // Gray when disabled, blue otherwise
-                strokeWidth="3" // Thicker arrow
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={sending || hasStop || input === ""} // Disable condition
+                className={`absolute bottom-3 right-3 flex items-center justify-center w-12 h-12 rounded-full border transition ${
+                  sending || hasStop
+                    ? "bg-gray-100 border-gray-300 cursor-not-allowed"
+                    : "bg-white border-blue-500 hover:bg-blue-50"
+                }`}
+                aria-label="Send"
               >
-                <title>Send</title>
-                <path d="M12 19V7M5 12l7-7 7 7" />
-              </svg>
-            )}
-          </button>
-        </div>
+                {sending ? (
+                  // Stop Button
+                  <div className="w-6 h-6 bg-black" /> // Black square for "Stop"
+                ) : (
+                  // Up Arrow Button
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5 transition"
+                    fill="none"
+                    stroke={
+                      sending || hasStop || input === "" ? "#A0AEC0" : "#3B82F6"
+                    } // Gray when disabled, blue otherwise
+                    strokeWidth="3" // Thicker arrow
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <title>Send</title>
+                    <path d="M12 19V7M5 12l7-7 7 7" />
+                  </svg>
+                )}
+              </button>
+            </div>
 
-        {/* Buttons Below */}
-        <div className="mt-4 flex space-x-2">
-          {onNewIP ? (
-            <button
-              type="button"
-              onClick={onNewIP}
-              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
+            {/* Buttons Below */}
+            <div className="mt-4 flex space-x-2">
+              {onNewIP ? (
+                <button
+                  type="button"
+                  onClick={onNewIP}
+                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
       focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
       hover:bg-gray-300 
       disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
-            >
-              Create a New IP
-            </button>
-          ) : null}
-          {onSave ? (
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={sending || messages.length < 2}
-              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
-      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
-      hover:bg-gray-300 
-      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
-            >
-              Save Chat Snapshot
-            </button>
-          ) : null}
-        </div>
-      </div>
-      {downloads.length > 0 && (
-        <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-lg font-bold text-gray-700 mb-2">
-            Download Snapshots:
-          </h3>
-          <ul className="space-y-2">
-            {downloads.map((file) => (
-              <li key={file.url}>
-                <a
-                  href={file.url}
-                  download={file.title}
-                  className="text-blue-600 hover:text-blue-800 underline"
                 >
-                  {file.title}
-                </a>
-              </li>
-            ))}
-          </ul>
+                  Create a New IP
+                </button>
+              ) : null}
+              {onSave ? (
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={sending || messages.length < 2}
+                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
+      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
+      hover:bg-gray-300 
+      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+                >
+                  Save Chat Snapshot
+                </button>
+              ) : null}
+            </div>
+          </div>
+          <div className="w-full">
+            {downloads.length > 0 && (
+              <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                <h3 className="text-lg font-bold text-gray-700 mb-2">
+                  Download Snapshots:
+                </h3>
+                <ul className="space-y-2">
+                  {downloads.map((file) => (
+                    <li key={file.url}>
+                      <a
+                        href={file.url}
+                        download={file.title}
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        {file.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
