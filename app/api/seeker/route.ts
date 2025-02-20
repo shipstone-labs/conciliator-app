@@ -17,14 +17,57 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 403 });
     }
 
-    const { messages } = await req.json();
+    const { messages: _messages } = await req.json();
 
+    const messages: { role: string; content: string }[] = _messages;
+
+    if (
+      messages.find(
+        ({ role, content }) =>
+          role === "assistant" && /^(None),\d*$/i.test(content)
+      )
+    ) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Completed" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use the appropriate model
-      max_tokens: messages.length === 1 ? 5 : undefined,
-      messages,
+      messages: [
+        {
+          role: "system",
+          content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
+  Context:
+  - The Matcher requires yes/no questions to control information flow
+  - Your goal is to understand the innovation's value and applicability
+  - Craft questions strategically to build understanding within the yes/no format
+
+  Previous exchanges: ${JSON.stringify(
+    messages.map(({ role, content }) => {
+      return {
+        role: role === "assistant" ? "user" : "assistant",
+        content:
+          role === "assistant"
+            ? content.replace(/^(Yes|No|None),\d*$/i, "$1")
+            : content,
+      };
+    })
+  )}
+
+  Generate your next strategic question. It must be answerable with yes/no. Respond with ONLY the question, no other text.`,
+        },
+      ],
     });
-    return new Response(JSON.stringify(completion), {
+    for (const { message } of completion.choices as {
+      message: { role: string; content: string };
+    }[]) {
+      messages.push({ ...message, role: "user" });
+    }
+    return new Response(JSON.stringify({ success: true, messages }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {

@@ -5,7 +5,9 @@ import Image from "next/image";
 import {
   type MouseEvent,
   useCallback,
+  useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -41,13 +43,61 @@ export default function ChatUI({
   const [downloads, setDownloads] = useState<{ url: string; title: string }[]>(
     []
   );
-  const hasStop =
-    (messages || []).find((message) => {
-      return (
-        message?.role === "assistant" &&
-        /^(STOP),(\d+)$/i.test(message?.content)
-      );
-    }) != null;
+  const [autoCompleting, setAutoCompleting] = useState(false);
+
+  const onAutoComplete = useCallback(async () => {
+    setAutoCompleting((prev) => !prev);
+  }, []);
+  const hasStop = useMemo(
+    () =>
+      (messages || []).find((message) => {
+        return (
+          message?.role === "assistant" &&
+          /^(STOP),(\d+)$/i.test(message?.content)
+        );
+      }) != null,
+    [messages]
+  );
+  useEffect(() => {
+    let running = true;
+    const doIt = async () => {
+      const response = await fetch("/api/seeker", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages }),
+      });
+      if (!response.ok || !running || !autoCompleting) {
+        setAutoCompleting(false);
+        return;
+      }
+      const { success, messages: newMessages } = await response.json();
+      if (!success || !running || !autoCompleting) {
+        setAutoCompleting(false);
+        return;
+      }
+      const { content } = newMessages.at(-1) || {};
+      if (!content || !running || !autoCompleting) {
+        setAutoCompleting(false);
+        return;
+      }
+      await onSend(content);
+    };
+    const timer = setTimeout(() => {
+      if (hasStop) {
+        setAutoCompleting(false);
+        return;
+      }
+      if (autoCompleting) {
+        doIt();
+      }
+    }, 500);
+    return () => {
+      running = false;
+      clearTimeout(timer);
+    };
+  }, [hasStop, autoCompleting, onSend, messages]);
   const handleSend = useCallback(async () => {
     if (input.trim()) {
       setSending(true);
@@ -281,6 +331,16 @@ export default function ChatUI({
                   Create a New IP
                 </button>
               ) : null}
+              <button
+                type="button"
+                onClick={onAutoComplete}
+                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
+      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
+      hover:bg-gray-300 
+      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+              >
+                {autoCompleting ? "Stop" : "Auto Seek"}
+              </button>
               {onSave ? (
                 <button
                   type="button"
