@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
           break;
       }
     }
+    console.log(previous);
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use the appropriate model
       messages: [
