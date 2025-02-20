@@ -35,6 +35,23 @@ export async function POST(req: NextRequest) {
         }
       );
     }
+    const previous: { question: string; answer: string }[] = [];
+    let item = { question: "", answer: "" };
+    for (const message of messages) {
+      switch (message.role) {
+        case "user":
+          item.question = message.content;
+          break;
+        case "assistant":
+          item.answer = message.content.replace(
+            /^(Yes|No|None),\s*\d*$/i,
+            "$1"
+          );
+          previous.push(item);
+          item = { question: "", answer: "" };
+          break;
+      }
+    }
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use the appropriate model
       messages: [
@@ -46,28 +63,35 @@ export async function POST(req: NextRequest) {
   - Your goal is to understand the innovation's value and applicability
   - Craft questions strategically to build understanding within the yes/no format
 
-  Previous exchanges: ${JSON.stringify(
-    messages.map(({ role, content }) => {
-      return {
-        role: role === "assistant" ? "user" : "assistant",
-        content:
-          role === "assistant"
-            ? content.replace(/^(Yes|No|None),\d*$/i, "$1")
-            : content,
-      };
-    })
-  )}
+  Previous exchanges: \`${JSON.stringify(previous)}\`,
 
-  Generate your next strategic question. It must be answerable with yes/no. Respond with ONLY the question, no other text.`,
+  Provide two responses (and always separate them with a newline)
+  - the next question to submit, Generate your next strategic question.
+  - A summary if enough information is available looking at the previous exchanges.
+`,
         },
       ],
     });
-    for (const { message } of completion.choices as {
+    const choices = completion.choices as {
       message: { role: string; content: string };
-    }[]) {
-      messages.push({ ...message, role: "user" });
+    }[];
+    console.log(choices);
+    const [_question, summary] =
+      choices[0].message.content
+        .split("\n")
+        .filter((item) => item.trim() !== "")
+        .map((item) => item.replace(/^-\s*/, "")) || [];
+    if (!_question) {
+      return new Response(
+        JSON.stringify({ success: false, error: "No question generated" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
-    return new Response(JSON.stringify({ success: true, messages }), {
+    messages.push({ ...choices[0].message, content: _question, role: "user" });
+    return new Response(JSON.stringify({ success: true, messages, summary }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {

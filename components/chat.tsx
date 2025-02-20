@@ -43,8 +43,8 @@ export default function ChatUI({
   const [downloads, setDownloads] = useState<{ url: string; title: string }[]>(
     []
   );
+  const [summary, setSummary] = useState("");
   const [autoCompleting, setAutoCompleting] = useState(false);
-
   const onAutoComplete = useCallback(async () => {
     setAutoCompleting((prev) => !prev);
   }, []);
@@ -53,7 +53,7 @@ export default function ChatUI({
       (messages || []).find((message) => {
         return (
           message?.role === "assistant" &&
-          /^(STOP),(\d+)$/i.test(message?.content)
+          /^(STOP),\s*(\d+)$/i.test(message?.content)
         );
       }) != null,
     [messages]
@@ -72,11 +72,12 @@ export default function ChatUI({
         setAutoCompleting(false);
         return;
       }
-      const { success, messages: newMessages } = await response.json();
+      const { success, messages: newMessages, summary } = await response.json();
       if (!success || !running || !autoCompleting) {
         setAutoCompleting(false);
         return;
       }
+      setSummary(summary);
       const { content } = newMessages.at(-1) || {};
       if (!content || !running || !autoCompleting) {
         setAutoCompleting(false);
@@ -157,19 +158,24 @@ export default function ChatUI({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter") {
-      if (e.shiftKey || e.ctrlKey) {
-        // Insert a linefeed
-        setInput((prev) => `${prev}\n`);
-      } else {
-        // Prevent default behavior of adding a new line
-        e.preventDefault();
-        // Trigger the send action
-        handleSend();
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter") {
+        if (e.shiftKey || e.ctrlKey) {
+          // Insert a linefeed
+          setInput((prev) => `${prev}\n`);
+        } else {
+          // Prevent default behavior of adding a new line
+          e.preventDefault();
+          // Trigger the send action
+          if (!autoCompleting) {
+            handleSend();
+          }
+        }
       }
-    }
-  };
+    },
+    [autoCompleting, handleSend]
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useLayoutEffect(() => {
@@ -178,6 +184,19 @@ export default function ChatUI({
     }
   }, [messages, downloads]); // Dependencies to trigger the effect
 
+  const messageWithIndex: { role: string; content: string; index?: number }[] =
+    useMemo(() => {
+      let index = 1;
+      return (messages || []).map((message, _index) => {
+        if (message.role === "assistant" && _index !== 0) {
+          return {
+            ...message,
+            index: index++,
+          };
+        }
+        return message;
+      });
+    }, [messages]);
   return (
     <Card ref={cardRef} className="w-full mx-auto">
       <CardHeader>
@@ -187,16 +206,16 @@ export default function ChatUI({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {(messages || []).map((message, index) => {
+        {(messageWithIndex || []).map((message, index) => {
           const isSpecial =
             message?.role === "assistant" &&
-            /^(Yes|No|STOP),(\d+)$/i.test(message?.content);
+            /^(Yes|No|STOP),\s*(\d+)$/i.test(message?.content);
           let highlightClass = "";
           let rating = "";
           let answer = "";
           if (isSpecial) {
             const [, extractedAnswer, extractedRating] =
-              /^(Yes|No|STOP),(\d+)$/i.exec(message?.content) || [];
+              /^(Yes|No|STOP),\s*(\d+)$/i.exec(message?.content) || [];
             highlightClass = getHighlightClass(answer.toUpperCase());
             rating = extractedRating;
             answer = extractedAnswer;
@@ -213,16 +232,21 @@ export default function ChatUI({
                 >
                   {/* Optional Avatar for Assistant */}
                   {message.role === "assistant" && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                      <Image
-                        src="/logo.png"
-                        alt="Logo"
-                        width={32}
-                        height={32}
-                      />
+                    <div className="flex flex-row items-center space-x-2">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                        {message.index || ""}
+                      </div>
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                        <Image
+                          src="/logo.png"
+                          alt="Logo"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
                     </div>
                   )}
-                  <div>
+                  <div className="p-1 rounded-lg max-w-3xl">
                     {/STOP/i.test(answer)
                       ? "Thank you for your chat. My job as conciliator is to ensure that you have enough information to gauge your level of interest in this project, and you have reached that point. We look forward to your bid for this IP."
                       : answer}
@@ -275,46 +299,50 @@ export default function ChatUI({
                     ? "The conversation has ended"
                     : "Type your question..."
                 }
-                value={input}
-                disabled={sending || hasStop}
+                value={summary || input}
+                disabled={sending || (hasStop && !summary)}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
                 className="resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full h-[120px] pr-16 rounded-lg" // Adjust height and padding for the button
               />
 
-              <button
-                type="button"
-                onClick={handleSend}
-                disabled={sending || hasStop || input === ""} // Disable condition
-                className={`absolute bottom-3 right-3 flex items-center justify-center w-12 h-12 rounded-full border transition ${
-                  sending || hasStop
-                    ? "bg-gray-100 border-gray-300 cursor-not-allowed"
-                    : "bg-white border-blue-500 hover:bg-blue-50"
-                }`}
-                aria-label="Send"
-              >
-                {sending ? (
-                  // Stop Button
-                  <div className="w-6 h-6 bg-black" /> // Black square for "Stop"
-                ) : (
-                  // Up Arrow Button
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    className="h-5 w-5 transition"
-                    fill="none"
-                    stroke={
-                      sending || hasStop || input === "" ? "#A0AEC0" : "#3B82F6"
-                    } // Gray when disabled, blue otherwise
-                    strokeWidth="3" // Thicker arrow
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <title>Send</title>
-                    <path d="M12 19V7M5 12l7-7 7 7" />
-                  </svg>
-                )}
-              </button>
+              {!autoCompleting && !summary ? (
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={sending || hasStop || input === ""} // Disable condition
+                  className={`absolute bottom-3 right-3 flex items-center justify-center w-12 h-12 rounded-full border transition ${
+                    sending || hasStop
+                      ? "bg-gray-100 border-gray-300 cursor-not-allowed"
+                      : "bg-white border-blue-500 hover:bg-blue-50"
+                  }`}
+                  aria-label="Send"
+                >
+                  {sending ? (
+                    // Stop Button
+                    <div className="w-6 h-6 bg-black" /> // Black square for "Stop"
+                  ) : (
+                    // Up Arrow Button
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5 transition"
+                      fill="none"
+                      stroke={
+                        sending || hasStop || input === ""
+                          ? "#A0AEC0"
+                          : "#3B82F6"
+                      } // Gray when disabled, blue otherwise
+                      strokeWidth="3" // Thicker arrow
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <title>Send</title>
+                      <path d="M12 19V7M5 12l7-7 7 7" />
+                    </svg>
+                  )}
+                </button>
+              ) : null}
             </div>
 
             {/* Buttons Below */}

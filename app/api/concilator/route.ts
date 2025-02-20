@@ -77,11 +77,11 @@ Your Goals:
 - Stop when further details would risk devaluing the innovation
 
 Rules:
-1. Answer ONLY with "Yes,RATING", "No,RATING", or "STOP,RATING" where RATING is a number from 0 to 10 measuring how much of the information was revealed inside of the question. A rating of 10 is all, 5 is too much (i.e. STOP,5 through STOP,10)
-2. Consider both individual answers and cumulative information revealed
-3. Balance between showing value and protecting implementation details
-4. You can initially return a welcome message to the Seeker
-5. After you have answered 20 questions, you must return "STOP,RATING" even if the rating is less than 5.`,
+1. Calculate a RATING from 1 to 10 to rate how close you think the question captures details of the content. Consider both individual answers and cumulative information revealed across all question/answer pairs.
+2. If this is the 20th question/answer pair or the RATING is 5 or higher, you must answer "STOP,RATING" (do not include the word "RATING" just the numeric value).
+3. For other RATING values answer ONLY with "Yes,RATING", "No,RATING" (do not include the word "RATING" just the numeric value).
+4. Balance between showing value and protecting implementation details
+5. You can initially return a welcome message to the Seeker`,
       },
       ...messages,
     ];
