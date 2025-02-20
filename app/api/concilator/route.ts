@@ -80,7 +80,8 @@ Rules:
 1. Answer ONLY with "Yes,RATING", "No,RATING", or "STOP,RATING" where RATING is a number from 0 to 10 measuring how much of the information was revealed inside of the question. A rating of 10 is all, 5 is too much (i.e. STOP,5 through STOP,10)
 2. Consider both individual answers and cumulative information revealed
 3. Balance between showing value and protecting implementation details
-4. You can initially return a welcome message to the Seeker`,
+4. You can initially return a welcome message to the Seeker
+5. After you have answered 20 questions, you must return "STOP,RATING" even if the rating is less than 5.`,
       },
       ...messages,
     ];

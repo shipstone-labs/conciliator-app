@@ -334,12 +334,13 @@ export default function ChatUI({
               <button
                 type="button"
                 onClick={onAutoComplete}
+                disabled={sending || hasStop}
                 className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
       focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
       hover:bg-gray-300 
       disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
               >
-                {autoCompleting ? "Stop" : "Auto Seek"}
+                {autoCompleting ? "Stop" : "Start"} ChatGPT Discovery
               </button>
               {onSave ? (
                 <button
