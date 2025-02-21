@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
-import Loading from "./Loading";
 
 const itemsPerPage = 16; // 4 Cards per page
 
