@@ -10,7 +10,7 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
 
 export async function POST(req: NextRequest) {
   try {
-    const origin = req.headers.get("origin") || "";
+    const origin = req.headers.get("origin") || req.headers.get("host") || "";
     const correctDomain = ALLOWED_ORIGINS.find((reg) => reg.test(origin));
     if (!correctDomain) {
       console.error("Invalid domain", origin);
@@ -52,7 +52,6 @@ export async function POST(req: NextRequest) {
           break;
       }
     }
-    console.log(previous);
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use the appropriate model
       messages: [
@@ -63,12 +62,11 @@ export async function POST(req: NextRequest) {
   - The Matcher requires yes/no questions to control information flow
   - Your goal is to understand the innovation's value and applicability
   - Craft questions strategically to build understanding within the yes/no format
+  - When you receive the Y/N answer, ask the next one. Every three questions, use the answers to make a detailed guess what the IP could be.
 
   Previous exchanges: \`${JSON.stringify(previous)}\`,
 
-  Provide two responses (and always separate them with a newline)
-  - the next question to submit, Generate your next strategic question.
-  - A summary if enough information is available looking at the previous exchanges.
+  
 `,
         },
       ],
@@ -76,12 +74,17 @@ export async function POST(req: NextRequest) {
     const choices = completion.choices as {
       message: { role: string; content: string };
     }[];
-    console.log(choices);
-    const [_question, summary] =
+    const [_question, ...rest] =
       choices[0].message.content
         .split("\n")
-        .filter((item) => item.trim() !== "")
         .map((item) => item.replace(/^-\s*/, "")) || [];
+    while (rest.length) {
+      if (rest[0].trim() === "") {
+        rest.shift();
+      } else {
+        break;
+      }
+    }
     if (!_question) {
       return new Response(
         JSON.stringify({ success: false, error: "No question generated" }),
@@ -92,7 +95,7 @@ export async function POST(req: NextRequest) {
       );
     }
     messages.push({ ...choices[0].message, content: _question, role: "user" });
-    return new Response(JSON.stringify({ success: true, messages, summary }), {
+    return new Response(JSON.stringify({ success: true, messages }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {

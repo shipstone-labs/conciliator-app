@@ -43,7 +43,6 @@ export default function ChatUI({
   const [downloads, setDownloads] = useState<{ url: string; title: string }[]>(
     []
   );
-  const [summary, setSummary] = useState("");
   const [autoCompleting, setAutoCompleting] = useState(false);
   const onAutoComplete = useCallback(async () => {
     setAutoCompleting((prev) => !prev);
@@ -72,12 +71,11 @@ export default function ChatUI({
         setAutoCompleting(false);
         return;
       }
-      const { success, messages: newMessages, summary } = await response.json();
+      const { success, messages: newMessages } = await response.json();
       if (!success || !running || !autoCompleting) {
         setAutoCompleting(false);
         return;
       }
-      setSummary(summary);
       const { content } = newMessages.at(-1) || {};
       if (!content || !running || !autoCompleting) {
         setAutoCompleting(false);
@@ -299,14 +297,13 @@ export default function ChatUI({
                     ? "The conversation has ended"
                     : "Type your question..."
                 }
-                value={summary || input}
-                disabled={sending || (hasStop && !summary)}
+                value={input}
+                disabled={sending || hasStop}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
                 className="resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full h-[120px] pr-16 rounded-lg" // Adjust height and padding for the button
               />
-
-              {!autoCompleting && !summary ? (
+              {!autoCompleting ? (
                 <button
                   type="button"
                   onClick={handleSend}

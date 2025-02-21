@@ -3,13 +3,15 @@ import type { NextRequest } from "next/server";
 export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
-  const response = await fetch(
-    `${process.env.PINATA_GATEWAY}/ipfs/${req.nextUrl.pathname.replace(
-      "/api/download/",
-      ""
-    )}?pinataGatewayToken=${process.env.PINATA_TOKEN}`,
-    { cache: "no-store" }
-  );
+  const url = `${
+    process.env.PINATA_GATEWAY
+  }/ipfs/${req.nextUrl.pathname.replace(
+    "/api/download/",
+    ""
+  )}?pinataGatewayToken=${process.env.PINATA_TOKEN}${
+    req.nextUrl.search ? `&${req.nextUrl.search.slice(1)}` : ""
+  }`;
+  const response = await fetch(url, { cache: "no-store" });
 
   // Get a reader to read the response body as a stream
   const reader = response?.body?.getReader();
@@ -26,9 +28,10 @@ export async function GET(req: NextRequest) {
       headers[key] = value;
     }
   }
-  headers["Content-Disposition"] =
-    'attachment; filename="Conciliator Chat.json"';
-
+  if (headers["Content-Type"] === "application/json") {
+    headers["Content-Disposition"] =
+      'attachment; filename="Conciliator Chat.json"';
+  }
   // Create a new ReadableStream to manually handle the data chunks
   const stream = new ReadableStream({
     async start(controller) {

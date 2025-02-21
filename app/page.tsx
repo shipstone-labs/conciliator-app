@@ -1,9 +1,9 @@
-import ConciliateApp from "@/components/conciliate-app";
+import HomeApp from "@/components/home-app";
 
 export default function Home() {
   return (
     <main>
-      <ConciliateApp />
+      <HomeApp />
     </main>
   );
 }

@@ -1,4 +1,5 @@
 import { OpenAI, type ClientOptions } from "openai";
+import { PinataSDK } from "pinata-web3";
 
 export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
@@ -13,6 +14,11 @@ const configuration: ClientOptions = {
 
 export const openai = new OpenAI(configuration);
 export const indexName = "ip-embeddings";
+
+export const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT,
+  pinataGateway: process.env.PINATA_GATEWAY,
+});
 
 export const abi = [
   {

@@ -1,22 +1,16 @@
 import type { NextRequest } from "next/server";
 // import { ALLOWED_ORIGINS, abi } from "../utils";
 // import { createWalletClient, decodeEventLog, http } from "viem";
-import { ALLOWED_ORIGINS } from "../utils";
+import { ALLOWED_ORIGINS, pinata } from "../utils";
 // import { createWalletClient, http } from "viem";
 // import { privateKeyToAccount } from "viem/accounts";
 // import { filecoinCalibration } from "viem/chains";
 // import { waitForTransactionReceipt } from "viem/actions";
-import { PinataSDK } from "pinata-web3";
 export const runtime = "edge";
-
-const pinata = new PinataSDK({
-  pinataJwt: process.env.PINATA_JWT,
-  pinataGateway: process.env.PINATA_GATEWAY,
-});
 
 export async function POST(req: NextRequest) {
   try {
-    const origin = req.headers.get("origin") || "";
+    const origin = req.headers.get("origin") || req.headers.get("host") || "";
     const correctDomain = ALLOWED_ORIGINS.find((reg) => reg.test(origin));
     if (!correctDomain) {
       console.error("Invalid domain", origin);
