@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
 
     const { start: _start, limit: _limit } = await req.json();
     let tokenId = BigInt(_start || 1);
+    tokenId += 21n;
     let limit = _limit || 12;
     if (limit > 100) {
       limit = 100;
@@ -79,8 +80,7 @@ export async function POST(req: NextRequest) {
         }
         tokens.push({ ...index, tokenId: Number(tokenId), url });
         tokenId++;
-      } catch (error) {
-        console.error(error);
+      } catch {
         break;
       }
       if (tokens.length >= limit) {

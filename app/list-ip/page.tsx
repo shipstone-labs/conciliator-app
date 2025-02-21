@@ -1,10 +1,12 @@
 "use client";
 
 import CardGrid, { type Data } from "@/components/card-grid";
+import Loading from "@/components/Loading";
 import { useCallback, useEffect, useState } from "react";
 
 export default function Home() {
   const [items, setItems] = useState<Data[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const retrieve = useCallback(
     async (_start: number, limit: number) => {
       let start = _start;
@@ -30,10 +32,14 @@ export default function Home() {
     [items]
   );
   useEffect(() => {
-    if (items.length === 0) {
+    if (!loaded) {
+      setLoaded(true);
       retrieve(0, 10);
     }
-  }, [items, retrieve]);
+  }, [retrieve, loaded]);
+  if (!loaded) {
+    return <Loading />;
+  }
   return (
     <main>
       <CardGrid items={items} onRetrieve={retrieve} />
