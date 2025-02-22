@@ -82,8 +82,7 @@ export async function POST(req: NextRequest) {
         console.log("url", url);
         tokens.push({ ...index, tokenId: Number(tokenId), url });
         tokenId++;
-      } catch (error) {
-        console.log("error", Object.keys(error as any));
+      } catch {
         break;
       }
       if (tokens.length >= limit) {
