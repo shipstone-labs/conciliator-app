@@ -55,7 +55,14 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center p-2">
+    <div className="w-full flex flex-col items-center p-3">
+      <Link
+        href="/add-ip"
+        className="fixed top-6 right-6 bg-blue-600 text-white text-3xl w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-blue-700 transition-all"
+      >
+        +
+      </Link>
+
       {/* Card Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
         {visibleItems.map((item, index) => (

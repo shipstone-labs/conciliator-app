@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import Link from "next/link";
 
 export default function ChatUI({
   messages,
@@ -380,6 +381,16 @@ export default function ChatUI({
                   Save Chat Snapshot
                 </button>
               ) : null}
+              <Link
+                type="button"
+                href="/list-ip"
+                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
+      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
+      hover:bg-gray-300 
+      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+              >
+                IP Docs
+              </Link>
             </div>
           </div>
           <div className="w-full">
