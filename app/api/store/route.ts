@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, content, description } = body;
+    const { name: _name, content, description } = body;
+    const name = _name || "Untitled";
+    console.log("body", body);
     const wallet = createWalletClient({
       account: privateKeyToAccount(
         (process.env.FILCOIN_PK || "") as `0x${string}`
@@ -25,17 +27,47 @@ export async function POST(req: NextRequest) {
       chain: filecoinCalibration,
       transport: http(),
     });
-    const hash = await wallet.writeContract({
-      functionName: "tokenizeDocument",
-      abi,
-      address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
-      args: [name, description, content],
-    });
-    const receipt = await waitForTransactionReceipt(wallet, {
-      hash,
-    });
+    console.log("minting", name, description, content);
+    const getImage = async () => {
+      const response2 = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: `Generate and image which accurately represents a supposed document
+with the title \`${name}\` and the descriptions \`${description}\`. If there are any word flagged as inappropriate,
+then just pick the closest word to it. If there is none, then pick a random word.
+I would like to always get an image, even if it's not 100% accurate.`,
+        response_format: "url",
+        size: "1024x1024",
+        quality: "standard",
+        n: 1,
+      });
+      console.log("response2", response2);
+      const { url } = response2.data[0];
+      let image = "";
+      if (url) {
+        const { IpfsHash } = await pinata.upload.url(url);
+        image = `ipfs://${IpfsHash}`;
+      }
+      return image;
+    };
+    const [image, receipt] = await Promise.all([
+      getImage(),
+      wallet
+        .writeContract({
+          functionName: "tokenizeDocument",
+          abi,
+          address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
+          args: [name, description, content],
+        })
+        .then((hash) => {
+          return waitForTransactionReceipt(wallet, {
+            hash,
+          });
+        }),
+    ]);
+    console.log("receipt", receipt);
     let embedding = {
       name: "",
+      image: "",
       description: "",
       tokenId: "",
     };
@@ -46,44 +78,37 @@ export async function POST(req: NextRequest) {
       ) {
         continue;
       }
+      console.log("log", log);
       const info = decodeEventLog({
         abi,
         ...log,
       });
+      console.log("info", info);
       const { name, description, tokenId } = info.args as unknown as {
         name: string;
         description: string;
         tokenId: bigint;
       };
-      const response2 = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: `Generate and image which accurately represents a supposed document
-        with the title \`${name}\` and the descriptions \`${description}\`. If there are any word flagged as inappropriate,
-        then just pick the closest word to it. If there is none, then pick a random word.
-        I would like to always get an image, even if it's not 100% accurate.`,
-        response_format: "url",
-        size: "1024x1024",
-        quality: "standard",
-        n: 1,
+      console.log("image", image);
+      await wallet.writeContract({
+        functionName: "setTokenURI",
+        abi,
+        address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
+        args: [tokenId, image],
       });
-
-      const { url } = response2.data[0];
-      if (url) {
-        const { IpfsHash } = await pinata.upload.url(url);
-        await wallet.writeContract({
-          functionName: "setTokenURI",
-          abi,
-          address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
-          args: [tokenId, `ipfs://${IpfsHash}`],
-        });
-      }
       embedding = {
         name,
+        image,
         description,
         tokenId: `${tokenId || 0n}`,
       };
+      console.log("embedding", embedding);
+      return new Response(JSON.stringify(embedding), {
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    return new Response(JSON.stringify(embedding), {
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {

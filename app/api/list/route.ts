@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     const { start: _start, limit: _limit } = await req.json();
     let tokenId = BigInt(_start || 1);
-    tokenId += 21n;
+    tokenId += 22n;
     let limit = _limit || 12;
     if (limit > 100) {
       limit = 100;
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
     const tokens = [];
     while (true) {
       try {
+        console.log("getting", tokenId);
         const index = (await readContract(wallet, {
           address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
           functionName: "getDocumentMetadata",
@@ -78,9 +79,11 @@ export async function POST(req: NextRequest) {
             });
           }
         }
+        console.log("url", url);
         tokens.push({ ...index, tokenId: Number(tokenId), url });
         tokenId++;
-      } catch {
+      } catch (error) {
+        console.log("error", Object.keys(error as any));
         break;
       }
       if (tokens.length >= limit) {
