@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -57,6 +62,12 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
   return (
     <div className="w-full flex flex-col items-center p-3">
       <Link
+        href="/"
+        className="fixed top-6 left-6 bg-gray-600 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-700 transition-all"
+      >
+        🏠
+      </Link>
+      <Link
         href="/add-ip"
         className="fixed top-6 right-6 bg-blue-600 text-white text-3xl w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-blue-700 transition-all"
       >
@@ -70,11 +81,18 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
             key={`${item.name}-${item.description}-${index}`}
             className="shadow-lg border border-gray-200 rounded-lg"
           >
-            {/* Name (Title) */}
-            <CardHeader className="bg-gray-100 p-4 rounded-t-lg text-center h-14">
-              <CardTitle className="text-base font-semibold max-h-12 overflow-auto line-clamp-2">
-                {item.name}
-              </CardTitle>
+            {/* Name (Title) with Tooltip */}
+            <CardHeader className="bg-gray-100 p-4 rounded-t-lg text-center h-16">
+              <Tooltip>
+                <TooltipTrigger className="block w-full">
+                  <CardTitle className="text-sm font-semibold leading-tight max-h-12 overflow-hidden line-clamp-2 text-ellipsis">
+                    {item.name}
+                  </CardTitle>
+                </TooltipTrigger>
+                <TooltipContent className="bg-gray-800 text-white p-2 rounded-md max-w-xs">
+                  {item.name}
+                </TooltipContent>
+              </Tooltip>
             </CardHeader>
 
             {/* Image */}
@@ -93,11 +111,18 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
               />
             </CardContent>
 
-            {/* Description */}
-            <CardContent className="p-4 max-h-32 h-32 overflow-auto line-clamp-5">
-              <p className="text-gray-600 text-sm overflow-hidden max-h-24">
-                {item.description}
-              </p>
+            {/* Description with Tooltip */}
+            <CardContent className="p-4 h-32 overflow-hidden">
+              <Tooltip>
+                <TooltipTrigger className="block w-full">
+                  <p className="text-gray-600 text-sm line-clamp-5 text-ellipsis">
+                    {item.description}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent className="bg-gray-800 text-white p-2 rounded-md max-w-sm">
+                  {item.description}
+                </TooltipContent>
+              </Tooltip>
             </CardContent>
 
             <CardContent className="p-2 flex justify-center">

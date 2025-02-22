@@ -21,6 +21,7 @@ import { Textarea } from "./ui/textarea";
 import Chat from "./chat";
 import { Logo } from "./Logo";
 import Loading from "./Loading";
+import Link from "next/link";
 
 const AppStates = {
   LOADING: "loading",
@@ -331,6 +332,12 @@ const ConciliateApp = ({
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
       <div className="max-w-6xl mx-auto space-y-6">
+        <Link
+          href="/"
+          className="fixed top-6 left-6 bg-gray-600 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-700 transition-all"
+        >
+          🏠
+        </Link>
         <Logo />
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
