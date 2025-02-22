@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 export default function Home() {
   const [items, setItems] = useState<Data[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
   const retrieve = useCallback(
     async (_start: number, limit: number) => {
       let start = _start;
@@ -28,15 +29,16 @@ export default function Home() {
       }
       const data = (await response.json()) as Data[];
       setItems([...items, ...data]);
+      setLoaded(true);
     },
     [items]
   );
   useEffect(() => {
-    if (!loaded) {
-      setLoaded(true);
+    if (!loading) {
+      setLoading(true);
       retrieve(0, 10);
     }
-  }, [retrieve, loaded]);
+  }, [retrieve, loading]);
   if (!loaded) {
     return <Loading />;
   }
