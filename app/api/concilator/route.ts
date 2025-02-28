@@ -18,6 +18,29 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
   .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
 
+function degrade(content: string) {
+  return content.replace(/([\d,.]+)/g, (_match, number) => {
+    try {
+      const num = Number.parseFloat(number);
+      if (num === 0) {
+        return number;
+      }
+      if (Number.isNaN(num)) return number;
+      const min = Math.round(num) * 0.9;
+      const max = Math.round(num) * 1.1;
+      const decimals = /\.(\d+)/.exec(number)?.[1]?.length || 0;
+      while (true) {
+        const num2 = Math.random() * (max - min) + min;
+        if (Math.abs((num2 - num) / num) > 0.05) {
+          return num2.toFixed(decimals);
+        }
+      }
+    } catch {
+      return number;
+    }
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const origin = req.headers.get("origin") || "";
@@ -27,7 +50,11 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 403 });
     }
 
-    const { messages, tokenId } = await req.json();
+    const { messages, tokenId, degraded } = (await req.json()) as {
+      messages: { role: "user" | "assistant" | "system"; content: string };
+      degraded?: boolean;
+      tokenId: number;
+    };
 
     const wallet = createWalletClient({
       account: privateKeyToAccount(
@@ -66,9 +93,11 @@ export async function POST(req: NextRequest) {
         role: "system",
         content: `You are the Matcher in an invention value discovery session.
 The innovation you're presenting is named \`${index.name}\` and
-has the following description: \`${index.description}\` with the following content:
+has the following description: \`${
+          index.description
+        }\` with the following content:
 \`\`\`
-${content}
+${degraded ? degrade(content) : content}
 \`\`\`
 
 Your Goals:

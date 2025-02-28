@@ -1,6 +1,8 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
 import {
   type MouseEvent,
@@ -32,7 +34,7 @@ export default function ChatUI({
   name: string;
   description: string;
   messages: { role: "user" | "assistant" | "system"; content: string }[];
-  onSend: (message: string) => Promise<void>;
+  onSend: (message: string, degraded: boolean) => Promise<void>;
   onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void;
   onSave?: (
     event: MouseEvent<HTMLButtonElement>
@@ -40,12 +42,14 @@ export default function ChatUI({
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
+  const [degraded, setDegraded] = useState(false);
   const [sending, setSending] = useState(false);
   const [downloads, setDownloads] = useState<{ url: string; title: string }[]>(
     []
   );
   const [autoCompleting, setAutoCompleting] = useState(false);
-  const onAutoComplete = useCallback(async () => {
+  const onAutoComplete = useCallback(async (e, degraded = false) => {
+    setDegraded(degraded);
     setAutoCompleting((prev) => !prev);
   }, []);
   const hasStop = useMemo(
@@ -82,7 +86,7 @@ export default function ChatUI({
         setAutoCompleting(false);
         return;
       }
-      await onSend(content);
+      await onSend(content, degraded);
     };
     const timer = setTimeout(() => {
       if (hasStop) {
@@ -97,18 +101,18 @@ export default function ChatUI({
       running = false;
       clearTimeout(timer);
     };
-  }, [hasStop, autoCompleting, onSend, messages]);
+  }, [hasStop, autoCompleting, onSend, messages, degraded]);
   const handleSend = useCallback(async () => {
     if (input.trim()) {
       setSending(true);
       try {
-        await onSend(input);
+        await onSend(input, degraded);
         setInput("");
       } finally {
         setSending(false);
       }
     }
-  }, [input, onSend]);
+  }, [input, onSend, degraded]);
 
   const handleSave = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
@@ -344,6 +348,21 @@ export default function ChatUI({
             </div>
 
             {/* Buttons Below */}
+            <div className="flex items-center space-x-2 mt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="degraded"
+                  checked={degraded}
+                  onCheckedChange={(checked) => {
+                    if (checked === "indeterminate") {
+                      return;
+                    }
+                    setDegraded(checked);
+                  }}
+                />
+                <Label htmlFor="degraded">Run in degraded mode</Label>
+              </div>
+            </div>
             <div className="mt-4 flex space-x-2">
               {onNewIP ? (
                 <button
