@@ -51,12 +51,9 @@ export default function ChatUI({
     []
   );
   const [autoCompleting, setAutoCompleting] = useState(false);
-  const onAutoComplete = useCallback(
-    async (e: MouseEvent<HTMLButtonElement>) => {
-      setAutoCompleting((prev) => !prev);
-    },
-    []
-  );
+  const onAutoComplete = useCallback(async () => {
+    setAutoCompleting((prev) => !prev);
+  }, []);
   const hasStop = useMemo(
     () =>
       (messages || []).find((message) => {
