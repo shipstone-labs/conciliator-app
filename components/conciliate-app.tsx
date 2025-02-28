@@ -112,7 +112,7 @@ const ConciliateApp = ({
       setName(name);
       setMessages(_resultMessages);
     },
-    [messages, tokenId]
+    [messages, tokenId, degraded]
   );
 
   const handleSave = useCallback(async () => {
