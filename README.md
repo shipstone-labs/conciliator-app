@@ -2,13 +2,11 @@ Welcome to the Conciliator Project
 
 Conciliator is a open source project that explores how to best work with AI agents that search for IP. It provides an effective way to enable discovery of IP while protecting the interests of the IP inventors and/or owners. 
 
-This is an experimental part of the SafeIdea project that we're working on. Ping me at Cart@shipstone.com to learn more.
+This is an experimental part of the SafeIdea project that we're working on. Ping us at Cart@shipstone.com to learn more.
 
 Also, we wanted to demonstrate how different LLMs can talk to eachother. Here's an informative conversation with Google Gemini: https://docs.google.com/document/d/e/2PACX-1vQYlzI-nmG1LpdEigAESJ_njDDtylSxnsx40RXAo7mYkfib57Q1E6yfhNM5erBKr_SqM4uxjDSo42_j/pub
 
 Unfortunately, this still does not work, although we think that most LLMs will have operator functionality this year so that they can generate any API they need on the fly. "No API is the best API!"
-
-Please ping us if you'd like to help out!  cart@shipstone.com
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
