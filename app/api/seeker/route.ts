@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (
       messages.find(
         ({ role, content }) =>
-          role === "assistant" && /^(None),\d*$/i.test(content)
+          role === "assistant" && /^(None),\d*/i.test(content)
       )
     ) {
       return new Response(
