@@ -30,7 +30,7 @@ function HomeApp() {
           You can test Conciliator below with your own technology description.
           Watch how agents interact through our question-and-answer protocol,
           and see how they build understanding while working within secure
-          boundaries. This is an early experiment in helping AI systems evaluate
+          boundaries. This is an experiment in helping AI systems evaluate
           innovations together.
         </p>
       </div>
