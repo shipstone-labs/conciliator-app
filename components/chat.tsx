@@ -217,13 +217,13 @@ export default function ChatUI({
         {(messageWithIndex || []).map((message, index) => {
           const isSpecial =
             message?.role === "assistant" &&
-            /^(Yes|No|STOP),\s*(\d+)$/i.test(message?.content);
+            /^(Yes|No|STOP),\s*(\d+)/i.test(message?.content);
           let highlightClass = "";
           let rating = "";
           let answer = "";
           if (isSpecial) {
             const [, extractedAnswer, extractedRating] =
-              /^(Yes|No|STOP),\s*(\d+)$/i.exec(message?.content) || [];
+              /^(Yes|No|STOP),\s*(\d+)/i.exec(message?.content) || [];
             highlightClass = getHighlightClass(answer.toUpperCase());
             rating = extractedRating;
             answer = extractedAnswer;

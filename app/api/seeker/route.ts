@@ -43,10 +43,7 @@ export async function POST(req: NextRequest) {
           item.question = message.content;
           break;
         case "assistant":
-          item.answer = message.content.replace(
-            /^(Yes|No|None),\s*\d*$/i,
-            "$1"
-          );
+          item.answer = message.content.replace(/^(Yes|No|None),\s*\d*/i, "$1");
           previous.push(item);
           item = { question: "", answer: "" };
           break;
