@@ -387,7 +387,7 @@ export default function ChatUI({
       hover:bg-gray-300 
       disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
               >
-                {autoCompleting ? "Stop" : "Start"} ChatGPT Discovery
+                {autoCompleting ? "Stop" : "Start"} Discovery
               </button>
               {onSave ? (
                 <button
