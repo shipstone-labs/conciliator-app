@@ -59,7 +59,7 @@ export default function ChatUI({
       (messages || []).find((message) => {
         return (
           message?.role === "assistant" &&
-          /^(STOP),\s*(\d+)$/i.test(message?.content)
+          /^(STOP),\s*(\d+)/i.test(message?.content)
         );
       }) != null,
     [messages]
