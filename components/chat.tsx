@@ -30,10 +30,14 @@ export default function ChatUI({
   onSend,
   onNewIP,
   onSave,
+  degraded,
+  setDegraded,
 }: {
   name: string;
   description: string;
   messages: { role: "user" | "assistant" | "system"; content: string }[];
+  degraded: boolean;
+  setDegraded: (checked: boolean) => void;
   onSend: (message: string, degraded: boolean) => Promise<void>;
   onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void;
   onSave?: (
@@ -42,16 +46,17 @@ export default function ChatUI({
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
-  const [degraded, setDegraded] = useState(false);
   const [sending, setSending] = useState(false);
   const [downloads, setDownloads] = useState<{ url: string; title: string }[]>(
     []
   );
   const [autoCompleting, setAutoCompleting] = useState(false);
-  const onAutoComplete = useCallback(async (e, degraded = false) => {
-    setDegraded(degraded);
-    setAutoCompleting((prev) => !prev);
-  }, []);
+  const onAutoComplete = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      setAutoCompleting((prev) => !prev);
+    },
+    []
+  );
   const hasStop = useMemo(
     () =>
       (messages || []).find((message) => {

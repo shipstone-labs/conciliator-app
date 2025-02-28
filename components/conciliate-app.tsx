@@ -41,6 +41,7 @@ const ConciliateApp = ({
   const [appState, setAppState] = useState(AppStates.LOADING);
   const [content, setContent] = useState("");
   const [name, setName] = useState("");
+  const [degraded, setDegraded] = useState(false);
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +100,7 @@ const ConciliateApp = ({
         body: JSON.stringify({
           tokenId,
           messages: request,
+          degraded,
         }),
       }).then((res) => {
         if (!res.ok) {
@@ -278,6 +280,8 @@ const ConciliateApp = ({
       onNewIP={onNewIP}
       onSave={handleSave}
       name={name}
+      degraded={degraded}
+      setDegraded={setDegraded}
       description={description}
     />
   );

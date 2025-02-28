@@ -32,7 +32,9 @@ function degrade(content: string) {
       while (true) {
         const num2 = Math.random() * (max - min) + min;
         if (Math.abs((num2 - num) / num) > 0.05) {
-          return num2.toFixed(decimals);
+          const output = num2.toFixed(decimals);
+          console.log("degrade", number, "->", output);
+          return `${output}`;
         }
       }
     } catch {
@@ -51,10 +53,15 @@ export async function POST(req: NextRequest) {
     }
 
     const { messages, tokenId, degraded } = (await req.json()) as {
-      messages: { role: "user" | "assistant" | "system"; content: string };
+      messages: {
+        role: "user" | "assistant" | "system";
+        content: string | null;
+      }[];
       degraded?: boolean;
       tokenId: number;
     };
+
+    console.log("question", tokenId, degraded);
 
     const wallet = createWalletClient({
       account: privateKeyToAccount(
@@ -113,7 +120,7 @@ Rules:
 5. You can initially return a welcome message to the Seeker`,
       },
       ...messages,
-    ];
+    ] as { role: "user" | "assistant" | "system"; content: string }[];
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Use the appropriate model
       messages: request,
