@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 403 });
     }
 
-    const { messages: _messages } = await req.json();
+    const { messages: _messages, title, description } = await req.json();
 
     const messages: { role: string; content: string }[] = _messages;
 
@@ -43,7 +43,10 @@ export async function POST(req: NextRequest) {
           item.question = message.content;
           break;
         case "assistant":
-          item.answer = message.content.replace(/^(Yes|No|None),\s*\d*/i, "$1");
+          item.answer = message.content.replace(
+            /^Question #\d*: (Yes|No|Stop)/i,
+            "$1"
+          );
           previous.push(item);
           item = { question: "", answer: "" };
           break;
@@ -61,9 +64,10 @@ export async function POST(req: NextRequest) {
   - Craft questions strategically to build understanding within the yes/no format
   - When you receive the Y/N answer, ask the next one. Every three questions, use the answers to make a detailed guess what the IP could be.
 
-  Previous exchanges: \`${JSON.stringify(previous)}\`,
+  title: ${title}
+  description: ${description}
 
-  
+  Previous exchanges: \`${JSON.stringify(previous)}\`,
 `,
         },
       ],
@@ -71,18 +75,12 @@ export async function POST(req: NextRequest) {
     const choices = completion.choices as {
       message: { role: string; content: string };
     }[];
-    const [_question, ...rest] =
-      choices[0].message.content
-        .split("\n")
-        .map((item) => item.replace(/^-\s*/, "")) || [];
-    while (rest.length) {
-      if (rest[0].trim() === "") {
-        rest.shift();
-      } else {
-        break;
-      }
-    }
-    if (!_question) {
+    const content = choices
+      .flatMap(({ message: { content = "" } = { content: "" } }) =>
+        content.split("\n")
+      )
+      .join("\n");
+    if (!content) {
       return new Response(
         JSON.stringify({ success: false, error: "No question generated" }),
         {
@@ -91,7 +89,7 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    messages.push({ ...choices[0].message, content: _question, role: "user" });
+    messages.push({ content, role: "user" });
     return new Response(JSON.stringify({ success: true, messages }), {
       headers: { "Content-Type": "application/json" },
     });
