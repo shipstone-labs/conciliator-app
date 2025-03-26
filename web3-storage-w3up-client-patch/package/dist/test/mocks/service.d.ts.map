@@ -1,0 +1,1 @@
+{"version":3,"file":"service.d.ts","sourceRoot":"","sources":["../../../test/mocks/service.js"],"names":[],"mappings":"AAMA;;;;GAIG;AACH,oDAFW;IAAE,EAAE,EAAE,GAAG,CAAA;CAAE,GAAG;IAAE,KAAK,EAAE,OAAO,GAAG,CAAC,OAAO,CAAA;CAAE;;;;;;;;EAWrD;AAED;;;;;GAKG;AACH,uCAHW,GAAG,WACH,GAAG,0BASb;AAED;;;;;;GAMG;AACH,kCAJW,GAAG,WACH,GAAG,QACH,MAAM,GAAG,SAAS;;EAW5B;wBApDuB,gBAAgB;wBADhB,gBAAgB"}

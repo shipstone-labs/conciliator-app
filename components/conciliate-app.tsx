@@ -22,6 +22,12 @@ import Chat from "./chat";
 import { Logo } from "./Logo";
 import Loading from "./Loading";
 import Link from "next/link";
+import { LIT_NETWORK } from "@lit-protocol/constants";
+import * as LitJsSdk from "@lit-protocol/lit-node-client";
+
+const client = new LitJsSdk.LitNodeClient({
+  litNetwork: LIT_NETWORK.Datil,
+});
 
 const AppStates = {
   LOADING: "loading",
@@ -48,6 +54,28 @@ const ConciliateApp = ({
   const [messages, setMessages] = useState<
     { role: "user" | "assistant" | "system"; content: string }[]
   >([]);
+  const login = useCallback(() => {
+    setIsLoading(true);
+    client
+      .connect()
+      .then(() => {
+        setAppState(AppStates.START);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+  const logoff = useCallback(() => {
+    setIsLoading(true);
+    client
+      .disconnect()
+      .then(() => {
+        setAppState(AppStates.LOADING);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
   const handleStart = useCallback(async () => {
     setError(null);
     setIsLoading(true);
@@ -174,8 +202,6 @@ const ConciliateApp = ({
           setAppState(AppStates.DISCUSSION);
         })();
       }
-    } else {
-      setAppState(AppStates.START);
     }
   }, [tokenId, messages]);
 
@@ -330,8 +356,23 @@ const ConciliateApp = ({
     </Card>
   );
 
-  if (appState === AppStates.LOADING && tokenId) {
-    return <Loading />;
+  const renderLoginState = () => {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <Button type="button" onClick={login}>
+            Login
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  if (appState === AppStates.LOADING) {
+    if (tokenId) {
+      return <Loading />;
+    }
+    return renderLoginState();
   }
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
@@ -343,6 +384,7 @@ const ConciliateApp = ({
           🏠
         </Link>
         <Logo />
+        {!tokenId && <Button onClick={logoff}>Logoff</Button>}
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}
