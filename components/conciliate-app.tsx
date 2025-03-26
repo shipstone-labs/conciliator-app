@@ -87,30 +87,41 @@ const ConciliateApp = ({
   const handleAskQuestion = useCallback(
     async (question: string) => {
       setIsLoading(true);
-      const request = [...messages, { role: "user", content: question }];
-      const {
-        messages: _resultMessages,
-        name,
-        description,
-      } = await fetch("/api/concilator", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tokenId,
-          messages: request,
-          degraded,
-        }),
-      }).then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to store invention");
-        }
-        return res.json();
-      });
-      setDescription(description);
-      setName(name);
-      setMessages(_resultMessages);
+      try {
+        // First update the messages array with the user's question so it's visible immediately
+        const userMessage = { role: "user" as const, content: question };
+        setMessages(prevMessages => [...prevMessages, userMessage]);
+        
+        // Then make the API request
+        const {
+          messages: _resultMessages,
+          name,
+          description,
+        } = await fetch("/api/concilator", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            tokenId,
+            messages: [...messages, userMessage],
+            degraded,
+          }),
+        }).then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to process request");
+          }
+          return res.json();
+        });
+        
+        setDescription(description);
+        setName(name);
+        setMessages(_resultMessages);
+      } catch (error) {
+        console.error("Error processing request:", error);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [messages, tokenId, degraded]
   );
@@ -283,6 +294,7 @@ const ConciliateApp = ({
       degraded={degraded}
       setDegraded={setDegraded}
       description={description}
+      isLoading={isLoading}
     />
   );
 

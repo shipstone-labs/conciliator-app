@@ -114,7 +114,6 @@ ${index.description}`,
       );
     }
 
-    const start = Date.now();
     const request = [
       {
         role: "system",
