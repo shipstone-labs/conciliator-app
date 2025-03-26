@@ -5,14 +5,20 @@ export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
   .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
 
-const configuration: ClientOptions = {
+const imageConfiguration: ClientOptions = {
   apiKey: process.env.OPENAI_API_KEY || "",
   project: process.env.OPENAI_PROJECT_ID || "",
   organization: process.env.OPENAI_ORGANIZATION_ID || "",
   dangerouslyAllowBrowser: true,
 };
+export const imageAI = new OpenAI(imageConfiguration);
 
-export const openai = new OpenAI(configuration);
+const completionConfiguration: ClientOptions = {
+  apiKey: process.env.LILYPAD_API_KEY || "",
+  baseURL: process.env.LILYPAD_BASE_URL || "",
+  dangerouslyAllowBrowser: true,
+};
+export const completionAI = new OpenAI(completionConfiguration);
 export const indexName = "ip-embeddings";
 
 export const pinata = new PinataSDK({
