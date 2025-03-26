@@ -25,7 +25,7 @@ const NAMES = [
   },
   {
     postfix: "_BASE_URL",
-    name: "baseUrl",
+    name: "baseURL",
   },
   {
     postfix: "_STORAGE_ID",

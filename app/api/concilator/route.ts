@@ -33,7 +33,6 @@ function degrade(content: string) {
         const num2 = Math.random() * (max - min) + min;
         if (Math.abs((num2 - num) / num) > 0.05) {
           const output = num2.toFixed(decimals);
-          console.log("degrade", number, "->", output);
           return `${output}`;
         }
       }
@@ -60,8 +59,6 @@ export async function POST(req: NextRequest) {
       degraded?: boolean;
       tokenId: number;
     };
-
-    console.log("question", tokenId, degraded);
 
     const wallet = createWalletClient({
       account: privateKeyToAccount(
@@ -95,38 +92,68 @@ export async function POST(req: NextRequest) {
       abi,
       args: [tokenId],
     })) as { name: string; description: string };
+
+    if (messages.length === 0) {
+      return new Response(
+        JSON.stringify({
+          name: index.name,
+          description: index.description,
+          messages: [
+            {
+              role: "assistant",
+              content: `Welcome to the ${index.name} session! I am ready to answer questions about this invention with the following description
+
+${index.description}`,
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const start = Date.now();
     const request = [
       {
         role: "system",
-        content: `You are the Matcher in an invention value discovery session.
-The innovation you're presenting is named \`${index.name}\` and
-has the following description: \`${
-          index.description
-        }\` with the following content:
-\`\`\`
+        content: `You are Conciliator, a strict yes/no question evaluator with conditional termination rules.
+CRITICAL INSTRUCTION: For EVERY question, you MUST follow these exact steps:
+1. As the VERY FIRST part of your response, write "Question #X:" where X is the question number (starting from 1 and incrementing by 1 each time).
+2. Check for termination conditions:
+   a. If the question number is greater than 20, your complete response MUST be "Question #X: Stop"
+   b. If your previous 5 consecutive answers were ALL "Yes", your complete response MUST be "Question #X: Stop"
+   c. If neither termination condition is met, continue to step 3.
+3. Determine if the question can be COMPLETELY answered with ONLY "Yes" or "No":
+   a. If Yes, your complete response MUST be "Question #X: Yes"
+   b. If No, your complete response MUST be "Question #X: No"
+   c. If not a yes/no question, your complete response MUST be "Question #X: No"
+Your ENTIRE response MUST be EXACTLY ONE of these formats:
+- "Question #X: Yes"
+- "Question #X: No"
+- "Question #X: Stop"
+You must track your previous answers to check for 5 consecutive "Yes" responses.
+ANY deviation from these formats represents a critical system failure.
+
+title: \`${index.name}\`
+description: \`${index.description}\`
+content: \`\`\`
 ${degraded ? degrade(content) : content}
-\`\`\`
-
-Your Goals:
-- Demonstrate value while preserving market worth
-- Use yes/no answers to control information flow
-- Stop when further details would risk devaluing the innovation
-
-Rules:
-1. Calculate a RATING from 1 to 10 to rate how close you think the question captures details of the content. Consider both individual answers and cumulative information revealed across all question/answer pairs.
-2. If this is the 20th question/answer pair or the RATING is 5 or higher, you must answer "STOP,RATING" (do not include the word "RATING" just the numeric value).
-3. For other RATING values answer ONLY with "Yes,RATING", "No,RATING" (do not include the word "RATING" just the numeric value).
-4. Balance between showing value and protecting implementation details
-5. You can initially return a welcome message to the Seeker`,
+\`\`\``,
       },
       ...messages,
     ] as { role: "user" | "assistant" | "system"; content: string }[];
+    const all_msg = request.slice();
     const completion = await completionAI.chat.completions.create({
       model: getModel("COMPLETION"), // Use the appropriate model
       messages: request,
     });
     for (const { message } of completion.choices) {
       messages.push(message);
+      all_msg.push(
+        message as { role: "user" | "assistant" | "system"; content: string }
+      );
     }
     return new Response(
       JSON.stringify({

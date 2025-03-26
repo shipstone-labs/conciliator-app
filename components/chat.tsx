@@ -4,6 +4,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   type MouseEvent,
   useCallback,
@@ -22,6 +24,12 @@ import {
   CardTitle,
 } from "./ui/card";
 import Link from "next/link";
+
+function parseAnswer(message: { content: string }) {
+  return /^Question #(?<question>\d+): (?<answer>Yes|No|Stop)/i.exec(
+    message.content || ""
+  )?.groups;
+}
 
 export default function ChatUI({
   messages,
@@ -213,16 +221,16 @@ export default function ChatUI({
       <CardContent className="space-y-4">
         {(messageWithIndex || []).map((message, index) => {
           const isSpecial =
-            message?.role === "assistant" &&
-            /^(Yes|No|STOP),\s*(\d+)/i.test(message?.content);
+            message?.role === "assistant" && parseAnswer(message) != null;
           let highlightClass = "";
-          let rating = "";
+          let questionNumber = 0;
           let answer = "";
           if (isSpecial) {
-            const [, extractedAnswer, extractedRating] =
-              /^(Yes|No|STOP),\s*(\d+)/i.exec(message?.content) || [];
+            const { answer: extractedAnswer, question } = parseAnswer(
+              message
+            ) ?? { answer: "", question: 1 };
             highlightClass = getHighlightClass(answer.toUpperCase());
-            rating = extractedRating;
+            questionNumber = Number(question);
             answer = extractedAnswer;
           }
           return (
@@ -252,12 +260,13 @@ export default function ChatUI({
                     </div>
                   )}
                   <div className="p-1 rounded-lg max-w-3xl">
-                    {/STOP/i.test(answer)
-                      ? "Thank you for your chat. My job as conciliator is to ensure that you have enough information to gauge your level of interest in this project, and you have reached that point. We look forward to your bid for this IP."
-                      : answer}
-                  </div>
-                  <div className="text-sm">
-                    <strong>Rating</strong> {rating}/10
+                    <div className="whitespace-pre-wrap break-words markdown-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {answer === "You have reached your question limit."
+                          ? "Thank you for your chat. My job as conciliator is to ensure that you have enough information to gauge your level of interest in this project, and you have reached that point. We look forward to your bid for this IP."
+                          : answer}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -284,7 +293,11 @@ export default function ChatUI({
                         : "bg-gray-50 text-sm italic"
                     }`}
                   >
-                    {message.content}
+                    <div className="whitespace-pre-wrap break-words markdown-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 </div>
               )}
