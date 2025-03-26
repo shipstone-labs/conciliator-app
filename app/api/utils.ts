@@ -8,7 +8,7 @@ export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
 const NAMES = [
   {
     postfix: "_API_KEY",
-    name: "apiKEy",
+    name: "apiKey",
   },
   {
     postfix: "_PROJECT_ID",
@@ -42,17 +42,20 @@ export function getModel(name: string) {
 }
 
 function readConfig(name: string) {
-  return Object.fromEntries(
+  const output = Object.fromEntries(
     (
-      NAMES.map(({ postfix, name }) => {
+      NAMES.map(({ postfix, name: _name }) => {
         const value = process.env[`${name}${postfix}`] || "";
         if (value) {
-          return [name, value] as [string, unknown];
+          console.log(`${name}: ${_name}=${value}`);
+          return [_name, value] as [string, unknown];
         }
         return undefined;
       }).filter(Boolean) as [string, unknown][]
     ).concat([["dangerouslyAllowBrowser", true] as [string, unknown]])
   );
+  console.log(name, output);
+  return output;
 }
 
 const imageConfiguration: ClientOptions = readConfig("IMAGE");
