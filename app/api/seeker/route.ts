@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { completionAI } from "../utils";
+import { completionAI, getModel } from "../utils";
 
 export const runtime = "edge";
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       }
     }
     const completion = await completionAI.chat.completions.create({
-      model: process.env.LILIPAD_COMPLETION_MODEL || "gpt-4o", // Use the appropriate model
+      model: getModel("COMPLETION"), // Use the appropriate model
       messages: [
         {
           role: "system",

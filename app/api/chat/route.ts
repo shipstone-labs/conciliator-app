@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { completionAI, abi } from "../utils";
+import { completionAI, abi, getModel } from "../utils";
 import { call, readContract } from "viem/actions";
 import { filecoinCalibration } from "viem/chains";
 import {
@@ -89,7 +89,7 @@ Rules:
       }) as { role: "user" | "assistant"; content: string }[]),
     ] as { role: "user" | "assistant" | "system"; content: string }[];
     const completion = await completionAI.chat.completions.create({
-      model: process.env.LILIPAD_COMPLETION_MODEL || "gpt-4o", // Use the appropriate model
+      model: getModel("COMPLETION"), // Use the appropriate model
       messages: request,
     });
     const items = [];
