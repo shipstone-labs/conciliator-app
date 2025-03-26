@@ -25,6 +25,7 @@ export default function Home() {
         }),
       });
       if (!response.ok) {
+        console.log(await response.text());
         throw new Error("Failed to retrieve items");
       }
       const data = (await response.json()) as Data[];
