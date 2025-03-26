@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { openai, abi } from "../utils";
+import { completionAI, abi } from "../utils";
 import { call, readContract } from "viem/actions";
 import { filecoinCalibration } from "viem/chains";
 import {
@@ -88,8 +88,8 @@ Rules:
         return result;
       }) as { role: "user" | "assistant"; content: string }[]),
     ] as { role: "user" | "assistant" | "system"; content: string }[];
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Use the appropriate model
+    const completion = await completionAI.chat.completions.create({
+      model: process.env.LILIPAD_COMPLETION_MODEL || "gpt-4o", // Use the appropriate model
       messages: request,
     });
     const items = [];
