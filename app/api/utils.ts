@@ -9,6 +9,7 @@ const NAMES = [
   {
     postfix: "_API_KEY",
     name: "apiKey",
+    default: "junkApi",
   },
   {
     postfix: "_PROJECT_ID",
@@ -44,17 +45,15 @@ export function getModel(name: string) {
 function readConfig(name: string) {
   const output = Object.fromEntries(
     (
-      NAMES.map(({ postfix, name: _name }) => {
-        const value = process.env[`${name}${postfix}`] || "";
+      NAMES.map(({ postfix, name: _name, default: _default }) => {
+        const value = process.env[`${name}${postfix}`] || _default || "";
         if (value) {
-          console.log(`${name}: ${_name}=${value}`);
           return [_name, value] as [string, unknown];
         }
         return undefined;
       }).filter(Boolean) as [string, unknown][]
     ).concat([["dangerouslyAllowBrowser", true] as [string, unknown]])
   );
-  console.log(name, output);
   return output;
 }
 
@@ -63,6 +62,7 @@ export const imageAI = new OpenAI(imageConfiguration);
 
 const completionConfiguration: ClientOptions = readConfig("COMPLETION");
 export const completionAI = new OpenAI(completionConfiguration);
+
 export const indexName = "ip-embeddings";
 
 export const pinata = new PinataSDK({
