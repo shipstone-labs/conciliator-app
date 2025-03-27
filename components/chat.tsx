@@ -209,12 +209,12 @@ export default function ChatUI({
         }
       }, 100);
 
-      let seekerResponse;
+      let seekerResponse: Response;
       try {
         seekerResponse = await fetch("/api/seeker", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages }),
+          body: JSON.stringify({ messages, title: name, description }),
           signal,
         });
 
@@ -222,7 +222,7 @@ export default function ChatUI({
         clearInterval(checkInterval);
       } catch (error) {
         // Handle fetch abort or network errors
-        if (error.name === "AbortError") {
+        if ((error as { name?: string }).name === "AbortError") {
           console.log("🛑 Seeker API fetch aborted by user");
         } else {
           console.log("❌ Seeker API fetch failed:", error);
@@ -361,7 +361,7 @@ export default function ChatUI({
       cycleRunning.current = false;
       setCycleInProgress(false);
     }
-  }, [hasStop, messages, onSend, degraded, isStopping]);
+  }, [hasStop, messages, onSend, degraded, isStopping, name, description]);
 
   // Effect to start the discovery cycle when auto-complete is turned on
   useEffect(() => {

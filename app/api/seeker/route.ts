@@ -55,12 +55,12 @@ export async function POST(req: NextRequest) {
           break;
       }
     }
-    const _content = template({
+    const _data = {
       title,
       description,
-      message: JSON.stringify(previous, null, 2),
-    });
-    console.log(_content);
+      messages: JSON.stringify(previous, null, 2),
+    };
+    const _content = template(_data);
     const completion = await completionAI.chat.completions.create({
       model: getModel("COMPLETION"), // Use the appropriate model
       messages: [
