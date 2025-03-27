@@ -573,7 +573,7 @@ export default function ChatUI({
               <button
                 type="button"
                 onClick={onAutoComplete}
-                disabled={hasStop || cycleInProgress}
+                disabled={hasStop}
                 className={`px-6 py-2 rounded-lg font-medium transition 
       focus:outline-none focus:ring-2 focus:ring-opacity-50 
       ${
