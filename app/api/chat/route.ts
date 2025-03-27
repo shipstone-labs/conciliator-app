@@ -78,7 +78,7 @@ Rules:
 5. You can initially return a welcome message to the Seeker`,
       },
       ...(messages.flatMap(({ question, answer }) => {
-        const result = [];
+        const result: Array<Record<string, unknown>> = [];
         if (question) {
           result.push({ role: "user", content: question });
         }
@@ -92,10 +92,10 @@ Rules:
       model: getModel("COMPLETION"), // Use the appropriate model
       messages: request,
     });
-    const items = [];
+    const items: string[] = [];
     if (hasQuestion) {
       for (const { message } of completion.choices) {
-        items.push(message.content);
+        items.push(message.content || "");
       }
       hasQuestion.answer = items.join("\n");
     }
