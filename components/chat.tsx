@@ -95,10 +95,24 @@ export default function ChatUI({
   );
   const [autoCompleting, setAutoCompleting] = useState(false);
 
-  // Simply toggle auto-complete state
+  // Toggle auto-complete state with proper ref handling
   const onAutoComplete = useCallback(() => {
-    setAutoCompleting((prev) => !prev);
-  }, []);
+    const newState = !autoCompleting;
+    
+    if (newState) {
+      // Starting auto-discovery
+      console.log("🟢 Starting auto-discovery");
+      setAutoCompleting(true);
+      // Note: The useEffect will trigger the first cycle
+    } else {
+      // Stopping auto-discovery
+      console.log("🔴 Stopping auto-discovery");
+      setAutoCompleting(false);
+      // Reset UI state immediately
+      setLoading("none");
+      // cycleRunning ref will be checked in the cycle function
+    }
+  }, [autoCompleting]);
 
   const hasStop = useMemo(
     () =>
@@ -111,181 +125,173 @@ export default function ChatUI({
     [messages]
   );
 
-  // State to track when a request is in progress
-  const [requestInProgress, setRequestInProgress] = useState(false);
-  const [pendingRequest, setPendingRequest] = useState(false);
+  // Simple flag to track if a discovery cycle is running
+  const [cycleInProgress, setCycleInProgress] = useState(false);
 
-  // Main auto-complete function - runs once and manages a single question generation
-  const generateNextQuestion = useCallback(async () => {
-    // Don't start if auto-complete is off or we've reached a stop
+  // This acts as a semaphore to ensure only one discovery cycle runs at a time
+  const cycleRunning = useRef(false);
+  
+  // Main function to run a complete cycle (seeker → conciliator)
+  const runDiscoveryCycle = useCallback(async () => {
+    // Don't start if we're stopped or already running
     if (!autoCompleting || hasStop) {
-      setRequestInProgress(false);
       return;
     }
-
-    // Don't run if there's already a request in progress
-    if (requestInProgress) {
-      setPendingRequest(true);
+    
+    // Double-check our ref that nothing is running
+    if (cycleRunning.current) {
+      console.log("🚫 Already running a cycle, not starting another");
       return;
     }
-
-    // Only start if the last message was from the assistant
-    const lastMessage =
-      messages.length > 0 ? messages[messages.length - 1] : null;
-    const canStartCycle = !lastMessage || lastMessage.role === "assistant";
-
-    if (!canStartCycle) {
-      setRequestInProgress(false);
-      return;
-    }
-
+    
+    // Set flags to show we're running
+    cycleRunning.current = true;
+    setCycleInProgress(true);
+    
     try {
-      setRequestInProgress(true);
-      setPendingRequest(false);
-
-      // First show user skeleton
+      console.log("🔍 Starting seeker");
+      
+      // 1. Show user question skeleton
       setLoading("user");
-      await new Promise((r) => setTimeout(r, 500)); // Show for 500ms
-
-      // Make sure we're still in auto-complete mode
+      await new Promise(r => setTimeout(r, 400));
+      
+      // Check if auto-complete was turned off during the delay
       if (!autoCompleting) {
-        setLoading("none");
-        setRequestInProgress(false);
+        console.log("❌ Auto-complete turned off, aborting");
         return;
       }
-
-      // Call the seeker API
-      const response = await fetch("/api/seeker", {
+      
+      // 2. Call seeker API to generate question
+      console.log("📤 Calling seeker API");
+      const seekerResponse = await fetch("/api/seeker", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages }),
       });
-
-      // Check if we're still active
-      if (!autoCompleting) {
-        setLoading("none");
-        setRequestInProgress(false);
+      
+      // Handle errors
+      if (!seekerResponse.ok || !autoCompleting) {
+        console.log("❌ Seeker API error or auto-complete turned off");
         return;
       }
-
-      if (!response.ok) {
-        console.error("Error from seeker API");
-        setLoading("none");
-        setRequestInProgress(false);
+      
+      const seekerData = await seekerResponse.json();
+      
+      // Validate response
+      if (!seekerData.success || !seekerData.messages?.length || !autoCompleting) {
+        console.log("❌ Invalid seeker response or auto-complete turned off");
         return;
       }
-
-      const data = await response.json();
-
-      // Check if we're still active
-      if (!autoCompleting) {
-        setLoading("none");
-        setRequestInProgress(false);
+      
+      const question = seekerData.messages[seekerData.messages.length - 1]?.content;
+      if (!question || !autoCompleting) {
+        console.log("❌ Empty question or auto-complete turned off");
         return;
       }
-
-      if (!data.success || !data.messages?.length) {
-        console.error("No messages returned from seeker");
-        setLoading("none");
-        setRequestInProgress(false);
-        return;
-      }
-
-      const content = data.messages[data.messages.length - 1]?.content;
-      if (!content) {
-        console.error("Empty content from seeker");
-        setLoading("none");
-        setRequestInProgress(false);
-        return;
-      }
-
-      // Switch to assistant skeleton
+      
+      console.log("✅ Got question from seeker");
+      
+      // 3. Switch to assistant skeleton for conciliator
       setLoading("assistant");
-
-      // Send to conciliator
-      await onSend(content, degraded);
-
-      // Final check if we're still active
-      if (!autoCompleting) {
-        setLoading("none");
-        setRequestInProgress(false);
-        return;
-      }
-
-      // Done - reset loading state
+      
+      // 4. Call conciliator API with the generated question
+      console.log("📤 Calling conciliator API");
+      await onSend(question, degraded);
+      
+      console.log("✅ Got response from conciliator");
+      
+      // 5. Reset loading state
       setLoading("none");
-
-      // Request is complete
-      setRequestInProgress(false);
-
-      // Schedule the next cycle if auto-complete is still on
+      
+      // Only continue auto-discovery if it's still enabled
       if (autoCompleting && !hasStop) {
-        setTimeout(() => {
-          if (autoCompleting && !hasStop) {
-            generateNextQuestion();
+        // Important: We need to schedule the next cycle *after* we've reset all flags
+        // to ensure we don't kick off multiple cycles
+        
+        // Reset flags first
+        cycleRunning.current = false;
+        setCycleInProgress(false);
+        
+        // Use requestAnimationFrame for better timing and to ensure we're out of this
+        // execution context before starting the next cycle
+        console.log("🔄 Scheduling next cycle");
+        requestAnimationFrame(() => {
+          // Double-check that auto-discovery is still wanted
+          if (autoCompleting && !hasStop && !cycleRunning.current) {
+            console.log("🔄 Starting next cycle");
+            runDiscoveryCycle();
           }
-        }, 1000);
+        });
+      } else {
+        // If auto-complete was turned off, just reset the flags
+        cycleRunning.current = false;
+        setCycleInProgress(false);
       }
     } catch (error) {
-      console.error("Error in auto-complete cycle:", error);
+      console.error("Error in discovery cycle:", error);
+    } finally {
+      // Always ensure we reset if there was an unhandled error
       setLoading("none");
-      setRequestInProgress(false);
+      cycleRunning.current = false;
+      setCycleInProgress(false);
     }
-  }, [autoCompleting, hasStop, messages, onSend, degraded, requestInProgress]);
-
-  // Effect to initiate auto-complete when turned on or status changes
+  }, [autoCompleting, hasStop, messages, onSend, degraded]);
+  
+  // Effect to start the discovery cycle when auto-complete is turned on
   useEffect(() => {
-    if (autoCompleting && !requestInProgress && !hasStop) {
-      generateNextQuestion();
+    if (autoCompleting && !hasStop && !cycleRunning.current) {
+      runDiscoveryCycle();
     }
-  }, [autoCompleting, requestInProgress, hasStop, generateNextQuestion]);
-
-  // Effect to process pending requests when the current one finishes
-  useEffect(() => {
-    if (pendingRequest && !requestInProgress && autoCompleting && !hasStop) {
-      setPendingRequest(false);
-      generateNextQuestion();
-    }
-  }, [
-    pendingRequest,
-    requestInProgress,
-    autoCompleting,
-    hasStop,
-    generateNextQuestion,
-  ]);
+  }, [autoCompleting, hasStop, runDiscoveryCycle]);
 
   // Handle user sending a message
   const handleSend = useCallback(async () => {
-    if (!input.trim() || requestInProgress) return;
+    if (!input.trim() || cycleRunning.current) return;
 
     try {
-      setRequestInProgress(true);
+      // Don't allow manual messages during auto-discovery
+      if (autoCompleting) {
+        console.log("Cannot send message while auto-discovery is in progress");
+        return;
+      }
+      
+      // Set flags to prevent other operations
+      cycleRunning.current = true;
+      setCycleInProgress(true);
+      
+      // Show user's message being sent
       setLoading("user");
-
-      // Show user skeleton briefly
       await new Promise((r) => setTimeout(r, 300));
 
-      // Switch to assistant skeleton
+      // Show conciliator thinking
       setLoading("assistant");
 
       // Send to conciliator
       await onSend(input, degraded);
       setInput("");
     } finally {
-      setTimeout(() => {
-        setLoading("none");
-        setRequestInProgress(false);
-      }, 500);
+      // Reset all flags
+      setLoading("none");
+      cycleRunning.current = false;
+      setCycleInProgress(false);
     }
-  }, [input, onSend, degraded, requestInProgress]);
+  }, [input, onSend, degraded, autoCompleting]);
 
   // Handle saving chat snapshot
   const handleSave = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
-      if (!onSave || messages.length === 0 || requestInProgress) return;
+      if (!onSave || messages.length === 0 || cycleRunning.current) return;
+
+      // Don't allow saving during auto-discovery
+      if (autoCompleting) {
+        console.log("Cannot save while auto-discovery is in progress");
+        return;
+      }
 
       try {
-        setRequestInProgress(true);
+        // Set flag to prevent other operations
+        cycleRunning.current = true;
+        setCycleInProgress(true);
         setLoading("assistant");
 
         const result = await onSave(event);
@@ -310,13 +316,13 @@ export default function ChatUI({
           },
         ]);
       } finally {
-        setTimeout(() => {
-          setLoading("none");
-          setRequestInProgress(false);
-        }, 500);
+        // Reset all flags
+        setLoading("none");
+        cycleRunning.current = false;
+        setCycleInProgress(false);
       }
     },
-    [downloads, messages.length, onSave, requestInProgress]
+    [downloads, messages.length, onSave, autoCompleting]
   );
   const getHighlightClass = (answer: string) => {
     switch (answer.toUpperCase()) {
@@ -495,15 +501,15 @@ export default function ChatUI({
                 <button
                   type="button"
                   onClick={handleSend}
-                  disabled={requestInProgress || hasStop || input === ""} // Disable condition
+                  disabled={cycleInProgress || hasStop || input === "" || autoCompleting} // Disable condition
                   className={`absolute bottom-3 right-3 flex items-center justify-center w-12 h-12 rounded-full border transition ${
-                    requestInProgress || hasStop
+                    cycleInProgress || hasStop
                       ? "bg-gray-100 border-gray-300 cursor-not-allowed"
                       : "bg-white border-blue-500 hover:bg-blue-50"
                   }`}
                   aria-label="Send"
                 >
-                  {requestInProgress ? (
+                  {cycleInProgress ? (
                     // Loading indicator (black square)
                     <div className="w-6 h-6 bg-black" />
                   ) : (
@@ -514,7 +520,7 @@ export default function ChatUI({
                       className="h-5 w-5 transition"
                       fill="none"
                       stroke={
-                        loading !== "none" || hasStop || input === ""
+                        cycleInProgress || hasStop || input === ""
                           ? "#A0AEC0"
                           : "#3B82F6"
                       } // Gray when disabled, blue otherwise
@@ -544,6 +550,11 @@ export default function ChatUI({
                   }}
                 />
                 <Label htmlFor="degraded">Run in degraded mode</Label>
+                
+                {/* API state indicator for debugging */}
+                <span className="ml-4 text-xs text-gray-500">
+                  {cycleInProgress ? "Processing" : "Ready"}
+                </span>
               </div>
             </div>
             <div className="mt-4 flex space-x-2">
@@ -562,7 +573,7 @@ export default function ChatUI({
               <button
                 type="button"
                 onClick={onAutoComplete}
-                disabled={hasStop || (requestInProgress && !autoCompleting)}
+                disabled={hasStop || cycleInProgress}
                 className={`px-6 py-2 rounded-lg font-medium transition 
       focus:outline-none focus:ring-2 focus:ring-opacity-50 
       ${
@@ -578,7 +589,7 @@ export default function ChatUI({
                 <button
                   type="button"
                   onClick={handleSave}
-                  disabled={requestInProgress || messages.length < 2}
+                  disabled={cycleInProgress || messages.length < 2 || autoCompleting}
                   className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
       focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
       hover:bg-gray-300 
