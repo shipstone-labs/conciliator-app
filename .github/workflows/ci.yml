@@ -10,10 +10,6 @@ on:
       - 'main'
       - 'lilypad'
 
-env:
-  CF_PROJECT_NAME: conciliator-app
-  CF_BASE_URL: conciliator-app
-
 jobs:
   deploy:
     runs-on: ubuntu-latest

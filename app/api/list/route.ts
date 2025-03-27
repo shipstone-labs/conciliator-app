@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       chain: filecoinCalibration,
       transport: http(),
     });
-    const tokens = [];
+    const tokens: Array<Record<string, unknown>> = [];
     while (true) {
       try {
         console.log("getting", tokenId);
