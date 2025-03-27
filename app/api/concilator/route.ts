@@ -10,9 +10,12 @@ import {
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import Handlebars from "handlebars";
+import templateText from "./system.hbs?raw";
 
 export const runtime = "edge";
 
+const template = Handlebars.compile(templateText);
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
@@ -114,32 +117,16 @@ ${index.description}`,
       );
     }
 
+    const _content = template({
+      name: index.name,
+      description: index.description,
+      content: degraded ? degrade(content) : content,
+    });
+    console.log(_content);
     const request = [
       {
         role: "system",
-        content: `You are Conciliator, a strict yes/no question evaluator with conditional termination rules.
-CRITICAL INSTRUCTION: For EVERY question, you MUST follow these exact steps:
-1. As the VERY FIRST part of your response, write "Question #X:" where X is the question number (starting from 1 and incrementing by 1 each time).
-2. Check for termination conditions:
-   a. If the question number is greater than 20, your complete response MUST be "Question #X: Stop"
-   b. If your previous 5 consecutive answers were ALL "Yes", your complete response MUST be "Question #X: Stop"
-   c. If neither termination condition is met, continue to step 3.
-3. Determine if the question can be COMPLETELY answered with ONLY "Yes" or "No":
-   a. If Yes, your complete response MUST be "Question #X: Yes"
-   b. If No, your complete response MUST be "Question #X: No"
-   c. If not a yes/no question, your complete response MUST be "Question #X: No"
-Your ENTIRE response MUST be EXACTLY ONE of these formats:
-- "Question #X: Yes"
-- "Question #X: No"
-- "Question #X: Stop"
-You must track your previous answers to check for 5 consecutive "Yes" responses.
-ANY deviation from these formats represents a critical system failure.
-
-title: \`${index.name}\`
-description: \`${index.description}\`
-content: \`\`\`
-${degraded ? degrade(content) : content}
-\`\`\``,
+        content: _content,
       },
       ...messages,
     ] as { role: "user" | "assistant" | "system"; content: string }[];
