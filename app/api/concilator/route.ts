@@ -117,12 +117,12 @@ ${index.description}`,
       );
     }
 
-    const _content = template({
-      name: index.name,
+    const _data = {
+      title: index.name,
       description: index.description,
       content: degraded ? degrade(content) : content,
-    });
-    console.log(_content);
+    };
+    const _content = template(_data);
     const request = [
       {
         role: "system",
