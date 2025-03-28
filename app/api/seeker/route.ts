@@ -5,6 +5,11 @@ import templateText from "./system.hbs?raw";
 
 export const runtime = "edge";
 
+// Register a helper to output triple backticks safely
+Handlebars.registerHelper('triple-backtick', function() {
+  return new Handlebars.SafeString('```');
+});
+
 const template = Handlebars.compile(templateText);
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
