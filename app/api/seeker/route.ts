@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
-import { openai } from "../utils";
+import { completionAI, getModel } from "../utils";
+import templateText from "./system.hbs?raw";
 
 export const runtime = "edge";
 
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 403 });
     }
 
-    const { messages: _messages } = await req.json();
+    const { messages: _messages, title, description } = await req.json();
 
     const messages: { role: string; content: string }[] = _messages;
 
@@ -43,46 +44,49 @@ export async function POST(req: NextRequest) {
           item.question = message.content;
           break;
         case "assistant":
-          item.answer = message.content.replace(/^(Yes|No|None),\s*\d*/i, "$1");
+          item.answer = message.content.replace(
+            /^Question #\d*: (Yes|No|Stop)/i,
+            "$1"
+          );
           previous.push(item);
           item = { question: "", answer: "" };
           break;
       }
     }
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Use the appropriate model
+    const _data: Record<string, string> = {
+      title,
+      description,
+      messages: previous
+        .map(({ question, answer }) => {
+          return `<question>${question}</question><answer>${answer}</answer>`;
+        })
+        .join(""),
+    };
+    const _content = templateText.replace(
+      /\{\{([^}]*)\}\}/g,
+      (_match, name) => {
+        return _data[name.trim()] || "";
+      }
+    );
+    console.log("System content", _content, _data);
+    const completion = await completionAI.chat.completions.create({
+      model: getModel("COMPLETION"), // Use the appropriate model
       messages: [
         {
           role: "system",
-          content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
-  Context:
-  - The Matcher requires yes/no questions to control information flow
-  - Your goal is to understand the innovation's value and applicability
-  - Craft questions strategically to build understanding within the yes/no format
-  - When you receive the Y/N answer, ask the next one. Every three questions, use the answers to make a detailed guess what the IP could be.
-
-  Previous exchanges: \`${JSON.stringify(previous)}\`,
-
-  
-`,
+          content: _content,
         },
       ],
     });
     const choices = completion.choices as {
       message: { role: string; content: string };
     }[];
-    const [_question, ...rest] =
-      choices[0].message.content
-        .split("\n")
-        .map((item) => item.replace(/^-\s*/, "")) || [];
-    while (rest.length) {
-      if (rest[0].trim() === "") {
-        rest.shift();
-      } else {
-        break;
-      }
-    }
-    if (!_question) {
+    const content = choices
+      .flatMap(({ message: { content = "" } = { content: "" } }) =>
+        content.split("\n")
+      )
+      .join("\n");
+    if (!content) {
       return new Response(
         JSON.stringify({ success: false, error: "No question generated" }),
         {
@@ -91,7 +95,7 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    messages.push({ ...choices[0].message, content: _question, role: "user" });
+    messages.push({ content, role: "user" });
     return new Response(JSON.stringify({ success: true, messages }), {
       headers: { "Content-Type": "application/json" },
     });

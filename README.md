@@ -39,3 +39,5 @@ pnpm dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 This is currently being deployed on cloudflare and should work in fleek.
+
+Force re-deploy 4

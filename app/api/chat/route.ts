@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { openai, abi } from "../utils";
+import { completionAI, abi, getModel } from "../utils";
 import { call, readContract } from "viem/actions";
 import { filecoinCalibration } from "viem/chains";
 import {
@@ -78,7 +78,7 @@ Rules:
 5. You can initially return a welcome message to the Seeker`,
       },
       ...(messages.flatMap(({ question, answer }) => {
-        const result = [];
+        const result: Array<Record<string, unknown>> = [];
         if (question) {
           result.push({ role: "user", content: question });
         }
@@ -88,14 +88,14 @@ Rules:
         return result;
       }) as { role: "user" | "assistant"; content: string }[]),
     ] as { role: "user" | "assistant" | "system"; content: string }[];
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Use the appropriate model
+    const completion = await completionAI.chat.completions.create({
+      model: getModel("COMPLETION"), // Use the appropriate model
       messages: request,
     });
-    const items = [];
+    const items: string[] = [];
     if (hasQuestion) {
       for (const { message } of completion.choices) {
-        items.push(message.content);
+        items.push(message.content || "");
       }
       hasQuestion.answer = items.join("\n");
     }
