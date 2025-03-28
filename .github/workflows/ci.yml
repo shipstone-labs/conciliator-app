@@ -66,7 +66,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          pnpm dlx wrangler pages deploy --project-name "${{ steps.extract_branch.outputs.project }}" --branch ""
+          pnpm dlx wrangler pages deploy --project-name "${{ steps.extract_branch.outputs.project }}" --branch main
 
       - name: Deploy ${{ steps.extract_branch.outputs.branch_name }} (PR)
         if: ${{ steps.extract_branch.outputs.branch_name != '' }}
