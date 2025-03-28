@@ -53,10 +53,14 @@ export async function POST(req: NextRequest) {
           break;
       }
     }
-    const _data = {
+    const _data: Record<string, string> = {
       title,
       description,
-      messages: JSON.stringify(previous, null, 2),
+      messages: previous
+        .map(({ question, answer }) => {
+          return `<question>${question}</question><answer>${answer}</answer>`;
+        })
+        .join(""),
     };
     const _content = templateText.replace(
       /\{\{([^}]*)\}\}/g,
