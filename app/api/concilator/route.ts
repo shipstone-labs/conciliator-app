@@ -10,12 +10,10 @@ import {
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import Handlebars from "handlebars";
 import templateText from "./system.hbs?raw";
 
 export const runtime = "edge";
 
-const template = Handlebars.compile(templateText);
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
@@ -122,7 +120,13 @@ ${index.description}`,
       description: index.description,
       content: degraded ? degrade(content) : content,
     };
-    const _content = template(_data);
+    const _content = templateText.replace(
+      /\{\{([^}]*)\}\}/g,
+      (_match, name) => {
+        return _data[name.trim()] || "";
+      }
+    );
+    console.log("System content", _content, _data);
     const request = [
       {
         role: "system",

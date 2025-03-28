@@ -1,16 +1,9 @@
 import type { NextRequest } from "next/server";
 import { completionAI, getModel } from "../utils";
-import Handlebars from "handlebars";
 import templateText from "./system.hbs?raw";
 
 export const runtime = "edge";
 
-// Register a helper to output triple backticks safely
-Handlebars.registerHelper('triple-backtick', function() {
-  return new Handlebars.SafeString('```');
-});
-
-const template = Handlebars.compile(templateText);
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
@@ -65,7 +58,13 @@ export async function POST(req: NextRequest) {
       description,
       messages: JSON.stringify(previous, null, 2),
     };
-    const _content = template(_data);
+    const _content = templateText.replace(
+      /\{\{([^}]*)\}\}/g,
+      (_match, name) => {
+        return _data[name.trim()] || "";
+      }
+    );
+    console.log("System content", _content, _data);
     const completion = await completionAI.chat.completions.create({
       model: getModel("COMPLETION"), // Use the appropriate model
       messages: [
