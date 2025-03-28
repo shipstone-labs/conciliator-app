@@ -115,7 +115,7 @@ ${index.description}`,
       );
     }
 
-    const _data = {
+    const _data: Record<string, string> = {
       title: index.name,
       description: index.description,
       content: degraded ? degrade(content) : content,
@@ -126,7 +126,6 @@ ${index.description}`,
         return _data[name.trim()] || "";
       }
     );
-    console.log("System content", _content, _data);
     const request = [
       {
         role: "system",
