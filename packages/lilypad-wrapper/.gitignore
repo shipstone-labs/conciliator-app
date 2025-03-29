@@ -1,2 +1,6 @@
+# Build output
 /dist
+go/mymodule.wasm
+
+# Node modules
 node_modules
