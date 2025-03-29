@@ -7,7 +7,7 @@
     "dev": "next dev",
     "prebuild": "pnpm run build-wrappers",
     "build": "next build",
-    "build-wrappers": "pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
+    "build-wrappers": "pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build && pnpm --filter lilypad-wrapper build",
     "start": "next start",
     "lint": "next lint",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1"
@@ -19,6 +19,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lilypad-wrapper": "workspace:*",
     "lit-wrapper": "workspace:*",
     "lucide-react": "^0.475.0",
     "next": "15.1.7",

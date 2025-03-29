@@ -30,6 +30,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      lilypad-wrapper:
+        specifier: workspace:*
+        version: link:packages/lilypad-wrapper
       lit-wrapper:
         specifier: workspace:*
         version: link:packages/lit-wrapper
@@ -157,6 +160,8 @@ importers:
       util:
         specifier: ^0.12.5
         version: 0.12.5
+
+  packages/lilypad-wrapper: {}
 
   packages/lit-wrapper:
     dependencies:

@@ -1,0 +1,15 @@
+{
+  "name": "lilypad-wrapper",
+  "version": "1.0.0",
+  "description": "Isolated wrapper for Lilypad client",
+  "main": "dist/index.js",
+  "browser": "browser.js",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}

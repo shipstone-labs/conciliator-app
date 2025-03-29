@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
           __dirname,
           "./packages/web-storage-wrapper"
         ),
+        "lilypad-wrapper": path.resolve(
+          __dirname,
+          "./packages/lilypad-wrapper"
+        ),
       };
 
       // Add process/Buffer polyfills
@@ -63,6 +67,9 @@ const nextConfig: NextConfig = {
     // Web3 Storage
     "web-storage-wrapper",
     "@web3-storage/w3up-client",
+    
+    // Lilypad
+    "lilypad-wrapper",
   ],
 };
 
