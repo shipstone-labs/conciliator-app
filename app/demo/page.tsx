@@ -46,7 +46,7 @@ export default function DemoPage() {
         try {
           // Try initializing the client
           const w3Client = await w3Module.createW3Client();
-          await w3Client.connect();
+          // await w3Client.login("andy@richtera.org");
           setW3Status("Client created successfully");
         } catch (initError) {
           console.error("Error initializing Web3 Storage client:", initError);
