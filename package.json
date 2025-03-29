@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "pnpm run build-wrappers",
     "dev": "next dev",
+    "prebuild": "pnpm run build-wrappers",
     "build": "next build",
+    "build-wrappers": "pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
     "start": "next start",
     "lint": "next lint",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1"
@@ -14,9 +17,9 @@
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
-    "@web3-storage/w3up-client": "^17.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lit-wrapper": "workspace:*",
     "lucide-react": "^0.475.0",
     "next": "15.1.7",
     "openai": "^4.85.0",
@@ -27,13 +30,15 @@
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.0.1",
     "uuid": "^11.0.5",
-    "viem": "^2.23.2"
+    "viem": "^2.23.2",
+    "web-storage-wrapper": "workspace:*"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.25.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "postcss": "^8",
