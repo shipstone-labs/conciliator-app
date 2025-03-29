@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Isolated wrapper for Lit Protocol",
   "main": "dist/index.js",
+  "browser": "browser.js",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/index.js --bundle --platform=node --format=esm --outfile=dist/index.js --external:node:* --external:fs --external:path --external:@lit-protocol/contracts --external:@lit-protocol/accs-schemas --external:browser-headers --external:@lit-protocol/crypto --external:js-sha256 --external:blakejs"
+    "build": "node build.js"
   },
   "keywords": [],
   "author": "",

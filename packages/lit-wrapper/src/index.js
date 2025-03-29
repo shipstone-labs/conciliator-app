@@ -1,8 +1,11 @@
 // Import directly from internal node_modules
 // These imports will be bundled by esbuild
-import "@lit-protocol/lit-node-client";
 import { LIT_NETWORK } from "@lit-protocol/constants";
-import { LitNodeClientNodeJs } from "@lit-protocol/lit-node-client";
+import {
+  LitNodeClientNodeJs,
+  decryptString,
+  encryptString,
+} from "@lit-protocol/lit-node-client";
 
 // Create a simplified API that's more manageable
 export const LitNetworks = {

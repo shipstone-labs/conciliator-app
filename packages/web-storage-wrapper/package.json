@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Isolated wrapper for Web3 Storage client",
   "main": "dist/index.js",
+  "browser": "browser.js",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/index.js --bundle --platform=node --format=esm --outfile=dist/index.js --external:node:* --external:fs --external:path --external:crypto"
+    "build": "node build.js"
   },
   "keywords": [],
   "author": "",

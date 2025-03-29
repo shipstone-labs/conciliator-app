@@ -1,33 +1,69 @@
-export default async function DemoPage() {
-  const { createLitClient, LitNetworks } = await import("lit-wrapper");
-  const { createW3Client } = await import("web-storage-wrapper");
-  // Example of using both wrapper modules together
-  let litStatus = "Not initialized";
-  let w3Status = "Not initialized";
+"use client";
 
-  try {
-    // Initialize Lit client
-    const litClient = await createLitClient({
-      litNetwork: LitNetworks.Datil,
-    });
-    litClient.connect();
-    litStatus = "Connected successfully";
-    console.log("Lit client initialized successfully");
-  } catch (error) {
-    litStatus = "Connection failed";
-    console.error("Failed to initialize Lit client:", error);
-  }
+import { useState, useEffect } from "react";
 
-  try {
-    // Initialize Web3.Storage client
-    const w3Client = await createW3Client();
-    w3Status = "Created successfully";
-    w3Client.login("andy@richtera.org");
-    console.log("Web3.Storage client created successfully");
-  } catch (error) {
-    w3Status = "Creation failed";
-    console.error("Failed to create Web3.Storage client:", error);
-  }
+export default function DemoPage() {
+  const [litStatus, setLitStatus] = useState("Not initialized");
+  const [w3Status, setW3Status] = useState("Not initialized");
+
+  useEffect(() => {
+    // Import and initialize modules on the client side
+    async function initModules() {
+      try {
+        console.log("Importing lit-wrapper...");
+        const litModule = await import("lit-wrapper");
+        console.log("Lit wrapper imported successfully");
+        setLitStatus("Import successful");
+
+        try {
+          // Try initializing the client
+          const litClient = await litModule.createLitClient({
+            litNetwork: litModule.LitNetworks.Datil,
+          });
+          await litClient.connect();
+          setLitStatus("Client created successfully");
+        } catch (initError) {
+          console.error("Error initializing Lit client:", initError);
+          setLitStatus(
+            `Client initialization failed: ${
+              (initError as { message: string }).message
+            }`
+          );
+        }
+      } catch (error) {
+        console.error("Failed to import Lit module:", error);
+        setLitStatus(
+          `Import failed: ${(error as { message: string }).message}`
+        );
+      }
+
+      try {
+        console.log("Importing web-storage-wrapper...");
+        const w3Module = await import("web-storage-wrapper");
+        console.log("Web3 Storage wrapper imported successfully");
+        setW3Status("Import successful");
+
+        try {
+          // Try initializing the client
+          const w3Client = await w3Module.createW3Client();
+          await w3Client.connect();
+          setW3Status("Client created successfully");
+        } catch (initError) {
+          console.error("Error initializing Web3 Storage client:", initError);
+          setW3Status(
+            `Client initialization failed: ${
+              (initError as { message: string }).message
+            }`
+          );
+        }
+      } catch (error) {
+        console.error("Failed to import Web3.Storage module:", error);
+        setW3Status(`Import failed: ${(error as { message: string }).message}`);
+      }
+    }
+
+    initModules();
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
