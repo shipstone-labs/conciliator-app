@@ -1,47 +1,56 @@
-import fs from 'fs';
-import { execSync } from 'child_process';
-import path from 'path';
+import fs from "fs";
+import { execSync } from "child_process";
+import path from "path";
 
 // Make sure the dist directory exists
-if (!fs.existsSync('./dist')) {
-  fs.mkdirSync('./dist');
+if (!fs.existsSync("./dist")) {
+  fs.mkdirSync("./dist");
 }
 
 // Step 1: Compile Go code to WASM using TinyGo
-console.log('🔨 Compiling Go to WebAssembly...');
+console.log("🔨 Compiling Go to WebAssembly...");
 try {
   // Check if TinyGo is installed
   try {
-    execSync('which tinygo', { stdio: 'ignore' });
+    execSync("which tinygo", { stdio: "ignore" });
     // If we get here, TinyGo is installed
-    execSync('tinygo build -o go/mymodule.wasm -target wasm go/mymodule.go', { stdio: 'inherit' });
-    console.log('✅ WASM compilation successful');
+    execSync("tinygo build -o go/mymodule.wasm -target wasm go/mymodule.go", {
+      stdio: "inherit",
+    });
+    console.log("✅ WASM compilation successful");
   } catch (tinyGoError) {
-    console.warn('⚠️ TinyGo not found in PATH. Using placeholder WASM if available or skipping compilation.');
-    
+    console.warn(
+      "⚠️ TinyGo not found in PATH. Using placeholder WASM if available or skipping compilation."
+    );
+
     // Check if WASM file already exists (we'll keep it if it does)
-    if (!fs.existsSync('./go/mymodule.wasm')) {
-      console.warn('⚠️ No existing WASM file found. Creating empty placeholder WASM.');
+    if (!fs.existsSync("./go/mymodule.wasm")) {
+      console.warn(
+        "⚠️ No existing WASM file found. Creating empty placeholder WASM."
+      );
       // Create a minimal placeholder WASM - this won't actually work, but allows development to continue
-      fs.writeFileSync('./go/mymodule.wasm', Buffer.from('AGFzbQEAAAA=', 'base64')); // Minimal empty WASM module
+      fs.writeFileSync(
+        "./go/mymodule.wasm",
+        Buffer.from("AGFzbQEAAAA=", "base64")
+      ); // Minimal empty WASM module
     } else {
-      console.log('✅ Using existing WASM file');
+      console.log("✅ Using existing WASM file");
     }
   }
 } catch (error) {
-  console.error('❌ Error during WASM preparation:', error.message);
+  console.error("❌ Error during WASM preparation:", error.message);
   process.exit(1);
 }
 
 // Step 2: Encode WASM to base64 and generate JavaScript wrapper
-console.log('📦 Embedding WASM in JavaScript...');
+console.log("📦 Embedding WASM in JavaScript...");
 try {
   // Read the WASM file
-  const wasmFile = fs.readFileSync('./go/mymodule.wasm');
-  
+  const wasmFile = fs.readFileSync("./go/mymodule.wasm");
+
   // Convert to Base64
-  const base64Wasm = Buffer.from(wasmFile).toString('base64');
-  
+  const base64Wasm = Buffer.from(wasmFile).toString("base64");
+
   // Create JavaScript module that embeds the WASM
   const wasmEmbeddedContent = `// Auto-generated file containing embedded WASM
 // DO NOT EDIT DIRECTLY
@@ -125,11 +134,11 @@ export async function processData(input) {
     } else {
       // Return a fallback response if we're using a placeholder WASM
       console.warn('WASM processData function not available - using fallback implementation');
-      return `[Fallback] Processed: ${input}`;
+      return '[Fallback] Processed: wasm';
     }
   } catch (error) {
     console.error('Error calling WASM processData:', error);
-    return `[Error] Failed to process: ${input}`;
+    return '[Error] Failed to process: wasm';
   }
 }
 
@@ -139,10 +148,10 @@ export default {
 };`;
 
   // Save the WASM embedded wrapper
-  fs.writeFileSync('./dist/wasm_embedded.js', wasmEmbeddedContent);
-  console.log('✅ WASM successfully embedded');
+  fs.writeFileSync("./dist/wasm_embedded.js", wasmEmbeddedContent);
+  console.log("✅ WASM successfully embedded");
 } catch (error) {
-  console.error('❌ Failed to embed WASM:', error.message);
+  console.error("❌ Failed to embed WASM:", error.message);
   process.exit(1);
 }
 
@@ -212,7 +221,7 @@ export { getWasmInstance };
 export default { getLilypadClient };`;
 
 // Write the index file
-fs.writeFileSync('./dist/index.js', indexContent);
+fs.writeFileSync("./dist/index.js", indexContent);
 
 // Create TypeScript definition file
 const dtsContent = `// Type definitions for lilypad-wrapper
@@ -251,6 +260,6 @@ declare const _default: {
 export default _default;`;
 
 // Write the TypeScript definition file
-fs.writeFileSync('./dist/index.d.ts', dtsContent);
+fs.writeFileSync("./dist/index.d.ts", dtsContent);
 
-console.log('📦 Lilypad wrapper built successfully!');
+console.log("📦 Lilypad wrapper built successfully!");
