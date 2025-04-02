@@ -3,8 +3,49 @@
     "GOOS": "js",
     "GOARCH": "wasm"
   },
-  "go.formatTool": "gofmt",
+  "go.inferGopath": false,
+  "go.useLanguageServer": true,
+  "go.languageServerFlags": ["-rpc.trace"],
+  "go.buildFlags": ["-tags=js wasm"],
+  "go.delveConfig": {
+    "dlvLoadConfig": {
+      "followPointers": false,
+      "maxVariableRecurse": 1,
+      "maxStringLen": 120,
+      "maxArrayValues": 25,
+      "maxStructFields": 5
+    }
+  },
+  "go.toolsManagement.autoUpdate": false,
+  "go.diagnostic.enableAny": false,
+  "go.lintOnSave": "off",
+  "go.vetOnSave": "off",
+  "go.modReferences": false,
+  "go.survey.prompt": false,
   "[go]": {
     "editor.defaultFormatter": "golang.go"
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/vendor/**": true,
+    "**/hardhat/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/go/pkg/**": true,
+    "**/*.wasm": true,
+    "**/*.js": true,
+    "**/*.ts": true,
+    "**/*.tsx": true,
+    "assets/**": true,
+    "backup/**": true,
+    "bin/**": true,
+    "cache/**": true,
+    "images/**": true,
+    "logs/**": true,
+    "system/**": true,
+    "tmp/**": true,
+    "webserver-configs/**": true
   }
 }
