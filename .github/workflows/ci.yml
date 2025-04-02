@@ -43,6 +43,16 @@ jobs:
 
       - uses: actions/checkout@v3
 
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Set up TinyGo
+        uses: acifani/setup-tinygo@v2
+        with:
+          tinygo-version: '0.28.1'  # Specify the TinyGo version you need
+      
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:

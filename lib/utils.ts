@@ -1,9 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import * as Client from "@web3-storage/w3up-client";
-import { StoreMemory } from "@web3-storage/w3up-client/stores/memory";
-import * as Proof from "@web3-storage/w3up-client/proof";
-import { Signer } from "@web3-storage/w3up-client/principal/ed25519";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -60,17 +56,4 @@ export async function makeOpenAIRequest(
     }
     throw err;
   }
-}
-
-export async function getStorachaClient() {
-  // Load client with specific private key
-  const principal = Signer.parse(process.env.STORACHA_KEY || "");
-  const store = new StoreMemory();
-  const client = await Client.create({ principal, store });
-  // Add proof that this agent has been delegated capabilities on the space
-  const proof = await Proof.parse(process.env.STORACHA_PROOF || "");
-  const space = await client.addSpace(proof);
-  await client.setCurrentSpace(space.did());
-  // READY to go!
-  return client;
 }
