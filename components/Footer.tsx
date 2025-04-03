@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Modal } from "@/components/ui/modal";
-import { ModalTest } from "@/components/ModalTest";
 
 export function Footer() {
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -36,9 +35,6 @@ export function Footer() {
               >
                 info@safeidea.ai
               </a>
-              <div className="ml-4">
-                <ModalTest />
-              </div>
             </div>
           </div>
         </div>
