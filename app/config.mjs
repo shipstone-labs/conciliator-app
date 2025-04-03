@@ -1,7 +1,7 @@
 export const appConfig = {
-  appName: "Concilliator",
+  appName: "Conciliator",
   description: "IP Value Discovery through structured dialogue",
-  themeColor: "#FFFFFF",
+  themeColor: "#1A1B25",
   icons: [
     {
       rel: "apple-touch-icon-precomposed",
