@@ -102,7 +102,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
                   /ipfs:\/\//,
                   "/api/download/"
                 )}?img-width=${imageWidth}&img-dpr=${
-                  window.devicePixelRatio || 1
+                  typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
                 }`}
                 alt={item.name}
                 width={200}
