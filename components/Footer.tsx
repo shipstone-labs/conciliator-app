@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { Modal } from "@/components/ui/modal";
 
 export function Footer() {
@@ -60,24 +59,24 @@ export function Footer() {
 
           <h3 className="text-lg font-medium">2. Use License</h3>
           <p>
-            Permission is granted to temporarily access the materials on SafeIdea's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+            Permission is granted to temporarily access the materials on SafeIdea&apos;s website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>Modify or copy the materials</li>
             <li>Use the materials for any commercial purpose or for any public display</li>
-            <li>Attempt to decompile or reverse engineer any software contained on SafeIdea's website</li>
+            <li>Attempt to decompile or reverse engineer any software contained on SafeIdea&apos;s website</li>
             <li>Remove any copyright or other proprietary notations from the materials</li>
-            <li>Transfer the materials to another person or "mirror" the materials on any other server</li>
+            <li>Transfer the materials to another person or &quot;mirror&quot; the materials on any other server</li>
           </ul>
 
           <h3 className="text-lg font-medium">3. Disclaimer</h3>
           <p>
-            The materials on SafeIdea's website are provided on an 'as is' basis. SafeIdea makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+            The materials on SafeIdea&apos;s website are provided on an &apos;as is&apos; basis. SafeIdea makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
           </p>
 
           <h3 className="text-lg font-medium">4. Limitations</h3>
           <p>
-            In no event shall SafeIdea or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on SafeIdea's website, even if SafeIdea or a SafeIdea authorized representative has been notified orally or in writing of the possibility of such damage.
+            In no event shall SafeIdea or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on SafeIdea&apos;s website, even if SafeIdea or a SafeIdea authorized representative has been notified orally or in writing of the possibility of such damage.
           </p>
         </div>
       </Modal>
