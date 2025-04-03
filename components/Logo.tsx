@@ -17,7 +17,7 @@ export const Logo = () => (
     {/* Text Container */}
     <div className="text-center mt-4">
       <h1 className="text-4xl font-bold text-blue-500">Conciliator Project</h1>
-      <p className="mt-1 text-sm text-blue-500">Valuing Agreement</p>
+      <p className="mt-1 text-sm text-blue-500">A Part of SafeIdea</p>
     </div>
   </div>
 );
