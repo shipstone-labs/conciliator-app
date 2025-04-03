@@ -27,9 +27,9 @@ export default function RootLayout({
 }) {
   return (
     <TooltipProvider>
-      <html lang="en">
+      <html lang="en" className="dark">
         <body className={inter.className}>
-          <main className="min-h-screen bg-background">{children}</main>
+          <main className="min-h-screen bg-gradient-to-b from-[#2B5B75] to-background">{children}</main>
         </body>
       </html>
     </TooltipProvider>

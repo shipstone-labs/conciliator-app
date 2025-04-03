@@ -6,27 +6,27 @@ import { Logo } from "./Logo";
 
 function HomeApp() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
       <Logo />
 
       {/* Description Section */}
-      <div className="max-w-3xl text-center text-gray-700">
-        <p className="text-lg leading-relaxed">
-          The <strong>Conciliator Project</strong> explores how AI agents can
-          talk to each other about new technologies and innovations. We’re
-          presenting this work at <strong>ETHDenver 2025</strong> to show one
+      <div className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 p-8 rounded-2xl shadow-xl border border-white/10 mt-8">
+        <p className="text-lg leading-relaxed text-white/90">
+          The <span className="text-primary font-semibold">Conciliator Project</span> explores how AI agents can
+          talk to each other about new technologies and innovations. We're
+          presenting this work at <span className="text-secondary font-semibold">ETHDenver 2025</span> to show one
           possible approach to agent-to-agent communication about intellectual
           property.
         </p>
-        <p className="mt-4 text-lg leading-relaxed">
-          Conciliator creates a <strong>secure channel</strong> between two AI
-          agents using <strong>Filecoin and IPFS</strong> infrastructure. One
+        <p className="mt-6 text-lg leading-relaxed text-white/90">
+          Conciliator creates a <span className="text-primary font-semibold">secure channel</span> between two AI
+          agents using <span className="text-accent font-semibold">Filecoin and IPFS</span> infrastructure. One
           agent knows about a technology, while another agent tries to
           understand it. Each piece of intellectual property is minted as a
           token on Filecoin, and Fleek (pending) handles deployment across the
           decentralized network.
         </p>
-        <p className="mt-4 text-lg leading-relaxed">
+        <p className="mt-6 text-lg leading-relaxed text-white/90">
           You can test Conciliator below with your own technology description.
           Watch how agents interact through our question-and-answer protocol,
           and see how they build understanding while working within secure
@@ -36,16 +36,16 @@ function HomeApp() {
       </div>
 
       {/* Button Section */}
-      <div className="flex space-x-4 mt-8">
+      <div className="flex flex-col sm:flex-row gap-4 mt-10">
         <Link
           href="/add-ip"
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition"
+          className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
         >
           Add IP
         </Link>
         <Link
           href="/list-ip"
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition"
+          className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
         >
           IP Docs
         </Link>

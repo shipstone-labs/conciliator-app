@@ -63,13 +63,13 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
     <div className="w-full flex flex-col items-center p-3">
       <Link
         href="/"
-        className="fixed top-6 left-6 bg-gray-600 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-gray-700 transition-all"
+        className="fixed top-6 left-6 bg-primary/80 backdrop-blur-lg text-black w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-primary transition-all hover:scale-110 border border-white/20"
       >
         🏠
       </Link>
       <Link
         href="/add-ip"
-        className="fixed top-6 right-6 bg-blue-600 text-white text-3xl w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-blue-700 transition-all"
+        className="fixed top-6 right-6 bg-secondary/80 backdrop-blur-lg text-black text-3xl w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-secondary transition-all hover:scale-110 border border-white/20"
       >
         +
       </Link>
@@ -79,17 +79,17 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
         {visibleItems.map((item, index) => (
           <Card
             key={`${item.name}-${item.description}-${index}`}
-            className="shadow-lg border border-gray-200 rounded-lg"
+            className="shadow-xl hover:shadow-primary/20 transition-all hover:-translate-y-1 backdrop-blur-md hover:backdrop-blur-lg"
           >
             {/* Name (Title) with Tooltip */}
-            <CardHeader className="bg-gray-100 p-4 rounded-t-lg text-center h-16">
+            <CardHeader className="p-4 rounded-t-xl text-center h-16">
               <Tooltip>
                 <TooltipTrigger className="block w-full">
-                  <CardTitle className="text-sm font-semibold leading-tight max-h-12 overflow-hidden line-clamp-2 text-ellipsis">
+                  <CardTitle className="text-sm font-bold leading-tight max-h-12 overflow-hidden line-clamp-2 text-ellipsis">
                     {item.name}
                   </CardTitle>
                 </TooltipTrigger>
-                <TooltipContent className="bg-gray-800 text-white p-2 rounded-md max-w-xs">
+                <TooltipContent className="bg-background/80 backdrop-blur-md text-white p-3 rounded-xl max-w-xs border border-white/10 shadow-lg">
                   {item.name}
                 </TooltipContent>
               </Tooltip>
@@ -107,7 +107,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
                 alt={item.name}
                 width={200}
                 height={200}
-                className="rounded-md object-cover"
+                className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all"
               />
             </CardContent>
 
@@ -115,22 +115,23 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
             <CardContent className="p-4 h-32 overflow-hidden">
               <Tooltip>
                 <TooltipTrigger className="block w-full">
-                  <p className="text-gray-600 text-sm line-clamp-5 text-ellipsis">
+                  <p className="text-white/80 text-sm line-clamp-5 text-ellipsis">
                     {item.description}
                   </p>
                 </TooltipTrigger>
-                <TooltipContent className="bg-gray-800 text-white p-2 rounded-md max-w-sm">
+                <TooltipContent className="bg-background/80 backdrop-blur-md text-white p-3 rounded-xl max-w-sm border border-white/10 shadow-lg">
                   {item.description}
                 </TooltipContent>
               </Tooltip>
             </CardContent>
 
-            <CardContent className="p-2 flex justify-center">
+            <CardContent className="p-3 flex justify-center">
               <Link
-                className="px-4 py-2 rounded-md bg-blue-500 text-white font-medium 
-             hover:bg-blue-600 
-             focus:ring-2 focus:ring-blue-400 focus:outline-none 
-             disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-6 py-2 rounded-xl bg-primary text-black font-medium
+                  hover:bg-primary/80 hover:scale-105
+                  focus:ring-2 focus:ring-primary/50 focus:outline-none
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  shadow-md hover:shadow-primary/30 transition-all"
                 href={`/${item.tokenId}`}
               >
                 Seek
@@ -141,12 +142,12 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center space-x-2 mt-6">
+      <div className="flex items-center space-x-3 mt-8">
         <button
           type="button"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+          className="px-5 py-2 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-md hover:shadow-lg hover:bg-background/70 transition-all"
         >
           Prev
         </button>
@@ -157,8 +158,10 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
             type="button"
             key={`page-${i + 1}`}
             onClick={() => goToPage(i + 1)}
-            className={`px-3 py-2 rounded-md ${
-              currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
+            className={`px-4 py-2 rounded-xl shadow-md transition-all ${
+              currentPage === i + 1 
+                ? "bg-primary text-black font-medium" 
+                : "bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70"
             }`}
           >
             {i + 1}
@@ -168,7 +171,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
         <button
           type="button"
           onClick={() => goToPage(currentPage + 1)}
-          className="px-3 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+          className="px-5 py-2 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-md hover:shadow-lg hover:bg-background/70 transition-all"
         >
           Next
         </button>
