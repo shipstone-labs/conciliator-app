@@ -36,31 +36,36 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    const previous: { question: string; answer: string }[] = [];
-    let item = { question: "", answer: "" };
+    const previous: {
+      content: string;
+      role: "assistant" | "user" | "system";
+    }[] = [];
     for (const message of messages) {
       switch (message.role) {
         case "user":
-          item.question = message.content;
+          previous.push({ ...message, role: "assistant" });
           break;
         case "assistant":
-          item.answer = message.content.replace(
-            /^Question #\d*: (Yes|No|Stop)/i,
-            "$1"
-          );
-          previous.push(item);
-          item = { question: "", answer: "" };
+          previous.push({
+            ...message,
+            content: message.content.replace(/^(Yes|No|Stop)/i, "$1"),
+            role: "user",
+          });
+          if (previous.at(-1)?.content === "Stop") {
+            return new Response(
+              JSON.stringify({ success: false, error: "Completed" }),
+              {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
           break;
       }
     }
     const _data: Record<string, string> = {
       title,
       description,
-      messages: previous
-        .map(({ question, answer }) => {
-          return `<question>${question}</question><answer>${answer}</answer>`;
-        })
-        .join(""),
     };
     const _content = templateText.replace(
       /\{\{([^}]*)\}\}/g,
@@ -68,7 +73,6 @@ export async function POST(req: NextRequest) {
         return _data[name.trim()] || "";
       }
     );
-    console.log("System content", _content, _data);
     const completion = await completionAI.chat.completions.create({
       model: getModel("COMPLETION"), // Use the appropriate model
       messages: [
@@ -76,7 +80,8 @@ export async function POST(req: NextRequest) {
           role: "system",
           content: _content,
         },
-      ],
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      ].concat(previous) as any,
     });
     const choices = completion.choices as {
       message: { role: string; content: string };
@@ -86,24 +91,34 @@ export async function POST(req: NextRequest) {
         content.split("\n")
       )
       .join("\n");
-    if (!content) {
-      return new Response(
-        JSON.stringify({ success: false, error: "No question generated" }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
     messages.push({ content, role: "user" });
     return new Response(JSON.stringify({ success: true, messages }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    const { message, request_id, status, name, headers } = error as {
+      message?: string;
+      request_id?: string;
+      status?: number;
+      name?: string;
+      headers?: Record<string, unknown>;
+    };
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: message || "Internal Server Error",
+          request_id,
+          status,
+          name,
+          headers,
+        },
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

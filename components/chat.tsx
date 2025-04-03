@@ -60,9 +60,7 @@ const MessageSkeleton = ({
 };
 
 function parseAnswer(message: { content: string }) {
-  return /^Question #(?<question>\d+): (?<answer>Yes|No|Stop)/i.exec(
-    message.content || ""
-  )?.groups;
+  return /^(?<answer>Yes|No|Stop)/i.exec(message.content || "")?.groups;
 }
 
 export default function ChatUI({
@@ -136,8 +134,7 @@ export default function ChatUI({
     () =>
       (messages || []).find((message) => {
         return (
-          message?.role === "assistant" &&
-          /^(STOP),\s*(\d+)/i.test(message?.content)
+          message?.role === "assistant" && /^(STOP)/i.test(message?.content)
         );
       }) != null,
     [messages]
@@ -224,6 +221,11 @@ export default function ChatUI({
         // Handle fetch abort or network errors
         if ((error as { name?: string }).name === "AbortError") {
           console.log("🛑 Seeker API fetch aborted by user");
+          // Reset stopping state since we're aborting
+          if (isStopping) {
+            setIsStopping(false);
+            isAutoDiscoveryActive.current = false;
+          }
         } else {
           console.log("❌ Seeker API fetch failed:", error);
         }
@@ -245,6 +247,10 @@ export default function ChatUI({
       // Handle errors - use our ref
       if (!seekerResponse.ok || !isAutoDiscoveryActive.current) {
         console.log("❌ Seeker API error or auto-complete turned off");
+        // Reset stopping state if we're aborting
+        if (isStopping) {
+          setIsStopping(false);
+        }
         // Make sure to reset flags when aborting
         cycleRunning.current = false;
         setCycleInProgress(false);
@@ -256,11 +262,16 @@ export default function ChatUI({
 
       // Validate response - use our ref
       if (
+        !seekerResponse.ok ||
         !seekerData.success ||
         !seekerData.messages?.length ||
         !isAutoDiscoveryActive.current
       ) {
         console.log("❌ Invalid seeker response or auto-complete turned off");
+        // Reset stopping state if we're aborting
+        if (isStopping) {
+          setIsStopping(false);
+        }
         // Make sure to reset flags when aborting
         cycleRunning.current = false;
         setCycleInProgress(false);
@@ -272,6 +283,10 @@ export default function ChatUI({
         seekerData.messages[seekerData.messages.length - 1]?.content;
       if (!question || !isAutoDiscoveryActive.current) {
         console.log("❌ Empty question or auto-complete turned off");
+        // Reset stopping state if we're aborting
+        if (isStopping) {
+          setIsStopping(false);
+        }
         // Make sure to reset flags when aborting
         cycleRunning.current = false;
         setCycleInProgress(false);
@@ -284,6 +299,10 @@ export default function ChatUI({
       // One more check before calling conciliator - use our ref
       if (!isAutoDiscoveryActive.current) {
         console.log("❌ Auto-complete turned off before conciliator call");
+        // Reset stopping state if we're aborting
+        if (isStopping) {
+          setIsStopping(false);
+        }
         // Make sure to reset flags when aborting
         cycleRunning.current = false;
         setCycleInProgress(false);
@@ -360,6 +379,12 @@ export default function ChatUI({
       setLoading("none");
       cycleRunning.current = false;
       setCycleInProgress(false);
+
+      // Also reset stopping state if needed
+      if (isStopping) {
+        setIsStopping(false);
+        isAutoDiscoveryActive.current = false;
+      }
     }
   }, [hasStop, messages, onSend, degraded, isStopping, name, description]);
 
@@ -715,7 +740,9 @@ export default function ChatUI({
                 className={`px-6 py-2 rounded-lg font-medium transition 
       focus:outline-none focus:ring-2 focus:ring-opacity-50 
       ${
-        autoCompleting
+        hasStop
+          ? "bg-blue-500 text-white focus:ring-blue-400"
+          : autoCompleting
           ? "bg-red-600 hover:bg-red-700 text-white focus:ring-red-400"
           : isStopping
           ? "bg-orange-500 text-white focus:ring-orange-400 cursor-wait"
@@ -723,8 +750,14 @@ export default function ChatUI({
       } 
       disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed`}
               >
-                {autoCompleting ? "Stop" : isStopping ? "Stopping..." : "Start"}{" "}
-                Auto-Discovery
+                {hasStop
+                  ? "Discovery Finished"
+                  : autoCompleting
+                  ? "Stop"
+                  : isStopping
+                  ? "Stopping..."
+                  : "Start"}{" "}
+                {!hasStop && "Auto-Discovery"}
               </button>
               {onSave ? (
                 <button

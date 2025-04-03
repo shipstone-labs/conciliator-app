@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const { messages, tokenId, degraded } = (await req.json()) as {
       messages: {
         role: "user" | "assistant" | "system";
-        content: string | null;
+        content?: string | null;
       }[];
       degraded?: boolean;
       tokenId: number;
@@ -131,19 +131,40 @@ ${index.description}`,
         role: "system",
         content: _content,
       },
-      ...messages,
-    ] as { role: "user" | "assistant" | "system"; content: string }[];
-    const all_msg = request.slice();
+    ] as { role: "user" | "assistant" | "system"; content?: string }[];
+    for (const message of messages) {
+      if (message.role === "assistant") {
+        request.push({
+          ...message,
+          content: message.content?.replace(/^(Yes|No|Stop)/i, "$1") || "",
+        });
+        if (request.at(-1)?.content === "Stop") {
+          return new Response(
+            JSON.stringify({ success: false, error: "Completed" }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+      } else {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        request.push(message as any);
+      }
+    }
     const completion = await completionAI.chat.completions.create({
       model: getModel("COMPLETION"), // Use the appropriate model
-      messages: request,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      messages: request as any,
     });
-    for (const { message } of completion.choices) {
-      messages.push(message);
-      all_msg.push(
-        message as { role: "user" | "assistant" | "system"; content: string }
-      );
-    }
+    const answerContent = completion.choices
+      .flatMap(
+        ({ message: { content = "" } = { content: "" } }) =>
+          content?.split("\n") || ""
+      )
+      .join("\n");
+    console.log("conciliator", answerContent);
+    messages.push({ content: answerContent, role: "assistant" });
     return new Response(
       JSON.stringify({
         messages,
@@ -156,9 +177,28 @@ ${index.description}`,
     );
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    const { message, request_id, status, name, headers } = error as {
+      message?: string;
+      request_id?: string;
+      status?: number;
+      name?: string;
+      headers?: Record<string, unknown>;
+    };
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: message || "Internal Server Error",
+          request_id,
+          status,
+          name,
+          headers,
+        },
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

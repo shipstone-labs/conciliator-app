@@ -90,8 +90,8 @@ const ConciliateApp = ({
       try {
         // First update the messages array with the user's question so it's visible immediately
         const userMessage = { role: "user" as const, content: question };
-        setMessages(prevMessages => [...prevMessages, userMessage]);
-        
+        setMessages((prevMessages) => [...prevMessages, userMessage]);
+
         // Then make the API request
         const {
           messages: _resultMessages,
@@ -113,7 +113,7 @@ const ConciliateApp = ({
           }
           return res.json();
         });
-        
+
         setDescription(description);
         setName(name);
         setMessages(_resultMessages);
