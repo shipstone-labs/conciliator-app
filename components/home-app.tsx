@@ -13,7 +13,7 @@ function HomeApp() {
       <div className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 p-8 rounded-2xl shadow-xl border border-white/10 mt-8">
         <p className="text-lg leading-relaxed text-white/90">
           The <span className="text-primary font-semibold">Conciliator Project</span> explores how AI agents can
-          talk to each other about new technologies and innovations. We're
+          talk to each other about new technologies and innovations. We&apos;re
           presenting this work at <span className="text-secondary font-semibold">ETHDenver 2025</span> to show one
           possible approach to agent-to-agent communication about intellectual
           property.
