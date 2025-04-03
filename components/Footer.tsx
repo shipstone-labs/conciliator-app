@@ -18,13 +18,19 @@ export function Footer() {
             </div>
             <div className="flex gap-6">
               <button 
-                onClick={() => setIsTermsOpen(true)}
+                onClick={() => {
+                  console.log("Terms clicked");
+                  setIsTermsOpen(true);
+                }}
                 className="text-gray-300 hover:text-gray-100"
               >
                 Terms of Service
               </button>
               <button 
-                onClick={() => setIsPrivacyOpen(true)}
+                onClick={() => {
+                  console.log("Privacy clicked");
+                  setIsPrivacyOpen(true);
+                }}
                 className="text-gray-300 hover:text-gray-100"
               >
                 Privacy Policy
