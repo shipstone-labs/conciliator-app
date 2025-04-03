@@ -10,16 +10,16 @@ export const Logo = () => (
       height={192}
       className="rounded-full shadow-lg border-2 border-primary/30"
       priority
-      src="/logo.png"
-      alt="Logo"
+      src="/assets/Black+Yellow.svg"
+      alt="SafeIdea Logo"
     />
 
     {/* Text Container */}
     <div className="text-center mt-6">
-      <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-        Conciliator Project
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+        SafeIdea: Securely Store, Share and Monetize Digital Assets
       </h1>
-      <p className="mt-2 text-base text-white/70">A Part of SafeIdea</p>
+      <p className="mt-2 text-base text-white/70">Includes the Conciliator Agentic Discovery project</p>
     </div>
   </div>
 );
