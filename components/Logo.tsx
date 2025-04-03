@@ -10,7 +10,7 @@ export const Logo = () => (
       height={192}
       className="rounded-full shadow-lg border-2 border-primary/30"
       priority
-      src="/assets/Black+Yellow.svg"
+      src="/svg/Black+Yellow.svg"
       alt="SafeIdea Logo"
     />
 
