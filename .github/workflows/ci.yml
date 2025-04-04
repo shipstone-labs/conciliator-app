@@ -4,15 +4,15 @@ on:
   pull_request:
     branches:
       - 'main'
-      - 'lilypad'
+      - 'legacy'
   push:
     branches:
       - 'main'
-      - 'lilypad'
+      - 'legacy'
 
-concurrency:
-  group: compile-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  CF_PROJECT_NAME: conciliator-app
+  CF_BASE_URL: conciliator-app
 
 jobs:
   deploy:
@@ -22,19 +22,19 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/lilypad" ]] || \
-            [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.base.ref }}" == "lilypad" ]]; then
-            echo project=conciliator-lilypad >> $GITHUB_OUTPUT
-            PROJECT_NAME=conciliator-lilypad
-          else          
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/legacy" ]] || \
+            [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.base.ref }}" == "legacy" ]]; then
             echo project=conciliator-app >> $GITHUB_OUTPUT
             PROJECT_NAME=conciliator-app
+          else          
+            echo project=conciliator-lilypad >> $GITHUB_OUTPUT
+            PROJECT_NAME=conciliator-lilypad
           fi
           PR_NUMBER="${{ github.event.number }}"
           if [ -n "$PR_NUMBER" ]
           then
             echo "branch_name=pr-${PR_NUMBER}" >> $GITHUB_OUTPUT
-            echo "url=https://pr-${PR_NUMBER}.${PROJECT_NAME}.pages.dev" >> $GITHUB_OUTPUT
+            echo "url=https://pr-${PR_NUMBER}.${{ env.CF_BASE_URL }}.pages.dev" >> $GITHUB_OUTPUT
           else
             echo "branch_name=" >> $GITHUB_OUTPUT
           fi
@@ -43,20 +43,10 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-
-      - name: Set up TinyGo
-        uses: acifani/setup-tinygo@v2
-        with:
-          tinygo-version: '0.28.1'  # Specify the TinyGo version you need
-      
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: "10.6.5"
+          version: "10.3.0"
       
       - uses: actions/setup-node@v3
         with:
@@ -76,7 +66,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          pnpm dlx wrangler pages deploy --project-name "${{ steps.extract_branch.outputs.project }}" --branch main
+          pnpm dlx wrangler pages deploy --project-name "${{ env.CF_PROJECT_NAME }}"
 
       - name: Deploy ${{ steps.extract_branch.outputs.branch_name }} (PR)
         if: ${{ steps.extract_branch.outputs.branch_name != '' }}
@@ -84,7 +74,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          pnpm dlx wrangler pages deploy --project-name "${{ steps.extract_branch.outputs.project }}" --branch "${{ steps.extract_branch.outputs.branch_name }}" | tee output.log
+          pnpm dlx wrangler pages deploy --project-name "${{ env.CF_PROJECT_NAME }}" --branch "${{ steps.extract_branch.outputs.branch_name }}" | tee output.log
           sed < output.log -n 's#.*Take a peek over at \(.*\)$#specific_url=\1#p' >> $GITHUB_OUTPUT
         id: deploy
 
