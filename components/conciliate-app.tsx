@@ -190,34 +190,6 @@ const ConciliateApp = ({
     }
   }, [tokenId, messages]);
 
-  //   const handleGenerateQuestion = useCallback(async () => {
-  //     setIsLoading(true);
-  //     setError(null);
-
-  //     try {
-  //       const seekerData = await makeOpenAIRequest([
-  //         {
-  //           role: "system",
-  //           content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
-  // Context:
-  // - The Matcher requires yes/no questions to control information flow
-  // - Your goal is to understand the innovation's value and applicability
-  // - Craft questions strategically to build understanding within the yes/no format
-
-  // Previous exchanges: ${JSON.stringify(exchanges)}
-
-  // Generate your next strategic question. It must be answerable with yes/no. Respond with ONLY the question, no other text.`,
-  //         },
-  //       ]);
-
-  //       const generatedQuestion = seekerData.choices[0].message.content.trim();
-  //     } catch (err) {
-  //       setError((err as { message: string }).message);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }, [exchanges]);
-
   const renderStartState = () => (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>

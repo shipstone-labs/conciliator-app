@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
         content.split("\n")
       )
       .join("\n");
+    console.log("seeker", content);
     messages.push({ content, role: "user" });
     return new Response(JSON.stringify({ success: true, messages }), {
       headers: { "Content-Type": "application/json" },

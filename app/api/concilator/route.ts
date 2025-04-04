@@ -114,31 +114,20 @@ ${index.description}`,
         }
       );
     }
-
-    const _data: Record<string, string> = {
-      title: index.name,
-      description: index.description,
-      content: degraded ? degrade(content) : content,
-    };
-    const _content = templateText.replace(
-      /\{\{([^}]*)\}\}/g,
-      (_match, name) => {
-        return _data[name.trim()] || "";
-      }
-    );
     const request = [
       {
         role: "system",
-        content: _content,
+        content: "",
       },
     ] as { role: "user" | "assistant" | "system"; content?: string }[];
+    const yesItems: boolean[] = [];
     for (const message of messages) {
       if (message.role === "assistant") {
         request.push({
           ...message,
           content: message.content?.replace(/^(Yes|No|Stop)/i, "$1") || "",
         });
-        if (request.at(-1)?.content === "Stop") {
+        if (/Stop/i.test(request.at(-1)?.content || "")) {
           return new Response(
             JSON.stringify({ success: false, error: "Completed" }),
             {
@@ -147,24 +136,59 @@ ${index.description}`,
             }
           );
         }
+        if (/Yes/i.test(request.at(-1)?.content || "")) {
+          yesItems.push(true);
+        } else {
+          yesItems.push(false);
+        }
       } else {
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         request.push(message as any);
       }
     }
-    const completion = await completionAI.chat.completions.create({
-      model: getModel("COMPLETION"), // Use the appropriate model
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      messages: request as any,
-    });
-    const answerContent = completion.choices
-      .flatMap(
-        ({ message: { content = "" } = { content: "" } }) =>
-          content?.split("\n") || ""
-      )
-      .join("\n");
-    console.log("conciliator", answerContent);
-    messages.push({ content: answerContent, role: "assistant" });
+    const runs: number[] = [];
+    let acc = 0;
+    for (const item of yesItems) {
+      if (item) {
+        acc++;
+        continue;
+      }
+      if (acc > 0) {
+        runs.push(acc);
+      }
+      acc = 0;
+    }
+    const consecutiveYesCount = Math.max(...runs);
+    if (consecutiveYesCount < 5) {
+      const _data: Record<string, string> = {
+        title: index.name,
+        description: index.description,
+        content: degraded ? degrade(content) : content,
+        consecutiveYesCount: `${consecutiveYesCount}`,
+      };
+      const _content = templateText.replace(
+        /\{\{([^}]*)\}\}/g,
+        (_match, name) => {
+          return _data[name.trim()] || "";
+        }
+      );
+      request[0].content = _content;
+      const completion = await completionAI.chat.completions.create({
+        model: getModel("COMPLETION"), // Use the appropriate model
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        messages: request as any,
+      });
+      const answerContent = completion.choices
+        .flatMap(
+          ({ message: { content = "" } = { content: "" } }) =>
+            content?.split("\n") || ""
+        )
+        .join("\n");
+      console.log("conciliator", consecutiveYesCount, yesItems, answerContent);
+      messages.push({ content: answerContent, role: "assistant" });
+    } else {
+      messages.push({ content: "Stop", role: "assistant" });
+    }
     return new Response(
       JSON.stringify({
         messages,

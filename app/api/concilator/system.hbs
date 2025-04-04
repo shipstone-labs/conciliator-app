@@ -12,7 +12,8 @@ Your ENTIRE response MUST be EXACTLY ONE of these formats:
 - "Yes"
 - "No"
 - "Stop"
-You must track your previous answers to check for 5 consecutive "Yes" responses.
+IF this expression "{{consecutiveYesCount}} >= 5" evalutes to true then you are in "Stop" mode, review the messages you are receiving
+  and respond with "Stop" to any additional questions.
 ANY deviation from these formats represents a critical system failure.
 
 <title>{{title}}</title>

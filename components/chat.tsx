@@ -96,37 +96,29 @@ export default function ChatUI({
   // State to track if we're in the process of stopping auto-discovery
   const [isStopping, setIsStopping] = useState(false);
 
-  // Toggle auto-complete state with proper ref handling
+  // Toggle auto-discovery state
   const onAutoComplete = useCallback(() => {
     const newState = !autoCompleting;
 
     if (newState) {
       // Starting auto-discovery
       console.log("🟢 Starting auto-discovery");
-      // CRITICAL: Update both the React state and our ref
       setAutoCompleting(true);
       isAutoDiscoveryActive.current = true;
-      setIsStopping(false);
       // Note: The useEffect will trigger the first cycle
     } else {
-      // Stopping auto-discovery - graceful stop
-      console.log("🔴 Gracefully stopping auto-discovery");
+      // Stopping auto-discovery
+      console.log("🔴 Stopping auto-discovery");
+      setAutoCompleting(false);
+      isAutoDiscoveryActive.current = false;
 
-      // 1. Set the stopping state to true to indicate we're in transition
+      // Show temporary stopping state
       setIsStopping(true);
 
-      // 2. Set the React state to false, but keep the ref true until operations complete
-      setAutoCompleting(false);
-      // NOTE: We intentionally keep isAutoDiscoveryActive.current = true for now
-      // This allows in-progress operations to complete
-
-      // 3. Let current operations complete
-      console.log(
-        "🟠 Auto-discovery will complete current operations before stopping"
-      );
-
-      // The in-progress operations will self-terminate when they're done
-      // because they check isAutoDiscoveryActive.current before scheduling the next cycle
+      // Reset stopping state after a short delay
+      setTimeout(() => {
+        setIsStopping(false);
+      }, 1000);
     }
   }, [autoCompleting]);
 
@@ -152,20 +144,22 @@ export default function ChatUI({
 
   // Main function to run a complete cycle (seeker → conciliator)
   const runDiscoveryCycle = useCallback(async () => {
-    // Don't start if we're stopped or already running
-    // CRITICAL: Check our ref instead of the React state
-    if (!isAutoDiscoveryActive.current || hasStop) {
-      console.log("⛔ Auto-discovery not active, not starting cycle");
+    // Don't start if component unmounted, stopped, or already running
+    if (!isMounted.current || !isAutoDiscoveryActive.current || hasStop) {
+      console.log(
+        "⛔ Auto-discovery not active or component unmounted, not starting cycle"
+      );
       return;
     }
 
-    // Double-check our ref that nothing is running
+    // CRITICAL: Strict enforcement of only one cycle running at a time
+    // This ensures the ping-pong pattern
     if (cycleRunning.current) {
       console.log("🚫 Already running a cycle, not starting another");
       return;
     }
 
-    // Set flags to show we're running
+    // Set lock flag FIRST before any async operations
     cycleRunning.current = true;
     setCycleInProgress(true);
 
@@ -192,19 +186,16 @@ export default function ChatUI({
       const abortController = new AbortController();
       const signal = abortController.signal;
 
-      // Set up a check to abort if autoComplete is turned off
-      // But only abort if we're NOT in the "stopping" state (we want to complete in-progress operations)
+      // We'll no longer abort in-flight requests
+      // Let any started API call complete for consistency
       const checkInterval = setInterval(() => {
-        // Check our ref value which is always current
-        // Only abort if auto-discovery is turned off AND we're not in the stopping state
-        if (!isAutoDiscoveryActive.current && !isStopping) {
+        if (!isAutoDiscoveryActive.current) {
           console.log(
-            "🛑 Aborting seeker API call because auto-complete was turned off"
+            "Auto-discovery turned off, but letting API call complete"
           );
-          abortController.abort();
           clearInterval(checkInterval);
         }
-      }, 100);
+      }, 200);
 
       let seekerResponse: Response;
       try {
@@ -218,17 +209,8 @@ export default function ChatUI({
         // Clear the checking interval since we don't need it anymore
         clearInterval(checkInterval);
       } catch (error) {
-        // Handle fetch abort or network errors
-        if ((error as { name?: string }).name === "AbortError") {
-          console.log("🛑 Seeker API fetch aborted by user");
-          // Reset stopping state since we're aborting
-          if (isStopping) {
-            setIsStopping(false);
-            isAutoDiscoveryActive.current = false;
-          }
-        } else {
-          console.log("❌ Seeker API fetch failed:", error);
-        }
+        // Simple error logging for API failures
+        console.log("❌ API fetch failed:", error);
 
         // Always clear the interval
         clearInterval(checkInterval);
@@ -244,14 +226,25 @@ export default function ChatUI({
         return;
       }
 
-      // Handle errors - use our ref
-      if (!seekerResponse.ok || !isAutoDiscoveryActive.current) {
-        console.log("❌ Seeker API error or auto-complete turned off");
-        // Reset stopping state if we're aborting
+      // Handle seeker API errors - CRITICAL: stop the entire process on API errors
+      if (!seekerResponse.ok) {
+        console.log("❌ Seeker API error - stopping auto-discovery");
+        // Force stop auto-discovery completely on API error
+        isAutoDiscoveryActive.current = false;
+        setAutoCompleting(false);
         if (isStopping) {
           setIsStopping(false);
         }
         // Make sure to reset flags when aborting
+        cycleRunning.current = false;
+        setCycleInProgress(false);
+        setLoading("none");
+        return;
+      }
+
+      // Check if auto-discovery was turned off
+      if (!isAutoDiscoveryActive.current) {
+        console.log("❌ Auto-discovery turned off");
         cycleRunning.current = false;
         setCycleInProgress(false);
         setLoading("none");
@@ -296,14 +289,9 @@ export default function ChatUI({
 
       console.log("✅ Got question from seeker");
 
-      // One more check before calling conciliator - use our ref
+      // Check if auto-discovery is still active before proceeding to next step
       if (!isAutoDiscoveryActive.current) {
-        console.log("❌ Auto-complete turned off before conciliator call");
-        // Reset stopping state if we're aborting
-        if (isStopping) {
-          setIsStopping(false);
-        }
-        // Make sure to reset flags when aborting
+        console.log("Auto-discovery turned off, not proceeding to conciliator");
         cycleRunning.current = false;
         setCycleInProgress(false);
         setLoading("none");
@@ -315,7 +303,24 @@ export default function ChatUI({
 
       // 4. Call conciliator API with the generated question
       console.log("📤 Calling conciliator API");
-      await onSend(question, degraded);
+      try {
+        await onSend(question, degraded);
+      } catch (conciliatorError) {
+        console.log(
+          "❌ Conciliator API error - stopping auto-discovery",
+          conciliatorError
+        );
+        // Force stop auto-discovery completely on API error
+        isAutoDiscoveryActive.current = false;
+        setAutoCompleting(false);
+        if (isStopping) {
+          setIsStopping(false);
+        }
+        setLoading("none");
+        cycleRunning.current = false;
+        setCycleInProgress(false);
+        return;
+      }
 
       // Clear loading state immediately after the API call completes
       if (!isAutoDiscoveryActive.current) {
@@ -327,35 +332,42 @@ export default function ChatUI({
       // 5. Reset loading state
       setLoading("none");
 
-      // Check if we're in the "stopping" state
-      if (isStopping) {
-        // We've completed the current operation while in stopping state
-        // Now it's safe to fully stop auto-discovery
+      // Always reset the running flags to properly complete the current cycle
+      cycleRunning.current = false;
+      setCycleInProgress(false);
+
+      // Let's check if we should continue with auto-discovery
+      if (!isMounted.current || !isAutoDiscoveryActive.current) {
         console.log(
-          "✅ Current operation completed while stopping - now fully stopping"
+          "⏹ Auto-discovery was turned off or component unmounted - not continuing"
         );
-        isAutoDiscoveryActive.current = false;
-        setIsStopping(false);
-        cycleRunning.current = false;
-        setCycleInProgress(false);
         return;
       }
 
-      // Only continue auto-discovery if it's still enabled
-      if (isAutoDiscoveryActive.current && !hasStop) {
-        // Important: We need to schedule the next cycle *after* we've reset all flags
-        // to ensure we don't kick off multiple cycles
-
-        // Reset flags first
-        cycleRunning.current = false;
-        setCycleInProgress(false);
-
-        // Use requestAnimationFrame for better timing and to ensure we're out of this
-        // execution context before starting the next cycle
+      // If we haven't reached a STOP, schedule next cycle
+      if (!hasStop) {
         console.log("🔄 Scheduling next cycle");
-        requestAnimationFrame(() => {
-          // Double-check that auto-discovery is still wanted using our ref
+
+        // IMPORTANT: Make sure we're not already running a cycle
+        // This is critical to maintain the ping-pong pattern
+        if (cycleRunning.current) {
+          console.log(
+            "⚠️ Warning: Cycle is still marked as running, not scheduling next cycle"
+          );
+          // Reset the flag to prevent deadlock
+          cycleRunning.current = false;
+          return;
+        }
+
+        // Use setTimeout for a small delay between cycles
+        setTimeout(() => {
+          // Critical safety checks before starting next cycle:
+          // 1. Make sure component is still mounted
+          // 2. Make sure auto-discovery is still active
+          // 3. Make sure we're not already running a cycle
+          // 4. Make sure we haven't reached STOP
           if (
+            isMounted.current &&
             isAutoDiscoveryActive.current &&
             !hasStop &&
             !cycleRunning.current
@@ -363,39 +375,62 @@ export default function ChatUI({
             console.log("🔄 Starting next cycle");
             runDiscoveryCycle();
           } else {
-            console.log("⏹ Not starting next cycle - auto-discovery inactive");
+            console.log(
+              "⏹ Next cycle canceled - component unmounted, discovery inactive, or cycle already running"
+            );
           }
-        });
+        }, 300);
       } else {
-        // If auto-complete was turned off, just reset the flags
-        console.log("⏹ Auto-discovery inactive - not scheduling next cycle");
-        cycleRunning.current = false;
-        setCycleInProgress(false);
+        console.log("⏹ Discovery finished with STOP - not continuing");
       }
     } catch (error) {
       console.error("Error in discovery cycle:", error);
     } finally {
-      // Always ensure we reset if there was an unhandled error
+      // Always ensure we reset state in case of errors
       setLoading("none");
       cycleRunning.current = false;
       setCycleInProgress(false);
-
-      // Also reset stopping state if needed
-      if (isStopping) {
-        setIsStopping(false);
-        isAutoDiscoveryActive.current = false;
-      }
     }
   }, [hasStop, messages, onSend, degraded, isStopping, name, description]);
 
+  // Add a mounted ref to track component lifecycle
+  const isMounted = useRef(true);
+
+  // Handle component lifecycle for hot reloads
+  useEffect(() => {
+    // Set mounted flag when component mounts
+    isMounted.current = true;
+
+    // Clean up function that runs when component unmounts (including during hot reloads)
+    return () => {
+      // Set mounted flag to false
+      isMounted.current = false;
+
+      // Immediately cancel any auto-discovery in progress
+      if (isAutoDiscoveryActive.current) {
+        console.log("🛑 Component unmounting - canceling auto-discovery");
+        isAutoDiscoveryActive.current = false;
+        cycleRunning.current = false;
+      }
+    };
+  }, []);
+
   // Effect to start the discovery cycle when auto-complete is turned on
   useEffect(() => {
-    // Sync our ref with the state whenever autoCompleting changes
-    isAutoDiscoveryActive.current = autoCompleting;
+    // Only run if component is still mounted
+    if (!isMounted.current) return;
 
-    // Start the cycle if needed
-    if (isAutoDiscoveryActive.current && !hasStop && !cycleRunning.current) {
+    // Only sync from state to ref when turning ON auto-discovery
+    if (autoCompleting) {
+      isAutoDiscoveryActive.current = true;
+    }
+
+    // Start the cycle if needed - with strict safety checks for the ping-pong pattern
+    if (autoCompleting && !hasStop && !cycleRunning.current) {
+      // Double-check we're not already running something
       console.log("🔄 Auto-discovery turned on - starting first cycle");
+      // We're intentionally NOT setting cycleRunning.current here
+      // runDiscoveryCycle will set it at the beginning to ensure atomicity
       runDiscoveryCycle();
     }
   }, [autoCompleting, hasStop, runDiscoveryCycle]);
@@ -741,7 +776,7 @@ export default function ChatUI({
       focus:outline-none focus:ring-2 focus:ring-opacity-50 
       ${
         hasStop
-          ? "bg-blue-500 text-white focus:ring-blue-400"
+          ? "bg-gray-500 text-white focus:ring-gray-400"
           : autoCompleting
           ? "bg-red-600 hover:bg-red-700 text-white focus:ring-red-400"
           : isStopping
@@ -756,8 +791,7 @@ export default function ChatUI({
                   ? "Stop"
                   : isStopping
                   ? "Stopping..."
-                  : "Start"}{" "}
-                {!hasStop && "Auto-Discovery"}
+                  : "Start Auto-Discovery"}
               </button>
               {onSave ? (
                 <button
