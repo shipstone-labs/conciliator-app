@@ -6,48 +6,41 @@ import { Logo } from "./Logo";
 
 function HomeApp() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
       <Logo />
 
       {/* Description Section */}
-      <div className="max-w-3xl text-center text-gray-700">
-        <p className="text-lg leading-relaxed">
-          The <strong>Conciliator Project</strong> explores how AI agents can
-          talk to each other about new technologies and innovations. We’re
-          presenting this work at <strong>ETHDenver 2025</strong> to show one
-          possible approach to agent-to-agent communication about intellectual
-          property.
+      <div className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 p-8 rounded-2xl shadow-xl border border-white/10 mt-8">
+        <p className="text-lg leading-relaxed text-white/90">
+          Welcome to <span className="text-primary font-semibold">SafeIdea.net</span>. This is the alpha version of our IP protection platform. We help creators and inventors store, share, and monetize their ideas securely.
         </p>
-        <p className="mt-4 text-lg leading-relaxed">
-          Conciliator creates a <strong>secure channel</strong> between two AI
-          agents using <strong>Filecoin and IPFS</strong> infrastructure. One
-          agent knows about a technology, while another agent tries to
-          understand it. Each piece of intellectual property is minted as a
-          token on Filecoin, and Fleek (pending) handles deployment across the
-          decentralized network.
+        <p className="mt-6 text-lg leading-relaxed text-white/90">
+          To try it out, click on the <span className="text-primary font-semibold">Add Idea</span> button below to upload your invention details. This version works best with text or markdown documents. If you&apos;d like to explore existing ideas, click on the <span className="text-secondary font-semibold">Idea Database</span> button to browse what&apos;s already in the system.
         </p>
-        <p className="mt-4 text-lg leading-relaxed">
-          You can test Conciliator below with your own technology description.
-          Watch how agents interact through our question-and-answer protocol,
-          and see how they build understanding while working within secure
-          boundaries. This is an experiment in helping AI systems evaluate
-          innovations together.
+        <p className="mt-6 text-lg leading-relaxed text-white/90">
+          SafeIdea provides three key benefits: First, secure storage establishes proof that you had a specific idea at a particular time. Second, controlled sharing creates records of who accessed your work and when. Third, our platform connects you with opportunities to monetize your ideas on your terms.
+        </p>
+        <p className="mt-6 text-lg leading-relaxed text-white/90">
+          This version of SafeIdea was designed to leverage technology within the <span className="text-accent font-semibold">Filecoin ecosystem</span>. We&apos;re using tokens from the Filecoin system, Storacha&apos;s file storage tools and Lilypad&apos;s AI modules. We&apos;re using LIT Protocol for encryption, which is integrated with Storacha. SafeIdea is an open source project, necessary if you want to make sure the developers don&apos;t know about your secrets.
+        </p>
+        <p className="mt-6 text-lg leading-relaxed text-white/90">
+          SafeIdea launches commercially in late 2025. Want early access? Apply now for our beta program. We&apos;re looking for inventors and creators ready to protect their intellectual property in the digital age.
         </p>
       </div>
 
       {/* Button Section */}
-      <div className="flex space-x-4 mt-8">
+      <div className="flex flex-col sm:flex-row gap-4 mt-10">
         <Link
           href="/add-ip"
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition"
+          className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
         >
-          Add IP
+          Add Idea
         </Link>
         <Link
           href="/list-ip"
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition"
+          className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
         >
-          IP Docs
+          Idea Database
         </Link>
       </div>
     </div>

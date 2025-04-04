@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
   useState,
+  useRef,
 } from "react";
 import {
   Card,
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
+import { Modal } from "./ui/modal";
 import Chat from "./chat";
 import { Logo } from "./Logo";
 import Loading from "./Loading";
@@ -48,6 +50,8 @@ const ConciliateApp = ({
   const [messages, setMessages] = useState<
     { role: "user" | "assistant" | "system"; content: string }[]
   >([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const handleStart = useCallback(async () => {
     setError(null);
     setIsLoading(true);
@@ -83,6 +87,35 @@ const ConciliateApp = ({
     setDescription("");
     setName("");
   }, []);
+  
+  const handleOpenFileDialog = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
+  
+  const handleFileSelection = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file size (2MB limit)
+    if (file.size > 2 * 1024 * 1024) {
+      setError("File size exceeds 2MB limit");
+      return;
+    }
+    
+    // Check file type (only text and markdown)
+    if (!file.type.includes('text') && !file.name.endsWith('.md')) {
+      setError("Only text and markdown files are supported");
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const fileContent = event.target?.result as string;
+      setContent(fileContent);
+      setIsModalOpen(false);
+    };
+    reader.readAsText(file);
+  }, []);
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
@@ -90,8 +123,8 @@ const ConciliateApp = ({
       try {
         // First update the messages array with the user's question so it's visible immediately
         const userMessage = { role: "user" as const, content: question };
-        setMessages(prevMessages => [...prevMessages, userMessage]);
-        
+        setMessages((prevMessages) => [...prevMessages, userMessage]);
+
         // Then make the API request
         const {
           messages: _resultMessages,
@@ -113,7 +146,7 @@ const ConciliateApp = ({
           }
           return res.json();
         });
-        
+
         setDescription(description);
         setName(name);
         setMessages(_resultMessages);
@@ -190,41 +223,13 @@ const ConciliateApp = ({
     }
   }, [tokenId, messages]);
 
-  //   const handleGenerateQuestion = useCallback(async () => {
-  //     setIsLoading(true);
-  //     setError(null);
-
-  //     try {
-  //       const seekerData = await makeOpenAIRequest([
-  //         {
-  //           role: "system",
-  //           content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
-  // Context:
-  // - The Matcher requires yes/no questions to control information flow
-  // - Your goal is to understand the innovation's value and applicability
-  // - Craft questions strategically to build understanding within the yes/no format
-
-  // Previous exchanges: ${JSON.stringify(exchanges)}
-
-  // Generate your next strategic question. It must be answerable with yes/no. Respond with ONLY the question, no other text.`,
-  //         },
-  //       ]);
-
-  //       const generatedQuestion = seekerData.choices[0].message.content.trim();
-  //     } catch (err) {
-  //       setError((err as { message: string }).message);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }, [exchanges]);
-
   const renderStartState = () => (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl">IP Value Discovery</CardTitle>
+        <CardTitle className="text-2xl">Add Your Idea</CardTitle>
         <CardDescription>
-          Discover the value of intellectual property through structured
-          dialogue
+          First enter the publically available information you want to use to describe your idea. 
+          This information will be publically available on the Internet.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -240,12 +245,33 @@ const ConciliateApp = ({
           onChange={(e) => setDescription(e.target.value)}
           disabled={isLoading}
         />
-        <Textarea
-          placeholder="IP Document (Secret)"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          disabled={isLoading}
-        />
+        {content ? (
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+            <div className="flex justify-between items-center">
+              <p className="text-sm font-medium text-gray-700">File uploaded successfully</p>
+              <Button 
+                onClick={() => setContent("")} 
+                variant="ghost" 
+                size="sm"
+                className="text-red-500 hover:text-red-700"
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            onClick={handleOpenFileDialog}
+            variant="outline"
+            className="w-full border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 py-2 px-4 rounded-md"
+            disabled={isLoading || !name || !description}
+          >
+            Add and Encrypt your Idea
+          </Button>
+        )}
+        <div className="text-xs text-gray-500 -mt-2">
+          Text and Markdown files under 2MB are requested
+        </div>
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -254,7 +280,7 @@ const ConciliateApp = ({
         <Button
           onClick={handleStart}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
-          disabled={isLoading}
+          disabled={isLoading || !content || !name || !description}
         >
           {isLoading ? (
             <>
@@ -280,6 +306,32 @@ const ConciliateApp = ({
         >
           Reset Fields
         </Button>
+        
+        {/* File upload modal */}
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Upload Your Idea">
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              Select a text or markdown file containing your idea description. 
+              This file will be encrypted and stored securely.
+            </p>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelection}
+              accept=".txt,.md,.markdown,text/plain,text/markdown"
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            <div className="flex justify-end space-x-2">
+              <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button 
+                onClick={() => fileInputRef.current?.click()} 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Select File
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </CardContent>
     </Card>
   );
@@ -354,7 +406,7 @@ const ConciliateApp = ({
         >
           🏠
         </Link>
-        <Logo />
+        <Logo showText={false} />
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}
