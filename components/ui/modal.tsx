@@ -31,8 +31,6 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
-  
-  console.log("Modal rendering with isOpen:", isOpen);
 
   // Close when clicking on backdrop (outside of modal content)
   const handleBackdropClick = (e: React.MouseEvent) => {
