@@ -21,7 +21,7 @@ function HomeApp() {
           SafeIdea provides three key benefits: First, secure storage establishes proof that you had a specific idea at a particular time. Second, controlled sharing creates records of who accessed your work and when. Third, our platform connects you with opportunities to monetize your ideas on your terms.
         </p>
         <p className="mt-6 text-lg leading-relaxed text-white/90">
-          This version of SafeIdea was designed to leverage technology within the <span className="text-accent font-semibold">Filecoin ecosystem</span>. We&apos;re using tokens from the Filecoin system, Storacha&apos;s file storage tools and Lilypad&apos;s AI modules. We&apos;re using LIT Protocol for encryption, which is integrated with Storage. SafeIdea is an open source project, necessary if you want to make sure the developers don&apos;t know about your secrets.
+          This version of SafeIdea was designed to leverage technology within the <span className="text-accent font-semibold">Filecoin ecosystem</span>. We&apos;re using tokens from the Filecoin system, Storacha&apos;s file storage tools and Lilypad&apos;s AI modules. We&apos;re using LIT Protocol for encryption, which is integrated with Storacha. SafeIdea is an open source project, necessary if you want to make sure the developers don&apos;t know about your secrets.
         </p>
         <p className="mt-6 text-lg leading-relaxed text-white/90">
           SafeIdea launches commercially in late 2025. Want early access? Apply now for our beta program. We&apos;re looking for inventors and creators ready to protect their intellectual property in the digital age.
