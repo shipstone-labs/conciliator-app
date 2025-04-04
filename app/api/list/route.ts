@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { abi, openai, pinata } from "../utils";
+import { abi, getModel, imageAI, pinata } from "../utils";
 import { readContract } from "viem/actions";
 import { filecoinCalibration } from "viem/chains";
 import { createWalletClient, http } from "viem";
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       chain: filecoinCalibration,
       transport: http(),
     });
-    const tokens = [];
+    const tokens: Array<Record<string, unknown>> = [];
     while (true) {
       try {
         console.log("getting", tokenId);
@@ -55,8 +55,8 @@ export async function POST(req: NextRequest) {
           return null;
         });
         if (!url) {
-          const response2 = await openai.images.generate({
-            model: "dall-e-3",
+          const response2 = await imageAI.images.generate({
+            model: getModel("IMAGE"),
             prompt: `Generate and image which accurately represents a supposed document
         with the title \`${index.name}\` and the descriptions \`${index.description}\`. If there are any word flagged as inappropriate,
         then just pick the closest word to it. If there is none, then pick a random word.

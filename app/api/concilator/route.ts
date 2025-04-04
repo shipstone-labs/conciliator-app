@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { openai, abi } from "../utils";
+import { completionAI, abi, getModel } from "../utils";
 import { call, readContract } from "viem/actions";
 import { filecoinCalibration } from "viem/chains";
 import {
@@ -10,6 +10,7 @@ import {
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import templateText from "./system.hbs?raw";
 
 export const runtime = "edge";
 
@@ -33,7 +34,6 @@ function degrade(content: string) {
         const num2 = Math.random() * (max - min) + min;
         if (Math.abs((num2 - num) / num) > 0.05) {
           const output = num2.toFixed(decimals);
-          console.log("degrade", number, "->", output);
           return `${output}`;
         }
       }
@@ -55,13 +55,11 @@ export async function POST(req: NextRequest) {
     const { messages, tokenId, degraded } = (await req.json()) as {
       messages: {
         role: "user" | "assistant" | "system";
-        content: string | null;
+        content: string;
       }[];
       degraded?: boolean;
       tokenId: number;
     };
-
-    console.log("question", tokenId, degraded);
 
     const wallet = createWalletClient({
       account: privateKeyToAccount(
@@ -95,38 +93,99 @@ export async function POST(req: NextRequest) {
       abi,
       args: [tokenId],
     })) as { name: string; description: string };
+
+    if (messages.length === 0) {
+      return new Response(
+        JSON.stringify({
+          name: index.name,
+          description: index.description,
+          messages: [
+            {
+              role: "assistant",
+              content: `Welcome to the ${index.name} session! I am ready to answer questions about this invention with the following description
+
+${index.description}`,
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
     const request = [
       {
         role: "system",
-        content: `You are the Matcher in an invention value discovery session.
-The innovation you're presenting is named \`${index.name}\` and
-has the following description: \`${
-          index.description
-        }\` with the following content:
-\`\`\`
-${degraded ? degrade(content) : content}
-\`\`\`
-
-Your Goals:
-- Demonstrate value while preserving market worth
-- Use yes/no answers to control information flow
-- Stop when further details would risk devaluing the innovation
-
-Rules:
-1. Calculate a RATING from 1 to 10 to rate how close you think the question captures details of the content. Consider both individual answers and cumulative information revealed across all question/answer pairs.
-2. If this is the 20th question/answer pair or the RATING is 5 or higher, you must answer "STOP,RATING" (do not include the word "RATING" just the numeric value).
-3. For other RATING values answer ONLY with "Yes,RATING", "No,RATING" (do not include the word "RATING" just the numeric value).
-4. Balance between showing value and protecting implementation details
-5. You can initially return a welcome message to the Seeker`,
+        content: "",
       },
-      ...messages,
     ] as { role: "user" | "assistant" | "system"; content: string }[];
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Use the appropriate model
-      messages: request,
-    });
-    for (const { message } of completion.choices) {
-      messages.push(message);
+    const yesItems: boolean[] = [];
+    for (const message of messages) {
+      if (message.role === "assistant") {
+        request.push({
+          ...message,
+          content: message.content?.replace(/^(Yes|No|Stop)/i, "$1") || "",
+        });
+        if (/Stop/i.test(request.at(-1)?.content || "")) {
+          return new Response(
+            JSON.stringify({ success: false, error: "Completed" }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+        if (/Yes/i.test(request.at(-1)?.content || "")) {
+          yesItems.push(true);
+        } else {
+          yesItems.push(false);
+        }
+      } else {
+        request.push(message);
+      }
+    }
+    const runs: number[] = [];
+    let acc = 0;
+    for (const item of yesItems) {
+      if (item) {
+        acc++;
+        continue;
+      }
+      if (acc > 0) {
+        runs.push(acc);
+      }
+      acc = 0;
+    }
+    const consecutiveYesCount = Math.max(...runs);
+    if (consecutiveYesCount < 5) {
+      const _data: Record<string, string> = {
+        title: index.name,
+        description: index.description,
+        content: degraded ? degrade(content) : content,
+        consecutiveYesCount: `${consecutiveYesCount}`,
+      };
+      const _content = templateText.replace(
+        /\{\{([^}]*)\}\}/g,
+        (_match, name) => {
+          return _data[name.trim()] || "";
+        }
+      );
+      request[0].content = _content;
+      const completion = await completionAI.chat.completions.create({
+        model: getModel("COMPLETION"), // Use the appropriate model
+        messages: request,
+      });
+      const answerContent = completion.choices
+        .flatMap(
+          ({ message: { content = "" } = { content: "" } }) =>
+            content?.split("\n") || ""
+        )
+        .join("\n");
+      console.log("conciliator", consecutiveYesCount, yesItems, answerContent);
+      messages.push({ content: answerContent, role: "assistant" });
+    } else {
+      messages.push({ content: "Stop", role: "assistant" });
     }
     return new Response(
       JSON.stringify({
@@ -140,9 +199,28 @@ Rules:
     );
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    const { message, request_id, status, name, headers } = error as {
+      message?: string;
+      request_id?: string;
+      status?: number;
+      name?: string;
+      headers?: Record<string, unknown>;
+    };
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: message || "Internal Server Error",
+          request_id,
+          status,
+          name,
+          headers,
+        },
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

@@ -5,14 +5,64 @@ export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
   .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
 
-const configuration: ClientOptions = {
-  apiKey: process.env.OPENAI_API_KEY || "",
-  project: process.env.OPENAI_PROJECT_ID || "",
-  organization: process.env.OPENAI_ORGANIZATION_ID || "",
-  dangerouslyAllowBrowser: true,
-};
+const NAMES = [
+  {
+    postfix: "_API_KEY",
+    name: "apiKey",
+    default: "junkApi",
+  },
+  {
+    postfix: "_PROJECT_ID",
+    name: "projectId",
+  },
+  {
+    postfix: "_ORGANIZATION_ID",
+    name: "organizationId",
+  },
+  {
+    postfix: "_STORAGE_ID",
+    name: "storageId",
+  },
+  {
+    postfix: "_BASE_URL",
+    name: "baseURL",
+  },
+  {
+    postfix: "_STORAGE_ID",
+    name: "storageId",
+  },
+];
 
-export const openai = new OpenAI(configuration);
+export function getModel(name: string) {
+  const model =
+    process.env[`${name}_MODEL`] || (name === "IMAGE" ? "dall-e-3" : "gpt-4o");
+  if (!model) {
+    throw new Error(`Missing ${name}_MODEL`);
+  }
+  return model;
+}
+
+function readConfig(name: string) {
+  const output = Object.fromEntries(
+    (
+      NAMES.map(({ postfix, name: _name, default: _default }) => {
+        const value = process.env[`${name}${postfix}`] || _default || "";
+        if (value) {
+          return [_name, value] as [string, unknown];
+        }
+        return undefined;
+      }).filter(Boolean) as [string, unknown][]
+    ).concat([["dangerouslyAllowBrowser", true] as [string, unknown]])
+  );
+  return output;
+}
+
+const imageConfiguration: ClientOptions = readConfig("IMAGE");
+export const imageAI = new OpenAI(imageConfiguration);
+
+const completionConfiguration: ClientOptions = readConfig("COMPLETION");
+export const completionAI = new OpenAI(completionConfiguration);
+
 export const indexName = "ip-embeddings";
 
 export const pinata = new PinataSDK({

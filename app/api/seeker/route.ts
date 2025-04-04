@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
-import { openai } from "../utils";
+import { completionAI, getModel } from "../utils";
+import templateText from "./system.hbs?raw";
 
 export const runtime = "edge";
 
@@ -17,9 +18,12 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 403 });
     }
 
-    const { messages: _messages } = await req.json();
+    const { messages: _messages, title, description } = await req.json();
 
-    const messages: { role: string; content: string }[] = _messages;
+    const messages: {
+      role: "assistant" | "user" | "system";
+      content: string;
+    }[] = _messages;
 
     if (
       messages.find(
@@ -35,71 +39,92 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    const previous: { question: string; answer: string }[] = [];
-    let item = { question: "", answer: "" };
+    const previous: {
+      content: string;
+      role: "assistant" | "user" | "system";
+    }[] = [];
     for (const message of messages) {
       switch (message.role) {
         case "user":
-          item.question = message.content;
+          previous.push({ ...message, role: "assistant" });
           break;
         case "assistant":
-          item.answer = message.content.replace(/^(Yes|No|None),\s*\d*/i, "$1");
-          previous.push(item);
-          item = { question: "", answer: "" };
+          previous.push({
+            ...message,
+            content: message.content.replace(/^(Yes|No|Stop)/i, "$1"),
+            role: "user",
+          });
+          if (previous.at(-1)?.content === "Stop") {
+            return new Response(
+              JSON.stringify({ success: false, error: "Completed" }),
+              {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
           break;
       }
     }
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Use the appropriate model
+    const _data: Record<string, string> = {
+      title,
+      description,
+    };
+    const _content = templateText.replace(
+      /\{\{([^}]*)\}\}/g,
+      (_match, name) => {
+        return _data[name.trim()] || "";
+      }
+    );
+    const completion = await completionAI.chat.completions.create({
+      model: getModel("COMPLETION"), // Use the appropriate model
       messages: [
         {
           role: "system",
-          content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
-  Context:
-  - The Matcher requires yes/no questions to control information flow
-  - Your goal is to understand the innovation's value and applicability
-  - Craft questions strategically to build understanding within the yes/no format
-  - When you receive the Y/N answer, ask the next one. Every three questions, use the answers to make a detailed guess what the IP could be.
-
-  Previous exchanges: \`${JSON.stringify(previous)}\`,
-
-  
-`,
+          content: _content,
         },
-      ],
+      ].concat(previous) as unknown as {
+        role: "user" | "assistant" | "system";
+        content: string;
+      }[],
     });
     const choices = completion.choices as {
       message: { role: string; content: string };
     }[];
-    const [_question, ...rest] =
-      choices[0].message.content
-        .split("\n")
-        .map((item) => item.replace(/^-\s*/, "")) || [];
-    while (rest.length) {
-      if (rest[0].trim() === "") {
-        rest.shift();
-      } else {
-        break;
-      }
-    }
-    if (!_question) {
-      return new Response(
-        JSON.stringify({ success: false, error: "No question generated" }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-    messages.push({ ...choices[0].message, content: _question, role: "user" });
+    const content = choices
+      .flatMap(({ message: { content = "" } = { content: "" } }) =>
+        content.split("\n")
+      )
+      .join("\n");
+    console.log("seeker", content);
+    messages.push({ content, role: "user" });
     return new Response(JSON.stringify({ success: true, messages }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    const { message, request_id, status, name, headers } = error as {
+      message?: string;
+      request_id?: string;
+      status?: number;
+      name?: string;
+      headers?: Record<string, unknown>;
+    };
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: message || "Internal Server Error",
+          request_id,
+          status,
+          name,
+          headers,
+        },
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
