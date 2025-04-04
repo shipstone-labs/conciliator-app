@@ -52,7 +52,15 @@ const nextConfig: NextConfig = {
     // Add support for Handlebars templates
     config.module.rules.push({
       test: /\.hbs$/,
+      resourceQuery: { not: [/raw/] },
       use: "raw-loader",
+    });
+
+    // Add support for Handlebars templates with ?raw query
+    config.module.rules.push({
+      test: /\.hbs$/,
+      resourceQuery: /raw/,
+      type: "asset/source",
     });
 
     return config;

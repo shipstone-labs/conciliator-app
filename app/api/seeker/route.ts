@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { completionAI, getModel } from "../utils";
-import templateText from "./system.hbs?raw";
+// Dynamic import for the template file
+import templateFile from "./system.hbs";
+const templateText = templateFile.toString();
 
 export const runtime = "edge";
 
