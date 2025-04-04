@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const { messages, tokenId, degraded } = (await req.json()) as {
       messages: {
         role: "user" | "assistant" | "system";
-        content: string | null;
+        content: string;
       }[];
       degraded?: boolean;
       tokenId: number;
@@ -114,35 +114,78 @@ ${index.description}`,
         }
       );
     }
-
-    const _data: Record<string, string> = {
-      title: index.name,
-      description: index.description,
-      content: degraded ? degrade(content) : content,
-    };
-    const _content = templateText.replace(
-      /\{\{([^}]*)\}\}/g,
-      (_match, name) => {
-        return _data[name.trim()] || "";
-      }
-    );
     const request = [
       {
         role: "system",
-        content: _content,
+        content: "",
       },
-      ...messages,
     ] as { role: "user" | "assistant" | "system"; content: string }[];
-    const all_msg = request.slice();
-    const completion = await completionAI.chat.completions.create({
-      model: getModel("COMPLETION"), // Use the appropriate model
-      messages: request,
-    });
-    for (const { message } of completion.choices) {
-      messages.push(message);
-      all_msg.push(
-        message as { role: "user" | "assistant" | "system"; content: string }
+    const yesItems: boolean[] = [];
+    for (const message of messages) {
+      if (message.role === "assistant") {
+        request.push({
+          ...message,
+          content: message.content?.replace(/^(Yes|No|Stop)/i, "$1") || "",
+        });
+        if (/Stop/i.test(request.at(-1)?.content || "")) {
+          return new Response(
+            JSON.stringify({ success: false, error: "Completed" }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+        if (/Yes/i.test(request.at(-1)?.content || "")) {
+          yesItems.push(true);
+        } else {
+          yesItems.push(false);
+        }
+      } else {
+        request.push(message);
+      }
+    }
+    const runs: number[] = [];
+    let acc = 0;
+    for (const item of yesItems) {
+      if (item) {
+        acc++;
+        continue;
+      }
+      if (acc > 0) {
+        runs.push(acc);
+      }
+      acc = 0;
+    }
+    const consecutiveYesCount = Math.max(...runs);
+    if (consecutiveYesCount < 5) {
+      const _data: Record<string, string> = {
+        title: index.name,
+        description: index.description,
+        content: degraded ? degrade(content) : content,
+        consecutiveYesCount: `${consecutiveYesCount}`,
+      };
+      const _content = templateText.replace(
+        /\{\{([^}]*)\}\}/g,
+        (_match, name) => {
+          return _data[name.trim()] || "";
+        }
       );
+      request[0].content = _content;
+      const completion = await completionAI.chat.completions.create({
+        model: getModel("COMPLETION"), // Use the appropriate model
+        messages: request,
+      });
+      const answerContent = completion.choices
+        .flatMap(
+          ({ message: { content = "" } = { content: "" } }) =>
+            content?.split("\n") || ""
+        )
+        .join("\n");
+      console.log("conciliator", consecutiveYesCount, yesItems, answerContent);
+      messages.push({ content: answerContent, role: "assistant" });
+    } else {
+      messages.push({ content: "Stop", role: "assistant" });
     }
     return new Response(
       JSON.stringify({
@@ -156,9 +199,28 @@ ${index.description}`,
     );
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    const { message, request_id, status, name, headers } = error as {
+      message?: string;
+      request_id?: string;
+      status?: number;
+      name?: string;
+      headers?: Record<string, unknown>;
+    };
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          message: message || "Internal Server Error",
+          request_id,
+          status,
+          name,
+          headers,
+        },
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

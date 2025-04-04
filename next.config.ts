@@ -67,7 +67,7 @@ const nextConfig: NextConfig = {
     // Web3 Storage
     "web-storage-wrapper",
     "@web3-storage/w3up-client",
-    
+
     // Lilypad
     "lilypad-wrapper",
   ],

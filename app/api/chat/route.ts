@@ -112,9 +112,15 @@ Rules:
     );
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          (error as { message?: string }).message || "Internal Server Error",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

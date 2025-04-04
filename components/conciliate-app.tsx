@@ -123,8 +123,8 @@ const ConciliateApp = ({
       try {
         // First update the messages array with the user's question so it's visible immediately
         const userMessage = { role: "user" as const, content: question };
-        setMessages(prevMessages => [...prevMessages, userMessage]);
-        
+        setMessages((prevMessages) => [...prevMessages, userMessage]);
+
         // Then make the API request
         const {
           messages: _resultMessages,
@@ -146,7 +146,7 @@ const ConciliateApp = ({
           }
           return res.json();
         });
-        
+
         setDescription(description);
         setName(name);
         setMessages(_resultMessages);
@@ -222,34 +222,6 @@ const ConciliateApp = ({
       setAppState(AppStates.START);
     }
   }, [tokenId, messages]);
-
-  //   const handleGenerateQuestion = useCallback(async () => {
-  //     setIsLoading(true);
-  //     setError(null);
-
-  //     try {
-  //       const seekerData = await makeOpenAIRequest([
-  //         {
-  //           role: "system",
-  //           content: `You are the Seeker in an invention value discovery session. You represent potential users/buyers of innovations, seeking to understand their value and applicability.
-  // Context:
-  // - The Matcher requires yes/no questions to control information flow
-  // - Your goal is to understand the innovation's value and applicability
-  // - Craft questions strategically to build understanding within the yes/no format
-
-  // Previous exchanges: ${JSON.stringify(exchanges)}
-
-  // Generate your next strategic question. It must be answerable with yes/no. Respond with ONLY the question, no other text.`,
-  //         },
-  //       ]);
-
-  //       const generatedQuestion = seekerData.choices[0].message.content.trim();
-  //     } catch (err) {
-  //       setError((err as { message: string }).message);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }, [exchanges]);
 
   const renderStartState = () => (
     <Card className="w-full max-w-2xl mx-auto">
@@ -434,7 +406,7 @@ const ConciliateApp = ({
         >
           🏠
         </Link>
-        <Logo />
+        <Logo showText={false} />
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}
