@@ -1,6 +1,6 @@
 export const appConfig = {
   appName: "Conciliator",
-  description: "IP Value Discovery through structured dialogue",
+  description: "Add Your Idea",
   themeColor: "#1A1B25",
   icons: [
     {
