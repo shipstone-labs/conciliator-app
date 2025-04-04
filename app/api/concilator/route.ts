@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const { messages, tokenId, degraded } = (await req.json()) as {
       messages: {
         role: "user" | "assistant" | "system";
-        content?: string | null;
+        content: string;
       }[];
       degraded?: boolean;
       tokenId: number;
@@ -119,7 +119,7 @@ ${index.description}`,
         role: "system",
         content: "",
       },
-    ] as { role: "user" | "assistant" | "system"; content?: string }[];
+    ] as { role: "user" | "assistant" | "system"; content: string }[];
     const yesItems: boolean[] = [];
     for (const message of messages) {
       if (message.role === "assistant") {
@@ -142,8 +142,7 @@ ${index.description}`,
           yesItems.push(false);
         }
       } else {
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        request.push(message as any);
+        request.push(message);
       }
     }
     const runs: number[] = [];
@@ -175,8 +174,7 @@ ${index.description}`,
       request[0].content = _content;
       const completion = await completionAI.chat.completions.create({
         model: getModel("COMPLETION"), // Use the appropriate model
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        messages: request as any,
+        messages: request,
       });
       const answerContent = completion.choices
         .flatMap(

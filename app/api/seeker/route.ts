@@ -20,7 +20,10 @@ export async function POST(req: NextRequest) {
 
     const { messages: _messages, title, description } = await req.json();
 
-    const messages: { role: string; content: string }[] = _messages;
+    const messages: {
+      role: "assistant" | "user" | "system";
+      content: string;
+    }[] = _messages;
 
     if (
       messages.find(
@@ -80,8 +83,10 @@ export async function POST(req: NextRequest) {
           role: "system",
           content: _content,
         },
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      ].concat(previous) as any,
+      ].concat(previous) as unknown as {
+        role: "user" | "assistant" | "system";
+        content: string;
+      }[],
     });
     const choices = completion.choices as {
       message: { role: string; content: string };
