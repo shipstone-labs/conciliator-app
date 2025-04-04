@@ -422,9 +422,6 @@ const ConciliateApp = ({
         >
           🏠
         </Link>
-        <div className="flex justify-center mb-6">
-          <Logo showText={false} />
-        </div>
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}
