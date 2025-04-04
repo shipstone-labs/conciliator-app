@@ -68,7 +68,8 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "protobufjs",
-      "sharp"
+      "sharp",
+      "esbuild"
     ]
   },
   "resolutions": {
