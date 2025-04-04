@@ -21,7 +21,7 @@ import { Loader2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Modal } from "./ui/modal";
 import Chat from "./chat";
-import { Logo } from "./Logo";
+// Logo removed from non-home pages
 import Loading from "./Loading";
 import Link from "next/link";
 
