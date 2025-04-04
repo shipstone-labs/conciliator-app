@@ -1,10 +1,10 @@
-import * as esbuild from 'esbuild';
-import fs from 'fs';
-import path from 'path';
+import * as esbuild from "esbuild";
+import fs from "node:fs";
+import path from "node:path";
 
 // Make sure the dist directory exists
-if (!fs.existsSync('./dist')) {
-  fs.mkdirSync('./dist');
+if (!fs.existsSync("./dist")) {
+  fs.mkdirSync("./dist");
 }
 
 // Simple re-export for the index to work with Next.js
@@ -46,6 +46,6 @@ export const utils = {
 export default { createLitClient, LitNetworks, utils };`;
 
 // Write the index file
-fs.writeFileSync('./dist/index.js', indexContent);
+fs.writeFileSync("./dist/index.js", indexContent);
 
-console.log('📦 Lit wrapper built successfully!');
+console.log("📦 Lit wrapper built successfully!");

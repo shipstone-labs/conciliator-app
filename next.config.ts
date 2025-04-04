@@ -71,6 +71,8 @@ const nextConfig: NextConfig = {
     // Lilypad
     "lilypad-wrapper",
   ],
+  // Configure React runtime
+  reactStrictMode: true,
 };
 
 export default nextConfig;
