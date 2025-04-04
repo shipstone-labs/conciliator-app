@@ -2,7 +2,11 @@
 import Image from "next/image";
 import React from "react";
 
-export const Logo = () => (
+interface LogoProps {
+  showText?: boolean;
+}
+
+export const Logo: React.FC<LogoProps> = ({ showText = true }) => (
   <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto mb-10">
     {/* Logo Image */}
     <Image
@@ -14,12 +18,14 @@ export const Logo = () => (
       alt="SafeIdea Logo"
     />
 
-    {/* Text Container */}
-    <div className="text-center mt-6">
-      <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-        SafeIdea: Securely Store, Share and Monetize Digital Assets
-      </h1>
-      <p className="mt-2 text-base text-white/70">Includes the Conciliator Agentic Discovery project</p>
-    </div>
+    {/* Text Container - Only shown when showText is true */}
+    {showText && (
+      <div className="text-center mt-6">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          SafeIdea: Securely Store, Share and Monetize Digital Assets
+        </h1>
+        <p className="mt-2 text-base text-white/70">Includes the Conciliator Agentic Discovery project</p>
+      </div>
+    )}
   </div>
 );

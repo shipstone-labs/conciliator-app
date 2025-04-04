@@ -406,7 +406,7 @@ const ConciliateApp = ({
         >
           🏠
         </Link>
-        <Logo />
+        <Logo showText={false} />
         {appState === AppStates.START && renderStartState()}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}
