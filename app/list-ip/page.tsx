@@ -1,5 +1,6 @@
 "use client";
 
+import Authenticated from "@/components/Authenticated";
 import CardGrid, { type Data } from "@/components/card-grid";
 import Loading from "@/components/Loading";
 import { useCallback, useEffect, useState } from "react";
@@ -44,8 +45,8 @@ export default function Home() {
     return <Loading />;
   }
   return (
-    <main>
+    <Authenticated>
       <CardGrid items={items} onRetrieve={retrieve} />
-    </main>
+    </Authenticated>
   );
 }

@@ -10,7 +10,7 @@ import { authContext } from "@/app/authLayout";
 import { useStytchUser } from "@stytch/nextjs";
 import Loading from "./Loading";
 
-export function Authenticated({
+export default function Authenticated({
   children,
 }: PropsWithChildren<{ alwaysShow?: boolean }>) {
   const { user, isInitialized } = useStytchUser();
