@@ -1,5 +1,5 @@
-// pages/_app.jsx
 "use client";
+
 import { StytchProvider, useStytchUser } from "@stytch/nextjs";
 import { createStytchUIClient } from "@stytch/nextjs/ui";
 import Loading from "./Loading";
@@ -9,10 +9,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
+import { AuthModal } from "./AuthModal";
 
-// optional object for configuring SDK cookie behavior, currently showing defaults
+// Stytch client configuration
 const stytchOptions = {
   cookieOptions: {
     opaqueTokenCookieName: "stytch_session",
@@ -34,14 +35,17 @@ function Content({
 }: PropsWithChildren<{ alwaysShow?: boolean }>) {
   const { user, isInitialized } = useStytchUser();
   const [loggingOff, setLoggingOff] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
+
+  // Show auth modal if not authenticated and not ignored
   useEffect(() => {
-    if (isInitialized && !user && pathname !== "/authenticate") {
-      // Redirect the user to the login page if they are not logged in
-      router.replace(`/authenticate?redirect=${pathname}`);
+    if (isInitialized && !user && !alwaysShow) {
+      setShowAuthModal(true);
     }
-  }, [user, isInitialized, router, pathname]);
+  }, [isInitialized, user, alwaysShow]);
+
+  // Handle logout
   const doLogout = useCallback(() => {
     setLoggingOff(true);
     stytchClient.session
@@ -54,30 +58,43 @@ function Content({
         setLoggingOff(false);
       });
   }, [router]);
+
+  // Handle successful authentication
+  const handleAuthSuccess = useCallback(() => {
+    setShowAuthModal(false);
+  }, []);
+
+  if (!isInitialized) {
+    return <Loading text="Initializing" />;
+  }
+
   return (
-    <main>
-      {isInitialized && (alwaysShow || user) && !loggingOff ? (
+    <>
+      {(alwaysShow || user) && !loggingOff ? (
         <div>
-          {!alwaysShow ? <Button onClick={doLogout}>Logout</Button> : null}
+          {!alwaysShow && user ? (
+            <Button onClick={doLogout}>Logout</Button>
+          ) : null}
           {children}
         </div>
       ) : (
-        <Loading />
+        <Loading text="Authentication required" />
       )}
-    </main>
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+      />
+    </>
   );
 }
-export default function AuthenticatedLayout({
-  children,
-  ignore,
-  alwaysShow,
-}: PropsWithChildren<{ ignore?: boolean; alwaysShow?: boolean }>) {
-  if (ignore) {
-    return <>{children}</>;
-  }
+
+export default function AuthenticatedLayout({ children }: PropsWithChildren) {
   return (
     <StytchProvider stytch={stytchClient}>
-      <Content alwaysShow={alwaysShow}>{children}</Content>
+      <Content>{children}</Content>
     </StytchProvider>
   );
 }

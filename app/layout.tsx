@@ -4,6 +4,7 @@ import "./globals.css";
 import { appConfig } from "./config.mjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Footer } from "@/components/Footer";
+import AuthLayout from "./authLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,7 +33,7 @@ export default function RootLayout({
         <body className={inter.className}>
           <div className="flex flex-col min-h-screen">
             <main className="flex-grow bg-gradient-to-b from-[#2B5B75] to-background">
-              {children}
+              <AuthLayout>{children}</AuthLayout>
             </main>
             <Footer />
           </div>

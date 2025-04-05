@@ -6,7 +6,7 @@ import {
   decryptString,
   encryptString,
 } from "@lit-protocol/lit-node-client";
-import { LitRelay } from "@lit-protocol/lit-auth-client";
+import { LitRelay, StytchOtpProvider } from "@lit-protocol/lit-auth-client";
 
 // Create a simplified API that's more manageable
 export const LitNetworks = {
@@ -15,10 +15,28 @@ export const LitNetworks = {
   Custom: LIT_NETWORK.Custom,
 };
 
-const litRelay = new LitRelay({
-  relayUrl: LitRelay.getRelayUrl(LIT_NETWORK.Datil),
-  relayApiKey: "test-api-key",
-});
+export async function authenticate(client, options) {
+  const { userId, appId, accessToken, relayApiKey } = options;
+
+  const litRelay = new LitRelay({
+    relayUrl: LitRelay.getRelayUrl(client.litNetwork),
+    relayApiKey,
+  });
+
+  const session = new StytchOtpProvider({
+    relay: litRelay,
+    litNodeClient: client,
+    options: {
+      userId,
+      appId,
+    },
+  });
+
+  // from the above example of using the Stytch client to get an authenticated session
+  return await session.authenticate({
+    accessToken,
+  });
+}
 
 // Expose a simpler function to create and connect a client
 export async function createLitClient(options = {}) {
@@ -28,7 +46,7 @@ export async function createLitClient(options = {}) {
       litNetwork: LIT_NETWORK.Datil,
       ...options,
     });
-    await client.connect();
+
     return client;
   } catch (err) {
     console.error("Error initializing Lit client:", err);
