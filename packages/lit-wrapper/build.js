@@ -1,6 +1,4 @@
-import * as esbuild from "esbuild";
 import fs from "node:fs";
-import path from "node:path";
 
 // Make sure the dist directory exists
 if (!fs.existsSync("./dist")) {
