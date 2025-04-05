@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { Logo } from "./Logo";
-import AuthenticatedLayout from "./Authenticated";
+import AuthenticatedLayout from "@/app/authLayout";
 import { AuthButton } from "./AuthButton";
 import { useStytchUser } from "@stytch/nextjs";
 import Loading from "./Loading";
-import { LogoutButton } from "@/app/authLayout";
+import LogoffButton from "@/components/LogoffButton";
 
 // This is a placeholder for the actual login detection logic
 function HomeApp() {
@@ -14,7 +14,7 @@ function HomeApp() {
   return (
     <>
       {" "}
-      <LogoutButton />
+      <LogoffButton />
       <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
         <Logo />
 
