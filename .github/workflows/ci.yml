@@ -13,8 +13,6 @@ on:
 env:
   CF_PROJECT_NAME: conciliator-app
   CF_BASE_URL: conciliator-app
-  NEXT_PUBLIC_STYTCH_PROJECT_ENV: ${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
-  NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: ${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
 
 jobs:
   deploy:
@@ -60,6 +58,11 @@ jobs:
 
       - name: Build
         run: |
+          trap 'rm -f .env.local' EXIT
+          echo <<EOF > .env.local
+          NEXT_PUBLIC_STYTCH_PROJECT_ENV=${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
+          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
+          EOF
           pnpm pages:build
 
       - name: 'Deploy release'
