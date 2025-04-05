@@ -2,8 +2,9 @@
   "name": "lit-wrapper",
   "version": "1.0.0",
   "description": "Isolated wrapper for Lit Protocol",
-  "main": "dist/index.js",
-  "browser": "browser.js",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "browser": "index.js",
   "type": "module",
   "scripts": {
     "build": "node build.js"
@@ -18,6 +19,7 @@
     "@lit-protocol/crypto": "7.0.10-alpha.0",
     "@lit-protocol/lit-auth-client": "7.0.10-alpha.0",
     "@lit-protocol/lit-node-client": "7.0.10-alpha.0",
+    "@simplewebauthn/browser": "^13.1.0",
     "blakejs": "^1.2.1",
     "browser-headers": "^0.4.1",
     "js-sha256": "^0.11.0",

@@ -195,6 +195,9 @@ importers:
       '@lit-protocol/lit-node-client':
         specifier: 7.0.10-alpha.0
         version: 7.0.10-alpha.0(@walletconnect/modal@2.7.0(@types/react@19.1.0)(react@19.1.0))(encoding@0.1.13)
+      '@simplewebauthn/browser':
+        specifier: ^13.1.0
+        version: 13.1.0
       blakejs:
         specifier: ^1.2.1
         version: 1.2.1
@@ -1667,6 +1670,9 @@ packages:
 
   '@scure/bip39@1.5.4':
     resolution: {integrity: sha512-TFM4ni0vKvCfBpohoh+/lY05i9gRbSwXWngAsF4CABQxoaOHijxuaZ2R6cStDQ5CHtHO9aGJTr4ksVJASRRyMA==}
+
+  '@simplewebauthn/browser@13.1.0':
+    resolution: {integrity: sha512-WuHZ/PYvyPJ9nxSzgHtOEjogBhwJfC8xzYkPC+rR/+8chl/ft4ngjiK8kSU5HtRJfczupyOh33b25TjYbvwAcg==}
 
   '@spruceid/siwe-parser@2.1.2':
     resolution: {integrity: sha512-d/r3S1LwJyMaRAKQ0awmo9whfXeE88Qt00vRj91q5uv5ATtWIQEGJ67Yr5eSZw5zp1/fZCXZYuEckt8lSkereQ==}
@@ -7494,6 +7500,8 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.7.1
       '@scure/base': 1.2.4
+
+  '@simplewebauthn/browser@13.1.0': {}
 
   '@spruceid/siwe-parser@2.1.2':
     dependencies:
