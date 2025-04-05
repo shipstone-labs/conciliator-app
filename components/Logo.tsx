@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { type FC } from "react";
+import type { FC } from "react";
 
 interface LogoProps {
   showText?: boolean;

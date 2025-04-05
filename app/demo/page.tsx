@@ -1,11 +1,19 @@
 "use client";
 
+import AuthenticatedLayout from "@/components/Authenticated";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { LitClient } from "lit-wrapper";
 import { useState, useEffect } from "react";
+import type { Web3StorageClient } from "web-storage-wrapper";
 
 export default function DemoPage() {
   const [litStatus, setLitStatus] = useState("Not initialized");
   const [w3Status, setW3Status] = useState("Not initialized");
-
+  const [w3Client, setW3Client] = useState<Web3StorageClient | undefined>();
+  const [litClient, setLitClient] = useState<LitClient | undefined>();
+  const [email, setEmail] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
   useEffect(() => {
     // Import and initialize modules on the client side
     async function initModules() {
@@ -21,7 +29,8 @@ export default function DemoPage() {
             litNetwork: litModule.LitNetworks.Datil,
           });
           await litClient.connect();
-          setLitStatus("Client created successfully");
+          setLitClient(litClient);
+          setLitStatus("Client created and connected successfully");
         } catch (initError) {
           console.error("Error initializing Lit client:", initError);
           setLitStatus(
@@ -46,8 +55,10 @@ export default function DemoPage() {
         try {
           // Try initializing the client
           const w3Client = await w3Module.createW3Client();
+          console.log("default", w3Client.agent.did());
           // await w3Client.login("andy@richtera.org");
           console.log(w3Client);
+          setW3Client(w3Client);
           setW3Status("Client created successfully");
         } catch (initError) {
           console.error("Error initializing Web3 Storage client:", initError);
@@ -62,51 +73,85 @@ export default function DemoPage() {
         setW3Status(`Import failed: ${(error as { message: string }).message}`);
       }
     }
-
     initModules();
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-2xl font-bold mb-4">Isolated Modules Demo</h1>
+    <AuthenticatedLayout>
+      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+        <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
+          <h1 className="text-2xl font-bold mb-4">Isolated Modules Demo</h1>
 
-        <div className="bg-slate-100 p-6 rounded-lg shadow-sm mb-4">
-          <h2 className="text-xl font-semibold mb-2">Lit Protocol</h2>
-          <p className="mb-2">
-            Status:{" "}
-            <span
-              className={
-                litStatus.includes("failed") ? "text-red-500" : "text-green-500"
-              }
-            >
-              {litStatus}
-            </span>
-          </p>
-          <p className="text-sm text-gray-600">
-            The Lit Protocol client is isolated in its own module to prevent
-            dependency conflicts.
-          </p>
-        </div>
+          <div className="bg-slate-100 p-6 rounded-lg shadow-sm mb-4">
+            <h2 className="text-xl font-semibold mb-2">Lit Protocol</h2>
 
-        <div className="bg-slate-100 p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-2">Web3.Storage</h2>
-          <p className="mb-2">
-            Status:{" "}
-            <span
-              className={
-                w3Status.includes("failed") ? "text-red-500" : "text-green-500"
-              }
+            <p className="mb-2">
+              Status:{" "}
+              <span
+                className={
+                  !litClient || litStatus.includes("failed")
+                    ? "text-red-500"
+                    : "text-green-500"
+                }
+              >
+                {litStatus}
+              </span>
+            </p>
+            <p className="text-sm text-gray-600">
+              The Lit Protocol client is isolated in its own module to prevent
+              dependency conflicts.
+            </p>
+          </div>
+
+          <div className="bg-slate-100 p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-2">Web3.Storage</h2>
+            <Input
+              placeholder="someone@sample.com"
+              value={email}
+              pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1"
+              disabled={!w3Client}
+            />
+            <Button
+              onClick={() => {
+                console.log("Logging in with email:", email);
+                setLoggingIn(true);
+                w3Client
+                  ?.login(email)
+                  .then((value) => {
+                    console.log(value);
+                    setW3Status("Login successful");
+                  })
+                  .catch((e) => setW3Status(e.message))
+                  .finally(() => setLoggingIn(false));
+              }}
+              variant="ghost"
+              disabled={!w3Client || loggingIn}
+              size="sm"
+              className="text-gray-500 hover:text-gray-700"
             >
-              {w3Status}
-            </span>
-          </p>
-          <p className="text-sm text-gray-600">
-            The Web3.Storage client is isolated in its own module to prevent
-            dependency conflicts.
-          </p>
+              Login
+            </Button>
+            <p className="mb-2">
+              Status:{" "}
+              <span
+                className={
+                  w3Status.includes("failed")
+                    ? "text-red-500"
+                    : "text-green-500"
+                }
+              >
+                {w3Status}
+              </span>
+            </p>
+            <p className="text-sm text-gray-600">
+              The Web3.Storage client is isolated in its own module to prevent
+              dependency conflicts.
+            </p>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </AuthenticatedLayout>
   );
 }

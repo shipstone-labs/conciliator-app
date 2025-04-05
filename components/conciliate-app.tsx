@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   type MouseEvent,
   useCallback,
   useEffect,
@@ -88,35 +88,38 @@ const ConciliateApp = ({
     setDescription("");
     setName("");
   }, []);
-  
+
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);
   }, []);
-  
-  const handleFileSelection = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    // Check file size (2MB limit)
-    if (file.size > 2 * 1024 * 1024) {
-      setError("File size exceeds 2MB limit");
-      return;
-    }
-    
-    // Check file type (only text and markdown)
-    if (!file.type.includes('text') && !file.name.endsWith('.md')) {
-      setError("Only text and markdown files are supported");
-      return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const fileContent = event.target?.result as string;
-      setContent(fileContent);
-      setIsModalOpen(false);
-    };
-    reader.readAsText(file);
-  }, []);
+
+  const handleFileSelection = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Check file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        setError("File size exceeds 2MB limit");
+        return;
+      }
+
+      // Check file type (only text and markdown)
+      if (!file.type.includes("text") && !file.name.endsWith(".md")) {
+        setError("Only text and markdown files are supported");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fileContent = event.target?.result as string;
+        setContent(fileContent);
+        setIsModalOpen(false);
+      };
+      reader.readAsText(file);
+    },
+    []
+  );
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
@@ -227,15 +230,23 @@ const ConciliateApp = ({
   const renderStartState = () => (
     <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
       <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-bold text-primary">Add Your Idea</CardTitle>
+        <CardTitle className="text-2xl font-bold text-primary">
+          Add Your Idea
+        </CardTitle>
         <CardDescription className="text-white/90 mt-2 text-base">
-          First enter the publicly available information you want to use to describe your idea. 
-          This information will be publicly available on the Internet.
+          First enter the publicly available information you want to use to
+          describe your idea. This information will be publicly available on the
+          Internet.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="space-y-2">
-          <label htmlFor="public-title" className="text-sm font-medium text-white/90 block">Public Title</label>
+          <label
+            htmlFor="public-title"
+            className="text-sm font-medium text-white/90 block"
+          >
+            Public Title
+          </label>
           <Input
             id="public-title"
             placeholder="Enter the title that will appear in public listings"
@@ -245,9 +256,14 @@ const ConciliateApp = ({
             className="border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary"
           />
         </div>
-        
+
         <div className="space-y-2">
-          <label htmlFor="public-description" className="text-sm font-medium text-white/90 block">Public Description</label>
+          <label
+            htmlFor="public-description"
+            className="text-sm font-medium text-white/90 block"
+          >
+            Public Description
+          </label>
           <Textarea
             id="public-description"
             placeholder="Enter a description that will be visible to the public"
@@ -257,14 +273,16 @@ const ConciliateApp = ({
             className="min-h-24 border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary"
           />
         </div>
-        
+
         {content ? (
           <div className="p-4 rounded-lg border border-primary/30 bg-muted/30">
             <div className="flex justify-between items-center">
-              <p className="text-sm font-medium text-white">File uploaded successfully</p>
-              <Button 
-                onClick={() => setContent("")} 
-                variant="ghost" 
+              <p className="text-sm font-medium text-white">
+                File uploaded successfully
+              </p>
+              <Button
+                onClick={() => setContent("")}
+                variant="ghost"
                 size="sm"
                 className="text-secondary hover:text-secondary/80"
               >
@@ -285,13 +303,13 @@ const ConciliateApp = ({
         <div className="text-xs text-white/70 -mt-2">
           Text and Markdown files under 2MB are supported
         </div>
-        
+
         {error && (
           <Alert variant="destructive" className="border-red-300 bg-red-500/20">
             <AlertDescription className="text-white">{error}</AlertDescription>
           </Alert>
         )}
-        
+
         <Button
           onClick={handleStart}
           className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-md transition-all shadow-lg hover:shadow-primary/30 hover:scale-105"
@@ -306,7 +324,7 @@ const ConciliateApp = ({
             "Start Discovery Session"
           )}
         </Button>
-        
+
         {/* Note below the Start Button */}
         <div className="mt-2 p-4 rounded-lg border border-white/20 bg-muted/30">
           <p className="text-sm text-white/90">
@@ -314,7 +332,7 @@ const ConciliateApp = ({
             page with others to test the Conciliator with the IP you added.
           </p>
         </div>
-        
+
         <Button
           onClick={handleClear}
           variant="ghost"
@@ -323,12 +341,16 @@ const ConciliateApp = ({
         >
           Reset Fields
         </Button>
-        
+
         {/* File upload modal */}
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Upload Your Idea">
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Upload Your Idea"
+        >
           <div className="space-y-4">
             <p className="text-white/90">
-              Select a text or markdown file containing your idea description. 
+              Select a text or markdown file containing your idea description.
               This file will be encrypted and stored securely.
             </p>
             <input
@@ -339,9 +361,15 @@ const ConciliateApp = ({
               className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
             />
             <div className="flex justify-end space-x-3 mt-4">
-              <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="text-white/90 hover:bg-muted/50">Cancel</Button>
-              <Button 
-                onClick={() => fileInputRef.current?.click()} 
+              <Button
+                variant="ghost"
+                onClick={() => setIsModalOpen(false)}
+                className="text-white/90 hover:bg-muted/50"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => fileInputRef.current?.click()}
                 className="bg-primary hover:bg-primary/80 text-black font-medium transition-all"
               >
                 Select File
@@ -421,10 +449,10 @@ const ConciliateApp = ({
           href="/"
           className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
         >
-          <Image 
-            src="/svg/Black+Yellow.svg" 
-            alt="Home" 
-            width={26} 
+          <Image
+            src="/svg/Black+Yellow.svg"
+            alt="Home"
+            width={26}
             height={26}
             className="transform scale-125"
           />

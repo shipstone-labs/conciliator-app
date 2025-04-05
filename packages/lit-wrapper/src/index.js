@@ -6,6 +6,7 @@ import {
   decryptString,
   encryptString,
 } from "@lit-protocol/lit-node-client";
+import { LitRelay } from "@lit-protocol/lit-auth-client";
 
 // Create a simplified API that's more manageable
 export const LitNetworks = {
@@ -13,6 +14,11 @@ export const LitNetworks = {
   Habanero: LIT_NETWORK.Habanero,
   Custom: LIT_NETWORK.Custom,
 };
+
+const litRelay = new LitRelay({
+  relayUrl: LitRelay.getRelayUrl(LIT_NETWORK.Datil),
+  relayApiKey: "test-api-key",
+});
 
 // Expose a simpler function to create and connect a client
 export async function createLitClient(options = {}) {
