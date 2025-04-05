@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 export default function LogoffButton({
   children,
   ...rest
-}: PropsWithChildren<any>) {
+}: PropsWithChildren<Record<string, unknown>>) {
   // Handle logout
   const router = useRouter();
   const { user, isInitialized } = useStytchUser();
