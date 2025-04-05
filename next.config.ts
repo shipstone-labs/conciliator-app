@@ -41,12 +41,27 @@ const nextConfig: NextConfig = {
         ),
       };
 
-      // Add process/Buffer polyfills
-      config.plugins.push(
-        new webpack.DefinePlugin({
-          "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
-        })
-      );
+      // Add process/Buffer polyfills and expose environment variables
+      // Create a mapping for explicit variable replacement
+      const env: Record<string, string> = {
+        // Explicitly replace each environment variable
+        "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+        "process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN": JSON.stringify(
+          process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN || ""
+        ),
+        // Add any other NEXT_PUBLIC_ variables here explicitly
+      };
+
+      // Also create a mapping for any other NEXT_PUBLIC_ variables
+      // that might be present but not explicitly listed above
+      Object.keys(process.env).forEach((key) => {
+        if (key.startsWith("NEXT_PUBLIC_") && !env[`process.env.${key}`]) {
+          env[`process.env.${key}`] = JSON.stringify(process.env[key]);
+        }
+      });
+
+      // CRITICAL: Do NOT map "process.env" as a whole object - this can break variable replacement
+      config.plugins.push(new webpack.DefinePlugin(env));
     }
 
     // Add support for Handlebars templates
