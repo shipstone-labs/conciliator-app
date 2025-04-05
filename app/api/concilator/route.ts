@@ -10,7 +10,9 @@ import {
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import templateText from "./system.hbs?raw";
+// Dynamic import for the template file
+import templateFile from "./system.hbs";
+const templateText = templateFile.toString();
 
 export const runtime = "edge";
 

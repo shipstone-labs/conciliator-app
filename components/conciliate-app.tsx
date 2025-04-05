@@ -1,6 +1,7 @@
 "use client";
 
-import React, {
+import {
+  type default as React,
   type MouseEvent,
   useCallback,
   useEffect,
@@ -87,35 +88,38 @@ const ConciliateApp = ({
     setDescription("");
     setName("");
   }, []);
-  
+
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);
   }, []);
-  
-  const handleFileSelection = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    // Check file size (2MB limit)
-    if (file.size > 2 * 1024 * 1024) {
-      setError("File size exceeds 2MB limit");
-      return;
-    }
-    
-    // Check file type (only text and markdown)
-    if (!file.type.includes('text') && !file.name.endsWith('.md')) {
-      setError("Only text and markdown files are supported");
-      return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const fileContent = event.target?.result as string;
-      setContent(fileContent);
-      setIsModalOpen(false);
-    };
-    reader.readAsText(file);
-  }, []);
+
+  const handleFileSelection = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Check file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        setError("File size exceeds 2MB limit");
+        return;
+      }
+
+      // Check file type (only text and markdown)
+      if (!file.type.includes("text") && !file.name.endsWith(".md")) {
+        setError("Only text and markdown files are supported");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fileContent = event.target?.result as string;
+        setContent(fileContent);
+        setIsModalOpen(false);
+      };
+      reader.readAsText(file);
+    },
+    []
+  );
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
@@ -228,8 +232,9 @@ const ConciliateApp = ({
       <CardHeader>
         <CardTitle className="text-2xl">Add Your Idea</CardTitle>
         <CardDescription>
-          First enter the publically available information you want to use to describe your idea. 
-          This information will be publically available on the Internet.
+          First enter the publically available information you want to use to
+          describe your idea. This information will be publically available on
+          the Internet.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -248,10 +253,12 @@ const ConciliateApp = ({
         {content ? (
           <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
             <div className="flex justify-between items-center">
-              <p className="text-sm font-medium text-gray-700">File uploaded successfully</p>
-              <Button 
-                onClick={() => setContent("")} 
-                variant="ghost" 
+              <p className="text-sm font-medium text-gray-700">
+                File uploaded successfully
+              </p>
+              <Button
+                onClick={() => setContent("")}
+                variant="ghost"
                 size="sm"
                 className="text-red-500 hover:text-red-700"
               >
@@ -306,12 +313,16 @@ const ConciliateApp = ({
         >
           Reset Fields
         </Button>
-        
+
         {/* File upload modal */}
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Upload Your Idea">
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Upload Your Idea"
+        >
           <div className="space-y-4">
             <p className="text-gray-600">
-              Select a text or markdown file containing your idea description. 
+              Select a text or markdown file containing your idea description.
               This file will be encrypted and stored securely.
             </p>
             <input
@@ -322,9 +333,11 @@ const ConciliateApp = ({
               className="w-full p-2 border border-gray-300 rounded-md"
             />
             <div className="flex justify-end space-x-2">
-              <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button 
-                onClick={() => fileInputRef.current?.click()} 
+              <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => fileInputRef.current?.click()}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Select File
