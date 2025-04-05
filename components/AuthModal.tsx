@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useStytch } from "@stytch/nextjs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Modal } from "@/components/ui/modal";
 import { X } from "lucide-react";
+import { authContext } from "@/app/authLayout";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ interface AuthModalProps {
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const stytch = useStytch();
-
+  const { loggingOff } = useContext(authContext);
   // Authentication states
   const [methodId, setMethodId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setError(null);
 
     try {
-      const response = await stytch.otps.email.send(email, {
+      const response = await stytch.otps.email.loginOrCreate(email, {
         expiration_minutes: 10,
       });
 
@@ -85,7 +86,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         ? phoneNumber
         : `+1${phoneNumber.replace(/[^0-9]/g, "")}`;
 
-      const response = await stytch.otps.sms.send(formattedPhone, {
+      const response = await stytch.otps.sms.loginOrCreate(formattedPhone, {
         expiration_minutes: 10,
       });
 
@@ -144,7 +145,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Sign In">
+    <Modal isOpen={isOpen && !loggingOff} onClose={handleClose} title="Sign In">
       <div className="absolute top-4 right-4">
         <button
           type="button"

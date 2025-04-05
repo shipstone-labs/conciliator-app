@@ -1,11 +1,11 @@
 "use client";
 
+import Authenticated from "@/components/Authenticated";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { LitClient } from "lit-wrapper";
 import { useState, useEffect } from "react";
 import type { Web3StorageClient } from "web-storage-wrapper";
-import { Authenticated } from "../authLayout";
 
 export default function DemoPage() {
   const [litStatus, setLitStatus] = useState("Not initialized");

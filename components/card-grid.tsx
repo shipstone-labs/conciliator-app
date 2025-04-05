@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import Image from "next/image";
 import Link from "next/link";
+import HomeLink from "./HomeLink";
 
 const itemsPerPage = 16; // 4 Cards per page
 
@@ -23,6 +24,7 @@ type Props = {
   items: Data[];
   onRetrieve: (start: number, limit: number) => Promise<void>;
 };
+
 const CardGrid = ({ items, onRetrieve }: Props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [imageWidth, setImageWidth] = useState(200); // Default width
@@ -61,18 +63,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
 
   return (
     <div className="w-full flex flex-col items-center p-3">
-      <Link
-        href="/"
-        className="fixed top-6 left-6 bg-muted w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-muted/80 transition-all z-50 overflow-hidden border border-white/10"
-      >
-        <Image 
-          src="/svg/Black+Yellow.svg" 
-          alt="Home" 
-          width={26} 
-          height={26}
-          className="transform scale-125"
-        />
-      </Link>
+      <HomeLink />
       <Link
         href="/add-ip"
         className="fixed top-6 right-6 bg-secondary/80 backdrop-blur-lg text-black text-3xl w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-secondary transition-all hover:scale-110 border border-white/20"
@@ -108,7 +99,9 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
                   /ipfs:\/\//,
                   "/api/download/"
                 )}?img-width=${imageWidth}&img-dpr=${
-                  typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
+                  typeof window !== "undefined"
+                    ? window.devicePixelRatio || 1
+                    : 1
                 }`}
                 alt={item.name}
                 width={200}
@@ -165,8 +158,8 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
             key={`page-${i + 1}`}
             onClick={() => goToPage(i + 1)}
             className={`px-4 py-2 rounded-xl shadow-md transition-all ${
-              currentPage === i + 1 
-                ? "bg-primary text-black font-medium" 
+              currentPage === i + 1
+                ? "bg-primary text-black font-medium"
                 : "bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70"
             }`}
           >
