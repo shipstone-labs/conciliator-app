@@ -57,11 +57,14 @@ jobs:
         run: pnpm install
 
       - name: Build
+        env:
+          NEXT_PUBLIC_STYTCH_PROJECT_ENV: ${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
+          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: ${{ secrets.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN }}
         run: |
-          trap 'rm -f .env.local' EXIT
-          echo <<EOF > .env.local
-          NEXT_PUBLIC_STYTCH_PROJECT_ENV=${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
-          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=${{ secrets.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN }}
+          trap 'rm -f .env' EXIT
+          echo <<EOF > .env
+          NEXT_PUBLIC_STYTCH_PROJECT_ENV=${NEXT_PUBLIC_STYTCH_PROJECT_ENV}
+          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=${NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN}
           EOF
           pnpm pages:build
 
