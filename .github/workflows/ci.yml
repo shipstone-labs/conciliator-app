@@ -61,7 +61,7 @@ jobs:
           trap 'rm -f .env.local' EXIT
           echo <<EOF > .env.local
           NEXT_PUBLIC_STYTCH_PROJECT_ENV=${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
-          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
+          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=${{ secrets.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN }}
           EOF
           pnpm pages:build
 
