@@ -1,12 +1,34 @@
-import { Loader2 } from "lucide-react";
+"use client";
 
-const Loading = () => (
-  <div className="flex items-center justify-center h-screen bg-gray-50">
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface LoadingProps {
+  small?: boolean;
+  className?: string;
+  showText?: boolean;
+  text?: string;
+}
+
+const Loading = ({
+  small = false,
+  className = "",
+  showText = true,
+  text = "Loading the Idea Database",
+}: LoadingProps) => (
+  <div
+    className={cn(
+      "flex items-center justify-center",
+      small ? "h-auto" : "h-screen",
+      "bg-transparent",
+      className
+    )}
+  >
     <div className="text-center">
       <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-      <p className="mt-4 text-lg font-medium text-gray-700">
-        Loading the Idea Database
-      </p>
+      {showText ? (
+        <p className="mt-4 text-lg font-medium text-gray-700">{text}</p>
+      ) : null}
     </div>
   </div>
 );

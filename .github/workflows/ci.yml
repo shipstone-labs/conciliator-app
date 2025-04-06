@@ -46,7 +46,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: "10.3.0"
+          version: "10.7.1"
       
       - uses: actions/setup-node@v3
         with:
@@ -57,7 +57,19 @@ jobs:
         run: pnpm install
 
       - name: Build
+        env:
+          NEXT_PUBLIC_STYTCH_PROJECT_ENV: ${{ secrets.NEXT_PUBLIC_STYTCH_PROJECT_ENV }}
+          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: ${{ secrets.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN }}
+          NEXT_PUBLIC_STYTCH_APP_ID: ${{ secrets.NEXT_PUBLIC_STYTCH_APP_ID }}
+          NEXT_PUBLIC_LIT_RELAY_API_KEY: ${{ secrets.NEXT_PUBLIC_LIT_RELAY_API_KEY }}
         run: |
+          trap 'rm -f .env.local' EXIT
+          echo <<EOF > .env.local
+          NEXT_PUBLIC_STYTCH_PROJECT_ENV=${NEXT_PUBLIC_STYTCH_PROJECT_ENV}
+          NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=${NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN}
+          NEXT_PUBLIC_STYTCH_APP_ID=${NEXT_PUBLIC_STYTCH_APP_ID}
+          NEXT_PUBLIC_LIT_RELAY_API_KEY=${NEXT_PUBLIC_LIT_RELAY_API_KEY}
+          EOF
           pnpm pages:build
 
       - name: 'Deploy release'

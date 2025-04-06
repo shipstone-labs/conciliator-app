@@ -13,9 +13,5 @@ export default function Token() {
     // Redirect to the root page
     window.location.href = "/";
   };
-  return (
-    <main>
-      <ConciliateApp tokenId={tokenId} onNewIP={handleCreateNewIP} />
-    </main>
-  );
+  return <ConciliateApp tokenId={tokenId} onNewIP={handleCreateNewIP} />;
 }
