@@ -1,5 +1,5 @@
-import ConciliateApp from "@/components/conciliate-app";
+import AddIP from "@/components/AddIP";
 
-export default function Home() {
-  return <ConciliateApp />;
+export default function AddIPPage() {
+  return <AddIP />;
 }
