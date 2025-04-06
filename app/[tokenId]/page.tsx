@@ -2,7 +2,7 @@
 
 export const runtime = "edge";
 
-import ConciliateApp from "@/components/conciliate-app";
+import QuestionIP from "@/components/QuestionIP";
 import { useParams } from "next/navigation";
 
 export default function Token() {
@@ -13,5 +13,5 @@ export default function Token() {
     // Redirect to the root page
     window.location.href = "/";
   };
-  return <ConciliateApp tokenId={tokenId} onNewIP={handleCreateNewIP} />;
+  return <QuestionIP tokenId={tokenId} onNewIP={handleCreateNewIP} />;
 }
