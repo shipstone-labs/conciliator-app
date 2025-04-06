@@ -63,9 +63,15 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
     <div className="w-full flex flex-col items-center p-3">
       <Link
         href="/"
-        className="fixed top-6 left-6 bg-primary/80 backdrop-blur-lg text-black w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-primary transition-all hover:scale-110 border border-white/20"
+        className="fixed top-6 left-6 bg-muted w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-muted/80 transition-all z-50 overflow-hidden border border-white/10"
       >
-        🏠
+        <Image 
+          src="/svg/Black+Yellow.svg" 
+          alt="Home" 
+          width={26} 
+          height={26}
+          className="transform scale-125"
+        />
       </Link>
       <Link
         href="/add-ip"

@@ -1,8 +1,13 @@
 export const appConfig = {
-  appName: "Conciliator",
-  description: "Add Your Idea",
+  appName: "SafeIdea",
+  description: "Securely Store, Share and Monetize IP",
   themeColor: "#1A1B25",
   icons: [
+    {
+      rel: "icon",
+      type: "image/svg+xml", 
+      url: "/favicon.svg",
+    },
     {
       rel: "apple-touch-icon-precomposed",
       sizes: "57x57",
