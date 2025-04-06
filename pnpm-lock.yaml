@@ -180,12 +180,18 @@ importers:
       '@lit-protocol/accs-schemas':
         specifier: ^0.0.24
         version: 0.0.24
+      '@lit-protocol/auth-helpers':
+        specifier: 7.0.10-alpha.0
+        version: 7.0.10-alpha.0
       '@lit-protocol/constants':
         specifier: 7.0.10-alpha.0
         version: 7.0.10-alpha.0
       '@lit-protocol/contracts':
         specifier: ^0.0.90
         version: 0.0.90(typescript@5.8.2)
+      '@lit-protocol/contracts-sdk':
+        specifier: 7.0.10-alpha.0
+        version: 7.0.10-alpha.0
       '@lit-protocol/crypto':
         specifier: 7.0.10-alpha.0
         version: 7.0.10-alpha.0

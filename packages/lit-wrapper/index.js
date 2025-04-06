@@ -1,12 +1,28 @@
 // Import directly from internal node_modules
 // These imports will be bundled by esbuild
-import { LIT_NETWORK } from "@lit-protocol/constants";
+import {
+  LIT_NETWORK,
+  AUTH_METHOD_SCOPE,
+  PROVIDER_TYPE,
+  LIT_ABILITY,
+} from "@lit-protocol/constants";
 import {
   LitNodeClientNodeJs,
   decryptString,
   encryptString,
 } from "@lit-protocol/lit-node-client";
-import { LitRelay, StytchOtpProvider } from "@lit-protocol/lit-auth-client";
+import {
+  LitAccessControlConditionResource,
+  newSessionCapabilityObject,
+  LitPKPResource,
+  LitActionResource,
+  capacityDelegationAuthSig,
+} from "@lit-protocol/auth-helpers";
+import {
+  LitRelay,
+  StytchOtpProvider,
+  getAuthIdByAuthMethod,
+} from "@lit-protocol/lit-auth-client";
 
 // Create a simplified API that's more manageable
 export const LitNetworks = {
@@ -36,9 +52,11 @@ export async function authenticate(client, options) {
   );
 
   // from the above example of using the Stytch client to get an authenticated session
-  return await session.authenticate({
+  const authMethod = await session.authenticate({
     accessToken,
   });
+  const authId = await getAuthIdByAuthMethod(authMethod);
+  return { authMethod, authId, provider: session };
 }
 
 // Expose a simpler function to create and connect a client
@@ -63,10 +81,31 @@ export const utils = {
   decryptString,
 };
 
+export {
+  AUTH_METHOD_SCOPE,
+  PROVIDER_TYPE,
+  LIT_NETWORK,
+  LIT_ABILITY,
+  LitAccessControlConditionResource,
+  newSessionCapabilityObject,
+  capacityDelegationAuthSig,
+  LitPKPResource,
+  LitActionResource,
+};
+
 // Default export for convenience
 export default {
   createLitClient,
   authenticate,
   LitNetworks,
+  LitAccessControlConditionResource,
+  newSessionCapabilityObject,
+  capacityDelegationAuthSig,
+  LitPKPResource,
+  LitActionResource,
   utils,
+  AUTH_METHOD_SCOPE,
+  PROVIDER_TYPE,
+  LIT_NETWORK,
+  LIT_ABILITY,
 };

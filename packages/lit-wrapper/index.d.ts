@@ -1,4 +1,22 @@
 // Type definitions for lit-wrapper
+import type {
+  AuthMethod,
+  StytchOtpProvider,
+} from "@lit-protocol/lit-auth-client";
+import {
+  LitAccessControlConditionResource,
+  newSessionCapabilityObject,
+  SessionCapabilityObject,
+  LitPKPResource,
+  LitActionResource,
+  capacityDelegationAuthSig,
+} from "@lit-protocol/auth-helpers";
+import {
+  LIT_NETWORKS,
+  AUTH_METHOD_SCOPE,
+  PROVIDER_TYPE,
+  LIT_ABILITY,
+} from "@lit-protocol/constants";
 // This file allows TypeScript to understand the exported types from our bundled module
 declare module "lit-wrapper" {
   export const LitNetworks: {
@@ -31,7 +49,11 @@ declare module "lit-wrapper" {
   export function authenticate(
     client: LitClient,
     options?: AuthOptions
-  ): Promise<void>;
+  ): Promise<{
+    authMethod: AuthMethod;
+    provider: StytchOtpProvider;
+    authId: string;
+  }>;
 
   export const utils: {
     encryptString: typeof LitClient.encryptString;
@@ -40,10 +62,32 @@ declare module "lit-wrapper" {
 
   const defaultExport: {
     createLitClient: typeof createLitClient;
-    authenticate: typeof authenticate;
+    authenticate: typeof StytchOtpProvider.authenticate;
     LitNetworks: typeof LitNetworks;
     utils: typeof utils;
+    LIT_NETWORKS;
+    AUTH_METHOD_SCOPE;
+    PROVIDER_TYPE;
+    LIT_ABILITY;
+    SessionCapabilityObject;
+    newSessionCapabilityObject;
+    LitAccessControlConditionResource;
+    capacityDelegationAuthSig;
+    LitPKPResource;
+    LitActionResource;
   };
 
+  export {
+    LIT_NETWORKS,
+    AUTH_METHOD_SCOPE,
+    PROVIDER_TYPE,
+    LIT_ABILITY,
+    SessionCapabilityObject,
+    newSessionCapabilityObject,
+    LitAccessControlConditionResource,
+    capacityDelegationAuthSig,
+    LitPKPResource,
+    LitActionResource,
+  };
   export default defaultExport;
 }

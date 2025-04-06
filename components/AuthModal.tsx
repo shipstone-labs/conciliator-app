@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { useStytch } from "@stytch/nextjs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Modal } from "@/components/ui/modal";
-import { X } from "lucide-react";
 import { authContext } from "@/app/authLayout";
 
 interface AuthModalProps {
@@ -31,7 +30,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [rememberDevice, setRememberDevice] = useState(true);
 
   // Reset form state when closing modal
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     // Reset all state
     setMethodId(null);
     setEmail("");
@@ -43,7 +42,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
     // Call the parent's onClose
     onClose();
-  };
+  }, [onClose]);
 
   // Handle sending email OTP
   const handleSendEmailOTP = async () => {
@@ -101,8 +100,17 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     }
   };
 
+  const handleEnter = useCallback((callback: () => void) => {
+    return (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        callback();
+      }
+    };
+  }, []);
+
   // Handle verifying OTP code
-  const handleVerifyOTP = async () => {
+  const handleVerifyOTP = useCallback(async () => {
     if (!code || !methodId) {
       setError("Please enter the verification code");
       return;
@@ -134,29 +142,18 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [code, methodId, onSuccess, stytch.otps, handleClose]);
 
   // Reset form to try a different method
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setShowCodeInput(false);
     setMethodId(null);
     setCode("");
     setError(null);
-  };
+  }, []);
 
   return (
     <Modal isOpen={isOpen && !loggingOff} onClose={handleClose} title="Sign In">
-      <div className="absolute top-4 right-4">
-        <button
-          type="button"
-          onClick={handleClose}
-          className="text-gray-400 hover:text-white transition-colors"
-          aria-label="Close"
-        >
-          <X size={20} />
-        </button>
-      </div>
-
       <div className="mt-4 space-y-6">
         {error && (
           <Alert
@@ -181,6 +178,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   placeholder="Email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={handleEnter(handleSendEmailOTP)}
                   disabled={isLoading}
                 />
               </div>
@@ -200,6 +198,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   placeholder="Phone number (e.g. +1 555-123-4567)"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
+                  onKeyDown={handleEnter(handleSendEmailOTP)}
                   disabled={isLoading}
                 />
               </div>
@@ -220,6 +219,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 placeholder="Enter verification code"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
+                onKeyDown={handleEnter(handleVerifyOTP)}
                 disabled={isLoading}
               />
             </div>

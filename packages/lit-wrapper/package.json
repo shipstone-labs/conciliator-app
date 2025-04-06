@@ -14,8 +14,10 @@
   "license": "ISC",
   "dependencies": {
     "@lit-protocol/accs-schemas": "^0.0.24",
+    "@lit-protocol/auth-helpers": "7.0.10-alpha.0",
     "@lit-protocol/constants": "7.0.10-alpha.0",
     "@lit-protocol/contracts": "^0.0.90",
+    "@lit-protocol/contracts-sdk": "7.0.10-alpha.0",
     "@lit-protocol/crypto": "7.0.10-alpha.0",
     "@lit-protocol/lit-auth-client": "7.0.10-alpha.0",
     "@lit-protocol/lit-node-client": "7.0.10-alpha.0",
