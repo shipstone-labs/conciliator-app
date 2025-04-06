@@ -8,6 +8,7 @@ import {
   newSessionCapabilityObject,
   SessionCapabilityObject,
   LitPKPResource,
+  LitNodeClient,
   LitActionResource,
   capacityDelegationAuthSig,
 } from "@lit-protocol/auth-helpers";
@@ -31,10 +32,6 @@ declare module "lit-wrapper" {
     [key: string]: any;
   }
 
-  export interface LitClient {
-    connect(): Promise<void>;
-    [key: string]: any;
-  }
   export interface AuthOptions {
     userId?: string;
     appId?: string;
@@ -44,7 +41,7 @@ declare module "lit-wrapper" {
 
   export function createLitClient(
     options?: LitClientOptions
-  ): Promise<LitClient>;
+  ): Promise<LitNodeClient>;
 
   export function authenticate(
     client: LitClient,
@@ -88,6 +85,7 @@ declare module "lit-wrapper" {
     capacityDelegationAuthSig,
     LitPKPResource,
     LitActionResource,
+    LitNodeClient,
   };
   export default defaultExport;
 }

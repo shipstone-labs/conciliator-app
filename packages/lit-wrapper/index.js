@@ -8,6 +8,7 @@ import {
 } from "@lit-protocol/constants";
 import {
   LitNodeClientNodeJs,
+  LitNodeClient,
   decryptString,
   encryptString,
 } from "@lit-protocol/lit-node-client";
@@ -91,6 +92,7 @@ export {
   capacityDelegationAuthSig,
   LitPKPResource,
   LitActionResource,
+  LitNodeClient,
 };
 
 // Default export for convenience
@@ -102,6 +104,7 @@ export default {
   newSessionCapabilityObject,
   capacityDelegationAuthSig,
   LitPKPResource,
+  LitNodeClient,
   LitActionResource,
   utils,
   AUTH_METHOD_SCOPE,

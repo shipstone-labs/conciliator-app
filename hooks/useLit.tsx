@@ -1,10 +1,10 @@
 "use client";
 
-import { authContext } from "@/app/authLayout";
+import { sessionContext } from "@/components/Authenticated";
 import { useContext } from "react";
 
-export const useAuth = () => {
-  const context = useContext(authContext);
+export const useLit = () => {
+  const context = useContext(sessionContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
