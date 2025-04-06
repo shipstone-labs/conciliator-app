@@ -523,13 +523,13 @@ export default function ChatUI({
   const getHighlightClass = (answer: string) => {
     switch (answer.toUpperCase()) {
       case "YES":
-        return "bg-green-50 border border-green-500";
+        return "bg-primary/10 border border-primary";
       case "NO":
-        return "bg-red-50 border border-red-500";
+        return "bg-secondary/10 border border-secondary";
       case "STOP":
-        return "bg-yellow-50 border border-yellow-500";
+        return "bg-brand/10 border border-brand";
       default:
-        return "bg-gray-50 border border-gray-300";
+        return "bg-background/40 border border-white/10";
     }
   };
 
@@ -573,9 +573,9 @@ export default function ChatUI({
       });
     }, [messages]);
   return (
-    <Card ref={cardRef} className="w-full mx-auto">
+    <Card ref={cardRef} className="w-full mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-xl">Discovery Session</CardTitle>
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Discovery Session</CardTitle>
         <CardDescription>
           {name} - {description}
         </CardDescription>
@@ -601,18 +601,18 @@ export default function ChatUI({
               {/* Highlight the previous user message if the current assistant message is special */}
               {isSpecial ? (
                 <div
-                  className={`p-4 flex flex-row items-center rounded-lg border w-full ${highlightClass}`}
+                  className={`p-4 flex flex-row items-center rounded-lg border w-full backdrop-blur-lg ${highlightClass}`}
                 >
                   {/* Avatar for Assistant */}
                   {message.role === "assistant" && (
                     <div className="flex flex-row items-center space-x-2 mr-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center">
                         {message.index || ""}
                       </div>
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                         <Image
-                          src="/logo.png"
-                          alt="Logo"
+                          src="/svg/Black+Yellow.svg"
+                          alt="Conciliator Logo"
                           width={32}
                           height={32}
                         />
@@ -635,10 +635,10 @@ export default function ChatUI({
                 <div className="flex items-start space-x-4">
                   {/* Optional Avatar for Assistant */}
                   {message.role === "assistant" && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                       <Image
-                        src="/logo.png"
-                        alt="Logo"
+                        src="/svg/Black+Yellow.svg"
+                        alt="Conciliator Logo"
                         width={32}
                         height={32}
                       />
@@ -647,12 +647,12 @@ export default function ChatUI({
 
                   {/* Chat Bubble */}
                   <div
-                    className={`p-4 rounded-lg max-w-3xl ${
+                    className={`p-4 rounded-lg max-w-3xl backdrop-blur-sm ${
                       message.role === "user"
-                        ? "bg-blue-100"
+                        ? "bg-primary/10 border border-primary/30"
                         : message.role === "assistant"
-                        ? "bg-gray-100"
-                        : "bg-gray-50 text-sm italic"
+                        ? "bg-background/40 border border-white/10"
+                        : "bg-muted/30 text-sm italic border border-white/5"
                     }`}
                   >
                     <div className="whitespace-pre-wrap break-words markdown-content">
@@ -691,7 +691,7 @@ export default function ChatUI({
                 disabled={loading !== "none" || hasStop}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
-                className="resize-none bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full h-[120px] pr-16 rounded-lg" // Adjust height and padding for the button
+                className="resize-none bg-background/40 border-white/10 focus:ring-primary focus:border-primary w-full h-[120px] pr-16 rounded-lg backdrop-blur-sm text-white placeholder:text-white/50" // Adjust height and padding for the button
               />
               {!autoCompleting ? (
                 <button
@@ -746,11 +746,12 @@ export default function ChatUI({
                     }
                     setDegraded(checked);
                   }}
+                  className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                 />
-                <Label htmlFor="degraded">Run in degraded mode</Label>
+                <Label htmlFor="degraded" className="text-white/80">Run in degraded mode</Label>
 
                 {/* API state indicator for debugging */}
-                <span className="ml-4 text-xs text-gray-500">
+                <span className="ml-4 text-xs text-white/50 bg-background/30 px-2 py-1 rounded-full border border-white/10">
                   {cycleInProgress ? "Processing" : "Ready"}
                 </span>
               </div>
@@ -760,10 +761,11 @@ export default function ChatUI({
                 <button
                   type="button"
                   onClick={onNewIP}
-                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
-      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
-      hover:bg-gray-300 
-      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+                  className="bg-background/40 text-white/80 px-6 py-2 rounded-lg transition
+      backdrop-blur-sm border border-white/10
+      focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-opacity-50 
+      hover:bg-background/60
+      disabled:bg-background/20 disabled:text-white/30 disabled:cursor-not-allowed disabled:hover:bg-background/20 disabled:focus:ring-0"
                 >
                   Create a New IP
                 </button>
@@ -778,10 +780,10 @@ export default function ChatUI({
         hasStop
           ? "bg-gray-500 text-white focus:ring-gray-400"
           : autoCompleting
-          ? "bg-red-600 hover:bg-red-700 text-white focus:ring-red-400"
+          ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground focus:ring-secondary/40"
           : isStopping
-          ? "bg-orange-500 text-white focus:ring-orange-400 cursor-wait"
-          : "bg-green-600 hover:bg-green-700 text-white focus:ring-green-400"
+          ? "bg-brand text-brand-foreground focus:ring-brand/40 cursor-wait"
+          : "bg-primary hover:bg-primary/90 text-primary-foreground focus:ring-primary/40"
       } 
       disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed`}
               >
@@ -803,10 +805,11 @@ export default function ChatUI({
                     autoCompleting ||
                     isStopping
                   }
-                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
-      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
-      hover:bg-gray-300 
-      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+                  className="bg-background/40 text-white/80 px-6 py-2 rounded-lg transition
+      backdrop-blur-sm border border-white/10
+      focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-opacity-50 
+      hover:bg-background/60
+      disabled:bg-background/20 disabled:text-white/30 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
                 >
                   Save Chat Snapshot
                 </button>
@@ -814,10 +817,11 @@ export default function ChatUI({
               <Link
                 type="button"
                 href="/list-ip"
-                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition 
-      focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
-      hover:bg-gray-300 
-      disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+                className="bg-background/40 text-white/80 px-6 py-2 rounded-lg transition
+      backdrop-blur-sm border border-white/10
+      focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-opacity-50 
+      hover:bg-background/60
+      disabled:bg-background/20 disabled:text-white/30 disabled:cursor-not-allowed disabled:hover:bg-background/20 disabled:focus:ring-0"
               >
                 IP Docs
               </Link>

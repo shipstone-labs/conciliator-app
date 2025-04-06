@@ -415,11 +415,11 @@ const ConciliateApp = ({
     return <Loading />;
   }
   return (
-    <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[#1a1b25] to-[#232538]">
+    <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
       <div className="max-w-6xl mx-auto space-y-8">
         <Link
           href="/"
-          className="fixed top-6 left-6 bg-muted w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-muted/80 transition-all z-50 overflow-hidden border border-white/10"
+          className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
         >
           <Image 
             src="/svg/Black+Yellow.svg" 
