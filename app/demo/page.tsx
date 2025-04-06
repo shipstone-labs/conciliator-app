@@ -3,7 +3,7 @@
 import Authenticated from "@/components/Authenticated";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { LitClient } from "lit-wrapper";
+import type { LitNodeClient } from "lit-wrapper";
 import { useState, useEffect } from "react";
 import type { Web3StorageClient } from "web-storage-wrapper";
 
@@ -11,7 +11,7 @@ export default function DemoPage() {
   const [litStatus, setLitStatus] = useState("Not initialized");
   const [w3Status, setW3Status] = useState("Not initialized");
   const [w3Client, setW3Client] = useState<Web3StorageClient | undefined>();
-  const [litClient, setLitClient] = useState<LitClient | undefined>();
+  const [litClient, setLitClient] = useState<LitNodeClient | undefined>();
   const [email, setEmail] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
   useEffect(() => {
