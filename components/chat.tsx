@@ -35,23 +35,25 @@ const MessageSkeleton = ({
   return (
     <div className="flex items-start space-x-4 animate-pulse">
       {isAssistant && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-300 flex items-center justify-center">
-          <div className="w-6 h-6 bg-blue-200 rounded-full" />
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700]/50 flex items-center justify-center">
+          <div className="w-6 h-6 bg-muted/20 rounded-full" />
         </div>
       )}
       <div
-        className={`p-4 rounded-lg max-w-3xl ${
-          isAssistant ? "bg-gray-100 w-24" : "bg-blue-100 w-4/5"
+        className={`p-4 rounded-lg max-w-3xl backdrop-blur-sm ${
+          isAssistant 
+            ? "bg-background/30 border border-white/10 w-24" 
+            : "bg-primary/10 border border-primary/30 w-4/5"
         }`}
       >
         {isAssistant ? (
           // Assistant skeleton - just a single short word (Yes/No)
-          <div className="h-4 bg-gray-300 rounded w-16" />
+          <div className="h-4 bg-white/10 rounded w-16" />
         ) : (
           // User skeleton - one short line for a question
           <>
-            <div className="h-4 bg-gray-300 rounded w-full mb-2" />
-            <div className="h-4 bg-gray-300 rounded w-1/2" />
+            <div className="h-4 bg-white/20 rounded w-full mb-2" />
+            <div className="h-4 bg-white/20 rounded w-1/2" />
           </>
         )}
       </div>
@@ -829,19 +831,22 @@ export default function ChatUI({
           </div>
           <div className="w-full">
             {downloads.length > 0 && (
-              <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                <h3 className="text-lg font-bold text-gray-700 mb-2">
-                  Download Snapshots:
+              <div className="mt-4 p-4 rounded-lg border border-white/20 bg-background/40 backdrop-blur-lg shadow-md">
+                <h3 className="text-lg font-bold text-white/90 mb-3 flex items-center">
+                  <span className="mr-2">📦</span> Saved Snapshots
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {downloads.map((file) => (
-                    <li key={file.url}>
+                    <li key={file.url} className="flex items-center">
                       <a
                         href={file.url}
                         download={file.title}
-                        className="text-blue-600 hover:text-blue-800 underline"
+                        className="text-primary hover:text-primary/80 transition-colors flex items-center px-3 py-2 rounded-md bg-muted/20 border border-primary/20 w-full"
                       >
-                        {file.title}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        </svg>
+                        <span className="truncate">{file.title}</span>
                       </a>
                     </li>
                   ))}
