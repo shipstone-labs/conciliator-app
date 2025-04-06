@@ -158,23 +158,28 @@ const QuestionIP = ({
   );
 
   const renderEvaluationState = () => (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-xl">Value Assessment</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-bold text-primary">
+          Value Assessment
+        </CardTitle>
+        <CardDescription className="text-white/90 mt-2">
           Based on the information exchanged, evaluate the potential value
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex space-x-2">
+      <CardContent className="space-y-5">
+        <div className="flex space-x-3">
           <Button
             onClick={() => setAppState(AppStates.END)}
             variant="outline"
-            className="flex-1"
+            className="flex-1 border-white/20 text-white/90 hover:bg-muted/30 py-3"
           >
             Insufficient Value
           </Button>
-          <Button onClick={() => setAppState(AppStates.END)} className="flex-1">
+          <Button
+            onClick={() => setAppState(AppStates.END)}
+            className="flex-1 bg-primary hover:bg-primary/80 text-black font-medium py-3 transition-all shadow-lg"
+          >
             Pursue Further
           </Button>
         </div>
@@ -183,17 +188,22 @@ const QuestionIP = ({
   );
 
   const renderEndState = () => (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-xl">Session Complete</CardTitle>
+    <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Session Complete
+        </CardTitle>
+        <CardDescription className="text-white/90 mt-2">
+          Thank you for using the Discovery Session
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button
           onClick={() => {
-            setAppState(AppStates.START);
+            setAppState(AppStates.DISCUSSION);
             setMessages([]);
           }}
-          className="w-full"
+          className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-md transition-all shadow-lg hover:shadow-primary/30 hover:scale-105"
         >
           Start New Session
         </Button>
