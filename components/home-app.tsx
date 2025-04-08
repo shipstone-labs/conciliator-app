@@ -7,7 +7,6 @@ import { AuthButton } from "./AuthButton";
 import { useStytchUser } from "@stytch/nextjs";
 import Loading from "./Loading";
 import LogoffButton from "@/components/LogoffButton";
-import Image from "next/image";
 
 // This is a placeholder for the actual login detection logic
 function HomeApp() {
@@ -15,11 +14,7 @@ function HomeApp() {
   return (
     <>
       {" "}
-      <span className="fixed top-6 left-6 w-12">
-        <LogoffButton className="bg-primary/80 backdrop-blur-lg text-black w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-primary transition-all hover:scale-110 border border-white/20 p-2">
-          <Image src="/svg/logout.svg" alt="Logout" width={24} height={24} />
-        </LogoffButton>
-      </span>
+      <LogoffButton />
       
       {/* Top-right Auth Button (below menubar) */}
       {!isInitialized ? null : !user ? (
