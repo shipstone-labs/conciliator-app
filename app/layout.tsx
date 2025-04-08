@@ -5,7 +5,7 @@ import { appConfig } from "./config.mjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Footer } from "@/components/Footer";
 import AuthLayout from "./authLayout";
-import NavigationMenuComponent from "@/components/NavigationMenu";
+import NavigationMenuComponent from "@/components/NavigationHeader";
 
 const inter = Inter({ subsets: ["latin"] });
 
