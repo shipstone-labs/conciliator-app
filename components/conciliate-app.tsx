@@ -88,11 +88,7 @@ const ConciliateApp = ({
     }
   }, [content, description, name]);
 
-  const handleClear = useCallback(() => {
-    setContent("");
-    setDescription("");
-    setName("");
-  }, []);
+  // Removed handleClear since Reset Fields button was removed
 
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);
