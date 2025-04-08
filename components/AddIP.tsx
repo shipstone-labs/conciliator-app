@@ -50,7 +50,7 @@ const AppIP = () => {
   // 4. Remove the test-specific code from handleFileSelection
   // =====================================================
   const [testTokenCounter, setTestTokenCounter] = useState(1000);
-  const { litClient /*, sessionSigs */ } = useLit();
+  const { litClient } = useLit();
 
   const handleStore = useCallback(async () => {
     setError(null);

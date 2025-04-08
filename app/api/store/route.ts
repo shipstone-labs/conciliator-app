@@ -73,7 +73,16 @@ export async function POST(req: NextRequest) {
     ]);
     console.log(sessionSigs);
     console.log("encrypted", encrypted, litModule.LIT_NETWORK);
-    const descrypted = await litClient.executeJs({
+    const storageWrapper = await import("web-storage-wrapper");
+    const w3Client = await storageWrapper.createAsAgent(
+      process.env.STORACHA_AGENT_KEY || "",
+      process.env.STORACHA_AGENT_PROOF || ""
+    );
+    const cid = await w3Client.uploadFile(
+      new Blob([JSON.stringify(encrypted)], { type: "application/json" })
+    );
+    console.log("cid", cid);
+    const decrypted = await litClient.executeJs({
       code: `async function run() {
   try {
     const input = await Lit.Actions.decryptAndCombine({
@@ -173,7 +182,7 @@ run();`,
     //   chain: litModule.LIT_NETWORK.Datil,
     //   ...encrypted,
     // });
-    console.log("descrypted", descrypted);
+    console.log("decrypted", decrypted);
     throw new Error("Not implemented");
     const wallet = createWalletClient({
       account,

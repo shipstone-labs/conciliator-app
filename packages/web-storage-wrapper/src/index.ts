@@ -1,6 +1,13 @@
 // Web Storage Wrapper
 // Isolated wrapper for Web3 Storage client
 import { type Client, create } from "@web3-storage/w3up-client";
+import { StoreMemory } from "@web3-storage/w3up-client/stores/memory";
+import { parse } from "@web3-storage/w3up-client/proof";
+import { Signer } from "@web3-storage/w3up-client/principal/ed25519";
+import type {
+  ListRequestOptions,
+  UploadListSuccess,
+} from "@web3-storage/w3up-client/dist/src/types";
 
 // /**
 //  * Type definitions for Web3 Storage client
@@ -56,7 +63,7 @@ export async function createW3Client(): Promise<Client> {
  */
 export async function authenticateWithEmail(
   client: Client,
-  email: string
+  email: `${string}@${string}`
 ): Promise<AuthResult> {
   try {
     await client.login(email);
@@ -73,6 +80,18 @@ export async function authenticateWithEmail(
   }
 }
 
+export async function createAsAgent(key: string, proof: string) {
+  // Load client with specific private key
+  const principal = Signer.parse(key);
+  const store = new StoreMemory();
+  const client = await create({ principal, store });
+  // Add proof that this agent has been delegated capabilities on the space
+  const parsedProof = await parse(proof);
+  const space = await client.addSpace(parsedProof);
+  await client.setCurrentSpace(space.did());
+  return client;
+}
+
 /**
  * Store content on Web3.Storage
  * @param client - The Web3.Storage client instance
@@ -81,7 +100,7 @@ export async function authenticateWithEmail(
  */
 export async function storeContent(
   client: Client,
-  content: any
+  content: Blob | string | object
 ): Promise<StoreResult> {
   try {
     // Convert content to Blob for upload
@@ -117,11 +136,12 @@ export async function storeContent(
  * @param client - The Web3.Storage client instance
  * @returns Array of uploads
  */
-export async function listUploads(client: Client): Promise<any[]> {
+export async function listUploads(
+  client: Client,
+  options: ListRequestOptions
+): Promise<UploadListSuccess> {
   try {
-    const space = await client.currentSpace();
-    const uploads = await client.spaces.list({ space: space.did() });
-    return uploads;
+    return await client.capability.upload.list(options);
   } catch (error) {
     console.error("Error listing uploads:", error);
     throw error;
@@ -131,6 +151,7 @@ export async function listUploads(client: Client): Promise<any[]> {
 // Export convenience object
 export const w3Storage = {
   create: createW3Client,
+  createAsAgent,
   authenticate: authenticateWithEmail,
   store: storeContent,
   list: listUploads,

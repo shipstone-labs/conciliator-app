@@ -2,9 +2,9 @@
   "name": "web-storage-wrapper",
   "version": "1.0.0",
   "description": "Isolated wrapper for Web3 Storage client",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "browser": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "browser": "dist/index.js",
   "type": "module",
   "scripts": {
     "build": "node build.js"
