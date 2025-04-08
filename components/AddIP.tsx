@@ -26,6 +26,11 @@ const AppIP = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [businessModel, setBusinessModel] = useState("Protected Evaluation");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [price, setPrice] = useState("");
 
   const handleStore = useCallback(async () => {
     setError(null);
@@ -221,13 +226,14 @@ const AppIP = () => {
               </p>
             </div>
 
+            {/* Set Terms button */}
             <Button
-              onClick={handleClear}
-              variant="ghost"
+              onClick={() => setIsTermsModalOpen(true)}
+              variant="outline"
               className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-md transition-all"
               disabled={isLoading}
             >
-              Reset Fields
+              Set Terms
             </Button>
 
             {/* File upload modal */}
@@ -261,6 +267,112 @@ const AppIP = () => {
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all"
                   >
                     Select File
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+            {/* Terms Modal */}
+            <Modal
+              isOpen={isTermsModalOpen}
+              onClose={() => setIsTermsModalOpen(false)}
+              title="Set Terms"
+            >
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="business-model"
+                    className="text-sm font-medium text-white/90 block"
+                  >
+                    Business Model
+                  </label>
+                  <select
+                    id="business-model"
+                    value={businessModel}
+                    onChange={(e) => setBusinessModel(e.target.value)}
+                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                    disabled={true} // Only Protected Evaluation is available
+                  >
+                    <option value="Trade Secret" disabled>
+                      Trade Secret
+                    </option>
+                    <option value="Provisional Patent" disabled>
+                      Provisional Patent
+                    </option>
+                    <option value="Protected Evaluation">
+                      Protected Evaluation
+                    </option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="start-date"
+                      className="text-sm font-medium text-white/90 block"
+                    >
+                      Start Date
+                    </label>
+                    <input
+                      id="start-date"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="end-date"
+                      className="text-sm font-medium text-white/90 block"
+                    >
+                      End Date
+                    </label>
+                    <input
+                      id="end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    htmlFor="price"
+                    className="text-sm font-medium text-white/90 block"
+                  >
+                    Price (USD)
+                  </label>
+                  <input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                  />
+                </div>
+
+                <div className="flex justify-between space-x-3 mt-6">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsTermsModalOpen(false)}
+                    className="text-white/90 hover:bg-muted/50"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      // Save terms logic would go here
+                      setIsTermsModalOpen(false);
+                    }}
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all"
+                  >
+                    Accept
                   </Button>
                 </div>
               </div>
