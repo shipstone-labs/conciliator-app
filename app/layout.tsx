@@ -37,8 +37,6 @@ export default function RootLayout({
               <header className="fixed top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/40 h-16 flex items-center px-4">
                 <NavigationHeader />
               </header>
-              {/* Portal container for modals to ensure they render at the root level */}
-              <div id="modal-portal"></div>
               <main className="flex-grow bg-gradient-to-b from-[#2B5B75] to-background">
                 {children}
               </main>
