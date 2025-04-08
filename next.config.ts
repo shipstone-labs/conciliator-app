@@ -46,10 +46,6 @@ const nextConfig: NextConfig = {
       const env: Record<string, string> = {
         // Explicitly replace each environment variable
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
-        "process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN": JSON.stringify(
-          process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN || ""
-        ),
-        // Add any other NEXT_PUBLIC_ variables here explicitly
       };
 
       // Also create a mapping for any other NEXT_PUBLIC_ variables
