@@ -78,7 +78,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          pnpm dlx wrangler pages deploy --project-name "${{ env.CF_PROJECT_NAME }}"
+          pnpm dlx wrangler pages deploy --project-name "${{ steps.extract_branch.outputs.project }}"
 
       - name: Deploy ${{ steps.extract_branch.outputs.branch_name }} (PR)
         if: ${{ steps.extract_branch.outputs.branch_name != '' }}
@@ -86,7 +86,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          pnpm dlx wrangler pages deploy --project-name "${{ env.CF_PROJECT_NAME }}" --branch "${{ steps.extract_branch.outputs.branch_name }}" | tee output.log
+          pnpm dlx wrangler pages deploy --project-name "${{ steps.extract_branch.outputs.project }}" --branch "${{ steps.extract_branch.outputs.branch_name }}" | tee output.log
           sed < output.log -n 's#.*Take a peek over at \(.*\)$#specific_url=\1#p' >> $GITHUB_OUTPUT
         id: deploy
 
