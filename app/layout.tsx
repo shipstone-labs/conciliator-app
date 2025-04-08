@@ -5,7 +5,7 @@ import { appConfig } from "./config.mjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Footer } from "@/components/Footer";
 import AuthLayout from "./authLayout";
-import NavigationMenuComponent from "@/components/NavigationHeader";
+import NavigationHeader from "@/components/NavigationHeader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,7 +35,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <AuthLayout>
               <header className="fixed top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/40 h-16 flex items-center px-4">
-                <NavigationMenuComponent />
+                <NavigationHeader />
               </header>
               <main className="flex-grow bg-gradient-to-b from-[#2B5B75] to-background">
                 {children}
