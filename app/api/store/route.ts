@@ -1,6 +1,18 @@
 import type { NextRequest } from "next/server";
-import { ALLOWED_ORIGINS, abi, getModel, imageAI, pinata } from "../utils";
-import { createWalletClient, decodeEventLog, http } from "viem";
+import {
+  ALLOWED_ORIGINS,
+  abi,
+  genSession,
+  getModel,
+  imageAI,
+  pinata,
+} from "../utils";
+import {
+  createWalletClient,
+  decodeEventLog,
+  http,
+  SignableMessage,
+} from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { filecoinCalibration } from "viem/chains";
 import { waitForTransactionReceipt } from "viem/actions";
@@ -17,13 +29,154 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name: _name, content, description } = body;
+    const { name: _name, content, description, encrypted } = body;
     const name = _name || "Untitled";
     console.log("body", body);
+    const account = privateKeyToAccount(
+      (process.env.FILCOIN_PK || "") as `0x${string}`
+    );
+    console.log("account", account.address);
+    const litModule = await import("lit-wrapper");
+    const litClient = await litModule.createLitClient({
+      litNetwork: litModule.LIT_NETWORK.Datil,
+    });
+    global.document = { dispatchEvent: (_event: Event) => true } as Document;
+    await litClient.connect();
+    const accsInput =
+      await litModule.LitAccessControlConditionResource.generateResourceString(
+        encrypted.unifiedAccessControlConditions,
+        encrypted.dataToEncryptHash
+      );
+
+    // const { capacityDelegationAuthSig } =
+    //   await litClient.createCapacityDelegationAuthSig({
+    //     dAppOwnerWallet: {
+    //       signMessage: (message: SignableMessage) =>
+    //         account.signMessage({ message }),
+    //       getAddress: async () => account.address,
+    //     },
+    //     capacityTokenId: 162391,
+    //     delegateeAddresses: [account.address],
+    //     uses: "1",
+    //     expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
+    //   });
+
+    const sessionSigs = await genSession(account, litClient, [
+      {
+        resource: new litModule.LitActionResource("*"),
+        ability: litModule.LIT_ABILITY.LitActionExecution,
+      },
+      {
+        resource: new litModule.LitAccessControlConditionResource(accsInput),
+        ability: litModule.LIT_ABILITY.AccessControlConditionDecryption,
+      },
+    ]);
+    console.log(sessionSigs);
+    console.log("encrypted", encrypted, litModule.LIT_NETWORK);
+    const descrypted = await litClient.executeJs({
+      code: `async function run() {
+  try {
+    const input = await Lit.Actions.decryptAndCombine({
+      accessControlConditions: unifiedAccessControlConditions,
+      ciphertext: ciphertext,
+      dataToEncryptHash: dataToEncryptHash,
+      chain: "filecoin",
+    });
+    // const configJson = await Lit.Actions.decryptAndCombine({
+    //   accessControlConditions: config[2],
+    //   ciphertext: config[0],
+    //   dataToEncryptHash: config[1],
+    //   chain: "filecoin",
+    // });
+    // const { apiKey, orgId, projectId, pinataJwt } = JSON.parse(configJson);
+    // const promptQuery = {
+    //   model: "gpt-4o-mini",
+    //   messages: [
+    //     {
+    //       role: "user",
+    //       content: \`Create a good looking picture by taking ideas of the following message \\\`\${input}\\\`. Summarize and simplify the text such that it would become a good prompt for image generation. Generate a good looking dark fantasy image. Please return only the prompt text for the image generation. Please describe any well-known characters with your own words for dall-e-3 to use and make sure it doesn't get rejected by the dall-e-safety system.\`,
+    //     },
+    //   ],
+    //   temperature: 0.7,
+    // };
+
+    // const promptResponse = await fetch(
+    //   "https://api.openai.com/v1/chat/completions",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       Authorization: \`Bearer \${apiKey}\`,
+    //       "OpenAI-Organization": orgId,
+    //       "OpenAI-Project": projectId,
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(promptQuery),
+    //   }
+    // );
+
+    // const promptData = await promptResponse.json();
+    // const prompt = promptData.choices[0].message.content.trim();
+
+    // const imageQuery = {
+    //   model: "dall-e-3",
+    //   prompt: \`Generate an image with the following description: \\\`\${prompt}\\\` and make sure it looks like the scene set in the future. Make sure the image is not too obvious to keep normal humans guessing as what to the image means.\`,
+    //   response_format: "url",
+    //   size: "1024x1024",
+    //   quality: "standard",
+    //   n: 1,
+    // };
+
+    // const imageResponse = await fetch(
+    //   "https://api.openai.com/v1/images/generations",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       Authorization: \`Bearer \${apiKey}\`,
+    //       "OpenAI-Organization": orgId,
+    //       "OpenAI-Project": projectId,
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(imageQuery),
+    //   }
+    // );
+
+    // const imageData = await imageResponse.json();
+    // const { url } = imageData.data[0];
+
+    // const { ciphertext: _ciphertext, dataToEncryptHash: _dataToEncryptHash } =
+    //   await Lit.Actions.encrypt({
+    //     accessControlConditions: data[2].slice(2),
+    //     to_encrypt: new TextEncoder().encode(input),
+    //   });
+    // Lit.Actions.setResponse({
+    //   response: JSON.stringify({
+    //     message: [_ciphertext, _dataToEncryptHash, data[2].slice(2)],
+    //     url,
+    //   }),
+    // });
+    Lit.Actions.setResponse({ response: input });
+  } catch (error) {
+    console.error("Error during execution:", error);
+    Lit.Actions.setResponse({ response: error.message });
+  }
+}
+run();`,
+      // cid: CID,
+      sessionSigs,
+      // chain: litModule.LIT_NETWORK.Datil,
+      jsParams: {
+        ...encrypted,
+      },
+    });
+    // const descrypted = await litClient.decrypt({
+    //   sessionSigs,
+    //   chain: litModule.LIT_NETWORK.Datil,
+    //   ...encrypted,
+    // });
+    console.log("descrypted", descrypted);
+    throw new Error("Not implemented");
     const wallet = createWalletClient({
-      account: privateKeyToAccount(
-        (process.env.FILCOIN_PK || "") as `0x${string}`
-      ),
+      account,
       chain: filecoinCalibration,
       transport: http(),
     });

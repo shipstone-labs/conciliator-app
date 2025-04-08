@@ -36,6 +36,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",
+    "ethers": "5",
+    "events-browserify": "^0.0.1",
     "lilypad-wrapper": "workspace:*",
     "lit-wrapper": "workspace:*",
     "lucide-react": "^0.475.0",
@@ -50,6 +52,7 @@
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.1.0",
+    "utf-8-validate": "^6.0.5",
     "uuid": "^11.1.0",
     "viem": "^2.25.0",
     "web-storage-wrapper": "workspace:*",
@@ -71,7 +74,6 @@
     "esbuild": "^0.25.2",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.1.7",
-    "events": "^3.3.0",
     "postcss": "^8.5.3",
     "process": "^0.11.10",
     "raw-loader": "^4.0.2",
@@ -86,14 +88,16 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "esbuild",
       "protobufjs",
       "sharp",
-      "esbuild"
+      "utf-8-validate"
     ]
   },
   "resolutions": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@walletconnect/types": "2.9.2"
   },
   "packageManager": "pnpm@10.7.1"
 }

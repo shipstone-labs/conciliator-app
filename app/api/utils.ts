@@ -1,5 +1,7 @@
+import type { LitNodeClient, LitResourceAbilityRequest } from "lit-wrapper";
 import { OpenAI, type ClientOptions } from "openai";
 import { PinataSDK } from "pinata-web3";
+import type { PrivateKeyAccount, SignableMessage } from "viem";
 
 export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
@@ -775,3 +777,70 @@ export const abi = [
     type: "function",
   },
 ];
+
+export const genAuthSig = async (
+  wallet: PrivateKeyAccount,
+  client: LitNodeClient,
+  uri: string,
+  resources: LitResourceAbilityRequest[]
+) => {
+  const blockHash = await client.getLatestBlockhash();
+  const { createSiweMessageWithRecaps, generateAuthSig } = await import(
+    "lit-wrapper"
+  );
+  const message = await createSiweMessageWithRecaps({
+    walletAddress: wallet.address,
+    nonce: blockHash,
+    litNodeClient: client,
+    resources,
+    expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
+    uri,
+  });
+  const authSig = await generateAuthSig({
+    signer: {
+      signMessage: (message: SignableMessage) =>
+        wallet.signMessage({ message }),
+      getAddress: async () => wallet.address,
+    },
+    toSign: message,
+    address: wallet.address,
+  });
+
+  return authSig;
+};
+
+export const genSession = async (
+  wallet: PrivateKeyAccount,
+  client: LitNodeClient,
+  resources: LitResourceAbilityRequest[]
+) => {
+  const sessionSigs = await client.getSessionSigs({
+    chain: "filecoin",
+    resourceAbilityRequests: resources,
+    authNeededCallback: async (params: any) => {
+      if (!params.expiration) {
+        throw new Error("expiration is required");
+      }
+
+      if (!params.resources) {
+        throw new Error("resourceAbilityRequests is required");
+      }
+
+      if (!params.uri) {
+        throw new Error("uri is required");
+      }
+
+      // generate the authSig for the inner signature of the session
+      // we need capabilities to assure that only one api key may be decrypted
+      const authSig = genAuthSig(
+        wallet,
+        client,
+        params.uri as string,
+        params.resourceAbilityRequests ?? []
+      );
+      return authSig;
+    },
+  });
+
+  return sessionSigs;
+};

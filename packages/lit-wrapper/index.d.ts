@@ -5,19 +5,23 @@ import type {
 } from "@lit-protocol/lit-auth-client";
 import {
   LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
   newSessionCapabilityObject,
   SessionCapabilityObject,
   LitPKPResource,
-  LitNodeClient,
   LitActionResource,
   capacityDelegationAuthSig,
+  createSiweMessageWithRecaps,
+  generateAuthSig,
 } from "@lit-protocol/auth-helpers";
 import {
-  LIT_NETWORKS,
+  LIT_NETWORK,
   AUTH_METHOD_SCOPE,
   PROVIDER_TYPE,
   LIT_ABILITY,
 } from "@lit-protocol/constants";
+export { LitNodeClient } from "@lit-protocol/lit-node-client";
+
 // This file allows TypeScript to understand the exported types from our bundled module
 declare module "lit-wrapper" {
   export const LitNetworks: {
@@ -58,34 +62,39 @@ declare module "lit-wrapper" {
   };
 
   const defaultExport: {
-    createLitClient: typeof createLitClient;
-    authenticate: typeof StytchOtpProvider.authenticate;
     LitNetworks: typeof LitNetworks;
     utils: typeof utils;
-    LIT_NETWORKS;
+    LIT_NETWORK;
     AUTH_METHOD_SCOPE;
     PROVIDER_TYPE;
     LIT_ABILITY;
-    SessionCapabilityObject;
     newSessionCapabilityObject;
     LitAccessControlConditionResource;
+    LitResourceAbilityRequest;
     capacityDelegationAuthSig;
+    createSiweMessageWithRecaps;
+    generateAuthSig;
     LitPKPResource;
     LitActionResource;
+    generateAuthSig;
   };
 
   export {
-    LIT_NETWORKS,
+    LIT_NETWORK,
     AUTH_METHOD_SCOPE,
     PROVIDER_TYPE,
     LIT_ABILITY,
     SessionCapabilityObject,
     newSessionCapabilityObject,
     LitAccessControlConditionResource,
+    LitResourceAbilityRequest,
     capacityDelegationAuthSig,
+    createSiweMessageWithRecaps,
+    generateAuthSig,
     LitPKPResource,
     LitActionResource,
     LitNodeClient,
+    generateAuthSig,
   };
   export default defaultExport;
 }

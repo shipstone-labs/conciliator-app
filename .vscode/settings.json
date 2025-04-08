@@ -47,5 +47,6 @@
     "system/**": true,
     "tmp/**": true,
     "webserver-configs/**": true
-  }
+  },
+  "debug.toolBarLocation": "docked"
 }

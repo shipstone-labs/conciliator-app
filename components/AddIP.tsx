@@ -14,11 +14,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Modal } from "./ui/modal";
+import { useLit } from "@/hooks/useLit";
 // Imports below are commented as logo is now in global header
 // import Link from 'next/link'
 // import Image from 'next/image'
 // Removed useStytchUser since it's no longer needed
 // import { useStytchUser } from "@stytch/nextjs";
+// Logo removed from non-home pages
+// import Link from "next/link";
+// import Image from "next/image";
 
 const AppIP = () => {
   // Removed user authentication check since it's handled by the main navigation
@@ -46,6 +50,7 @@ const AppIP = () => {
   // 4. Remove the test-specific code from handleFileSelection
   // =====================================================
   const [testTokenCounter, setTestTokenCounter] = useState(1000);
+  const { litClient /*, sessionSigs */ } = useLit();
 
   const handleStore = useCallback(async () => {
     setError(null);
@@ -54,11 +59,13 @@ const AppIP = () => {
     // TESTING SHORTCUT: Check for test.md content
     // REMOVE THIS ENTIRE IF-BLOCK FOR PRODUCTION
     if (content.includes("TEST_MODE") || name.toLowerCase().includes("test")) {
-      console.log("TEST MODE ACTIVATED - Bypassing encryption and tokenization");
+      console.log(
+        "TEST MODE ACTIVATED - Bypassing encryption and tokenization"
+      );
       // Increment test token for unique test IDs
       const testTokenId = testTokenCounter;
-      setTestTokenCounter(prev => prev + 1);
-      
+      setTestTokenCounter((prev) => prev + 1);
+
       // Simulate API delay
       setTimeout(() => {
         setIsLoading(false);
@@ -71,6 +78,59 @@ const AppIP = () => {
 
     // Normal production flow
     try {
+      if (!litClient) {
+        throw new Error("Lit client is not initialized");
+      }
+      const unifiedAccessControlConditions = [
+        {
+          conditionType: "evmBasic",
+          contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
+          standardContractType: "",
+          chain: "filecoin",
+          method: "",
+          parameters: [":userAddress"],
+          returnValueTest: {
+            comparator: "=",
+            value: process.env.NEXT_PUBLIC_LIT_ADDRESS,
+          },
+        },
+        // {
+        //   conditionType: "evmBasic",
+        //   contractAddress: "",
+        //   standardContractType: "",
+        //   chain: "base",
+        //   method: "eth_getBalance",
+        //   parameters: [":userAddress", "latest"],
+        //   returnValueTest: {
+        //     comparator: ">",
+        //     value: "0",
+        //   },
+        // },
+        { conditionType: "operator", operator: "or" },
+        {
+          conditionType: "evmBasic",
+          contractAddress: "",
+          standardContractType: "timestamp",
+          chain: "filecoin",
+          method: "eth_getBlockByNumber",
+          parameters: ["latest"],
+          returnValueTest: {
+            comparator: ">=",
+            value: Math.round((Date.now() + 10000) / 1000).toString(),
+          },
+        },
+      ];
+      const encrypted = await litClient
+        .encrypt({
+          dataToEncrypt: new TextEncoder().encode(content),
+          unifiedAccessControlConditions,
+        })
+        .then(async (encryptedContent) => {
+          if (!encryptedContent) {
+            throw new Error("Failed to encrypt content");
+          }
+          return encryptedContent;
+        });
       const data = await fetch("/api/store", {
         method: "POST",
         headers: {
@@ -79,6 +139,10 @@ const AppIP = () => {
         body: JSON.stringify({
           name,
           content,
+          encrypted: {
+            ...encrypted,
+            unifiedAccessControlConditions,
+          },
           description,
         }),
       }).then((res) => {
@@ -95,8 +159,8 @@ const AppIP = () => {
     } finally {
       setIsLoading(false);
     }
-  // ⚠️ Remove testTokenCounter when removing test mode
-  }, [content, description, name, testTokenCounter]);
+    // ⚠️ Remove testTokenCounter when removing test mode
+  }, [content, description, name, testTokenCounter, litClient]);
 
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);
@@ -128,17 +192,17 @@ const AppIP = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         let fileContent = event.target?.result as string;
-        
+
         // If this is a test file, add TEST_MODE marker
         // REMOVE THIS BLOCK FOR PRODUCTION
         if (isTestFile && !fileContent.includes("TEST_MODE")) {
-          fileContent = "TEST_MODE\n\n" + fileContent;
+          fileContent = `TEST_MODE\n\n${fileContent}`;
           console.log("Test file detected - Adding TEST_MODE marker");
         }
-        
+
         setContent(fileContent);
         setIsModalOpen(false);
-        
+
         // If it's a test file, show a helpful message
         // REMOVE THIS BLOCK FOR PRODUCTION
         if (isTestFile) {
@@ -154,7 +218,7 @@ const AppIP = () => {
   // Reset terms when content changes
   useEffect(() => {
     setTermsAccepted(false);
-  }, [content]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
@@ -191,8 +255,8 @@ const AppIP = () => {
               </h3>
               <p className="text-sm text-white/90">
                 First enter the publicly available information you want to use
-                to describe your idea. This information can be seen by others
-                on the Internet.
+                to describe your idea. This information can be seen by others on
+                the Internet.
               </p>
             </div>
             <div className="space-y-2">

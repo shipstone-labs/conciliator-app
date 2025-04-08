@@ -26,7 +26,7 @@ export default function DemoPage() {
         try {
           // Try initializing the client
           const litClient = await litModule.createLitClient({
-            litNetwork: litModule.LitNetworks.Datil,
+            litNetwork: litModule.LIT_NETWORK.Datil,
           });
           await litClient.connect();
           setLitClient(litClient);

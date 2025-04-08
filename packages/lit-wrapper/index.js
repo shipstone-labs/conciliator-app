@@ -7,17 +7,19 @@ import {
   LIT_ABILITY,
 } from "@lit-protocol/constants";
 import {
-  LitNodeClientNodeJs,
   LitNodeClient,
   decryptString,
   encryptString,
 } from "@lit-protocol/lit-node-client";
 import {
   LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
   newSessionCapabilityObject,
   LitPKPResource,
   LitActionResource,
   capacityDelegationAuthSig,
+  createSiweMessageWithRecaps,
+  generateAuthSig,
 } from "@lit-protocol/auth-helpers";
 import {
   LitRelay,
@@ -63,7 +65,7 @@ export async function authenticate(client, options) {
 // Expose a simpler function to create and connect a client
 export async function createLitClient(options = {}) {
   try {
-    const client = new LitNodeClientNodeJs({
+    const client = new LitNodeClient({
       alertWhenUnauthorized: false,
       litNetwork: LIT_NETWORK.Datil,
       ...options,
@@ -87,24 +89,30 @@ export {
   PROVIDER_TYPE,
   LIT_NETWORK,
   LIT_ABILITY,
+  LitNodeClient,
   LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
   newSessionCapabilityObject,
   capacityDelegationAuthSig,
+  createSiweMessageWithRecaps,
+  generateAuthSig,
   LitPKPResource,
   LitActionResource,
-  LitNodeClient,
 };
 
 // Default export for convenience
 export default {
   createLitClient,
   authenticate,
+  createSiweMessageWithRecaps,
+  generateAuthSig,
   LitNetworks,
+  LitNodeClient,
   LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
   newSessionCapabilityObject,
   capacityDelegationAuthSig,
   LitPKPResource,
-  LitNodeClient,
   LitActionResource,
   utils,
   AUTH_METHOD_SCOPE,

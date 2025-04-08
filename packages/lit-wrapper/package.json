@@ -26,6 +26,7 @@
     "browser-headers": "^0.4.1",
     "js-sha256": "^0.11.0",
     "multiformats": "9.9.0",
-    "uint8arrays": "^5.1.0"
+    "uint8arrays": "^5.1.0",
+    "utf-8-validate": "^5.0.10"
   }
 }
