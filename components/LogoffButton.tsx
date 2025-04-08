@@ -41,5 +41,5 @@ export default function LogoffButton({
       </Button>
     );
   }
-  return <Button onClick={doLogout}>Sign Out</Button>;
+  return <Button onClick={doLogout}>Logout</Button>;
 }
