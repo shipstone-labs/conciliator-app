@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 interface ModalProps {
@@ -39,10 +40,12 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     if (e.target === e.currentTarget) onClose();
   };
 
-  return (
+  // Use ReactDOM.createPortal to render the modal outside of the component hierarchy
+  const modalContent = (
     <div 
       className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-auto"
       onClick={handleBackdropClick}
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
       <div 
         className={cn(
@@ -64,4 +67,27 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       </div>
     </div>
   );
+  
+  // Use React Portal on the client side to ensure modal is rendered at the root level
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  // On the server or during initial render, return null or a placeholder
+  if (!mounted) {
+    return null;
+  }
+
+  // On the client after mounting, render using createPortal
+  const portalElement = document.getElementById('modal-portal');
+  
+  if (!portalElement) {
+    console.error('Modal portal element not found');
+    return modalContent; // Fallback to inline rendering
+  }
+  
+  return createPortal(modalContent, portalElement);
 }
