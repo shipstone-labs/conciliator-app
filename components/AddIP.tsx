@@ -118,7 +118,9 @@ const AppIP = () => {
           <div className="fixed top-20 right-4 z-20">
             <LogoffButton 
               className="bg-primary hover:bg-primary/80 text-black font-medium rounded-md shadow-md"
-            />
+            >
+              Sign Out
+            </LogoffButton>
           </div>
         ) : null}
         <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
