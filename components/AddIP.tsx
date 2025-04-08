@@ -62,12 +62,6 @@ const AppIP = () => {
     }
   }, [content, description, name]);
 
-  const handleClear = useCallback(() => {
-    setContent("");
-    setDescription("");
-    setName("");
-  }, []);
-
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);
   }, []);
