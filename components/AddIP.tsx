@@ -154,6 +154,10 @@ const AppIP = () => {
                 className="min-h-24 border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary"
               />
             </div>
+            
+            <div className="text-sm text-white/90 mt-2">
+              Now you need to add a text or markdown file that contains the details about your idea. The file will be encrypted so that only you can access it.
+            </div>
 
             {content ? (
               <div className="p-4 rounded-lg border border-primary/30 bg-muted/30">
@@ -181,9 +185,12 @@ const AppIP = () => {
                 Add and Encrypt your Idea
               </Button>
             )}
-            <div className="text-xs text-white/70 -mt-2">
-              Text and Markdown files under 2MB are supported
-            </div>
+            
+            {content && (
+              <div className="text-sm text-white/90 mt-2">
+                You have added and protected your Idea. Next, you need to decide the terms under which you will offer access to your Idea by others.
+              </div>
+            )}
 
             {error && (
               <Alert
@@ -195,6 +202,16 @@ const AppIP = () => {
                 </AlertDescription>
               </Alert>
             )}
+
+            {/* Set Terms button */}
+            <Button
+              onClick={() => setIsTermsModalOpen(true)}
+              variant="outline"
+              className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-md transition-all"
+              disabled={isLoading}
+            >
+              Set Terms
+            </Button>
 
             <Button
               onClick={handleStore}
@@ -219,16 +236,6 @@ const AppIP = () => {
                 added.
               </p>
             </div>
-
-            {/* Set Terms button */}
-            <Button
-              onClick={() => setIsTermsModalOpen(true)}
-              variant="outline"
-              className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-md transition-all"
-              disabled={isLoading}
-            >
-              Set Terms
-            </Button>
 
             {/* File upload modal */}
             <Modal
