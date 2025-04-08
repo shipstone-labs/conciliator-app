@@ -22,16 +22,12 @@ export default function NavigationHeader() {
       
       {/* Main menu items */}
       <Menubar className="border-none bg-transparent flex-grow">
-        <Link href="/">
-          <MenubarMenu>
-            <MenubarTrigger>What is SafeIdea?</MenubarTrigger>
-          </MenubarMenu>
-        </Link>
-        <Link href="/list-ip">
-          <MenubarMenu>
-            <MenubarTrigger>Explore Ideas</MenubarTrigger>
-          </MenubarMenu>
-        </Link>
+        <MenubarMenu>
+          <MenubarTrigger>What is SafeIdea?</MenubarTrigger>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger>Explore Ideas</MenubarTrigger>
+        </MenubarMenu>
       </Menubar>
       
       {/* Spacer for the right side to maintain balanced layout */}
