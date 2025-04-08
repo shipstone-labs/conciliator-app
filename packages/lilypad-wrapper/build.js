@@ -20,7 +20,8 @@ try {
     console.log("✅ WASM compilation successful");
   } catch (tinyGoError) {
     console.warn(
-      "⚠️ TinyGo not found in PATH. Using placeholder WASM if available or skipping compilation."
+      "⚠️ TinyGo not found in PATH. Using placeholder WASM if available or skipping compilation.",
+      tinyGoError
     );
 
     // Check if WASM file already exists (we'll keep it if it does)

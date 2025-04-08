@@ -6,6 +6,9 @@
   "types": "index.d.ts",
   "browser": "index.js",
   "type": "module",
+  "scripts": {
+    "build": "node build.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,5 +20,8 @@
     "@web3-storage/w3up-client": "^17.1.2",
     "multiformats": "13.3.2",
     "uint8arrays": "^5.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
   }
 }
