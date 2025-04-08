@@ -17,8 +17,11 @@ import { Modal } from "./ui/modal";
 // Logo removed from non-home pages
 import Link from "next/link";
 import Image from "next/image";
+import LogoffButton from "@/components/LogoffButton";
+import { useStytchUser } from "@stytch/nextjs";
 
 const AppIP = () => {
+  const { user, isInitialized } = useStytchUser();
   const [content, setContent] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -109,6 +112,15 @@ const AppIP = () => {
             className="transform scale-125"
           />
         </Link>
+        
+        {/* LogoffButton positioned in top-right corner */}
+        {isInitialized && user ? (
+          <div className="fixed top-20 right-4 z-20">
+            <LogoffButton 
+              className="bg-primary hover:bg-primary/80 text-black font-medium rounded-md shadow-md"
+            />
+          </div>
+        ) : null}
         <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">
