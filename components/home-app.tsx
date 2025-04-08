@@ -33,7 +33,7 @@ function HomeApp() {
             below to upload your invention details. This version works best with
             text or markdown documents. If you&apos;d like to explore existing
             ideas, click on the{" "}
-            <span className="text-secondary font-semibold">Idea Database</span>{" "}
+            <span className="text-secondary font-semibold">Explore Ideas</span>{" "}
             button to browse what&apos;s already in the system.
           </p>
           <p className="mt-6 text-lg leading-relaxed text-white/90">
@@ -79,7 +79,7 @@ function HomeApp() {
                 href="/list-ip"
                 className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
               >
-                Idea Database
+                Explore Ideas
               </Link>
             </>
           ) : (
