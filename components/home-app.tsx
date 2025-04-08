@@ -19,7 +19,10 @@ function HomeApp() {
       {/* Top-right Auth Button (below menubar) */}
       {!isInitialized ? null : !user ? (
         <div className="fixed top-20 right-4 z-20">
-          <AuthButton className="bg-primary hover:bg-primary/80 text-black font-medium rounded-md shadow-md" />
+          <AuthButton 
+            text="Sign In / Register"
+            className="bg-primary hover:bg-primary/80 text-black font-medium rounded-md shadow-md" 
+          />
         </div>
       ) : null}
       
