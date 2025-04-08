@@ -202,7 +202,7 @@ const AppIP = () => {
             
             {!content && (
               <div className="text-sm text-white/90 mt-2">
-                Now that you've protected your Idea, you can choose how you want to share your Idea. Click on the Set Terms to get started.
+                Now that you&apos;ve protected your Idea, you can choose how you want to share your Idea. Click on the Set Terms to get started.
               </div>
             )}
             
