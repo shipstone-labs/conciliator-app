@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/menubar";
 import Image from "next/image";
 import Link from "next/link";
-import { AuthButton } from "./AuthButton";
 
 export default function NavigationHeader() {
   return (
@@ -55,13 +54,8 @@ export default function NavigationHeader() {
         </MenubarMenu>
       </Menubar>
       
-      {/* Right-aligned Sign In button */}
-      <div className="ml-4">
-        <AuthButton 
-          text="Sign In / Register" 
-          className="bg-primary hover:bg-primary/80 text-black font-medium rounded-md shadow-md" 
-        />
-      </div>
+      {/* Spacer for the right side to maintain balanced layout */}
+      <div className="ml-4 w-[150px]"></div>
     </div>
   );
 }
