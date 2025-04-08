@@ -18,7 +18,9 @@ function HomeApp() {
         <div className="fixed top-20 right-4 z-20">
           <LogoffButton 
             className="bg-primary hover:bg-primary/80 text-black font-medium rounded-md shadow-md"
-          />
+          >
+            Logout
+          </LogoffButton>
         </div>
       ) : null}
       
