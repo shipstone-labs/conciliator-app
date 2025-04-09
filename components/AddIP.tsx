@@ -198,8 +198,8 @@ const AppIP = () => {
               </h3>
               <p className="text-sm text-white/90">
                 First enter the publicly available information you want to use
-                to describe your idea. This information will be publicly
-                available on the Internet.
+                to describe your idea. This information can be seen by others
+                on the Internet.
               </p>
             </div>
             <div className="space-y-2">
