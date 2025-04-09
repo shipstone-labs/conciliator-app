@@ -36,9 +36,40 @@ const AppIP = () => {
   const [price, setPrice] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
+  // =====================================================
+  // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
+  // =====================================================
+  // To remove test mode:
+  // 1. Delete this testTokenCounter state
+  // 2. Remove the entire if-block checking for TEST_MODE below
+  // 3. Remove the testTokenCounter from the dependency array
+  // 4. Remove the test-specific code from handleFileSelection
+  // =====================================================
+  const [testTokenCounter, setTestTokenCounter] = useState(1000);
+
   const handleStore = useCallback(async () => {
     setError(null);
     setIsLoading(true);
+
+    // TESTING SHORTCUT: Check for test.md content
+    // REMOVE THIS ENTIRE IF-BLOCK FOR PRODUCTION
+    if (content.includes("TEST_MODE") || name.toLowerCase().includes("test")) {
+      console.log("TEST MODE ACTIVATED - Bypassing encryption and tokenization");
+      // Increment test token for unique test IDs
+      const testTokenId = testTokenCounter;
+      setTestTokenCounter(prev => prev + 1);
+      
+      // Simulate API delay
+      setTimeout(() => {
+        setIsLoading(false);
+        // Redirect to details page with test token ID
+        window.location.href = `/details/${testTokenId}`;
+      }, 1000);
+      return;
+    }
+    // =====================================================
+
+    // Normal production flow
     try {
       const data = await fetch("/api/store", {
         method: "POST",
@@ -64,7 +95,8 @@ const AppIP = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [content, description, name]);
+  // ⚠️ Remove testTokenCounter when removing test mode
+  }, [content, description, name, testTokenCounter]);
 
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);
@@ -87,11 +119,32 @@ const AppIP = () => {
         return;
       }
 
+      // =====================================================
+      // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
+      // This section detects test.md files and enables test mode
+      // =====================================================
+      const isTestFile = file.name.toLowerCase() === "test.md";
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        const fileContent = event.target?.result as string;
+        let fileContent = event.target?.result as string;
+        
+        // If this is a test file, add TEST_MODE marker
+        // REMOVE THIS BLOCK FOR PRODUCTION
+        if (isTestFile && !fileContent.includes("TEST_MODE")) {
+          fileContent = "TEST_MODE\n\n" + fileContent;
+          console.log("Test file detected - Adding TEST_MODE marker");
+        }
+        
         setContent(fileContent);
         setIsModalOpen(false);
+        
+        // If it's a test file, show a helpful message
+        // REMOVE THIS BLOCK FOR PRODUCTION
+        if (isTestFile) {
+          setError(null); // Clear any previous errors
+        }
+        // =====================================================
       };
       reader.readAsText(file);
     },
@@ -101,7 +154,7 @@ const AppIP = () => {
   // Reset terms when content changes
   useEffect(() => {
     setTermsAccepted(false);
-  }, []);
+  }, [content]);
 
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">

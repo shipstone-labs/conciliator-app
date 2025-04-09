@@ -251,6 +251,19 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 4. Idea Analytics - Engagement metrics
 5. Idea Discovery - Advanced browsing and recommendations
 
+## Test Mode
+
+A temporary test mode has been implemented to facilitate testing of the Details and Discovery pages without requiring the full encryption and blockchain process.
+
+### How to Use Test Mode
+1. Upload a file named "test.md" OR include "test" in the idea name
+2. Complete the normal idea creation process
+3. The system will generate a test token ID (starting from 1000)
+4. You will be taken to the Details page for this test token
+
+### Removing Test Mode
+The test mode functionality should be removed before production deployment. The code includes clear comments marking all test-related code with "TEMPORARY TEST MODE - REMOVE FOR PRODUCTION" and instructions for removal.
+
 ## Component Relationships
 
 - **Layout Components**: Layout.tsx, AuthLayout.tsx (global wrappers)
