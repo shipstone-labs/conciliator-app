@@ -6,12 +6,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Loading from "./Loading";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -120,7 +117,7 @@ const DetailIP = ({
             <div>
               <h3 className="text-lg font-medium text-primary mb-1">Discovery Mode</h3>
               <p className="text-white/80 text-sm">
-                In Discovery mode, you can interact with AI agents to explore your idea's potential
+                In Discovery mode, you can interact with AI agents to explore your idea&apos;s potential
                 applications and receive valuable feedback from simulated stakeholders.
               </p>
             </div>
