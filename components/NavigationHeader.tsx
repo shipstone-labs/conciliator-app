@@ -1,4 +1,3 @@
-import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -16,17 +15,18 @@ export default function NavigationHeader() {
         />
       </Link>
 
-      {/* Main menu items */}
-      <Menubar className="border-none bg-transparent flex-grow">
-        <MenubarMenu>
-          <MenubarTrigger>What is SafeIdea?</MenubarTrigger>
-        </MenubarMenu>
-        <MenubarMenu>
-          <Link href="/list-ip">
-            <MenubarTrigger>Explore Ideas</MenubarTrigger>
-          </Link>
-        </MenubarMenu>
-      </Menubar>
+      {/* Main menu items - simplified without Menubar */}
+      <nav className="flex items-center space-x-6 flex-grow">
+        <div className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors">
+          What is SafeIdea?
+        </div>
+        <Link 
+          href="/list-ip"
+          className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+        >
+          Explore Ideas
+        </Link>
+      </nav>
 
       {/* Spacer for the right side to maintain balanced layout */}
       <div className="ml-4 w-[150px]" />
