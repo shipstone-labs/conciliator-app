@@ -1,49 +1,49 @@
-'use client'
+"use client";
 
-import { useCallback, useState, useRef, useEffect } from 'react'
+import { useCallback, useState, useRef, useEffect } from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2 } from 'lucide-react'
-import { Textarea } from './ui/textarea'
-import { Modal } from './ui/modal'
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import { Textarea } from "./ui/textarea";
+import { Modal } from "./ui/modal";
 // Imports below are commented as logo is now in global header
 // import Link from 'next/link'
 // import Image from 'next/image'
-import LogoffButton from '@/components/LogoffButton'
-import { useStytchUser } from '@stytch/nextjs'
+import LogoffButton from "@/components/LogoffButton";
+import { useStytchUser } from "@stytch/nextjs";
 
 const AppIP = () => {
-  const { user, isInitialized } = useStytchUser()
-  const [content, setContent] = useState('')
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
-  const [businessModel, setBusinessModel] = useState('Protected Evaluation')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [price, setPrice] = useState('')
-  const [termsAccepted, setTermsAccepted] = useState(false)
+  const { user, isInitialized } = useStytchUser();
+  const [content, setContent] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [businessModel, setBusinessModel] = useState("Protected Evaluation");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [price, setPrice] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleStore = useCallback(async () => {
-    setError(null)
-    setIsLoading(true)
+    setError(null);
+    setIsLoading(true);
     try {
-      const data = await fetch('/api/store', {
-        method: 'POST',
+      const data = await fetch("/api/store", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name,
@@ -52,56 +52,56 @@ const AppIP = () => {
         }),
       }).then((res) => {
         if (!res.ok) {
-          throw new Error('Failed to store invention')
+          throw new Error("Failed to store invention");
         }
-        return res.json()
-      })
-      const { tokenId } = data
-      window.location.href = `/${tokenId}`
+        return res.json();
+      });
+      const { tokenId } = data;
+      window.location.href = `/details/${tokenId}`;
     } catch (err) {
-      console.error('API Key validation error:', err)
-      setError((err as { message: string }).message)
+      console.error("API Key validation error:", err);
+      setError((err as { message: string }).message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [content, description, name])
+  }, [content, description, name]);
 
   const handleOpenFileDialog = useCallback(() => {
-    setIsModalOpen(true)
-  }, [])
+    setIsModalOpen(true);
+  }, []);
 
   const handleFileSelection = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
+      const file = e.target.files?.[0];
+      if (!file) return;
 
       // Check file size (2MB limit)
       if (file.size > 2 * 1024 * 1024) {
-        setError('File size exceeds 2MB limit')
-        return
+        setError("File size exceeds 2MB limit");
+        return;
       }
 
       // Check file type (only text and markdown)
-      if (!file.type.includes('text') && !file.name.endsWith('.md')) {
-        setError('Only text and markdown files are supported')
-        return
+      if (!file.type.includes("text") && !file.name.endsWith(".md")) {
+        setError("Only text and markdown files are supported");
+        return;
       }
 
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (event) => {
-        const fileContent = event.target?.result as string
-        setContent(fileContent)
-        setIsModalOpen(false)
-      }
-      reader.readAsText(file)
+        const fileContent = event.target?.result as string;
+        setContent(fileContent);
+        setIsModalOpen(false);
+      };
+      reader.readAsText(file);
     },
     []
-  )
-  
+  );
+
   // Reset terms when content changes
   useEffect(() => {
-    setTermsAccepted(false)
-  }, [content])
+    setTermsAccepted(false);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
@@ -201,7 +201,7 @@ const AppIP = () => {
                     File uploaded successfully
                   </p>
                   <Button
-                    onClick={() => setContent('')}
+                    onClick={() => setContent("")}
                     variant="ghost"
                     size="sm"
                     className="text-secondary hover:text-secondary/80 hover:bg-muted/30 rounded-xl"
@@ -268,8 +268,9 @@ const AppIP = () => {
             {/* Create Page explanation */}
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
               <p className="text-sm text-white/90">
-                Clicking <strong>View Idea Page</strong> takes you to your new Idea page. 
-                You can share this page address with others to test the Conciliator.
+                Clicking <strong>View Idea Page</strong> takes you to your new
+                Idea page. You can share this page address with others to test
+                the Conciliator.
               </p>
             </div>
 
@@ -277,7 +278,9 @@ const AppIP = () => {
             <Button
               onClick={handleStore}
               className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12 mt-4"
-              disabled={isLoading || !content || !name || !description || !termsAccepted}
+              disabled={
+                isLoading || !content || !name || !description || !termsAccepted
+              }
             >
               {isLoading ? (
                 <>
@@ -285,7 +288,7 @@ const AppIP = () => {
                   Connecting to the Conciliator (this may take a minute or so)
                 </>
               ) : (
-                'View Idea Page'
+                "View Idea Page"
               )}
             </Button>
 
@@ -421,8 +424,8 @@ const AppIP = () => {
                   <Button
                     onClick={() => {
                       // Save terms logic would go here
-                      setTermsAccepted(true)
-                      setIsTermsModalOpen(false)
+                      setTermsAccepted(true);
+                      setIsTermsModalOpen(false);
                     }}
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
                   >
@@ -435,7 +438,7 @@ const AppIP = () => {
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AppIP
+export default AppIP;

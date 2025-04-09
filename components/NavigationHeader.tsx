@@ -1,6 +1,6 @@
-import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar'
-import Image from 'next/image'
-import Link from 'next/link'
+import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function NavigationHeader() {
   return (
@@ -29,7 +29,7 @@ export default function NavigationHeader() {
       </Menubar>
 
       {/* Spacer for the right side to maintain balanced layout */}
-      <div className="ml-4 w-[150px]"></div>
+      <div className="ml-4 w-[150px]" />
     </div>
-  )
+  );
 }
