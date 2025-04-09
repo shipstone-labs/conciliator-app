@@ -22,7 +22,7 @@ ARG TINYGO_VERSION=0.30.0
 RUN wget -q https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
   rm tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
-  ln -s /usr/local/tinygo/bin/tinygo /usr/local/bin/tinygo
+  ln -s /usr/local/tinygo/bin/tinygo /usr/bin/tinygo
 
 ENV PATH="${PATH}:/root/go/bin"
 RUN mkdir -p /root/go
