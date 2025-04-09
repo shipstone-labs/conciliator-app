@@ -10,7 +10,7 @@ RUN apk add --no-cache libc6-compat python3 make g++ git wget tar build-base bsd
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 COPY packages ./packages
 
 ARG NEXT_PUBLIC_STYTCH_PROJECT_ENV
@@ -44,7 +44,7 @@ RUN \
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/ ./packages
+COPY --from=deps /app/packages ./packages
 COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
