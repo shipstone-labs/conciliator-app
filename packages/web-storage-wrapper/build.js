@@ -8,13 +8,13 @@ async function build() {
   try {
     // Step 1: Compile TypeScript
     console.log("🔧 Compiling TypeScript...");
-    execSync("npx tsc", { stdio: "inherit" });
+    execSync("pnpm dlx tsc", { stdio: "inherit" });
     console.log("✅ TypeScript compilation successful");
 
     // Step 2: Bundle with Rollup using the config file
     console.log("📦 Bundling with Rollup...");
     // Run rollup with the config file in production mode
-    execSync("npx rollup -c rollup.config.mjs", { 
+    execSync("pnpm dlx rollup -c rollup.config.mjs", { 
       stdio: "inherit",
       env: { ...process.env, NODE_ENV: "production" }
     });
