@@ -8,7 +8,6 @@ import { useStytchUser } from '@stytch/nextjs'
 import Loading from './Loading'
 import LogoffButton from '@/components/LogoffButton'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 
 // This is a placeholder for the actual login detection logic
 function HomeApp() {
