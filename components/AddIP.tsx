@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useRef } from 'react'
+import { useCallback, useState, useRef, useEffect } from 'react'
 import {
   Card,
   CardContent,
@@ -34,6 +34,7 @@ const AppIP = () => {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [price, setPrice] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleStore = useCallback(async () => {
     setError(null)
@@ -96,6 +97,11 @@ const AppIP = () => {
     },
     []
   )
+  
+  // Reset terms when content changes
+  useEffect(() => {
+    setTermsAccepted(false)
+  }, [content])
 
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
@@ -132,11 +138,13 @@ const AppIP = () => {
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2">
-              <h3 className="font-semibold text-primary text-sm mb-1">Step 1: Public Information</h3>
+              <h3 className="font-semibold text-primary text-sm mb-1">
+                Step 1: Public Information
+              </h3>
               <p className="text-sm text-white/90">
-                First enter the publicly available information you want to use to
-                describe your idea. This information will be publicly available on
-                the Internet.
+                First enter the publicly available information you want to use
+                to describe your idea. This information will be publicly
+                available on the Internet.
               </p>
             </div>
             <div className="space-y-2">
@@ -174,7 +182,9 @@ const AppIP = () => {
             </div>
 
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
-              <h3 className="font-semibold text-primary text-sm mb-1">Step 2: Private Document</h3>
+              <h3 className="font-semibold text-primary text-sm mb-1">
+                Step 2: Private Document
+              </h3>
               <p className="text-sm text-white/90">
                 Now you need to add a text or markdown file that contains the
                 details about your idea. The file will be encrypted so that only
@@ -220,39 +230,45 @@ const AppIP = () => {
               </Alert>
             )}
 
-            {/* Success message + Step 3 section */}
+            {/* Success message shown when content exists */}
             {content && (
               <div className="p-4 rounded-lg border border-primary/30 bg-muted/30 mb-2 mt-4">
-                <p className="text-sm font-semibold text-primary mb-1">✓ Document Encrypted</p>
-                <p className="text-sm text-white/90">Your Idea is safely encrypted.</p>
-              </div>
-            )}
-            
-            {/* Step 3 section moved above Set Terms button */}
-            {content && (
-              <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
-                <h3 className="font-semibold text-primary text-sm mb-1">Step 3: Share Your Idea</h3>
+                <p className="text-sm font-semibold text-primary mb-1">
+                  ✓ Document Encrypted
+                </p>
                 <p className="text-sm text-white/90">
-                  Now, you can choose how you want to share it. Click &quot;Set Terms&quot; to configure sharing options.
+                  Your Idea is safely encrypted.
                 </p>
               </div>
             )}
 
-            {/* Set Terms button */}
+            {/* Step 3 section - always visible */}
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+              <h3 className="font-semibold text-primary text-sm mb-1">
+                Step 3: Share Your Idea
+              </h3>
+              <p className="text-sm text-white/90">
+                Now, you can choose how you want to share it. Click
+                &quot;Set Terms&quot; to configure sharing options.
+              </p>
+            </div>
+
+            {/* Set Terms button - disabled until content exists */}
             <Button
               onClick={() => setIsTermsModalOpen(true)}
               variant="outline"
               className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-xl transition-all h-12"
-              disabled={isLoading}
+              disabled={isLoading || !content}
             >
               Set Terms
             </Button>
-            
+
             {/* Create Page explanation */}
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
               <p className="text-sm text-white/90">
-                Clicking &quot;View Idea Page&quot; below creates a new secure page for your IP. 
-                You can share this page address with others to test the Conciliator.
+                Clicking &quot;View Idea Page&quot; below creates a new secure
+                page for your IP. You can share this page address with others to
+                test the Conciliator.
               </p>
             </div>
 
@@ -260,7 +276,7 @@ const AppIP = () => {
             <Button
               onClick={handleStore}
               className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12 mt-4"
-              disabled={isLoading || !content || !name || !description}
+              disabled={isLoading || !content || !name || !description || !termsAccepted}
             >
               {isLoading ? (
                 <>
@@ -404,6 +420,7 @@ const AppIP = () => {
                   <Button
                     onClick={() => {
                       // Save terms logic would go here
+                      setTermsAccepted(true)
                       setIsTermsModalOpen(false)
                     }}
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
