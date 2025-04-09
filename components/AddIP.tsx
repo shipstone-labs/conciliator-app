@@ -14,9 +14,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
 import { Textarea } from './ui/textarea'
 import { Modal } from './ui/modal'
-// Logo removed from non-home pages
-import Link from 'next/link'
-import Image from 'next/image'
+// Imports below are commented as logo is now in global header
+// import Link from 'next/link'
+// import Image from 'next/image'
 import LogoffButton from '@/components/LogoffButton'
 import { useStytchUser } from '@stytch/nextjs'
 
