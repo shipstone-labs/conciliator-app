@@ -1,4 +1,4 @@
-import type { LitNodeClient, LitResourceAbilityRequest } from "lit-wrapper";
+import type { LitNodeClient, LitResourceAbilityRequest, AuthCallbackParams } from "lit-wrapper";
 import { OpenAI, type ClientOptions } from "openai";
 import { PinataSDK } from "pinata-web3";
 import type { PrivateKeyAccount, SignableMessage } from "viem";
@@ -817,7 +817,7 @@ export const genSession = async (
   const sessionSigs = await client.getSessionSigs({
     chain: "filecoin",
     resourceAbilityRequests: resources,
-    authNeededCallback: async (params: any) => {
+    authNeededCallback: async (params: AuthCallbackParams) => {
       if (!params.expiration) {
         throw new Error("expiration is required");
       }
@@ -836,7 +836,7 @@ export const genSession = async (
         wallet,
         client,
         params.uri as string,
-        params.resourceAbilityRequests ?? []
+        (params.resourceAbilityRequests as LitResourceAbilityRequest[]) ?? []
       );
       return authSig;
     },
@@ -844,3 +844,5 @@ export const genSession = async (
 
   return sessionSigs;
 };
+
+export async function getStorachaClient() {}

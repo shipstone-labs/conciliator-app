@@ -13,6 +13,7 @@ import {
   capacityDelegationAuthSig,
   createSiweMessageWithRecaps,
   generateAuthSig,
+  AuthCallbackParams,
 } from "@lit-protocol/auth-helpers";
 import {
   LIT_NETWORK,
@@ -94,6 +95,7 @@ declare module "lit-wrapper" {
     LitPKPResource,
     LitActionResource,
     LitNodeClient,
+    AuthCallbackParams,
     generateAuthSig,
   };
   export default defaultExport;

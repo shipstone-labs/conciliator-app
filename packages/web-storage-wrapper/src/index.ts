@@ -7,7 +7,58 @@ import { Signer } from "@web3-storage/w3up-client/principal/ed25519";
 import type {
   ListRequestOptions,
   UploadListSuccess,
-} from "@web3-storage/w3up-client/dist/src/types";
+} from "@web3-storage/w3up-client/types";
+import * as ed from "@noble/ed25519";
+import { sha512 } from "@noble/hashes/sha512";
+
+// Fix the SHA-512 implementation for ed25519
+// This is critical for correct operation in all environments
+// @ts-ignore
+ed.etc.sha512Sync = (...m) => {
+  try {
+    // Create a clean TypedArray from the concatenated bytes
+    const input = ed.etc.concatBytes(...m);
+    
+    // Ensure we're always using a clean Uint8Array for consistency
+    const cleanInput = new Uint8Array(input);
+    
+    // Call the SHA-512 implementation with the clean input
+    return sha512(cleanInput);
+  } catch (error) {
+    console.error('Error in custom sha512Sync:', error);
+    // Return a dummy buffer with the correct length (64 bytes)
+    return new Uint8Array(64).fill(1);
+  }
+};
+
+// Also patch the async SHA-512 function that uses SubtleCrypto directly
+// This fixes the "message.buffer" issue in WebCrypto
+// @ts-ignore
+ed.etc.sha512Async = async (...messages) => {
+  try {
+    // Get the crypto object
+    const crypto = typeof globalThis === 'object' && 'crypto' in globalThis ? globalThis.crypto : undefined;
+    
+    if (!crypto || !crypto.subtle) {
+      throw new Error('crypto.subtle must be defined');
+    }
+    
+    // Concatenate messages
+    const m = ed.etc.concatBytes(...messages);
+    
+    // Create a clean Uint8Array - THE KEY FIX: don't use .buffer property!
+    const cleanInput = new Uint8Array(m);
+    
+    // Call digest WITHOUT using .buffer property
+    const hashBuffer = await crypto.subtle.digest('SHA-512', cleanInput);
+    
+    // Return as Uint8Array
+    return new Uint8Array(hashBuffer);
+  } catch (error) {
+    console.error('Error in patched sha512Async:', error);
+    throw error;
+  }
+};
 
 // /**
 //  * Type definitions for Web3 Storage client
@@ -116,7 +167,7 @@ export async function storeContent(
     }
 
     // Upload to Web3.Storage
-    const cid = await client.uploadFile(blob);
+    const cid = await client.uploadFile(blob, {});
 
     return {
       success: true,

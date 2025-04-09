@@ -7,14 +7,15 @@
     "dev": "next dev | grep --color=always -v 'nextjs_original-stack-frames'",
     "prebuild": "pnpm run build-wrappers",
     "build": "next build",
-    "build-wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter web-storage-wrapper build",
+    "build-wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
     "start": "next start",
     "lint": "next lint",
     "lint:biome": "biome lint .",
     "check": "biome check --apply .",
     "format": "biome format --write .",
+    "prepages:build": "pnpm run build-wrappers",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
-    "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2023-10-01"
+    "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08"
   },
   "dependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -97,7 +98,8 @@
   "resolutions": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@walletconnect/types": "2.9.2"
+    "@walletconnect/types": "2.9.2",
+    "@noble/ed25519": "2.1.0"
   },
   "packageManager": "pnpm@10.7.1"
 }

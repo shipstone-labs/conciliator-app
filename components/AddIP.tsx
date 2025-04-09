@@ -15,14 +15,7 @@ import { Loader2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Modal } from "./ui/modal";
 import { useLit } from "@/hooks/useLit";
-// Imports below are commented as logo is now in global header
-// import Link from 'next/link'
-// import Image from 'next/image'
-// Removed useStytchUser since it's no longer needed
-// import { useStytchUser } from "@stytch/nextjs";
-// Logo removed from non-home pages
-// import Link from "next/link";
-// import Image from "next/image";
+import type { EncryptResponse } from "lit-wrapper";
 
 const AppIP = () => {
   // Removed user authentication check since it's handled by the main navigation
@@ -125,7 +118,7 @@ const AppIP = () => {
           dataToEncrypt: new TextEncoder().encode(content),
           unifiedAccessControlConditions,
         })
-        .then(async (encryptedContent) => {
+        .then(async (encryptedContent: EncryptResponse) => {
           if (!encryptedContent) {
             throw new Error("Failed to encrypt content");
           }

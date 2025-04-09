@@ -7,15 +7,18 @@ import {
   imageAI,
   pinata,
 } from "../utils";
-import {
-  createWalletClient,
-  decodeEventLog,
-  http,
-  SignableMessage,
-} from "viem";
+import { createWalletClient, decodeEventLog, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { filecoinCalibration } from "viem/chains";
 import { waitForTransactionReceipt } from "viem/actions";
+import { createAsAgent } from "web-storage-wrapper";
+import {
+  createLitClient,
+  LIT_ABILITY,
+  LIT_NETWORK,
+  LitAccessControlConditionResource,
+  LitActionResource,
+} from "lit-wrapper";
 
 export const runtime = "edge";
 
@@ -36,14 +39,13 @@ export async function POST(req: NextRequest) {
       (process.env.FILCOIN_PK || "") as `0x${string}`
     );
     console.log("account", account.address);
-    const litModule = await import("lit-wrapper");
-    const litClient = await litModule.createLitClient({
-      litNetwork: litModule.LIT_NETWORK.Datil,
+    const litClient = await createLitClient({
+      litNetwork: LIT_NETWORK.Datil,
     });
     global.document = { dispatchEvent: (_event: Event) => true } as Document;
     await litClient.connect();
     const accsInput =
-      await litModule.LitAccessControlConditionResource.generateResourceString(
+      await LitAccessControlConditionResource.generateResourceString(
         encrypted.unifiedAccessControlConditions,
         encrypted.dataToEncryptHash
       );
@@ -63,25 +65,35 @@ export async function POST(req: NextRequest) {
 
     const sessionSigs = await genSession(account, litClient, [
       {
-        resource: new litModule.LitActionResource("*"),
-        ability: litModule.LIT_ABILITY.LitActionExecution,
+        resource: new LitActionResource("*"),
+        ability: LIT_ABILITY.LitActionExecution,
       },
       {
-        resource: new litModule.LitAccessControlConditionResource(accsInput),
-        ability: litModule.LIT_ABILITY.AccessControlConditionDecryption,
+        resource: new LitAccessControlConditionResource(accsInput),
+        ability: LIT_ABILITY.AccessControlConditionDecryption,
       },
     ]);
     console.log(sessionSigs);
-    console.log("encrypted", encrypted, litModule.LIT_NETWORK);
-    const storageWrapper = await import("web-storage-wrapper");
-    const w3Client = await storageWrapper.createAsAgent(
+    console.log("encrypted", encrypted, LIT_NETWORK);
+    const w3Client = await createAsAgent(
       process.env.STORACHA_AGENT_KEY || "",
       process.env.STORACHA_AGENT_PROOF || ""
     );
-    const cid = await w3Client.uploadFile(
-      new Blob([JSON.stringify(encrypted)], { type: "application/json" })
+    const blob = new Blob(
+      [new TextEncoder().encode(JSON.stringify(encrypted))],
+      {
+        type: "application/json",
+      }
     );
-    console.log("cid", cid);
+    const cid = await w3Client.uploadFile(
+      // {
+      //   async arrayBuffer() {
+      //     return new TextEncoder().encode(JSON.stringify(encrypted));
+      //   },
+      // } as any
+      blob
+    );
+    console.log("cid", cid.toString());
     const decrypted = await litClient.executeJs({
       code: `async function run() {
   try {
@@ -172,14 +184,14 @@ export async function POST(req: NextRequest) {
 run();`,
       // cid: CID,
       sessionSigs,
-      // chain: litModule.LIT_NETWORK.Datil,
+      // chain: LIT_NETWORK.Datil,
       jsParams: {
         ...encrypted,
       },
     });
     // const descrypted = await litClient.decrypt({
     //   sessionSigs,
-    //   chain: litModule.LIT_NETWORK.Datil,
+    //   chain: LIT_NETWORK.Datil,
     //   ...encrypted,
     // });
     console.log("decrypted", decrypted);

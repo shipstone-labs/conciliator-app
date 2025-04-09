@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 async function build() {
-  console.log("📦 Building web-storage-wrapper...");
+  console.log("📦 Building lit-wrapper...");
 
   try {
     // Step 1: Compile TypeScript
@@ -14,15 +14,21 @@ async function build() {
     // Step 2: Bundle with Rollup using the config file
     console.log("📦 Bundling with Rollup...");
     // Run rollup with the config file in production mode
-    execSync("npx rollup -c rollup.config.mjs", { 
+    execSync("npx rollup -c rollup.config.mjs", {
       stdio: "inherit",
-      env: { ...process.env, NODE_ENV: "production" }
+      env: { ...process.env, NODE_ENV: "production" },
     });
 
-    const file = resolve("./dist/index.js")
-    const content = readFileSync(file, "utf-8")
-    writeFileSync(file, content.replace("const buffer = await crypto$1.web.subtle.digest('SHA-512', message.buffer);", "const buffer = await crypto$1.web.subtle.digest('SHA-512', message);"))
-    
+    const file = resolve("./dist/index.js");
+    const content = readFileSync(file, "utf-8");
+    writeFileSync(
+      file,
+      content.replace(
+        "const buffer = await crypto$1.web.subtle.digest('SHA-512', message.buffer);",
+        "const buffer = await crypto$1.web.subtle.digest('SHA-512', message);"
+      )
+    );
+
     console.log("✅ web-storage-wrapper built successfully!");
   } catch (error) {
     console.error("❌ Build failed:", error);

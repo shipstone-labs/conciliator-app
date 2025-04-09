@@ -11,7 +11,7 @@ import { AuthModal } from "./AuthModal";
 import { authContext } from "@/app/authLayout";
 import { useStytchUser } from "@stytch/nextjs";
 import Loading from "./Loading";
-import type { LitNodeClient } from "lit-wrapper/index.d.ts";
+import type { LitNodeClient } from "lit-wrapper";
 import { publicKeyToAddress } from "viem/utils";
 
 export type Session = {

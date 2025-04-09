@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "node:path";
 import webpack from "webpack";
 
 const nextConfig: NextConfig = {
@@ -32,15 +31,13 @@ const nextConfig: NextConfig = {
       "@walletconnect/web3-provider": false,
       "@walletconnect/core": false,
       "@walletconnect/sign-client": false,
-
-      // Force our wrapper modules to be used
-      "lit-wrapper": path.resolve(__dirname, "./packages/lit-wrapper"),
-      "web-storage-wrapper": path.resolve(
-        __dirname,
-        "./packages/web-storage-wrapper"
-      ),
-      "lilypad-wrapper": path.resolve(__dirname, "./packages/lilypad-wrapper"),
     };
+
+    if (isServer) {
+      // Replace node-fetch with empty module or a custom implementation
+      config.resolve.alias["node-fetch"] = false;
+      // config.resolve.mainFields = ["main", "module"]; // Prefer 'main' (CJS) over 'module' (ESM)
+    }
 
     // Add process/Buffer polyfills and expose environment variables
     // Create a mapping for explicit variable replacement
@@ -82,11 +79,11 @@ const nextConfig: NextConfig = {
     "lit-wrapper",
     "@lit-protocol/constants",
     "@lit-protocol/lit-node-client",
-
     // Web3 Storage
     "web-storage-wrapper",
     "@web3-storage/w3up-client",
-
+    "@noble/ed25519",
+    "multiformats",
     // Lilypad
     "lilypad-wrapper",
   ],
