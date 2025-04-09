@@ -220,11 +220,21 @@ const AppIP = () => {
               </Alert>
             )}
 
-            {/* Encrypted message will always show if content is available */}
+            {/* Success message + Step 3 section */}
             {content && (
               <div className="p-4 rounded-lg border border-primary/30 bg-muted/30 mb-2 mt-4">
                 <p className="text-sm font-semibold text-primary mb-1">✓ Document Encrypted</p>
-                <p className="text-sm text-white/90">Your Idea is safely encrypted. The next step is to choose how you&apos;d like to share it.</p>
+                <p className="text-sm text-white/90">Your Idea is safely encrypted.</p>
+              </div>
+            )}
+            
+            {/* Step 3 section moved above Set Terms button */}
+            {content && (
+              <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+                <h3 className="font-semibold text-primary text-sm mb-1">Step 3: Share Your Idea</h3>
+                <p className="text-sm text-white/90">
+                  Now, you can choose how you want to share it. Click "Set Terms" to configure sharing options.
+                </p>
               </div>
             )}
 
@@ -238,13 +248,11 @@ const AppIP = () => {
               Set Terms
             </Button>
             
-            {/* Note about the created page */}
+            {/* Create Page explanation */}
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
-              <h3 className="font-semibold text-primary text-sm mb-1">Step 3: Create Your Idea Page</h3>
               <p className="text-sm text-white/90">
-                This creates a new page for your IP. Share the address to the
-                new page with others to test the Conciliator with the IP you
-                added.
+                Clicking "View Idea Page" below creates a new secure page for your IP. 
+                You can share this page address with others to test the Conciliator.
               </p>
             </div>
 
