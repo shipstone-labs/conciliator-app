@@ -127,12 +127,18 @@ const AppIP = () => {
               Add Your Idea
             </CardTitle>
             <CardDescription className="text-white/90 mt-2 text-base">
-              First enter the publicly available information you want to use to
-              describe your idea. This information will be publicly available on
-              the Internet.
+              Complete all three steps below to create your secure idea page.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2">
+              <h3 className="font-semibold text-primary text-sm mb-1">Step 1: Public Information</h3>
+              <p className="text-sm text-white/90">
+                First enter the publicly available information you want to use to
+                describe your idea. This information will be publicly available on
+                the Internet.
+              </p>
+            </div>
             <div className="space-y-2">
               <label
                 htmlFor="public-title"
@@ -167,10 +173,13 @@ const AppIP = () => {
               />
             </div>
 
-            <div className="text-sm text-white/90 mt-2">
-              Now you need to add a text or markdown file that contains the
-              details about your idea. The file will be encrypted so that only
-              you can access it.
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+              <h3 className="font-semibold text-primary text-sm mb-1">Step 2: Private Document</h3>
+              <p className="text-sm text-white/90">
+                Now you need to add a text or markdown file that contains the
+                details about your idea. The file will be encrypted so that only
+                you can access it.
+              </p>
             </div>
 
             {content ? (
@@ -200,12 +209,6 @@ const AppIP = () => {
               </Button>
             )}
 
-            {content && (
-              <div className="text-sm text-white/90 mt-2">
-                Your Idea is safely encrypted. The next step is to choose how you&apos;d like to share it.
-              </div>
-            )}
-
             {error && (
               <Alert
                 variant="destructive"
@@ -215,6 +218,14 @@ const AppIP = () => {
                   {error}
                 </AlertDescription>
               </Alert>
+            )}
+
+            {/* Encrypted message will always show if content is available */}
+            {content && (
+              <div className="p-4 rounded-lg border border-primary/30 bg-muted/30 mb-2 mt-4">
+                <p className="text-sm font-semibold text-primary mb-1">✓ Document Encrypted</p>
+                <p className="text-sm text-white/90">Your Idea is safely encrypted. The next step is to choose how you&apos;d like to share it.</p>
+              </div>
             )}
 
             {/* Set Terms button */}
@@ -228,7 +239,8 @@ const AppIP = () => {
             </Button>
             
             {/* Note about the created page */}
-            <div className="p-4 rounded-lg border border-white/20 bg-muted/30">
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+              <h3 className="font-semibold text-primary text-sm mb-1">Step 3: Create Your Idea Page</h3>
               <p className="text-sm text-white/90">
                 This creates a new page for your IP. Share the address to the
                 new page with others to test the Conciliator with the IP you
