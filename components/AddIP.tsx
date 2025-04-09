@@ -1,48 +1,48 @@
-"use client";
+'use client'
 
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef } from 'react'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
-import { Textarea } from "./ui/textarea";
-import { Modal } from "./ui/modal";
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Loader2 } from 'lucide-react'
+import { Textarea } from './ui/textarea'
+import { Modal } from './ui/modal'
 // Logo removed from non-home pages
-import Link from "next/link";
-import Image from "next/image";
-import LogoffButton from "@/components/LogoffButton";
-import { useStytchUser } from "@stytch/nextjs";
+import Link from 'next/link'
+import Image from 'next/image'
+import LogoffButton from '@/components/LogoffButton'
+import { useStytchUser } from '@stytch/nextjs'
 
 const AppIP = () => {
-  const { user, isInitialized } = useStytchUser();
-  const [content, setContent] = useState("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
-  const [businessModel, setBusinessModel] = useState("Protected Evaluation");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [price, setPrice] = useState("");
+  const { user, isInitialized } = useStytchUser()
+  const [content, setContent] = useState('')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
+  const [businessModel, setBusinessModel] = useState('Protected Evaluation')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [price, setPrice] = useState('')
 
   const handleStore = useCallback(async () => {
-    setError(null);
-    setIsLoading(true);
+    setError(null)
+    setIsLoading(true)
     try {
-      const data = await fetch("/api/store", {
-        method: "POST",
+      const data = await fetch('/api/store', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name,
@@ -51,51 +51,51 @@ const AppIP = () => {
         }),
       }).then((res) => {
         if (!res.ok) {
-          throw new Error("Failed to store invention");
+          throw new Error('Failed to store invention')
         }
-        return res.json();
-      });
-      const { tokenId } = data;
-      window.location.href = `/${tokenId}`;
+        return res.json()
+      })
+      const { tokenId } = data
+      window.location.href = `/${tokenId}`
     } catch (err) {
-      console.error("API Key validation error:", err);
-      setError((err as { message: string }).message);
+      console.error('API Key validation error:', err)
+      setError((err as { message: string }).message)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [content, description, name]);
+  }, [content, description, name])
 
   const handleOpenFileDialog = useCallback(() => {
-    setIsModalOpen(true);
-  }, []);
+    setIsModalOpen(true)
+  }, [])
 
   const handleFileSelection = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+      const file = e.target.files?.[0]
+      if (!file) return
 
       // Check file size (2MB limit)
       if (file.size > 2 * 1024 * 1024) {
-        setError("File size exceeds 2MB limit");
-        return;
+        setError('File size exceeds 2MB limit')
+        return
       }
 
       // Check file type (only text and markdown)
-      if (!file.type.includes("text") && !file.name.endsWith(".md")) {
-        setError("Only text and markdown files are supported");
-        return;
+      if (!file.type.includes('text') && !file.name.endsWith('.md')) {
+        setError('Only text and markdown files are supported')
+        return
       }
 
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (event) => {
-        const fileContent = event.target?.result as string;
-        setContent(fileContent);
-        setIsModalOpen(false);
-      };
-      reader.readAsText(file);
+        const fileContent = event.target?.result as string
+        setContent(fileContent)
+        setIsModalOpen(false)
+      }
+      reader.readAsText(file)
     },
     []
-  );
+  )
 
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
@@ -112,13 +112,11 @@ const AppIP = () => {
             className="transform scale-125"
           />
         </Link>
-        
+
         {/* LogoffButton positioned in top-right corner */}
         {isInitialized && user ? (
           <div className="fixed top-20 right-4 z-20">
-            <LogoffButton 
-              className="bg-primary hover:bg-primary/80 text-black font-medium rounded-md shadow-md"
-            >
+            <LogoffButton className="bg-primary hover:bg-primary/80 text-black font-medium rounded-xl shadow-lg hover:shadow-xl hover:scale-105">
               Logout
             </LogoffButton>
           </div>
@@ -148,7 +146,7 @@ const AppIP = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-                className="border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary"
+                className="border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary rounded-xl h-11"
               />
             </div>
 
@@ -165,12 +163,14 @@ const AppIP = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isLoading}
-                className="min-h-24 border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary"
+                className="min-h-24 border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary rounded-xl"
               />
             </div>
-            
+
             <div className="text-sm text-white/90 mt-2">
-              Now you need to add a text or markdown file that contains the details about your idea. The file will be encrypted so that only you can access it.
+              Now you need to add a text or markdown file that contains the
+              details about your idea. The file will be encrypted so that only
+              you can access it.
             </div>
 
             {content ? (
@@ -180,7 +180,7 @@ const AppIP = () => {
                     File uploaded successfully
                   </p>
                   <Button
-                    onClick={() => setContent("")}
+                    onClick={() => setContent('')}
                     variant="ghost"
                     size="sm"
                     className="text-secondary hover:text-secondary/80"
@@ -199,10 +199,12 @@ const AppIP = () => {
                 Add and Encrypt your Idea
               </Button>
             )}
-            
+
             {content && (
               <div className="text-sm text-white/90 mt-2">
-                You have added and protected your Idea. Next, you need to decide the terms under which you will offer access to your Idea by others.
+                You have added and protected your Idea. Next, you need to decide
+                the terms under which you will offer access to your Idea by
+                others.
               </div>
             )}
 
@@ -221,7 +223,7 @@ const AppIP = () => {
             <Button
               onClick={() => setIsTermsModalOpen(true)}
               variant="outline"
-              className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-md transition-all"
+              className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-xl transition-all h-12"
               disabled={isLoading}
             >
               Set Terms
@@ -229,7 +231,7 @@ const AppIP = () => {
 
             <Button
               onClick={handleStore}
-              className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-md transition-all shadow-lg hover:shadow-primary/30 hover:scale-105"
+              className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12"
               disabled={isLoading || !content || !name || !description}
             >
               {isLoading ? (
@@ -238,7 +240,7 @@ const AppIP = () => {
                   Connecting to the Conciliator (this may take a minute or so)
                 </>
               ) : (
-                "Start Discovery Session"
+                'Start Discovery Session'
               )}
             </Button>
 
@@ -267,19 +269,19 @@ const AppIP = () => {
                   ref={fileInputRef}
                   onChange={handleFileSelection}
                   accept=".txt,.md,.markdown,text/plain,text/markdown"
-                  className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                  className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl"
                 />
                 <div className="flex justify-end space-x-3 mt-4">
                   <Button
                     variant="ghost"
                     onClick={() => setIsModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50"
+                    className="text-white/90 hover:bg-muted/50 rounded-xl"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all"
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl"
                   >
                     Select File
                   </Button>
@@ -304,7 +306,7 @@ const AppIP = () => {
                     id="business-model"
                     value={businessModel}
                     onChange={(e) => setBusinessModel(e.target.value)}
-                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
                     disabled={true} // Only Protected Evaluation is available
                   >
                     <option value="Trade Secret" disabled>
@@ -332,7 +334,7 @@ const AppIP = () => {
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
                     />
                   </div>
 
@@ -348,7 +350,7 @@ const AppIP = () => {
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
                     />
                   </div>
                 </div>
@@ -368,7 +370,7 @@ const AppIP = () => {
                     placeholder="0.00"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
                   />
                 </div>
 
@@ -376,16 +378,16 @@ const AppIP = () => {
                   <Button
                     variant="ghost"
                     onClick={() => setIsTermsModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50"
+                    className="text-white/90 hover:bg-muted/50 rounded-xl"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={() => {
                       // Save terms logic would go here
-                      setIsTermsModalOpen(false);
+                      setIsTermsModalOpen(false)
                     }}
-                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all"
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl"
                   >
                     Accept
                   </Button>
@@ -396,7 +398,7 @@ const AppIP = () => {
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AppIP;
+export default AppIP

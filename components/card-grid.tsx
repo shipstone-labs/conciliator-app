@@ -1,65 +1,65 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from 'react'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip";
-import Image from "next/image";
-import Link from "next/link";
-import HomeLink from "./HomeLink";
+} from '@/components/ui/tooltip'
+import Image from 'next/image'
+import Link from 'next/link'
+import HomeLink from './HomeLink'
 
-const itemsPerPage = 16; // 4 Cards per page
+const itemsPerPage = 16 // 4 Cards per page
 
 export type Data = {
-  name: string;
-  url: string;
-  description: string;
-  tokenId: number;
-};
+  name: string
+  url: string
+  description: string
+  tokenId: number
+}
 
 type Props = {
-  items: Data[];
-  onRetrieve: (start: number, limit: number) => Promise<void>;
-};
+  items: Data[]
+  onRetrieve: (start: number, limit: number) => Promise<void>
+}
 
 const CardGrid = ({ items, onRetrieve }: Props) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [imageWidth, setImageWidth] = useState(200); // Default width
+  const [currentPage, setCurrentPage] = useState(1)
+  const [imageWidth, setImageWidth] = useState(200) // Default width
 
   // Responsive image size calculation
   useEffect(() => {
     const updateImageWidth = () => {
-      const screenWidth = window.innerWidth;
+      const screenWidth = window.innerWidth
 
       if (screenWidth < 640) {
-        setImageWidth(150); // Mobile
+        setImageWidth(150) // Mobile
       } else if (screenWidth < 1024) {
-        setImageWidth(180); // Tablet
+        setImageWidth(180) // Tablet
       } else {
-        setImageWidth(250); // Desktop
+        setImageWidth(250) // Desktop
       }
-    };
+    }
 
-    updateImageWidth(); // Set initial width
-    window.addEventListener("resize", updateImageWidth);
+    updateImageWidth() // Set initial width
+    window.addEventListener('resize', updateImageWidth)
 
-    return () => window.removeEventListener("resize", updateImageWidth);
-  }, []);
-  const totalPages = Math.ceil(items.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage);
+    return () => window.removeEventListener('resize', updateImageWidth)
+  }, [])
+  const totalPages = Math.ceil(items.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage)
 
   const goToPage = (page: number) => {
     if (page > totalPages) {
-      onRetrieve(items.length, itemsPerPage);
+      onRetrieve(items.length, itemsPerPage)
     }
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      setCurrentPage(page)
     }
-  };
+  }
 
   return (
     <div className="w-full flex flex-col items-center p-3">
@@ -67,6 +67,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
       <Link
         href="/add-ip"
         className="fixed top-6 right-6 bg-secondary/80 backdrop-blur-lg text-black text-3xl w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-secondary transition-all hover:scale-110 border border-white/20"
+        aria-label="Add New Idea"
       >
         +
       </Link>
@@ -97,9 +98,9 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
               <Image
                 src={`${item.url.replace(
                   /ipfs:\/\//,
-                  "/api/download/"
+                  '/api/download/'
                 )}?img-width=${imageWidth}&img-dpr=${
-                  typeof window !== "undefined"
+                  typeof window !== 'undefined'
                     ? window.devicePixelRatio || 1
                     : 1
                 }`}
@@ -126,11 +127,11 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
 
             <CardContent className="p-3 flex justify-center">
               <Link
-                className="px-6 py-2 rounded-xl bg-primary text-black font-medium
+                className="px-8 py-2 h-11 rounded-xl bg-primary text-black font-medium
                   hover:bg-primary/80 hover:scale-105
-                  focus:ring-2 focus:ring-primary/50 focus:outline-none
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  shadow-md hover:shadow-primary/30 transition-all"
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+                  disabled:opacity-50 disabled:pointer-events-none ring-offset-background
+                  shadow-lg hover:shadow-primary/30 transition-all"
                 href={`/${item.tokenId}`}
               >
                 Seek
@@ -146,7 +147,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
           type="button"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-5 py-2 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-md hover:shadow-lg hover:bg-background/70 transition-all"
+          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
         >
           Prev
         </button>
@@ -157,10 +158,10 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
             type="button"
             key={`page-${i + 1}`}
             onClick={() => goToPage(i + 1)}
-            className={`px-4 py-2 rounded-xl shadow-md transition-all ${
+            className={`px-4 py-2 h-11 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all ${
               currentPage === i + 1
-                ? "bg-primary text-black font-medium"
-                : "bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70"
+                ? 'bg-primary text-black font-medium'
+                : 'bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70'
             }`}
           >
             {i + 1}
@@ -170,13 +171,13 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
         <button
           type="button"
           onClick={() => goToPage(currentPage + 1)}
-          className="px-5 py-2 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-md hover:shadow-lg hover:bg-background/70 transition-all"
+          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
         >
           Next
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CardGrid;
+export default CardGrid
