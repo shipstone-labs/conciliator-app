@@ -183,7 +183,7 @@ const AppIP = () => {
                     onClick={() => setContent('')}
                     variant="ghost"
                     size="sm"
-                    className="text-secondary hover:text-secondary/80"
+                    className="text-secondary hover:text-secondary/80 hover:bg-muted/30 rounded-xl"
                   >
                     Remove
                   </Button>
@@ -193,7 +193,7 @@ const AppIP = () => {
               <Button
                 onClick={handleOpenFileDialog}
                 variant="outline"
-                className="w-full border border-white/20 bg-muted/30 text-white hover:bg-muted/50 py-3 px-4 rounded-md transition-all"
+                className="w-full border border-white/20 bg-muted/30 text-white hover:bg-muted/50 py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 h-12"
                 disabled={isLoading || !name || !description}
               >
                 Add and Encrypt your Idea
@@ -202,9 +202,7 @@ const AppIP = () => {
 
             {content && (
               <div className="text-sm text-white/90 mt-2">
-                You have added and protected your Idea. Next, you need to decide
-                the terms under which you will offer access to your Idea by
-                others.
+                Your Idea is safely encrypted. The next step is to choose how you'd like to share it.
               </div>
             )}
 
@@ -228,10 +226,20 @@ const AppIP = () => {
             >
               Set Terms
             </Button>
+            
+            {/* Note about the created page */}
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30">
+              <p className="text-sm text-white/90">
+                This creates a new page for your IP. Share the address to the
+                new page with others to test the Conciliator with the IP you
+                added.
+              </p>
+            </div>
 
+            {/* Button moved below the note */}
             <Button
               onClick={handleStore}
-              className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12"
+              className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12 mt-4"
               disabled={isLoading || !content || !name || !description}
             >
               {isLoading ? (
@@ -240,18 +248,9 @@ const AppIP = () => {
                   Connecting to the Conciliator (this may take a minute or so)
                 </>
               ) : (
-                'Start Discovery Session'
+                'View Idea Page'
               )}
             </Button>
-
-            {/* Note below the Start Button */}
-            <div className="mt-2 p-4 rounded-lg border border-white/20 bg-muted/30">
-              <p className="text-sm text-white/90">
-                This creates a new page for your IP. Share the address to the
-                new page with others to test the Conciliator with the IP you
-                added.
-              </p>
-            </div>
 
             {/* File upload modal */}
             <Modal
@@ -275,13 +274,13 @@ const AppIP = () => {
                   <Button
                     variant="ghost"
                     onClick={() => setIsModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50 rounded-xl"
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl"
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
                   >
                     Select File
                   </Button>
@@ -378,7 +377,7 @@ const AppIP = () => {
                   <Button
                     variant="ghost"
                     onClick={() => setIsTermsModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50 rounded-xl"
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
                   >
                     Cancel
                   </Button>
@@ -387,7 +386,7 @@ const AppIP = () => {
                       // Save terms logic would go here
                       setIsTermsModalOpen(false)
                     }}
-                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl"
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
                   >
                     Accept
                   </Button>
