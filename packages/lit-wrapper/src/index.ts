@@ -1,6 +1,5 @@
 // Import directly from internal node_modules
 // These imports will be bundled by esbuild
-import fetch from 'cross-fetch'
 import {
   LIT_NETWORK,
   AUTH_METHOD_SCOPE,

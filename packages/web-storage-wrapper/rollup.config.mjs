@@ -6,7 +6,6 @@ import virtual from '@rollup/plugin-virtual';
 
 // Create a global window shim
 const globals = `
-const globalThis = self || global;
 const window = globalThis;
 `;
 
