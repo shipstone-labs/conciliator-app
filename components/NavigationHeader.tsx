@@ -1,10 +1,6 @@
-import {
-  Menubar,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-import Image from "next/image";
-import Link from "next/link";
+import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function NavigationHeader() {
   return (
@@ -19,19 +15,21 @@ export default function NavigationHeader() {
           className="rounded-full"
         />
       </Link>
-      
+
       {/* Main menu items */}
       <Menubar className="border-none bg-transparent flex-grow">
         <MenubarMenu>
           <MenubarTrigger>What is SafeIdea?</MenubarTrigger>
         </MenubarMenu>
         <MenubarMenu>
-          <MenubarTrigger>Explore Ideas</MenubarTrigger>
+          <Link href="/list-ip">
+            <MenubarTrigger>Explore Ideas</MenubarTrigger>
+          </Link>
         </MenubarMenu>
       </Menubar>
-      
+
       {/* Spacer for the right side to maintain balanced layout */}
       <div className="ml-4 w-[150px]"></div>
     </div>
-  );
+  )
 }
