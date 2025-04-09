@@ -5,7 +5,8 @@ FROM node:22-alpine AS base
 # Install dependencies only when needed
 FROM base AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat python3 make g++ git
+RUN apk add --no-cache libc6-compat python3 make g++ git wget tar go build-base bsd-compat-headers
+      
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
@@ -16,6 +17,16 @@ ARG NEXT_PUBLIC_STYTCH_PROJECT_ENV
 ARG NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN
 ARG NEXT_PUBLIC_STYTCH_APP_ID
 ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
+ARG TINYGO_VERSION=0.30.0
+
+RUN wget -q https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
+  tar -C /usr/local -xzf tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
+  rm tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
+  ln -s /usr/local/tinygo/bin/tinygo /usr/local/bin/tinygo
+
+ENV PATH="${PATH}:/root/go/bin"
+RUN mkdir -p /root/go
+ENV GOPATH="/root/go"
 
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
