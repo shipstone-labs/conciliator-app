@@ -1,16 +1,16 @@
 import type { NextRequest } from "next/server";
 import {
   ALLOWED_ORIGINS,
-  abi,
+  // abi,
   genSession,
-  getModel,
-  imageAI,
-  pinata,
+  // getModel,
+  // imageAI,
+  // pinata,
 } from "../utils";
-import { createWalletClient, decodeEventLog, http } from "viem";
+// import { createWalletClient, decodeEventLog, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { filecoinCalibration } from "viem/chains";
-import { waitForTransactionReceipt } from "viem/actions";
+// import { filecoinCalibration } from "viem/chains";
+// import { waitForTransactionReceipt } from "viem/actions";
 import { createAsAgent } from "web-storage-wrapper";
 import {
   createLitClient,
@@ -32,8 +32,9 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name: _name, content, description, encrypted } = body;
-    const name = _name || "Untitled";
+    // const { name: _name, content, description, encrypted } = body;
+    const { name: _name, encrypted } = body;
+    // const name = _name || "Untitled";
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || "") as `0x${string}`
     );
