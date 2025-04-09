@@ -39,7 +39,6 @@ RUN \
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
@@ -50,7 +49,7 @@ COPY . .
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm install && pnpm run build; \
   else echo "Lockfile not found." && exit 1; \
   fi
 RUN ls -l ./.next
