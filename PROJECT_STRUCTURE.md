@@ -39,12 +39,21 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 - Accessible from Individual Idea Pages
 - Implementation needs: Analytics tracking system, visualization components, metrics storage
 
-### 5. Account Page (`/account`) **(TBD)**
-- User profile information (name, email, phone)
-- Editable profile fields (name is optional)
-- "Your Ideas" button to view owned/accessed ideas
-- Account settings and preferences
-- Implementation needs: Profile form components, data storage for profile info, settings management
+### 5. Account Modal Component **(IN PROGRESS)**
+- Accessible via hamburger menu in top-right of navigation bar
+- Menu provides two options:
+  - Account: Opens account modal dialog
+  - Sign Out: Logs user out of the application
+- Modal features:
+  - Display user information (email or phone number)
+  - Editable name field (optional, not shown to other users)
+  - Cancel button (closes modal)
+  - OK button (saves changes and closes modal)
+- Implementation needs: 
+  - Hamburger menu component in NavigationHeader
+  - Account modal component
+  - User data storage and retrieval
+  - Integration with existing authentication system
 
 ### 6. My Ideas Page (`/my-ideas`) **(TBD)**
 - Filtered view of ideas owned by the user
@@ -52,7 +61,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 - Same layout/functionality as idea discovery but with personal filter
 - Implementation needs: User-to-idea relationship tracking, access permission tracking
 
-### 7. Individual Idea Page
+### 7. Individual Idea Page **(IN PROGRESS)**
 - Split into two specialized views:
   - Details View (`/details/[tokenId]`) - Shows idea details and information
     - Component: `DetailIP.tsx` 
