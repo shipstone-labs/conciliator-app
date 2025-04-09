@@ -57,11 +57,19 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
   - Details View (`/details/[tokenId]`) - Shows idea details and information
     - Component: `DetailIP.tsx` 
     - Implementation: `/app/details/[tokenId]/page.tsx`
+    - Features:
+      - Displays idea title, description, metadata, and tags
+      - Shows creation date and category information
+      - "Explore in Discovery" button to navigate to discovery view
+      - Informational card explaining Discovery mode
   - Discovery View (`/discovery/[tokenId]`) - Q&A interface via the Conciliator
     - Component: `QuestionIP.tsx` 
     - Implementation: `/app/discovery/[tokenId]/page.tsx`
+- User Flow:
+  - After idea creation, users are directed to Details view
+  - From Details view, users can navigate to Discovery view
+  - Future enhancement: Navigation to Analytics view **(TBD)**
 - Document access controls based on permissions
-- Navigation buttons to Idea Discovery and Idea Analytics **(TBD)**
 
 ### 8. Dashboard (`/dashboard`)
 - Authenticated home page
@@ -189,8 +197,8 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 
 ### 1. Idea Creation Flow
 - Home → Auth → Add Idea → Enter public info → Upload document
-- → Set terms → Store via API → Redirect to new Idea details page
-- Key components: AddIP.tsx, Modal components, Store API
+- → Set terms → Store via API → Redirect to Details view → Option to go to Discovery view
+- Key components: AddIP.tsx, DetailIP.tsx, Modal components, Store API
 
 ### 2. Idea Exploration Flow
 - Home → Auth → Idea Discovery → Browse ideas → View specific Idea
