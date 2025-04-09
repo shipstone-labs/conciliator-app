@@ -37,6 +37,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",
+    "dotenv": "^16.4.7",
     "ethers": "5",
     "events-browserify": "^0.0.1",
     "lilypad-wrapper": "workspace:*",
