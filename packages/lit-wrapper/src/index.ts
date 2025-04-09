@@ -1,5 +1,6 @@
 // Import directly from internal node_modules
 // These imports will be bundled by esbuild
+import fetch from 'cross-fetch'
 import {
   LIT_NETWORK,
   AUTH_METHOD_SCOPE,
@@ -22,6 +23,12 @@ import {
   getAuthIdByAuthMethod,
 } from "@lit-protocol/lit-auth-client";
 import type { AuthMethod, EncryptResponse } from "@lit-protocol/types";
+
+// biome-ignore lint/correctness/noUnusedVariables: <explanation>
+// biome-ignore lint/style/noVar: <explanation>
+var hasRequiredBrowserPonyfill = true;
+
+// globalThis.fetch = fetch;
 
 export type AuthParams = {
   userId: string;

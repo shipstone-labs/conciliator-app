@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "pnpm run build-wrappers",
     "dev": "next dev | grep --color=always -v 'nextjs_original-stack-frames'",
-    "prebuild": "pnpm run build-wrappers",
+    "notprebuild": "pnpm run build-wrappers",
     "build": "next build",
     "build-wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
     "start": "next start",
@@ -13,7 +13,7 @@
     "lint:biome": "biome lint .",
     "check": "biome check --apply .",
     "format": "biome format --write .",
-    "prepages:build": "pnpm run build-wrappers",
+    "notprepages:build": "pnpm run build-wrappers",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
     "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08"
   },

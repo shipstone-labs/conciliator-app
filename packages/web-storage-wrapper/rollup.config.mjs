@@ -2,6 +2,13 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
+import virtual from '@rollup/plugin-virtual';
+
+// Create a global window shim
+const globals = `
+const globalThis = self || global;
+const window = globalThis;
+`;
 
 export default {
   input: "./dist/index.js",
@@ -21,6 +28,18 @@ export default {
     }
   },
   plugins: [
+    // Add window global shim at the beginning of the bundle
+    {
+      name: 'globals',
+      banner() {
+        return globals;
+      },
+    },
+    // Stub out modules that shouldn't be included in the worker bundle
+    virtual({
+      '@walletconnect/modal': 'export default {}',
+      // Add any other modules to stub here as needed
+    }),
     // Explicitly resolve from this package's node_modules
     resolve({
       browser: true,
@@ -37,6 +56,8 @@ export default {
     json(),
     replace({
       "process.env.NODE_ENV": JSON.stringify("production"),
+      "global.window": "globalThis",
+      "typeof window": "typeof globalThis",
       preventAssignment: true,
     }),
     // Uncomment to enable minification

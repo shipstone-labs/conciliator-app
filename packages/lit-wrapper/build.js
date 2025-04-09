@@ -24,8 +24,8 @@ async function build() {
     writeFileSync(
       file,
       content.replace(
-        "const buffer = await crypto$1.web.subtle.digest('SHA-512', message.buffer);",
-        "const buffer = await crypto$1.web.subtle.digest('SHA-512', message);"
+        "process.versions",
+        "process.versions"
       )
     );
 

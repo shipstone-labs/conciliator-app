@@ -16,6 +16,9 @@
   "scripts": {
     "build": "node build.js"
   },
+  "devDependencies": {
+    "@rollup/plugin-virtual": "^3.0.2"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -32,6 +35,7 @@
     "@simplewebauthn/browser": "^13.1.0",
     "blakejs": "^1.2.1",
     "browser-headers": "^0.4.1",
+    "cross-fetch": "^4.1.0",
     "js-sha256": "^0.11.0",
     "multiformats": "9.9.0",
     "uint8arrays": "^5.1.0",
