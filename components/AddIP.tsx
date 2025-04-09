@@ -106,6 +106,7 @@ const AppIP = () => {
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
       <div className="max-w-6xl mx-auto space-y-8">
+        {/* Logo removed from non-home pages - now using global header logo
         <Link
           href="/"
           className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
@@ -118,6 +119,7 @@ const AppIP = () => {
             className="transform scale-125"
           />
         </Link>
+        */}
 
         {/* LogoffButton positioned in top-right corner */}
         {isInitialized && user ? (
@@ -249,7 +251,7 @@ const AppIP = () => {
               </h3>
               <p className="text-sm text-white/90">
                 Now, you can choose how you want to share it. Click
-                &quot;Set Terms&quot; to configure sharing options.
+                <strong> Set Terms </strong> to configure sharing options.
               </p>
             </div>
 
@@ -266,9 +268,8 @@ const AppIP = () => {
             {/* Create Page explanation */}
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
               <p className="text-sm text-white/90">
-                Clicking &quot;View Idea Page&quot; below creates a new secure
-                page for your IP. You can share this page address with others to
-                test the Conciliator.
+                Clicking <strong>View Idea Page</strong> takes you to your new Idea page. 
+                You can share this page address with others to test the Conciliator.
               </p>
             </div>
 
