@@ -1,14 +1,24 @@
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { useStytchUser } from "@stytch/nextjs";
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { AccountModal } from "./AccountModal";
+import LogoffButton from "./LogoffButton";
 
 export default function NavigationHeader() {
+  const { user, isInitialized } = useStytchUser();
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  
+  // Only show account options if user is authenticated
+  const isAuthenticated = isInitialized && user;
+
   return (
     <div className="flex w-full items-center justify-between">
       {/* Logo on left */}
@@ -42,15 +52,35 @@ export default function NavigationHeader() {
             <Menu className="h-5 w-5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
-            <DropdownMenuItem className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer">
-              Account
-            </DropdownMenuItem>
-            <DropdownMenuItem className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer">
-              Sign Out
-            </DropdownMenuItem>
+            {isAuthenticated && (
+              <>
+                <DropdownMenuItem 
+                  className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer"
+                  onClick={() => setIsAccountModalOpen(true)}
+                >
+                  Account
+                </DropdownMenuItem>
+                <LogoffButton className="w-full justify-start px-3 py-2 hover:bg-white/10 rounded-lg text-left font-normal">
+                  Sign Out
+                </LogoffButton>
+              </>
+            )}
+            {!isAuthenticated && (
+              <Link href="/" className="block">
+                <DropdownMenuItem className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer">
+                  Sign In
+                </DropdownMenuItem>
+              </Link>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Account modal */}
+      <AccountModal 
+        isOpen={isAccountModalOpen} 
+        onClose={() => setIsAccountModalOpen(false)} 
+      />
     </div>
   );
 }
