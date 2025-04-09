@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import webpack from "webpack";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   webpack: (config, { isServer }) => {
     // Handle browser-compatibility for Node.js built-ins
     // Provide empty implementations for Node.js built-ins
