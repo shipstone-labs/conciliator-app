@@ -5,7 +5,7 @@ FROM node:22-alpine AS base
 # Install dependencies only when needed
 FROM base AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat python3 make g++ git wget tar go build-base bsd-compat-headers
+RUN apk add --no-cache libc6-compat python3 make g++ git wget tar build-base bsd-compat-headers
       
 WORKDIR /app
 
@@ -18,20 +18,24 @@ ARG NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN
 ARG NEXT_PUBLIC_STYTCH_APP_ID
 ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
 ARG TINYGO_VERSION=0.30.0
+ARG GO_VERSION=1.21.6
+
+RUN wget -q https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
+  tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
+  rm go${GO_VERSION}.linux-amd64.tar.gz
 
 RUN wget -q https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
-  rm tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
-  ln -s /usr/local/tinygo/bin/tinygo /usr/bin/tinygo
+  rm tinygo${TINYGO_VERSION}.linux-amd64.tar.gz
 
-ENV PATH="${PATH}:/root/go/bin"
+ENV PATH="${PATH}:/usr/local/go/bin:/usr/local/tinygo/bin:/root/go/bin"
 RUN mkdir -p /root/go
 ENV GOPATH="/root/go"
 
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; pnpm build-wrappers \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile && pnpm build-wrappers; \
   else echo "Lockfile not found." && exit 1; \
   fi
 
@@ -54,7 +58,6 @@ RUN \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build:plain; \
   else echo "Lockfile not found." && exit 1; \
   fi
-RUN ls -l ./.next
 
 # Production image, copy all the files and run next
 FROM base AS runner
