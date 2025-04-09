@@ -7,6 +7,7 @@
     "dev": "next dev | grep --color=always -v 'nextjs_original-stack-frames'",
     "prebuild": "pnpm run build-wrappers",
     "build": "next build",
+    "build:plain": "next build",
     "build-wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
     "start": "next start",
     "lint": "next lint",
