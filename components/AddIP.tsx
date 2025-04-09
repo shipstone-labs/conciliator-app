@@ -202,7 +202,7 @@ const AppIP = () => {
 
             {content && (
               <div className="text-sm text-white/90 mt-2">
-                Your Idea is safely encrypted. The next step is to choose how you'd like to share it.
+                Your Idea is safely encrypted. The next step is to choose how you&apos;d like to share it.
               </div>
             )}
 
