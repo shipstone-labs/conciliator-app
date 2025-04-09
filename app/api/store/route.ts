@@ -34,7 +34,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name: _name, content, description, encrypted } = body;
     const name = _name || "Untitled";
-    console.log("body", body);
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || "") as `0x${string}`
     );
@@ -73,7 +72,6 @@ export async function POST(req: NextRequest) {
         ability: LIT_ABILITY.AccessControlConditionDecryption,
       },
     ]);
-    console.log(sessionSigs);
     console.log("encrypted", encrypted, LIT_NETWORK);
     const w3Client = await createAsAgent(
       process.env.STORACHA_AGENT_KEY || "",

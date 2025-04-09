@@ -78,6 +78,7 @@ export async function createLitClient(options = {}) {
       alertWhenUnauthorized: false,
       litNetwork: LIT_NETWORK.Datil,
       ...options,
+      debug: false,
     });
 
     return client;
