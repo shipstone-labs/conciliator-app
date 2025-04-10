@@ -39,7 +39,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 - Accessible from Individual Idea Pages
 - Implementation needs: Analytics tracking system, visualization components, metrics storage
 
-### 5. Account Modal Component **(IN PROGRESS)**
+### 5. Account Modal Component
 - Accessible via hamburger menu in top-right of navigation bar
 - Menu provides two options:
   - Account: Opens account modal dialog
@@ -49,11 +49,10 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
   - Editable name field (optional, not shown to other users)
   - Cancel button (closes modal)
   - OK button (saves changes and closes modal)
-- Implementation needs: 
-  - Hamburger menu component in NavigationHeader
-  - Account modal component
-  - User data storage and retrieval
-  - Integration with existing authentication system
+- Implementation: 
+  - `AccountModal.tsx` component
+  - `NavigationHeader.tsx` for menu navigation
+  - Integrated with authentication system through hooks
 
 ### 6. My Ideas Page (`/my-ideas`) **(TBD)**
 - Filtered view of ideas owned by the user
@@ -61,7 +60,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 - Same layout/functionality as idea discovery but with personal filter
 - Implementation needs: User-to-idea relationship tracking, access permission tracking
 
-### 7. Individual Idea Page **(IN PROGRESS)**
+### 7. Individual Idea Page
 - Split into two specialized views:
   - Details View (`/details/[tokenId]`) - Shows idea details and information
     - Component: `DetailIP.tsx` 
@@ -74,6 +73,10 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
   - Discovery View (`/discovery/[tokenId]`) - Q&A interface via the Conciliator
     - Component: `QuestionIP.tsx` 
     - Implementation: `/app/discovery/[tokenId]/page.tsx`
+    - Features:
+      - Interactive Q&A with document through Conciliator API
+      - Conversational interface for idea exploration
+      - Context-aware responses based on document content
 - User Flow:
   - After idea creation, users are directed to Details view
   - From Details view, users can navigate to Discovery view
@@ -103,8 +106,10 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 
 ### 3. Conciliator API (`/api/concilator`)
 - Handles Q&A about specific idea documents
-- Called from: Individual Idea pages
-- Implementation: `/app/api/concilator/route.ts`
+- Called from: Individual Idea pages (Discovery view)
+- Implementation: 
+  - `/app/api/concilator/route.ts` - Main API logic
+  - `/app/api/concilator/system.hbs` - System prompt template
 
 ### 4. Analytics API (`/api/analytics/[tokenId]`) **(TBD)**
 - Retrieves engagement metrics for specific ideas
@@ -131,8 +136,12 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 
 ### 8. Supporting APIs
 - `/api/seeker` - Search functionality
+  - Implementation: 
+    - `/app/api/seeker/route.ts` - Main API logic
+    - `/app/api/seeker/system.hbs` - System prompt template
 - `/api/snapshot` - Conversational state preservation
 - `/api/download/[...cid]` - IPFS content retrieval
+- `/api/utils.ts` - Shared API utilities
 
 ## Navigation Flow
 
@@ -192,9 +201,16 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 - AuthButton - Sign in/Register for unauthenticated users
 - LogoffButton - Logout for authenticated users
 - AuthModal - Login/registration modal
+- LoginOrSignupForm - Form component for authentication
+- AccountModal - User account management component
+- Authenticated - Component for conditional rendering based on auth state
 - Implementation: Component files in `/components/`
 
-### 3. Protected Routes
+### 3. Authentication Hooks
+- useAuth - Custom hook for accessing authentication state and methods
+- useLit - Custom hook for Lit Protocol integration and document encryption
+
+### 4. Protected Routes
 - `/add-ip` - Requires auth to add ideas
 - `/idea-discovery` - Auth required to browse ideas **(TBD)**
 - `/[tokenId]/analytics` - Auth required for metrics **(TBD)**
@@ -276,9 +292,14 @@ The test mode functionality should be removed before production deployment. The 
 ## Component Relationships
 
 - **Layout Components**: Layout.tsx, AuthLayout.tsx (global wrappers)
-- **Authentication Components**: AuthButton.tsx, AuthModal.tsx, LogoffButton.tsx
-- **Idea Management**: AddIP.tsx, List-IP page (future Idea Discovery)
-- **Interaction Components**: Chat.tsx, QuestionIP.tsx
-- **UI Components**: Various in `/components/ui/`
+- **Navigation Components**: NavigationHeader.tsx, HomeLink.tsx, Footer.tsx
+- **Authentication Components**: 
+  - User Interface: AuthButton.tsx, AuthModal.tsx, LogoffButton.tsx, LoginOrSignupForm.tsx, AccountModal.tsx
+  - Logic: Authenticated.tsx and custom hooks (useAuth.tsx, useLit.tsx)
+- **Idea Management**: AddIP.tsx, DetailIP.tsx, List-IP page (future Idea Discovery)
+- **Interaction Components**: Chat.tsx, QuestionIP.tsx, Loading.tsx
+- **UI Components**: 
+  - Basic Components: alert.tsx, avatar.tsx, badge.tsx, button.tsx, card.tsx, checkbox.tsx, input.tsx, textarea.tsx, tooltip.tsx
+  - Advanced Components: collapsible.tsx, context-menu.tsx, dropdown-menu.tsx, input-otp.tsx, menubar.tsx, modal.tsx, navigation-menu.tsx, pagination.tsx, popover.tsx, progress.tsx, sonner.tsx, table.tsx, tabs.tsx
 
 This document will be updated as features move from planned (TBD) to in progress to completed status.
