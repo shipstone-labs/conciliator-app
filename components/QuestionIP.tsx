@@ -12,8 +12,7 @@ import { Button } from "@/components/ui/button";
 import Chat from "./chat";
 // Logo removed from non-home pages
 import Loading from "./Loading";
-import Link from "next/link";
-import Image from "next/image";
+// Link and Image imports removed - no longer needed
 
 const AppStates = {
   LOADING: "loading",

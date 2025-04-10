@@ -17,11 +17,11 @@ import { Modal } from "./ui/modal";
 // Imports below are commented as logo is now in global header
 // import Link from 'next/link'
 // import Image from 'next/image'
-// LogoffButton import removed
-import { useStytchUser } from "@stytch/nextjs";
+// Removed useStytchUser since it's no longer needed
+// import { useStytchUser } from "@stytch/nextjs";
 
 const AppIP = () => {
-  const { user, isInitialized } = useStytchUser();
+  // Removed user authentication check since it's handled by the main navigation
   const [content, setContent] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
