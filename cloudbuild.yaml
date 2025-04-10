@@ -11,8 +11,8 @@ steps:
           CACHE_TAG="main-latest"
         elif [[ "$$BRANCH_NAME" == "legacy" ]]; then
           CACHE_TAG="legacy-latest"
-        elif [[ "$$_PR_NUMBER" != "" ]]; then
-          CACHE_TAG="pr-$$_PR_NUMBER-latest"
+        elif [[ "$_PR_NUMBER" != "" ]]; then
+          CACHE_TAG="pr-$_PR_NUMBER-latest"
         else
           # Replace slashes with hyphens for branch name
           BRANCH_SAFE=$${BRANCH_NAME//\//-}
@@ -75,9 +75,9 @@ steps:
         elif [[ "$$BRANCH_NAME" == "legacy" ]]; then
           # Tag as legacy for legacy branch
           TAG_OPTION="--tag=legacy"
-        elif [[ "$$_PR_NUMBER" != "" ]]; then
+        elif [[ "$_PR_NUMBER" != "" ]]; then
           # Tag with PR number for pull requests
-          TAG_OPTION="--tag=pr-$$_PR_NUMBER"
+          TAG_OPTION="--tag=pr-$_PR_NUMBER"
         else
           # Default: no tag
           TAG_OPTION=""
