@@ -1,5 +1,5 @@
 steps:
-  # Determine cache source and latest tag based on branch/PR
+  # Set up cache tag based on branch/PR
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: SetupCacheVars
     entrypoint: bash
@@ -7,58 +7,61 @@ steps:
       - -c
       - |
         # Set cache tag based on branch or PR
-        if [[ "$BRANCH_NAME" == "main" ]]; then
-          # Main branch cache
-          echo "main-latest" > /workspace/cache_tag
-        elif [[ "$BRANCH_NAME" == "legacy" ]]; then
-          # Legacy branch cache
-          echo "legacy-latest" > /workspace/cache_tag
-        elif [[ "$_PR_NUMBER" != "" ]]; then
-          # PR cache with PR number
-          echo "pr-$_PR_NUMBER-latest" > /workspace/cache_tag
+        if [[ "$$BRANCH_NAME" == "main" ]]; then
+          CACHE_TAG="main-latest"
+        elif [[ "$$BRANCH_NAME" == "legacy" ]]; then
+          CACHE_TAG="legacy-latest"
+        elif [[ "$$_PR_NUMBER" != "" ]]; then
+          CACHE_TAG="pr-$$_PR_NUMBER-latest"
         else
-          # Default: branch name as cache
-          echo "${BRANCH_NAME//\//-}-latest" > /workspace/cache_tag
+          # Replace slashes with hyphens for branch name
+          BRANCH_SAFE=$${BRANCH_NAME//\//-}
+          CACHE_TAG="$$BRANCH_SAFE-latest"
         fi
         
-        # Log cache tag for debugging
-        echo "Using cache tag: $(cat /workspace/cache_tag)"
+        # Save to a file that can be accessed by other steps
+        echo "$$CACHE_TAG" > /workspace/cache_tag.txt
+        echo "Using cache tag: $$CACHE_TAG"
+        
+        # Pull the cache image if it exists (won't fail if it doesn't)
+        docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
 
+  # Build with cache
   - name: 'gcr.io/cloud-builders/docker'
     id: Build
+    entrypoint: bash
     args:
-      - 'build'
-      - '--tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA'
-      - '--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$(cat /workspace/cache_tag)'
-      - '--build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV'
-      - '--build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN'
-      - '--build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID'
-      - '--build-arg=NEXT_PUBLIC_LIT_RELAY_API_KEY=$_NEXT_PUBLIC_LIT_RELAY_API_KEY'
-      - '--build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS'
-      - '--build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS'
-      - '.'
+      - -c
+      - |
+        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
+        docker build \
+          --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
+          --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
+          --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
+          --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
+          --build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID \
+          --build-arg=NEXT_PUBLIC_LIT_RELAY_API_KEY=$_NEXT_PUBLIC_LIT_RELAY_API_KEY \
+          --build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS \
+          --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
+          .
 
-  # Tag with commit SHA
+  # Push with commit SHA
   - name: 'gcr.io/cloud-builders/docker'
     id: Push
     args:
       - 'push'
       - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA'
       
-  # Tag with cache tag for future builds
+  # Tag and push with cache tag
   - name: 'gcr.io/cloud-builders/docker'
     id: TagForCache
+    entrypoint: bash
     args:
-      - 'tag'
-      - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA'
-      - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$(cat /workspace/cache_tag)'
-      
-  # Push cache tag
-  - name: 'gcr.io/cloud-builders/docker'
-    id: PushCacheTag
-    args:
-      - 'push'
-      - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$(cat /workspace/cache_tag)'
+      - -c
+      - |
+        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
+        docker tag $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
+        docker push $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: Deploy
     entrypoint: bash
@@ -66,15 +69,15 @@ steps:
       - -c
       - |
         # Set tag based on branch or PR
-        if [[ "$BRANCH_NAME" == "main" ]]; then
+        if [[ "$$BRANCH_NAME" == "main" ]]; then
           # No tag for main branch
           TAG_OPTION=""
-        elif [[ "$BRANCH_NAME" == "legacy" ]]; then
+        elif [[ "$$BRANCH_NAME" == "legacy" ]]; then
           # Tag as legacy for legacy branch
           TAG_OPTION="--tag=legacy"
-        elif [[ "$_PR_NUMBER" != "" ]]; then
+        elif [[ "$$_PR_NUMBER" != "" ]]; then
           # Tag with PR number for pull requests
-          TAG_OPTION="--tag=pr-$_PR_NUMBER"
+          TAG_OPTION="--tag=pr-$$_PR_NUMBER"
         else
           # Default: no tag
           TAG_OPTION=""
