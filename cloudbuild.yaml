@@ -7,7 +7,7 @@ steps:
       - -c
       - |
         # Set cache tag based on branch or PR
-        if [[ "$$BRANCH_NAME" == "main" ]]; then
+        if [[ "$BRANCH_NAME" == "main" ]]; then
           CACHE_TAG="main-latest"
         elif [[ "$$BRANCH_NAME" == "legacy" ]]; then
           CACHE_TAG="legacy-latest"
@@ -15,7 +15,8 @@ steps:
           CACHE_TAG="pr-$_PR_NUMBER-latest"
         else
           # Replace slashes with hyphens for branch name
-          BRANCH_SAFE=$${BRANCH_NAME//\//-}
+          BRANCH_SAFE=$BRANCH_NAME
+          BRANCH_SAFE=$${BRANCH_SAFE//\//-}
           CACHE_TAG="$$BRANCH_SAFE-latest"
         fi
         
