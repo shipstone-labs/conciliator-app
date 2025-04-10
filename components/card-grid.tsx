@@ -127,7 +127,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
                   shadow-lg hover:shadow-primary/30 transition-all"
                 href={`/discovery/${item.tokenId}`}
               >
-                Seek
+                Learn More
               </Link>
             </CardContent>
           </Card>
