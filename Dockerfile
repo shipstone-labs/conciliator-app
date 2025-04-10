@@ -48,6 +48,8 @@ ARG NEXT_PUBLIC_STYTCH_PROJECT_ENV
 ARG NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN
 ARG NEXT_PUBLIC_STYTCH_APP_ID
 ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
+ARG NEXT_PUBLIC_LIT_CONTRACT_ADDRESS
+ARG NEXT_PUBLIC_LIT_ADDRESS
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
