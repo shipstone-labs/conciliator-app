@@ -35,13 +35,14 @@ steps:
         fi
         
         # Execute the deploy command with dynamic tag
+        # Use $$ to escape bash variables in Cloud Build YAML
         gcloud run services update $_SERVICE_NAME \
           --platform=managed \
           --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
           --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID \
           --region=$_DEPLOY_REGION \
           --quiet \
-          $TAG_OPTION
+          $$TAG_OPTION
 images:
   - >-
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
