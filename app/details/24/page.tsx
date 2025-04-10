@@ -14,11 +14,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { 
   ArrowRight, 
-  Calendar, 
-  User, 
-  Tag, 
   Check, 
-  DollarSign,
   Shield,
   Download,
   Upload,
