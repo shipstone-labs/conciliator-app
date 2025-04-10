@@ -35,7 +35,7 @@ export default function NavigationHeader() {
       </Link>
 
       {/* Main menu items - simplified without Menubar */}
-      <nav className="flex items-center space-x-6 flex-grow bg-transparent">
+      <nav className="flex items-center space-x-6 flex-grow">
         <div className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors">
           What is SafeIdea?
         </div>
@@ -53,7 +53,7 @@ export default function NavigationHeader() {
           <DropdownMenuTrigger className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30">
             <Menu className="h-5 w-5" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
+          <DropdownMenuContent align="end" className="bg-background/95 border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
             {isAuthenticated && (
               <>
                 <DropdownMenuItem 
@@ -77,7 +77,7 @@ export default function NavigationHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
+      
       {/* Account modal */}
       <AccountModal 
         isOpen={isAccountModalOpen} 
