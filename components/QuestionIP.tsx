@@ -12,8 +12,7 @@ import { Button } from "@/components/ui/button";
 import Chat from "./chat";
 // Logo removed from non-home pages
 import Loading from "./Loading";
-import Link from "next/link";
-import Image from "next/image";
+// Link and Image imports removed - no longer needed
 
 const AppStates = {
   LOADING: "loading",
@@ -218,18 +217,7 @@ const QuestionIP = ({
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
       <div className="max-w-6xl mx-auto space-y-8">
-        <Link
-          href="/"
-          className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
-        >
-          <Image
-            src="/svg/Black+Yellow.svg"
-            alt="Home"
-            width={26}
-            height={26}
-            className="transform scale-125"
-          />
-        </Link>
+        {/* Home link removed - now available in global header */}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}
         {appState === AppStates.END && renderEndState()}

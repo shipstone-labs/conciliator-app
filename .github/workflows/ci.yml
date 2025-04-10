@@ -34,7 +34,7 @@ jobs:
           if [ -n "$PR_NUMBER" ]
           then
             echo "branch_name=pr-${PR_NUMBER}" >> $GITHUB_OUTPUT
-            echo "url=https://pr-${PR_NUMBER}.${{ env.CF_BASE_URL }}.pages.dev" >> $GITHUB_OUTPUT
+            echo "url=https://pr-${PR_NUMBER}.${PROJECT_NAME}.pages.dev" >> $GITHUB_OUTPUT
           else
             echo "branch_name=" >> $GITHUB_OUTPUT
           fi

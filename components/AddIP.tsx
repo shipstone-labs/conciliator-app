@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -14,11 +14,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Modal } from "./ui/modal";
-// Logo removed from non-home pages
-import Link from "next/link";
-import Image from "next/image";
+// Imports below are commented as logo is now in global header
+// import Link from 'next/link'
+// import Image from 'next/image'
+// Removed useStytchUser since it's no longer needed
+// import { useStytchUser } from "@stytch/nextjs";
 
 const AppIP = () => {
+  // Removed user authentication check since it's handled by the main navigation
   const [content, setContent] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -26,10 +29,47 @@ const AppIP = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [businessModel, setBusinessModel] = useState("Protected Evaluation");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [price, setPrice] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // =====================================================
+  // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
+  // =====================================================
+  // To remove test mode:
+  // 1. Delete this testTokenCounter state
+  // 2. Remove the entire if-block checking for TEST_MODE below
+  // 3. Remove the testTokenCounter from the dependency array
+  // 4. Remove the test-specific code from handleFileSelection
+  // =====================================================
+  const [testTokenCounter, setTestTokenCounter] = useState(1000);
 
   const handleStore = useCallback(async () => {
     setError(null);
     setIsLoading(true);
+
+    // TESTING SHORTCUT: Check for test.md content
+    // REMOVE THIS ENTIRE IF-BLOCK FOR PRODUCTION
+    if (content.includes("TEST_MODE") || name.toLowerCase().includes("test")) {
+      console.log("TEST MODE ACTIVATED - Bypassing encryption and tokenization");
+      // Increment test token for unique test IDs
+      const testTokenId = testTokenCounter;
+      setTestTokenCounter(prev => prev + 1);
+      
+      // Simulate API delay
+      setTimeout(() => {
+        setIsLoading(false);
+        // Redirect to details page with test token ID
+        window.location.href = `/details/${testTokenId}`;
+      }, 1000);
+      return;
+    }
+    // =====================================================
+
+    // Normal production flow
     try {
       const data = await fetch("/api/store", {
         method: "POST",
@@ -48,20 +88,15 @@ const AppIP = () => {
         return res.json();
       });
       const { tokenId } = data;
-      window.location.href = `/${tokenId}`;
+      window.location.href = `/details/${tokenId}`;
     } catch (err) {
       console.error("API Key validation error:", err);
       setError((err as { message: string }).message);
     } finally {
       setIsLoading(false);
     }
-  }, [content, description, name]);
-
-  const handleClear = useCallback(() => {
-    setContent("");
-    setDescription("");
-    setName("");
-  }, []);
+  // ⚠️ Remove testTokenCounter when removing test mode
+  }, [content, description, name, testTokenCounter]);
 
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);
@@ -84,20 +119,47 @@ const AppIP = () => {
         return;
       }
 
+      // =====================================================
+      // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
+      // This section detects test.md files and enables test mode
+      // =====================================================
+      const isTestFile = file.name.toLowerCase() === "test.md";
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        const fileContent = event.target?.result as string;
+        let fileContent = event.target?.result as string;
+        
+        // If this is a test file, add TEST_MODE marker
+        // REMOVE THIS BLOCK FOR PRODUCTION
+        if (isTestFile && !fileContent.includes("TEST_MODE")) {
+          fileContent = "TEST_MODE\n\n" + fileContent;
+          console.log("Test file detected - Adding TEST_MODE marker");
+        }
+        
         setContent(fileContent);
         setIsModalOpen(false);
+        
+        // If it's a test file, show a helpful message
+        // REMOVE THIS BLOCK FOR PRODUCTION
+        if (isTestFile) {
+          setError(null); // Clear any previous errors
+        }
+        // =====================================================
       };
       reader.readAsText(file);
     },
     []
   );
 
+  // Reset terms when content changes
+  useEffect(() => {
+    setTermsAccepted(false);
+  }, [content]);
+
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
       <div className="max-w-6xl mx-auto space-y-8">
+        {/* Logo removed from non-home pages - now using global header logo
         <Link
           href="/"
           className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
@@ -110,18 +172,29 @@ const AppIP = () => {
             className="transform scale-125"
           />
         </Link>
+        */}
+
+        {/* Logout button removed - now in hamburger menu */}
         <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">
               Add Your Idea
             </CardTitle>
             <CardDescription className="text-white/90 mt-2 text-base">
-              First enter the publicly available information you want to use to
-              describe your idea. This information will be publicly available on
-              the Internet.
+              Complete all three steps below to create your secure idea page.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2">
+              <h3 className="font-semibold text-primary text-sm mb-1">
+                Step 1: Public Information
+              </h3>
+              <p className="text-sm text-white/90">
+                First enter the publicly available information you want to use
+                to describe your idea. This information can be seen by others
+                on the Internet.
+              </p>
+            </div>
             <div className="space-y-2">
               <label
                 htmlFor="public-title"
@@ -135,7 +208,7 @@ const AppIP = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-                className="border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary"
+                className="border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary rounded-xl h-11"
               />
             </div>
 
@@ -152,8 +225,19 @@ const AppIP = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isLoading}
-                className="min-h-24 border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary"
+                className="min-h-24 border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary rounded-xl"
               />
+            </div>
+
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+              <h3 className="font-semibold text-primary text-sm mb-1">
+                Step 2: Private Document
+              </h3>
+              <p className="text-sm text-white/90">
+                Now you need to add a text or markdown file that contains the
+                details about your idea. The file will be encrypted so that only
+                you can access it.
+              </p>
             </div>
 
             {content ? (
@@ -166,7 +250,7 @@ const AppIP = () => {
                     onClick={() => setContent("")}
                     variant="ghost"
                     size="sm"
-                    className="text-secondary hover:text-secondary/80"
+                    className="text-secondary hover:text-secondary/80 hover:bg-muted/30 rounded-xl"
                   >
                     Remove
                   </Button>
@@ -176,15 +260,12 @@ const AppIP = () => {
               <Button
                 onClick={handleOpenFileDialog}
                 variant="outline"
-                className="w-full border border-white/20 bg-muted/30 text-white hover:bg-muted/50 py-3 px-4 rounded-md transition-all"
+                className="w-full border border-white/20 bg-muted/30 text-white hover:bg-muted/50 py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 h-12"
                 disabled={isLoading || !name || !description}
               >
                 Add and Encrypt your Idea
               </Button>
             )}
-            <div className="text-xs text-white/70 -mt-2">
-              Text and Markdown files under 2MB are supported
-            </div>
 
             {error && (
               <Alert
@@ -197,10 +278,55 @@ const AppIP = () => {
               </Alert>
             )}
 
+            {/* Success message shown when content exists */}
+            {content && (
+              <div className="p-4 rounded-lg border border-primary/30 bg-muted/30 mb-2 mt-4">
+                <p className="text-sm font-semibold text-primary mb-1">
+                  ✓ Document Encrypted
+                </p>
+                <p className="text-sm text-white/90">
+                  Your Idea is safely encrypted.
+                </p>
+              </div>
+            )}
+
+            {/* Step 3 section - always visible */}
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+              <h3 className="font-semibold text-primary text-sm mb-1">
+                Step 3: Share Your Idea
+              </h3>
+              <p className="text-sm text-white/90">
+                Now, you can choose how you want to share it. Click
+                <strong> Set Terms </strong> to configure sharing options.
+              </p>
+            </div>
+
+            {/* Set Terms button - disabled until content exists */}
+            <Button
+              onClick={() => setIsTermsModalOpen(true)}
+              variant="outline"
+              className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-xl transition-all h-12"
+              disabled={isLoading || !content}
+            >
+              Set Terms
+            </Button>
+
+            {/* Create Page explanation */}
+            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+              <p className="text-sm text-white/90">
+                Clicking <strong>View Idea Page</strong> takes you to your new
+                Idea page. You can share this page address with others to test
+                the Conciliator.
+              </p>
+            </div>
+
+            {/* Button moved below the note */}
             <Button
               onClick={handleStore}
-              className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-md transition-all shadow-lg hover:shadow-primary/30 hover:scale-105"
-              disabled={isLoading || !content || !name || !description}
+              className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12 mt-4"
+              disabled={
+                isLoading || !content || !name || !description || !termsAccepted
+              }
             >
               {isLoading ? (
                 <>
@@ -208,26 +334,8 @@ const AppIP = () => {
                   Connecting to the Conciliator (this may take a minute or so)
                 </>
               ) : (
-                "Start Discovery Session"
+                "View Idea Page"
               )}
-            </Button>
-
-            {/* Note below the Start Button */}
-            <div className="mt-2 p-4 rounded-lg border border-white/20 bg-muted/30">
-              <p className="text-sm text-white/90">
-                This creates a new page for your IP. Share the address to the
-                new page with others to test the Conciliator with the IP you
-                added.
-              </p>
-            </div>
-
-            <Button
-              onClick={handleClear}
-              variant="ghost"
-              className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-md transition-all"
-              disabled={isLoading}
-            >
-              Reset Fields
             </Button>
 
             {/* File upload modal */}
@@ -246,21 +354,128 @@ const AppIP = () => {
                   ref={fileInputRef}
                   onChange={handleFileSelection}
                   accept=".txt,.md,.markdown,text/plain,text/markdown"
-                  className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-md"
+                  className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl"
                 />
                 <div className="flex justify-end space-x-3 mt-4">
                   <Button
                     variant="ghost"
                     onClick={() => setIsModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50"
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all"
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
                   >
                     Select File
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+            {/* Terms Modal */}
+            <Modal
+              isOpen={isTermsModalOpen}
+              onClose={() => setIsTermsModalOpen(false)}
+              title="Set Terms"
+            >
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="business-model"
+                    className="text-sm font-medium text-white/90 block"
+                  >
+                    Business Model
+                  </label>
+                  <select
+                    id="business-model"
+                    value={businessModel}
+                    onChange={(e) => setBusinessModel(e.target.value)}
+                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                    disabled={true} // Only Protected Evaluation is available
+                  >
+                    <option value="Trade Secret" disabled>
+                      Trade Secret
+                    </option>
+                    <option value="Provisional Patent" disabled>
+                      Provisional Patent
+                    </option>
+                    <option value="Protected Evaluation">
+                      Protected Evaluation
+                    </option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="start-date"
+                      className="text-sm font-medium text-white/90 block"
+                    >
+                      Start Date
+                    </label>
+                    <input
+                      id="start-date"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="end-date"
+                      className="text-sm font-medium text-white/90 block"
+                    >
+                      End Date
+                    </label>
+                    <input
+                      id="end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    htmlFor="price"
+                    className="text-sm font-medium text-white/90 block"
+                  >
+                    Price (USD)
+                  </label>
+                  <input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                  />
+                </div>
+
+                <div className="flex justify-between space-x-3 mt-6">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsTermsModalOpen(false)}
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      // Save terms logic would go here
+                      setTermsAccepted(true);
+                      setIsTermsModalOpen(false);
+                    }}
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
+                  >
+                    Accept
                   </Button>
                 </div>
               </div>

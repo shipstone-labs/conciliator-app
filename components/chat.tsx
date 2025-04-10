@@ -41,8 +41,8 @@ const MessageSkeleton = ({
       )}
       <div
         className={`p-4 rounded-lg max-w-3xl backdrop-blur-sm ${
-          isAssistant 
-            ? "bg-background/30 border border-white/10 w-24" 
+          isAssistant
+            ? "bg-background/30 border border-white/10 w-24"
             : "bg-primary/10 border border-primary/30 w-4/5"
         }`}
       >
@@ -575,9 +575,14 @@ export default function ChatUI({
       });
     }, [messages]);
   return (
-    <Card ref={cardRef} className="w-full mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
+    <Card
+      ref={cardRef}
+      className="w-full mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl"
+    >
       <CardHeader>
-        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Discovery Session</CardTitle>
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Discovery Session
+        </CardTitle>
         <CardDescription>
           {name} - {description}
         </CardDescription>
@@ -750,7 +755,9 @@ export default function ChatUI({
                   }}
                   className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                 />
-                <Label htmlFor="degraded" className="text-white/80">Run in degraded mode</Label>
+                <Label htmlFor="degraded" className="text-white/80">
+                  Run in degraded mode
+                </Label>
 
                 {/* API state indicator for debugging */}
                 <span className="ml-4 text-xs text-white/50 bg-background/30 px-2 py-1 rounded-full border border-white/10">
@@ -843,8 +850,20 @@ export default function ChatUI({
                         download={file.title}
                         className="text-primary hover:text-primary/80 transition-colors flex items-center px-3 py-2 rounded-md bg-muted/20 border border-primary/20 w-full"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 mr-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <title>Download</title>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                          />
                         </svg>
                         <span className="truncate">{file.title}</span>
                       </a>
