@@ -32,6 +32,9 @@ const AppIP = () => {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [businessModel, setBusinessModel] = useState("Protected Evaluation");
   const [evaluationPeriod, setEvaluationPeriod] = useState("one-day");
+  const [dayPrice, setDayPrice] = useState("5.00");
+  const [weekPrice, setWeekPrice] = useState("25.00");
+  const [monthPrice, setMonthPrice] = useState("90.00");
   const [ndaConfirmed, setNdaConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -415,7 +418,7 @@ const AppIP = () => {
                     >
                       Evaluation Period
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-3">
                       <div 
                         className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-day" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
                         onClick={() => setEvaluationPeriod("one-day")}
@@ -429,10 +432,23 @@ const AppIP = () => {
                           onChange={() => setEvaluationPeriod("one-day")}
                           className="text-primary rounded-full"
                         />
-                        <label htmlFor="one-day" className="text-white cursor-pointer">
-                          One Day ($5)
+                        <label htmlFor="one-day" className="text-white cursor-pointer flex-grow">
+                          One Day
                         </label>
+                        <div className="flex items-center">
+                          <span className="text-white/70 mr-2">$</span>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            step="0.01"
+                            value={dayPrice}
+                            onChange={(e) => setDayPrice(e.target.value)}
+                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
                       </div>
+                      
                       <div 
                         className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-week" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
                         onClick={() => setEvaluationPeriod("one-week")}
@@ -446,10 +462,23 @@ const AppIP = () => {
                           onChange={() => setEvaluationPeriod("one-week")}
                           className="text-primary rounded-full"
                         />
-                        <label htmlFor="one-week" className="text-white cursor-pointer">
-                          One Week ($25)
+                        <label htmlFor="one-week" className="text-white cursor-pointer flex-grow">
+                          One Week
                         </label>
+                        <div className="flex items-center">
+                          <span className="text-white/70 mr-2">$</span>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            step="0.01"
+                            value={weekPrice}
+                            onChange={(e) => setWeekPrice(e.target.value)}
+                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
                       </div>
+                      
                       <div 
                         className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-month" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
                         onClick={() => setEvaluationPeriod("one-month")}
@@ -463,9 +492,21 @@ const AppIP = () => {
                           onChange={() => setEvaluationPeriod("one-month")}
                           className="text-primary rounded-full"
                         />
-                        <label htmlFor="one-month" className="text-white cursor-pointer">
-                          One Month ($90)
+                        <label htmlFor="one-month" className="text-white cursor-pointer flex-grow">
+                          One Month
                         </label>
+                        <div className="flex items-center">
+                          <span className="text-white/70 mr-2">$</span>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            step="0.01"
+                            value={monthPrice}
+                            onChange={(e) => setMonthPrice(e.target.value)}
+                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
                       </div>
                     </div>
                     <p className="text-xs text-white/60 mt-1">
@@ -484,12 +525,9 @@ const AppIP = () => {
                       className="rounded border-white/20 bg-muted/30 text-primary"
                     />
                     <label htmlFor="nda-confirmed" className="text-white/90 cursor-pointer">
-                      Confirm Signed NDA
+                      I understand that transactions will require a signed NDA with purchaser
                     </label>
                   </div>
-                  <p className="text-xs text-white/60 ml-6">
-                    By checking this box, you confirm that you have a signed NDA in place for this evaluation
-                  </p>
                 </div>
 
                 {/* Price is now automatically set based on the evaluation period */}
