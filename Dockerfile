@@ -13,10 +13,6 @@ WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 COPY packages ./packages
 
-ARG NEXT_PUBLIC_STYTCH_PROJECT_ENV
-ARG NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN
-ARG NEXT_PUBLIC_STYTCH_APP_ID
-ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
 ARG TINYGO_VERSION=0.30.0
 ARG GO_VERSION=1.21.6
 
@@ -42,10 +38,16 @@ RUN \
 
 # Rebuild the source code only when needed
 FROM base AS builder
+
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
 COPY . .
+
+ARG NEXT_PUBLIC_STYTCH_PROJECT_ENV
+ARG NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN
+ARG NEXT_PUBLIC_STYTCH_APP_ID
+ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
