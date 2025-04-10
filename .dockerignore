@@ -1,0 +1,12 @@
+node_modules
+/.next
+/.vercel
+/.output
+cloudbuild.yaml
+Dockerfile
+/*.md
+/hardhat
+/.env*
+/.dev.vars
+/.github
+/.git

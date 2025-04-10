@@ -11,19 +11,15 @@ import { AuthModal } from "./AuthModal";
 import { authContext } from "@/app/authLayout";
 import { useStytchUser } from "@stytch/nextjs";
 import Loading from "./Loading";
-import {
-  AUTH_METHOD_SCOPE,
-  capacityDelegationAuthSig,
-  LIT_ABILITY,
-  type LitNodeClient,
-  LitPKPResource,
-} from "lit-wrapper";
+import type { LitNodeClient } from "lit-wrapper";
+import { publicKeyToAddress } from "viem/utils";
 
 export type Session = {
   litClient?: LitNodeClient;
   sessionSigs?: {
     authMethod: string;
     pkpPublicKey: string;
+    address: `0x${string}`;
     sessionSigs: unknown;
   };
 };
@@ -52,7 +48,7 @@ export default function Authenticated({
             litActive.current = true;
             try {
               const litClient = await litModule.createLitClient({
-                litNetwork: litModule.LitNetworks.Datil,
+                litNetwork: litModule.LIT_NETWORK.Datil,
               });
               litClient.connect();
               const { authMethod, provider } = await litModule.authenticate(
@@ -67,7 +63,9 @@ export default function Authenticated({
               // -- setting scope for the auth method
               // <https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes>
               const options = {
-                permittedAuthMethodScopes: [[AUTH_METHOD_SCOPE.SignAnything]],
+                permittedAuthMethodScopes: [
+                  [litModule.AUTH_METHOD_SCOPE.SignAnything],
+                ],
               };
               let pkps = await provider.fetchPKPsThroughRelayer(authMethod);
               if (pkps.length <= 0) {
@@ -80,17 +78,27 @@ export default function Authenticated({
               }
               const sessionSigs = await litClient.getPkpSessionSigs({
                 pkpPublicKey: pkps[0].publicKey,
-                capabilityAuthSigs: [capacityDelegationAuthSig],
+                // capabilityAuthSigs: [capacityDelegationAuthSig],
                 authMethods: [authMethod],
                 resourceAbilityRequests: [
                   {
-                    resource: new LitPKPResource("*"),
-                    ability: LIT_ABILITY.PKPSigning,
+                    resource: new litModule.LitPKPResource("*"),
+                    ability: litModule.LIT_ABILITY.PKPSigning,
                   },
                 ],
                 expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
               });
-              setSessionSigs({ litClient, sessionSigs });
+              setSessionSigs({
+                litClient,
+                sessionSigs: {
+                  authMethod,
+                  pkpPublicKey: pkps[0].publicKey,
+                  address: publicKeyToAddress(
+                    pkps[0].publicKey as `0x${string}`
+                  ),
+                  sessionSigs,
+                },
+              });
               console.log("authMethod", authMethod, pkps, sessionSigs);
             } catch {
               litActive.current = false;

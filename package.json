@@ -7,14 +7,16 @@
     "dev": "next dev | grep --color=always -v 'nextjs_original-stack-frames'",
     "prebuild": "pnpm run build-wrappers",
     "build": "next build",
-    "build-wrappers": "pnpm --filter lilypad-wrapper build",
+    "build:plain": "next build",
+    "build-wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
     "start": "next start",
     "lint": "next lint",
     "lint:biome": "biome lint .",
     "check": "biome check --apply .",
     "format": "biome format --write .",
+    "prepages:build": "pnpm run build-wrappers",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
-    "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2023-10-01"
+    "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08"
   },
   "dependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -36,6 +38,9 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",
+    "dotenv": "^16.4.7",
+    "ethers": "5",
+    "events-browserify": "^0.0.1",
     "lilypad-wrapper": "workspace:*",
     "lit-wrapper": "workspace:*",
     "lucide-react": "^0.475.0",
@@ -50,6 +55,7 @@
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.1.0",
+    "utf-8-validate": "^6.0.5",
     "uuid": "^11.1.0",
     "viem": "^2.25.0",
     "web-storage-wrapper": "workspace:*",
@@ -71,7 +77,6 @@
     "esbuild": "^0.25.2",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.1.7",
-    "events": "^3.3.0",
     "postcss": "^8.5.3",
     "process": "^0.11.10",
     "raw-loader": "^4.0.2",
@@ -86,14 +91,18 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild",
       "protobufjs",
       "sharp",
-      "esbuild"
+      "utf-8-validate"
     ]
   },
   "resolutions": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@walletconnect/types": "2.9.2",
+    "@noble/ed25519": "2.1.0"
   },
   "packageManager": "pnpm@10.7.1"
 }

@@ -6,37 +6,44 @@ import {
   PROVIDER_TYPE,
   LIT_ABILITY,
 } from "@lit-protocol/constants";
-import {
-  LitNodeClient,
-  decryptString,
-  encryptString,
-} from "@lit-protocol/lit-node-client";
+import { LitNodeClient } from "@lit-protocol/lit-node-client";
 import {
   LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
+  type LitResourceAbilityRequest,
   newSessionCapabilityObject,
   LitPKPResource,
   LitActionResource,
-  capacityDelegationAuthSig,
   createSiweMessageWithRecaps,
   generateAuthSig,
-  AuthCallbackParams,
 } from "@lit-protocol/auth-helpers";
 import {
   LitRelay,
   StytchOtpProvider,
   getAuthIdByAuthMethod,
 } from "@lit-protocol/lit-auth-client";
+import type { AuthMethod, EncryptResponse } from "@lit-protocol/types";
 
-// Create a simplified API that's more manageable
-export const LitNetworks = {
-  Datil: LIT_NETWORK.Datil,
-  DatilTest: LIT_NETWORK.DatilTest,
-  Habanero: LIT_NETWORK.Habanero,
-  Custom: LIT_NETWORK.Custom,
+// biome-ignore lint/correctness/noUnusedVariables: <explanation>
+// biome-ignore lint/style/noVar: <explanation>
+var hasRequiredBrowserPonyfill = true;
+
+// globalThis.fetch = fetch;
+
+export type AuthParams = {
+  userId: string;
+  appId: string;
+  accessToken: string;
+  relayApiKey: string;
 };
 
-export async function authenticate(client, options) {
+export async function authenticate(
+  client: LitNodeClient,
+  options: AuthParams
+): Promise<{
+  authMethod: AuthMethod;
+  provider: StytchOtpProvider;
+  authId: string;
+}> {
   const { userId, appId, accessToken, relayApiKey } = options;
 
   const litRelay = new LitRelay({
@@ -70,6 +77,7 @@ export async function createLitClient(options = {}) {
       alertWhenUnauthorized: false,
       litNetwork: LIT_NETWORK.Datil,
       ...options,
+      debug: false,
     });
 
     return client;
@@ -79,47 +87,18 @@ export async function createLitClient(options = {}) {
   }
 }
 
-// Export only the functions we need
-export const utils = {
-  encryptString,
-  decryptString,
-};
-
 export {
   AUTH_METHOD_SCOPE,
   PROVIDER_TYPE,
   LIT_NETWORK,
   LIT_ABILITY,
-  LitNodeClient,
+  type LitNodeClient,
   LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
+  type LitResourceAbilityRequest,
   newSessionCapabilityObject,
-  capacityDelegationAuthSig,
   createSiweMessageWithRecaps,
   generateAuthSig,
   LitPKPResource,
-  AuthCallbackParams,
   LitActionResource,
-};
-
-// Default export for convenience
-export default {
-  createLitClient,
-  authenticate,
-  createSiweMessageWithRecaps,
-  generateAuthSig,
-  LitNetworks,
-  LitNodeClient,
-  LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
-  newSessionCapabilityObject,
-  capacityDelegationAuthSig,
-  LitPKPResource,
-  LitActionResource,
-  utils,
-  AuthCallbackParams,
-  AUTH_METHOD_SCOPE,
-  PROVIDER_TYPE,
-  LIT_NETWORK,
-  LIT_ABILITY,
+  type EncryptResponse,
 };

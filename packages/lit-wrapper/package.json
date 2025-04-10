@@ -2,12 +2,22 @@
   "name": "lit-wrapper",
   "version": "1.0.0",
   "description": "Isolated wrapper for Lit Protocol",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "browser": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "browser": "dist/index.js",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "node build.js"
+  },
+  "devDependencies": {
+    "@rollup/plugin-virtual": "^3.0.2"
   },
   "keywords": [],
   "author": "",
@@ -21,11 +31,14 @@
     "@lit-protocol/crypto": "7.0.10-alpha.0",
     "@lit-protocol/lit-auth-client": "7.0.10-alpha.0",
     "@lit-protocol/lit-node-client": "7.0.10-alpha.0",
+    "@lit-protocol/types": "^7.1.0",
     "@simplewebauthn/browser": "^13.1.0",
     "blakejs": "^1.2.1",
     "browser-headers": "^0.4.1",
+    "cross-fetch": "^4.1.0",
     "js-sha256": "^0.11.0",
     "multiformats": "9.9.0",
-    "uint8arrays": "^5.1.0"
+    "uint8arrays": "^5.1.0",
+    "utf-8-validate": "^5.0.10"
   }
 }
