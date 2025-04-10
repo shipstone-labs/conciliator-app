@@ -6,7 +6,7 @@ import AuthenticatedLayout from '@/app/authLayout'
 import { AuthButton } from './AuthButton'
 import { useStytchUser } from '@stytch/nextjs'
 import Loading from './Loading'
-import LogoffButton from '@/components/LogoffButton'
+// LogoffButton import removed
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 // This is a placeholder for the actual login detection logic
@@ -15,13 +15,7 @@ function HomeApp() {
   return (
     <>
       {' '}
-      {isInitialized && user ? (
-        <div className="fixed top-20 right-4 z-20">
-          <LogoffButton className="bg-primary hover:bg-primary/80 text-black font-medium rounded-xl shadow-lg hover:shadow-xl hover:scale-105">
-            Logout
-          </LogoffButton>
-        </div>
-      ) : null}
+      {/* Logout button removed - now in hamburger menu */}
       {/* Top-right Auth Button (below menubar) */}
       {!isInitialized ? null : !user ? (
         <div className="fixed top-20 right-4 z-20">

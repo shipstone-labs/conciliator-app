@@ -17,7 +17,7 @@ import { Modal } from "./ui/modal";
 // Imports below are commented as logo is now in global header
 // import Link from 'next/link'
 // import Image from 'next/image'
-import LogoffButton from "@/components/LogoffButton";
+// LogoffButton import removed
 import { useStytchUser } from "@stytch/nextjs";
 
 const AppIP = () => {
@@ -174,14 +174,7 @@ const AppIP = () => {
         </Link>
         */}
 
-        {/* LogoffButton positioned in top-right corner */}
-        {isInitialized && user ? (
-          <div className="fixed top-20 right-4 z-20">
-            <LogoffButton className="bg-primary hover:bg-primary/80 text-black font-medium rounded-xl shadow-lg hover:shadow-xl hover:scale-105">
-              Logout
-            </LogoffButton>
-          </div>
-        ) : null}
+        {/* Logout button removed - now in hamburger menu */}
         <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">

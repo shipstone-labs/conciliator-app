@@ -63,6 +63,14 @@ export default function NavigationHeader() {
         >
           Explore Ideas
         </Link>
+        {isAuthenticated && (
+          <Link 
+            href="/add-ip"
+            className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+          >
+            Add Idea
+          </Link>
+        )}
       </nav>
 
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}

@@ -64,13 +64,6 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
   return (
     <div className="w-full flex flex-col items-center p-3">
       <HomeLink />
-      <Link
-        href="/add-ip"
-        className="fixed top-6 right-6 bg-secondary/80 backdrop-blur-lg text-black text-3xl w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-secondary transition-all hover:scale-110 border border-white/20"
-        aria-label="Add New Idea"
-      >
-        +
-      </Link>
 
       {/* Card Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
