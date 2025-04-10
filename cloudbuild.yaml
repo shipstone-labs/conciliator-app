@@ -17,6 +17,11 @@ steps:
       - NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID
       - '--build-arg'
       - NEXT_PUBLIC_LIT_RELAY_API_KEY=$_NEXT_PUBLIC_LIT_RELAY_API_KEY
+      - '--build-arg'
+      - NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS
+      - '--build-arg'
+      - NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS
+
     id: Build
   - name: gcr.io/cloud-builders/docker
     args:
@@ -57,6 +62,8 @@ substitutions:
   _NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: public-token-test-32ccb142-bf26-4bd7-a4f6-5c3b71b94955
   _NEXT_PUBLIC_STYTCH_APP_ID: project-test-df5856de-9131-412e-bee2-f8155431b86a
   _NEXT_PUBLIC_LIT_RELAY_API_KEY: test-api-key
+  _NEXT_PUBLIC_LIT_CONTRACT_ADDRESS: '0x262B5cb19B39a813C3E4366BC9d92573128139ba'
+  _NEXT_PUBLIC_LIT_ADDRESS: '0xa6985f885c29cff477212ba5b2fb7679f83555b6'
 
 tags:
   - gcp-cloud-build-deploy-cloud-run
