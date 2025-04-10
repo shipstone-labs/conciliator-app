@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Modal } from "@/components/ui/modal";
 import { authContext } from "@/app/authLayout";
+import Image from "next/image";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -155,6 +156,17 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   return (
     <Modal isOpen={isOpen && !loggingOff} onClose={handleClose} title="Sign In">
       <div className="mt-4 space-y-6">
+        {/* SafeIdea Logo */}
+        <div className="flex justify-center mb-6">
+          <Image
+            src="/svg/Black+Yellow.svg"
+            width={100}
+            height={100}
+            alt="SafeIdea Logo"
+            className="rounded-full shadow-md border border-primary/20"
+          />
+        </div>
+        
         {error && (
           <Alert
             variant="destructive"
