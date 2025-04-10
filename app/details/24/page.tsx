@@ -2,13 +2,11 @@
 
 export const runtime = "edge";
 
-import { type MouseEvent } from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
