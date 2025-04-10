@@ -31,9 +31,8 @@ const AppIP = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [businessModel, setBusinessModel] = useState("Protected Evaluation");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [price, setPrice] = useState("");
+  const [evaluationPeriod, setEvaluationPeriod] = useState("one-day");
+  const [ndaConfirmed, setNdaConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // =====================================================
@@ -411,85 +410,89 @@ const AppIP = () => {
                 <div className="space-y-5">
                   <div className="space-y-2">
                     <label
-                      htmlFor="start-date"
+                      htmlFor="evaluation-period"
                       className="text-sm font-medium text-white/90 block"
                     >
-                      Start Date and Time
+                      Evaluation Period
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        id="start-date"
-                        type="date"
-                        value={startDate.split('T')[0] || ''}
-                        onChange={(e) => setStartDate(prev => {
-                          const [_, time] = prev.split('T');
-                          return `${e.target.value}${time ? `T${time}` : ''}`;
-                        })}
-                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                      />
-                      <input
-                        id="start-time"
-                        type="time"
-                        value={startDate.split('T')[1] || ''}
-                        onChange={(e) => setStartDate(prev => {
-                          const [date] = prev.split('T');
-                          return date ? `${date}T${e.target.value}` : prev;
-                        })}
-                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                      />
+                    <div className="grid grid-cols-3 gap-2">
+                      <div 
+                        className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-day" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
+                        onClick={() => setEvaluationPeriod("one-day")}
+                      >
+                        <input
+                          type="radio"
+                          id="one-day"
+                          name="evaluation-period"
+                          value="one-day"
+                          checked={evaluationPeriod === "one-day"}
+                          onChange={() => setEvaluationPeriod("one-day")}
+                          className="text-primary rounded-full"
+                        />
+                        <label htmlFor="one-day" className="text-white cursor-pointer">
+                          One Day ($5)
+                        </label>
+                      </div>
+                      <div 
+                        className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-week" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
+                        onClick={() => setEvaluationPeriod("one-week")}
+                      >
+                        <input
+                          type="radio"
+                          id="one-week"
+                          name="evaluation-period"
+                          value="one-week"
+                          checked={evaluationPeriod === "one-week"}
+                          onChange={() => setEvaluationPeriod("one-week")}
+                          className="text-primary rounded-full"
+                        />
+                        <label htmlFor="one-week" className="text-white cursor-pointer">
+                          One Week ($25)
+                        </label>
+                      </div>
+                      <div 
+                        className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-month" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
+                        onClick={() => setEvaluationPeriod("one-month")}
+                      >
+                        <input
+                          type="radio"
+                          id="one-month"
+                          name="evaluation-period"
+                          value="one-month"
+                          checked={evaluationPeriod === "one-month"}
+                          onChange={() => setEvaluationPeriod("one-month")}
+                          className="text-primary rounded-full"
+                        />
+                        <label htmlFor="one-month" className="text-white cursor-pointer">
+                          One Month ($90)
+                        </label>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="end-date"
-                      className="text-sm font-medium text-white/90 block"
-                    >
-                      End Date and Time
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        id="end-date"
-                        type="date"
-                        value={endDate.split('T')[0] || ''}
-                        onChange={(e) => setEndDate(prev => {
-                          const [_, time] = prev.split('T');
-                          return `${e.target.value}${time ? `T${time}` : ''}`;
-                        })}
-                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                      />
-                      <input
-                        id="end-time"
-                        type="time"
-                        value={endDate.split('T')[1] || ''}
-                        onChange={(e) => setEndDate(prev => {
-                          const [date] = prev.split('T');
-                          return date ? `${date}T${e.target.value}` : prev;
-                        })}
-                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                      />
-                    </div>
+                    <p className="text-xs text-white/60 mt-1">
+                      Period begins after transaction is completed
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label
-                    htmlFor="price"
-                    className="text-sm font-medium text-white/90 block"
-                  >
-                    Price (USD)
-                  </label>
-                  <input
-                    id="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                  />
+                <div className="space-y-2 mt-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="nda-confirmed"
+                      checked={ndaConfirmed}
+                      onChange={() => setNdaConfirmed(!ndaConfirmed)}
+                      className="rounded border-white/20 bg-muted/30 text-primary"
+                    />
+                    <label htmlFor="nda-confirmed" className="text-white/90 cursor-pointer">
+                      Confirm Signed NDA
+                    </label>
+                  </div>
+                  <p className="text-xs text-white/60 ml-6">
+                    By checking this box, you confirm that you have a signed NDA in place for this evaluation
+                  </p>
                 </div>
+
+                {/* Price is now automatically set based on the evaluation period */}
 
                 <div className="flex justify-between space-x-3 mt-6">
                   <Button
@@ -501,11 +504,16 @@ const AppIP = () => {
                   </Button>
                   <Button
                     onClick={() => {
+                      if (!ndaConfirmed) {
+                        alert("Please confirm you have a signed NDA in place");
+                        return;
+                      }
                       // Save terms logic would go here
                       setTermsAccepted(true);
                       setIsTermsModalOpen(false);
                     }}
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
+                    disabled={!ndaConfirmed}
                   >
                     Accept
                   </Button>
