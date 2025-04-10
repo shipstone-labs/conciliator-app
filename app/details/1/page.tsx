@@ -22,8 +22,7 @@ import {
   MessageCircle, 
   Check, 
   DollarSign,
-  Shield,
-  Zap
+  Shield
 } from "lucide-react";
 
 export default function EnhancedDetailPage() {
