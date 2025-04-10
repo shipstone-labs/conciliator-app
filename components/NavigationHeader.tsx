@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { useStytchUser } from "@stytch/nextjs";
+import { useRouter } from "next/navigation";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -12,14 +13,31 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { AccountModal } from "./AccountModal";
-import LogoffButton from "./LogoffButton";
+import { authContext } from "@/app/authLayout";
 
 export default function NavigationHeader() {
+  const router = useRouter();
   const { user, isInitialized } = useStytchUser();
+  const { loggingOff, setLoggingOff, stytchClient } = useContext(authContext);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   
   // Only show account options if user is authenticated
   const isAuthenticated = isInitialized && user;
+  
+  // Handle logout
+  const handleLogout = () => {
+    if (loggingOff) return;
+    setLoggingOff(true);
+    stytchClient.session
+      .revoke()
+      .catch(() => {
+        alert("Unable to log out, try again later");
+        setLoggingOff(false);
+      })
+      .then(() => {
+        router.replace("/");
+      });
+  };
 
   return (
     <div className="flex w-full items-center justify-between">
@@ -62,9 +80,13 @@ export default function NavigationHeader() {
                 >
                   Account
                 </DropdownMenuItem>
-                <LogoffButton className="w-full justify-start px-3 py-2 hover:bg-white/10 rounded-lg text-left font-normal">
-                  Sign Out
-                </LogoffButton>
+                <DropdownMenuItem 
+                  className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer"
+                  onClick={handleLogout}
+                  disabled={loggingOff}
+                >
+                  {loggingOff ? "Signing out..." : "Sign Out"}
+                </DropdownMenuItem>
               </>
             )}
             {!isAuthenticated && (
