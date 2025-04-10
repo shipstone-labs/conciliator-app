@@ -9,7 +9,7 @@ steps:
         # Set cache tag based on branch or PR
         if [[ "$BRANCH_NAME" == "main" ]]; then
           CACHE_TAG="main-latest"
-        elif [[ "$$BRANCH_NAME" == "legacy" ]]; then
+        elif [[ "$BRANCH_NAME" == "legacy" ]]; then
           CACHE_TAG="legacy-latest"
         elif [[ "$_PR_NUMBER" != "" ]]; then
           CACHE_TAG="pr-$_PR_NUMBER-latest"
@@ -70,10 +70,10 @@ steps:
       - -c
       - |
         # Set tag based on branch or PR
-        if [[ "$$BRANCH_NAME" == "main" ]]; then
+        if [[ "$BRANCH_NAME" == "main" ]]; then
           # No tag for main branch
           TAG_OPTION=""
-        elif [[ "$$BRANCH_NAME" == "legacy" ]]; then
+        elif [[ "$BRANCH_NAME" == "legacy" ]]; then
           # Tag as legacy for legacy branch
           TAG_OPTION="--tag=legacy"
         elif [[ "$_PR_NUMBER" != "" ]]; then
