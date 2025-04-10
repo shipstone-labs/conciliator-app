@@ -392,35 +392,52 @@ const AppIP = () => {
                     value={businessModel}
                     onChange={(e) => setBusinessModel(e.target.value)}
                     className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                    disabled={true} // Only Protected Evaluation is available
                   >
-                    <option value="Trade Secret" disabled>
-                      Trade Secret
+                    <option value="Protected Evaluation">
+                      Protected Evaluation
                     </option>
                     <option value="Provisional Patent" disabled>
                       Provisional Patent
                     </option>
-                    <option value="Protected Evaluation">
-                      Protected Evaluation
+                    <option value="One Year Subscription" disabled>
+                      One Year Subscription
                     </option>
                   </select>
+                  <p className="text-xs text-white/60 mt-1">
+                    Additional business models coming soon
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-5">
                   <div className="space-y-2">
                     <label
                       htmlFor="start-date"
                       className="text-sm font-medium text-white/90 block"
                     >
-                      Start Date
+                      Start Date and Time
                     </label>
-                    <input
-                      id="start-date"
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        id="start-date"
+                        type="date"
+                        value={startDate.split('T')[0] || ''}
+                        onChange={(e) => setStartDate(prev => {
+                          const [_, time] = prev.split('T');
+                          return `${e.target.value}${time ? `T${time}` : ''}`;
+                        })}
+                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                      />
+                      <input
+                        id="start-time"
+                        type="time"
+                        value={startDate.split('T')[1] || ''}
+                        onChange={(e) => setStartDate(prev => {
+                          const [date] = prev.split('T');
+                          return date ? `${date}T${e.target.value}` : prev;
+                        })}
+                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -428,15 +445,30 @@ const AppIP = () => {
                       htmlFor="end-date"
                       className="text-sm font-medium text-white/90 block"
                     >
-                      End Date
+                      End Date and Time
                     </label>
-                    <input
-                      id="end-date"
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
-                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        id="end-date"
+                        type="date"
+                        value={endDate.split('T')[0] || ''}
+                        onChange={(e) => setEndDate(prev => {
+                          const [_, time] = prev.split('T');
+                          return `${e.target.value}${time ? `T${time}` : ''}`;
+                        })}
+                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                      />
+                      <input
+                        id="end-time"
+                        type="time"
+                        value={endDate.split('T')[1] || ''}
+                        onChange={(e) => setEndDate(prev => {
+                          const [date] = prev.split('T');
+                          return date ? `${date}T${e.target.value}` : prev;
+                        })}
+                        className="p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                      />
+                    </div>
                   </div>
                 </div>
 
