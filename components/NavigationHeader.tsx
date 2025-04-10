@@ -56,9 +56,6 @@ export default function NavigationHeader() {
 
       {/* Main menu items - simplified without Menubar */}
       <nav className="flex items-center space-x-6 flex-grow">
-        <div className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors">
-          What is SafeIdea?
-        </div>
         <Link
           href="/list-ip"
           className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
