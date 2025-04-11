@@ -128,8 +128,8 @@ const CardGrid = () => {
               <Image
                 src={cidAsURL(item?.image?.cid) || '/images/placeholder.png'}
                 alt={item.name}
-                width={200}
-                height={200}
+                width={imageWidth}
+                height={imageWidth}
                 className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all"
               />
             </CardContent>

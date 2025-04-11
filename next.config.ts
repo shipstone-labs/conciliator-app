@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { resolve } from "path";
 import webpack from "webpack";
 
 const nextConfig: NextConfig = {
@@ -21,7 +22,7 @@ const nextConfig: NextConfig = {
         ...config.resolve.fallback,
         fs: false,
         path: false,
-        crypto: false,
+        crypto: false, // resolve(__dirname, "node_modules/crypto-browserify"),
         stream: false,
         buffer: false,
         util: false,

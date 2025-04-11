@@ -1,6 +1,6 @@
 'use client'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
