@@ -22,11 +22,10 @@ module.exports = {
     },
 
     // Ethereum Mainnet (optional)
-    mainnet: {
+    filecoin: {
       url:
-        process.env.MAINNET_RPC_URL ||
-        'https://mainnet.infura.io/v3/YOUR_INFURA_KEY',
-      chainId: 1,
+        'https://api.node.glif.io/rpc/v1',
+      chainId: 314,
       accounts: [process.env.PRIVATE_KEY],
     },
 

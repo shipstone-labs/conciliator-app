@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import {
-  // abi,
+  abi,
   // genSession,
   getModel,
   imageAI,
@@ -8,10 +8,10 @@ import {
   // imageAI,
   // pinata,
 } from '../utils'
-// import { createWalletClient, decodeEventLog, http } from "viem";
+import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-// import { filecoinCalibration } from "viem/chains";
-// import { waitForTransactionReceipt } from "viem/actions";
+import { filecoinCalibration } from 'viem/chains'
+import { waitForTransactionReceipt } from 'viem/actions'
 import { createAsAgent } from 'web-storage-wrapper'
 import // createLitClient,
 // LIT_ABILITY,
@@ -24,6 +24,7 @@ import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
 import type { IPDoc } from '@/lib/types'
 import { Timestamp } from 'firebase-admin/firestore'
+import { bytesToHex, padBytes } from 'viem'
 
 export const runtime = 'nodejs'
 
@@ -57,55 +58,17 @@ export async function POST(req: NextRequest) {
     const user = await getUser(req)
 
     const body = await req.json()
-    // const { name: _name, content, description, encrypted } = body;
     const {
-      name: _name,
-      description,
       encrypted,
       downSampledEncrypted,
-      category,
-      tags,
+      name: _name,
+      description,
+      ...rest
     } = body
-    // const name = _name || "Untitled";
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`
     )
     console.log('account', account.address)
-    // const litClient = await createLitClient({
-    //   litNetwork: LIT_NETWORK.Datil,
-    //   debug: false,
-    // });
-    // global.document = { dispatchEvent: (_event: Event) => true } as Document;
-    // await litClient.connect();
-    // const accsInput =
-    //   await LitAccessControlConditionResource.generateResourceString(
-    //     encrypted.unifiedAccessControlConditions,
-    //     encrypted.dataToEncryptHash
-    //   );
-
-    // const { capacityDelegationAuthSig } =
-    //   await litClient.createCapacityDelegationAuthSig({
-    //     dAppOwnerWallet: {
-    //       signMessage: (message: SignableMessage) =>
-    //         account.signMessage({ message }),
-    //       getAddress: async () => account.address,
-    //     },
-    //     capacityTokenId: 162391,
-    //     delegateeAddresses: [account.address],
-    //     uses: "1",
-    //     expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
-    //   });
-
-    // const sessionSigs = await genSession(account, litClient, [
-    //   {
-    //     resource: new LitActionResource("*"),
-    //     ability: LIT_ABILITY.LitActionExecution,
-    //   },
-    //   {
-    //     resource: new LitAccessControlConditionResource(accsInput),
-    //     ability: LIT_ABILITY.AccessControlConditionDecryption,
-    //   },
-    // ]);
     const w3Client = await createAsAgent(
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
@@ -168,6 +131,7 @@ export async function POST(req: NextRequest) {
       })
     const firestore = await getFirestore()
     const data: IPDoc = clean({
+      ...rest,
       ...(imageCid
         ? {
             image: {
@@ -188,9 +152,8 @@ export async function POST(req: NextRequest) {
       updatedAt: Timestamp.fromDate(new Date()),
       name: _name,
       description,
+      tags: rest.tags || [],
       creator: user.user.user_id,
-      category,
-      tags: tags || [],
       downSampled: {
         cid: downSampledEncryptedCid.toString(),
         acl: JSON.stringify(
@@ -200,6 +163,32 @@ export async function POST(req: NextRequest) {
       },
     }) as IPDoc
     const doc = await firestore.collection('ip').add(data)
+    const tokenId = bytesToHex(
+      padBytes(new TextEncoder().encode('371l4vRJJV6uoWTONUqS'), {
+        dir: 'left',
+        size: 32,
+      })
+    )
+    const wallet = createWalletClient({
+      account,
+      chain: filecoinCalibration,
+      transport: http(),
+    })
+    wallet
+      .writeContract({
+        functionName: 'mint',
+        abi,
+        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+        args: [name, description, content],
+      })
+      .then((hash) => {
+        return waitForTransactionReceipt(wallet, {
+          hash,
+        })
+      })
+    await doc.update({
+      tokenId,
+    })
 
     // const _decrypted = await litClient.decrypt({
     //   accessControlConditions: encrypted.unifiedAccessControlConditions,
