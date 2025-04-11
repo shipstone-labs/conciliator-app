@@ -10,17 +10,20 @@ export function useIP(_tokenId: string) {
     tokenId = bytesToString(hexToBytes(id))
   }
   const fs = getFirestore()
-  const [ideaData, setIdexData] = useState<IPDoc | undefined>()
+  const [ideaData, setIdeaData] = useState<IPDoc | undefined>(undefined)
+
   useEffect(() => {
     const fetchData = async () => {
       const docRef = await getDoc(doc(fs, 'ip', tokenId))
       if (docRef.exists()) {
-        setIdexData(castToUIDoc(docRef.data() as IPDoc))
+        setIdeaData(castToUIDoc(docRef.data() as IPDoc))
       } else {
-        setIdexData(undefined)
+        setIdeaData(undefined)
       }
     }
+
     fetchData()
   }, [fs, tokenId])
+
   return ideaData
 }
