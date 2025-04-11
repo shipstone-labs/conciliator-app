@@ -14,7 +14,7 @@ steps:
           echo "$_GITHUB_TOKEN" | gh auth login --with-token
           
           # Post build URL to the PR
-          BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
+          BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
           gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "🔄 Build started: [View logs]($$BUILD_URL)"
         fi
 
@@ -64,15 +64,15 @@ steps:
             -f auto_merge=false \
             -f required_contexts='[]')
           
-          DEPLOYMENT_ID=$(echo "$DEPLOYMENT_PAYLOAD" | grep -o '"id": [0-9]*' | head -1 | awk '{print $2}')
-          echo "Created deployment ID: $DEPLOYMENT_ID"
+          DEPLOYMENT_ID=$(echo "$$DEPLOYMENT_PAYLOAD" | grep -o '"id": [0-9]*' | head -1 | awk '{print $$2}')
+          echo "Created deployment ID: $$DEPLOYMENT_ID"
           
           # Save deployment ID for potential failure notification
-          echo "$DEPLOYMENT_ID" > /workspace/deployment_id
+          echo "$$DEPLOYMENT_ID" > /workspace/deployment_id
           
           # Update deployment status to in_progress
           gh api \
-            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
             -X POST \
             -f state="in_progress" \
             -f description="Building Container..."
@@ -240,14 +240,14 @@ steps:
             DEPLOYMENT_ID=$(cat /workspace/deployment_id)
             
             # Build URL and notify failure
-            BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
+            BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
             gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "❌ Build failed: [View logs]($$BUILD_URL)"
             
             # Create deployment status if a deployment was created
             if [[ -f /workspace/deployment_id ]]; then
               DEPLOYMENT_ID=$(cat /workspace/deployment_id)
               gh api \
-                repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+                repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
                 -X POST \
                 -f state="failure" \
                 -f description="Deployment failed" \
