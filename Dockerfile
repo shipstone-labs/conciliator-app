@@ -50,6 +50,7 @@ ARG NEXT_PUBLIC_STYTCH_APP_ID
 ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
 ARG NEXT_PUBLIC_LIT_CONTRACT_ADDRESS
 ARG NEXT_PUBLIC_LIT_ADDRESS
+ARG NEXT_PUBLIC_FIREBASE_CONFIG
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry

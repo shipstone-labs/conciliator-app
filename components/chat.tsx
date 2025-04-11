@@ -1,8 +1,6 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -24,6 +22,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import Link from "next/link";
+import type { IPDoc } from "@/lib/types";
 
 // Skeleton loader component for messages
 const MessageSkeleton = ({
@@ -67,20 +66,14 @@ function parseAnswer(message: { content: string }) {
 
 export default function ChatUI({
   messages,
-  name,
-  description,
+  doc,
   onSend,
   onNewIP,
   onSave,
-  degraded,
-  setDegraded,
 }: {
-  name: string;
-  description: string;
+  doc: IPDoc;
   messages: { role: "user" | "assistant" | "system"; content: string }[];
-  degraded: boolean;
-  setDegraded: (checked: boolean) => void;
-  onSend: (message: string, degraded: boolean) => Promise<void>;
+  onSend: (message: string) => Promise<void>;
   onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void;
   onSave?: (
     event: MouseEvent<HTMLButtonElement>
@@ -204,7 +197,7 @@ export default function ChatUI({
         seekerResponse = await fetch("/api/seeker", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages, title: name, description }),
+          body: JSON.stringify({ messages, tokenId: doc.tokenId }),
           signal,
         });
 
@@ -306,7 +299,7 @@ export default function ChatUI({
       // 4. Call conciliator API with the generated question
       console.log("📤 Calling conciliator API");
       try {
-        await onSend(question, degraded);
+        await onSend(question);
       } catch (conciliatorError) {
         console.log(
           "❌ Conciliator API error - stopping auto-discovery",
@@ -393,7 +386,7 @@ export default function ChatUI({
       cycleRunning.current = false;
       setCycleInProgress(false);
     }
-  }, [hasStop, messages, onSend, degraded, isStopping, name, description]);
+  }, [hasStop, messages, onSend, isStopping, doc]);
 
   // Add a mounted ref to track component lifecycle
   const isMounted = useRef(true);
@@ -466,14 +459,14 @@ export default function ChatUI({
       setLoading("assistant");
 
       // Send to conciliator
-      await onSend(messageToSend, degraded);
+      await onSend(messageToSend);
     } finally {
       // Reset all flags
       setLoading("none");
       cycleRunning.current = false;
       setCycleInProgress(false);
     }
-  }, [input, onSend, degraded, autoCompleting]);
+  }, [input, onSend, autoCompleting]);
 
   // Handle saving chat snapshot
   const handleSave = useCallback(
@@ -584,7 +577,7 @@ export default function ChatUI({
           Discovery Session
         </CardTitle>
         <CardDescription>
-          {name} - {description}
+          {doc.name} - {doc.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -744,21 +737,6 @@ export default function ChatUI({
             {/* Buttons Below */}
             <div className="flex items-center space-x-2 mt-2">
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="degraded"
-                  checked={degraded}
-                  onCheckedChange={(checked) => {
-                    if (checked === "indeterminate") {
-                      return;
-                    }
-                    setDegraded(checked);
-                  }}
-                  className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                />
-                <Label htmlFor="degraded" className="text-white/80">
-                  Run in degraded mode
-                </Label>
-
                 {/* API state indicator for debugging */}
                 <span className="ml-4 text-xs text-white/50 bg-background/30 px-2 py-1 rounded-full border border-white/10">
                   {cycleInProgress ? "Processing" : "Ready"}

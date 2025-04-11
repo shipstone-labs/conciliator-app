@@ -7,6 +7,9 @@ import virtual from "@rollup/plugin-virtual";
 // Create a global window shim
 const globals = `
 const window = globalThis;
+if (typeof self === "undefined") {
+  globalThis.self = globalThis;
+}
 const process = {}
 `;
 

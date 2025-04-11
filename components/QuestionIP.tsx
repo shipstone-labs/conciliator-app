@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import Chat from "./chat";
 // Logo removed from non-home pages
 import Loading from "./Loading";
+import { useIP } from "@/hooks/useIP";
 // Link and Image imports removed - no longer needed
 
 const AppStates = {
@@ -30,24 +31,18 @@ const QuestionIP = ({
   onNewIP: (event: MouseEvent<HTMLButtonElement>) => void;
 }) => {
   const [appState, setAppState] = useState(AppStates.LOADING);
-  const [name, setName] = useState("");
-  const [degraded, setDegraded] = useState(false);
-  const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     { role: "user" | "assistant" | "system"; content: string }[]
   >([]);
+  const ipDoc = useIP(tokenId);
 
   useEffect(() => {
     if (tokenId) {
       if (!messages.length) {
         (async () => {
           setIsLoading(true);
-          const {
-            messages: _resultMessages,
-            name,
-            description,
-          } = await fetch("/api/concilator", {
+          const { messages: _resultMessages } = await fetch("/api/concilator", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -62,8 +57,6 @@ const QuestionIP = ({
             }
             return res.json();
           });
-          setDescription(description);
-          setName(name);
           setMessages(_resultMessages);
           setIsLoading(false);
           setAppState(AppStates.DISCUSSION);
@@ -83,11 +76,7 @@ const QuestionIP = ({
         setMessages((prevMessages) => [...prevMessages, userMessage]);
 
         // Then make the API request
-        const {
-          messages: _resultMessages,
-          name,
-          description,
-        } = await fetch("/api/concilator", {
+        const { messages: _resultMessages } = await fetch("/api/concilator", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -95,7 +84,6 @@ const QuestionIP = ({
           body: JSON.stringify({
             tokenId,
             messages: [...messages, userMessage],
-            degraded,
           }),
         }).then((res) => {
           if (!res.ok) {
@@ -104,8 +92,6 @@ const QuestionIP = ({
           return res.json();
         });
 
-        setDescription(description);
-        setName(name);
         setMessages(_resultMessages);
       } catch (error) {
         console.error("Error processing request:", error);
@@ -113,7 +99,7 @@ const QuestionIP = ({
         setIsLoading(false);
       }
     },
-    [messages, tokenId, degraded]
+    [messages, tokenId]
   );
 
   const handleSave = useCallback(async () => {
@@ -125,8 +111,7 @@ const QuestionIP = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name,
-          description,
+          tokenId,
           messages,
         }),
       }).then((res) => {
@@ -135,13 +120,17 @@ const QuestionIP = ({
         }
         return res.json();
       });
-      return data as { IpfsHash: string };
+      return data;
     } catch (err) {
       console.log(err);
     } finally {
       setIsLoading(false);
     }
-  }, [description, messages, name]);
+  }, [messages, tokenId]);
+
+  if (appState === AppStates.LOADING || !ipDoc) {
+    return <Loading />;
+  }
 
   const renderDiscussionState = () => (
     <Chat
@@ -149,10 +138,7 @@ const QuestionIP = ({
       onSend={handleAskQuestion}
       onNewIP={onNewIP}
       onSave={handleSave}
-      name={name}
-      degraded={degraded}
-      setDegraded={setDegraded}
-      description={description}
+      doc={ipDoc}
       isLoading={isLoading}
     />
   );
@@ -211,9 +197,6 @@ const QuestionIP = ({
     </Card>
   );
 
-  if (appState === AppStates.LOADING && tokenId) {
-    return <Loading />;
-  }
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
       <div className="max-w-6xl mx-auto space-y-8">

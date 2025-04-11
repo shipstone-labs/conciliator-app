@@ -14,8 +14,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Modal } from "./ui/modal";
-import { useLit } from "@/hooks/useLit";
+import { useSession } from "@/hooks/useSession";
 import type { EncryptResponse } from "lit-wrapper";
+import { useAuth } from "@/hooks/useAuth";
+import { downsample } from "@/lib/downsample";
 
 const AppIP = () => {
   // Removed user authentication check since it's handled by the main navigation
@@ -34,6 +36,7 @@ const AppIP = () => {
   const [monthPrice, setMonthPrice] = useState("90.00");
   const [ndaConfirmed, setNdaConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const { stytchClient } = useAuth();
 
   // =====================================================
   // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
@@ -45,7 +48,7 @@ const AppIP = () => {
   // 4. Remove the test-specific code from handleFileSelection
   // =====================================================
   const [testTokenCounter, setTestTokenCounter] = useState(1000);
-  const { litClient } = useLit();
+  const { litClient } = useSession();
 
   const handleStore = useCallback(async () => {
     setError(null);
@@ -126,16 +129,33 @@ const AppIP = () => {
           }
           return encryptedContent;
         });
+      const downSampledEncrypted = await litClient
+        .encrypt({
+          dataToEncrypt: new TextEncoder().encode(downsample(content)),
+          unifiedAccessControlConditions,
+        })
+        .then(async (encryptedContent: EncryptResponse) => {
+          if (!encryptedContent) {
+            throw new Error("Failed to encrypt content");
+          }
+          return encryptedContent;
+        });
+      const { session_jwt } = stytchClient.session.getTokens() || {};
       const data = await fetch("/api/store", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session_jwt}`,
         },
         body: JSON.stringify({
           name,
           content,
           encrypted: {
             ...encrypted,
+            unifiedAccessControlConditions,
+          },
+          downSampledEncrypted: {
+            ...downSampledEncrypted,
             unifiedAccessControlConditions,
           },
           description,
@@ -155,7 +175,14 @@ const AppIP = () => {
       setIsLoading(false);
     }
     // ⚠️ Remove testTokenCounter when removing test mode
-  }, [content, description, name, testTokenCounter, litClient]);
+  }, [
+    content,
+    description,
+    name,
+    testTokenCounter,
+    litClient,
+    stytchClient.session,
+  ]);
 
   const handleOpenFileDialog = useCallback(() => {
     setIsModalOpen(true);

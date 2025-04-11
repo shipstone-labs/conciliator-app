@@ -4,7 +4,7 @@ import { completionAI, getModel } from "../utils";
 import templateFile from "./system.hbs";
 const templateText = templateFile.toString();
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")

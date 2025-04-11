@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import Loading from "@/components/Loading";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Tooltip,
@@ -20,14 +22,47 @@ export type Data = {
   tokenId: number;
 };
 
-type Props = {
-  items: Data[];
-  onRetrieve: (start: number, limit: number) => Promise<void>;
-};
-
-const CardGrid = ({ items, onRetrieve }: Props) => {
+const CardGrid = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [imageWidth, setImageWidth] = useState(200); // Default width
+
+  const [items, setItems] = useState<Data[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const onRetrieve = useCallback(
+    async (_start: number, limit: number) => {
+      let start = _start;
+      if (start < items.length) {
+        start = items.length;
+      }
+      const response = await fetch("/api/list", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start,
+          limit,
+        }),
+      });
+      if (!response.ok) {
+        console.log(await response.text());
+        throw new Error("Failed to retrieve items");
+      }
+      const data = (await response.json()) as Data[];
+      setItems([...items, ...data]);
+      setLoaded(true);
+    },
+    [items]
+  );
+
+  useEffect(() => {
+    if (!loading) {
+      setLoading(true);
+      onRetrieve(0, 10);
+    }
+  }, [onRetrieve, loading]);
 
   // Responsive image size calculation
   useEffect(() => {
@@ -60,6 +95,10 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
       setCurrentPage(page);
     }
   };
+
+  if (!loaded) {
+    return <Loading />;
+  }
 
   return (
     <div className="w-full flex flex-col items-center p-3">

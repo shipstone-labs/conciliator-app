@@ -4,8 +4,9 @@ import { readContract } from "viem/actions";
 import { filecoinCalibration } from "viem/chains";
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { getFirestore } from "../firebase";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
@@ -36,9 +37,24 @@ export async function POST(req: NextRequest) {
       transport: http(),
     });
     const tokens: Array<Record<string, unknown>> = [];
+    const fb = await getFirestore();
+    const doc = await fb.collection("ip").orderBy("createdBy", "desc").get();
+    const docs = doc.docs.map((d) => {
+      const data = d.data();
+      return [data.tokenId, data];
+    }) as [number, Record<string, unknown>][];
+    const seenTokenIds = new Map<number, Record<string, unknown>>(docs);
     while (true) {
       try {
-        console.log("getting", tokenId);
+        if (seenTokenIds.has(Number(tokenId))) {
+          const token = seenTokenIds.get(Number(tokenId)) as Record<
+            string,
+            unknown
+          >;
+          tokens.push(token);
+          tokenId++;
+          continue;
+        }
         const index = (await readContract(wallet, {
           address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
           functionName: "getDocumentMetadata",
@@ -79,8 +95,9 @@ export async function POST(req: NextRequest) {
             });
           }
         }
-        console.log("url", url);
-        tokens.push({ ...index, tokenId: Number(tokenId), url });
+        const token = { ...index, tokenId: Number(tokenId), url };
+        tokens.push(token);
+        await fb.collection("tokens").add(token);
         tokenId++;
       } catch {
         break;
@@ -89,6 +106,7 @@ export async function POST(req: NextRequest) {
         break;
       }
     }
+
     return new Response(JSON.stringify(tokens), {
       status: 200,
       headers: { "Content-Type": "application/json" },

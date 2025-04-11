@@ -1,7 +1,5 @@
 "use client";
 
-export const runtime = "edge";
-
 import DetailIP from "@/components/DetailIP";
 import { useParams } from "next/navigation";
 

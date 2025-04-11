@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
-// import { readFileSync, writeFileSync } from "node:fs";
-// import { resolve } from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 async function build() {
   console.log("📦 Building lit-wrapper...");
@@ -19,15 +19,12 @@ async function build() {
       env: { ...process.env, NODE_ENV: "production" },
     });
 
-    // const file = resolve("./dist/index.js");
-    // const content = readFileSync(file, "utf-8");
-    // writeFileSync(
-    //   file,
-    //   content.replace(
-    //     "process.versions",
-    //     "process.versions"
-    //   )
-    // );
+    const file = resolve("./dist/index.js");
+    const content = readFileSync(file, "utf-8");
+    writeFileSync(
+      file,
+      content.replace(/console.log\('JWT body: ', parsedBody\);\n/g, "")
+    );
 
     console.log("✅ web-storage-wrapper built successfully!");
   } catch (error) {

@@ -1,7 +1,5 @@
 "use client";
 
-export const runtime = "edge";
-
 import QuestionIP from "@/components/QuestionIP";
 import { useParams } from "next/navigation";
 

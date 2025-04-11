@@ -1,49 +1,36 @@
 import type { NextRequest } from "next/server";
-import { completionAI, abi, getModel } from "../utils";
-import { call, readContract } from "viem/actions";
-import { filecoinCalibration } from "viem/chains";
-import {
-  createWalletClient,
-  decodeAbiParameters,
-  encodeFunctionData,
-  type Hex,
-  http,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { completionAI, genSession, /* abi, */ getModel } from "../utils";
+// import { call, readContract } from "viem/actions";
+// import { filecoinCalibration } from "viem/chains";
+// import {
+//   createWalletClient,
+//   decodeAbiParameters,
+//   encodeFunctionData,
+//   type Hex,
+//   http,
+// } from "viem";
+// import { privateKeyToAccount } from "viem/accounts";
 // Dynamic import for the template file
 import templateFile from "./system.hbs";
+import { getFirestore } from "../firebase";
+import { cidAsURL, type IPDoc } from "@/lib/types";
+import {
+  createLitClient,
+  LIT_ABILITY,
+  LIT_NETWORK,
+  LitAccessControlConditionResource,
+  LitActionResource,
+} from "lit-wrapper";
+// import { SignableMessage } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 const templateText = templateFile.toString();
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 // You'll set these in your .env.local file
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
   .split(",")
   .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
-
-function degrade(content: string) {
-  return content.replace(/([\d,.]+)/g, (_match, number) => {
-    try {
-      const num = Number.parseFloat(number);
-      if (num === 0) {
-        return number;
-      }
-      if (Number.isNaN(num)) return number;
-      const min = Math.round(num) * 0.9;
-      const max = Math.round(num) * 1.1;
-      const decimals = /\.(\d+)/.exec(number)?.[1]?.length || 0;
-      while (true) {
-        const num2 = Math.random() * (max - min) + min;
-        if (Math.abs((num2 - num) / num) > 0.05) {
-          const output = num2.toFixed(decimals);
-          return `${output}`;
-        }
-      }
-    } catch {
-      return number;
-    }
-  });
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,59 +41,62 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 403 });
     }
 
-    const { messages, tokenId, degraded } = (await req.json()) as {
+    const { messages, tokenId } = (await req.json()) as {
       messages: {
         role: "user" | "assistant" | "system";
         content: string;
       }[];
-      degraded?: boolean;
-      tokenId: number;
+      tokenId: string;
     };
 
-    const wallet = createWalletClient({
-      account: privateKeyToAccount(
-        (process.env.FILCOIN_PK || "") as `0x${string}`
-      ),
-      // chain: {
-      //   ...filecoinCalibration,
-      //   rpcUrls: {
-      //     default: { http: ["https://api.calibration.node.glif.io"] },
-      //   },
-      // },
-      chain: filecoinCalibration,
-      transport: http(),
-    });
-    const data = encodeFunctionData({
-      abi,
-      functionName: "getDocument",
-      args: [tokenId],
-    });
-    const { data: results } = await call(wallet, {
-      to: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
-      data,
-    });
-    const content = decodeAbiParameters(
-      [{ type: "string" }],
-      results as Hex
-    )[0];
-    const index = (await readContract(wallet, {
-      address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
-      functionName: "getDocumentMetadata",
-      abi,
-      args: [tokenId],
-    })) as { name: string; description: string };
+    const fs = await getFirestore();
+    const doc = await fs.collection("ip").doc(tokenId).get();
+    const data = doc.data() as IPDoc;
+
+    // const wallet = createWalletClient({
+    //   account: privateKeyToAccount(
+    //     (process.env.FILCOIN_PK || "") as `0x${string}`
+    //   ),
+    //   // chain: {
+    //   //   ...filecoinCalibration,
+    //   //   rpcUrls: {
+    //   //     default: { http: ["https://api.calibration.node.glif.io"] },
+    //   //   },
+    //   // },
+    //   chain: filecoinCalibration,
+    //   transport: http(),
+    // });
+    // const data = encodeFunctionData({
+    //   abi,
+    //   functionName: "getDocument",
+    //   args: [tokenId],
+    // });
+    // const { data: results } = await call(wallet, {
+    //   to: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
+    //   data,
+    // });
+    // const content = decodeAbiParameters(
+    //   [{ type: "string" }],
+    //   results as Hex
+    // )[0];
+    // const index = (await readContract(wallet, {
+    //   address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
+    //   functionName: "getDocumentMetadata",
+    //   abi,
+    //   args: [tokenId],
+    // })) as { name: string; description: string };
 
     if (messages.length === 0) {
       return new Response(
         JSON.stringify({
-          name: index.name,
-          description: index.description,
+          name: data.name,
+          description: data.description,
           messages: [
             {
               role: "assistant",
-              content: `Welcome to the ${index.name} session! I am ready to answer questions about this invention with the following description
+              content: `Welcome to the ${data.name} session! I am ready to answer questions about this invention with the following description
 
-${index.description}`,
+${data.description}`,
             },
           ],
         }),
@@ -161,10 +151,73 @@ ${index.description}`,
     }
     const consecutiveYesCount = Math.max(...runs);
     if (consecutiveYesCount < 5) {
+      const account = privateKeyToAccount(
+        (process.env.FILCOIN_PK || "") as `0x${string}`
+      );
+      const litClient = await createLitClient({
+        litNetwork: LIT_NETWORK.Datil,
+        debug: false,
+      });
+      global.document = { dispatchEvent: (_event: Event) => true } as Document;
+      await litClient.connect();
+      const accsInput =
+        await LitAccessControlConditionResource.generateResourceString(
+          JSON.parse(data.encrypted.acl),
+          data.encrypted.hash
+        );
+
+      // const { capacityDelegationAuthSig } =
+      //   await litClient.createCapacityDelegationAuthSig({
+      //     dAppOwnerWallet: {
+      //       signMessage: (message: SignableMessage) =>
+      //         account.signMessage({ message }),
+      //       getAddress: async () => account.address,
+      //     },
+      //     capacityTokenId: 162391,
+      //     delegateeAddresses: [account.address],
+      //     uses: "1",
+      //     expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
+      //   });
+
+      const sessionSigs = await genSession(account, litClient, [
+        {
+          resource: new LitActionResource("*"),
+          ability: LIT_ABILITY.LitActionExecution,
+        },
+        {
+          resource: new LitAccessControlConditionResource(accsInput),
+          ability: LIT_ABILITY.AccessControlConditionDecryption,
+        },
+      ]);
+      const encrypted = await fetch(cidAsURL(data.downSampled.cid))
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to fetch encrypted data");
+          }
+          return res.json();
+        })
+        .then((res) => res.ciphertext);
+
+      const _decrypted = await litClient.decrypt({
+        accessControlConditions: JSON.parse(data.downSampled.acl),
+        ciphertext: encrypted,
+        dataToEncryptHash: data.downSampled.hash,
+        chain: "filecoin",
+        sessionSigs,
+      });
+
+      console.log("raw decrypted", _decrypted);
+      console.log(
+        "raw decrypted",
+        new TextDecoder().decode(_decrypted.decryptedData)
+      );
+
+      const content = new TextDecoder().decode(_decrypted.decryptedData);
+
       const _data: Record<string, string> = {
-        title: index.name,
-        description: index.description,
-        content: degraded ? degrade(content) : content,
+        title: data.name,
+        description: data.description,
+        content,
         consecutiveYesCount: `${consecutiveYesCount}`,
       };
       const _content = templateText.replace(
@@ -192,8 +245,8 @@ ${index.description}`,
     return new Response(
       JSON.stringify({
         messages,
-        name: index.name,
-        description: index.description,
+        name: data.name,
+        description: data.description,
       }),
       {
         headers: { "Content-Type": "application/json" },

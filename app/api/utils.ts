@@ -1,4 +1,8 @@
-import type { LitNodeClient, LitResourceAbilityRequest, AuthCallbackParams } from "lit-wrapper";
+import type {
+  LitNodeClient,
+  LitResourceAbilityRequest,
+  AuthCallbackParams,
+} from "lit-wrapper";
 import { OpenAI, type ClientOptions } from "openai";
 import { PinataSDK } from "pinata-web3";
 import type { PrivateKeyAccount, SignableMessage } from "viem";
