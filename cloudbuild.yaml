@@ -15,7 +15,7 @@ steps:
           
           # Post build URL to the PR
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
-          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "🔄 Build started: [View logs]($BUILD_URL)"
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "🔄 Build started: [View logs]($$BUILD_URL)"
         fi
 
   # Set up cache tag based on branch/PR
@@ -216,7 +216,7 @@ steps:
             -f log_url="$BUILD_URL"
           
           # Also post a comment for easier access
-          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($REVISION_URL) | [View logs]($BUILD_URL)"
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($REVISION_URL) | [View logs]($$BUILD_URL)"
           
           # Mark deployment as successful for the final status check
           touch /workspace/deployment_success
@@ -241,7 +241,7 @@ steps:
             
             # Build URL and notify failure
             BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
-            gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "❌ Build failed: [View logs]($BUILD_URL)"
+            gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "❌ Build failed: [View logs]($$BUILD_URL)"
             
             # Create deployment status if a deployment was created
             if [[ -f /workspace/deployment_id ]]; then
