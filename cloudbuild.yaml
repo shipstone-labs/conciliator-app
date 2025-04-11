@@ -1,30 +1,4 @@
 steps:
-  # Cancel previous builds on the same branch or PR
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: CancelPreviousBuilds
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        # Get running builds with the same branch/PR
-        if [[ "$_PR_NUMBER" != "" ]]; then
-          # For PRs, filter by trigger substitutions
-          running_builds=$(gcloud builds list --ongoing --filter="substitutions._PR_NUMBER=$_PR_NUMBER AND id!=$$BUILD_ID" --format="value(id)")
-        else
-          # For branches, filter by branch name
-          running_builds=$(gcloud builds list --ongoing --filter="source.repoSource.branchName=$BRANCH_NAME AND id!=$$BUILD_ID" --format="value(id)")
-        fi
-        
-        # Cancel any previous running builds
-        if [[ -n "$$running_builds" ]]; then
-          echo "Cancelling previous builds: $$running_builds"
-          for build_id in $$running_builds; do
-            gcloud builds cancel $$build_id --quiet || true
-          done
-        else
-          echo "No previous builds to cancel"
-        fi
-        
   # Post build start notification with logs URL
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyBuildStart
