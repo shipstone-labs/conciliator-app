@@ -169,7 +169,7 @@ steps:
           
           # Update deployment status to in_progress
           gh api \
-            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
             -X POST \
             -f state="in_progress" \
             -f description="Deploying Container..."
@@ -208,7 +208,7 @@ steps:
           
           # Update deployment status to success with deployment URL
           gh api \
-            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
             -X POST \
             -f state="success" \
             -f description="Deployed to Cloud Run" \
