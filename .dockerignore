@@ -10,3 +10,9 @@ Dockerfile
 /.dev.vars
 /.github
 /.git
+/.wrangler
+/packages/*/node_modules
+/packages/*/dist
+.DS_Store
+/*.log
+/.dockerignore
