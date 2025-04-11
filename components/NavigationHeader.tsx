@@ -56,12 +56,6 @@ export default function NavigationHeader() {
 
       {/* Main menu items - simplified without Menubar */}
       <nav className="flex items-center space-x-6 flex-grow">
-        <Link
-          href="/list-ip"
-          className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
-        >
-          Explore Ideas
-        </Link>
         {isAuthenticated && (
           <Link
             href="/add-ip"
@@ -70,6 +64,12 @@ export default function NavigationHeader() {
             Add Idea
           </Link>
         )}
+        <Link
+          href="/list-ip"
+          className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+        >
+          Explore Ideas
+        </Link>
       </nav>
 
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}
