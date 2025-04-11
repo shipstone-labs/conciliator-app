@@ -1,14 +1,15 @@
 name: Lint, Test, Build
 
 on:
-  pull_request:
-    branches:
-      - 'main'
-      - 'legacy'
-  push:
-    branches:
-      - 'main'
-      - 'legacy'
+  workflow_dispatch:
+  # pull_request:
+  #   branches:
+  #     - 'main'
+  #     - 'legacy'
+  # push:
+  #   branches:
+  #     - 'main'
+  #     - 'legacy'
 
 env:
   CF_PROJECT_NAME: conciliator-app
@@ -16,6 +17,7 @@ env:
 
 jobs:
   deploy:
+    if: false
     runs-on: ubuntu-latest
 
     steps:
