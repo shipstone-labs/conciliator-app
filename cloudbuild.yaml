@@ -1,4 +1,41 @@
 steps:
+  # Cancel previous builds on the same branch or PR
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: CancelPreviousBuilds
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # Determine the tag to filter builds by
+        if [[ "$BRANCH_NAME" == "main" ]]; then
+          FILTER_TAG="main"
+        elif [[ "$BRANCH_NAME" == "legacy" ]]; then
+          FILTER_TAG="legacy"
+        elif [[ "$_PR_NUMBER" != "" ]]; then
+          FILTER_TAG="pr-$_PR_NUMBER"
+        else
+          # Replace slashes with hyphens for branch name
+          BRANCH_SAFE=$BRANCH_NAME
+          BRANCH_SAFE=${BRANCH_SAFE//\//-}
+          FILTER_TAG="$BRANCH_SAFE"
+        fi
+        
+        # Add tags to current build to make it identifiable
+        gcloud builds update $BUILD_ID --add-tags=$$FILTER_TAG || true
+        
+        # Get running builds with the same tag
+        running_builds=$(gcloud builds list --ongoing --filter="tags=$$FILTER_TAG AND id!=$$BUILD_ID" --format="value(id)")
+        
+        # Cancel any previous running builds
+        if [[ -n "$$running_builds" ]]; then
+          echo "Cancelling previous builds: $$running_builds"
+          for build_id in $$running_builds; do
+            gcloud builds cancel $$build_id --quiet || true
+          done
+        else
+          echo "No previous builds to cancel"
+        fi
+        
   # Post build start notification with logs URL
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyBuildStart
@@ -287,3 +324,4 @@ tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
   - conciliator
+  # Build-specific tags will be added dynamically by the CancelPreviousBuilds step
