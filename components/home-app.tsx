@@ -87,9 +87,11 @@ function HomeApp() {
               . We&apos;re using tokens from the Filecoin system,
               Storacha&apos;s file storage tools and Lilypad&apos;s AI modules.
               We&apos;re using LIT Protocol for encryption, which is integrated
-              with Storacha. SafeIdea is an open source project, necessary if
-              you want to make sure the developers don&apos;t know about your
-              secrets.
+              with Storacha.
+              <p className="mt-4 text-lg leading-relaxed text-white/90">
+                SafeIdea is an open source project, necessary if you want to
+                make sure the developers don&apos;t know about your secrets.
+              </p>
             </p>
             <p className="mt-6 text-lg leading-relaxed text-white/90">
               SafeIdea plans to launch commercially in late 2025. Want early
