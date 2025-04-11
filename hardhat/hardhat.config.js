@@ -1,6 +1,7 @@
 require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
+require("@starboardventures/hardhat-verify");
 
 require('dotenv').config() // Load environment variables from .env
 
@@ -9,6 +10,10 @@ module.exports = {
   optimize: {
     enabled: true,
     runs: 200,
+  },
+  starboardConfig: {
+    baseURL: 'https://fvm-calibration-api.starboard.ventures/api/v1',
+    network: 'hyperspace' // if there's no baseURL, url will depend on the network.  Mainnet || Calibration
   },
   networks: {
     // Local Hardhat network (default for testing)

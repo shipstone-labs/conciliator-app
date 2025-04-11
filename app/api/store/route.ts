@@ -180,6 +180,26 @@ export async function POST(req: NextRequest) {
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
         args: [name, description, content],
+         {
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
       })
       .then((hash) => {
         return waitForTransactionReceipt(wallet, {
