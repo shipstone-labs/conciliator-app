@@ -404,8 +404,8 @@ const AppIP = () => {
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
               <p className="text-sm text-white/90">
                 Clicking <strong>View Idea Page</strong> takes you to your new
-                Idea page. You can share this page address with others to explore
-                your secure idea.
+                Idea page. You can share this page address with others to
+                explore your secure idea.
               </p>
             </div>
 
@@ -420,18 +420,22 @@ const AppIP = () => {
                 onClick={handleStore}
                 className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12 mt-4"
                 disabled={
-                  isLoading || !content || !name || !description || !termsAccepted
+                  isLoading ||
+                  !content ||
+                  !name ||
+                  !description ||
+                  !termsAccepted
                 }
               >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Creating your Idea page (this may take a minute or so)
-                </>
-              ) : (
-                'View Idea Page'
-              )}
-            </Button>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Creating your Idea page (this may take a minute or so)
+                  </>
+                ) : (
+                  'View Idea Page'
+                )}
+              </Button>
             </div>
 
             {/* File upload modal */}

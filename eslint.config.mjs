@@ -23,7 +23,7 @@ const eslintConfig = [
         },
       ],
       // Make semicolons optional to match Biome's "semicolons: asNeeded" setting
-      semi: ['error', 'never'],
+      semi: ['warn', 'never'],
       'semi-spacing': ['error', { before: false, after: true }],
     },
   },
