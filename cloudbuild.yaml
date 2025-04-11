@@ -6,25 +6,14 @@ steps:
     args:
       - -c
       - |
-        # Determine the tag to filter builds by
-        if [[ "$BRANCH_NAME" == "main" ]]; then
-          FILTER_TAG="main"
-        elif [[ "$BRANCH_NAME" == "legacy" ]]; then
-          FILTER_TAG="legacy"
-        elif [[ "$_PR_NUMBER" != "" ]]; then
-          FILTER_TAG="pr-$_PR_NUMBER"
+        # Get running builds with the same branch/PR
+        if [[ "$_PR_NUMBER" != "" ]]; then
+          # For PRs, filter by trigger substitutions
+          running_builds=$(gcloud builds list --ongoing --filter="substitutions._PR_NUMBER=$_PR_NUMBER AND id!=$$BUILD_ID" --format="value(id)")
         else
-          # Replace slashes with hyphens for branch name
-          BRANCH_SAFE=$$BRANCH_NAME
-          BRANCH_SAFE=$${BRANCH_SAFE//\//-}
-          FILTER_TAG="$$BRANCH_SAFE"
+          # For branches, filter by branch name
+          running_builds=$(gcloud builds list --ongoing --filter="source.repoSource.branchName=$BRANCH_NAME AND id!=$$BUILD_ID" --format="value(id)")
         fi
-        
-        # Add tags to current build to make it identifiable
-        gcloud builds update $$BUILD_ID --add-tags=$$FILTER_TAG || true
-        
-        # Get running builds with the same tag
-        running_builds=$(gcloud builds list --ongoing --filter="tags=$$FILTER_TAG AND id!=$$BUILD_ID" --format="value(id)")
         
         # Cancel any previous running builds
         if [[ -n "$$running_builds" ]]; then
