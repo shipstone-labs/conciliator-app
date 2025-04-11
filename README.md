@@ -43,3 +43,7 @@ This is currently being deployed on cloudflare and should work in fleek.
 ## Support
 
 If you have questions about the Conciliator Project, please reach out to the team at Cart@shipstone.com.
+
+## Deployment
+
+This project is configured for deployment on Cloudflare Pages with automatic builds and previews for each PR.
