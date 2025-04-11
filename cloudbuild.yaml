@@ -251,7 +251,7 @@ steps:
                 -X POST \
                 -f state="failure" \
                 -f description="Deployment failed" \
-                -f log_url="$BUILD_URL"
+                -f log_url="$$BUILD_URL"
             fi
           fi
         fi
