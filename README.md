@@ -1,6 +1,6 @@
 # Welcome to the Conciliator Project
 
-Conciliator is an open source project that explores how to best work with AI agents that search for IP. It provides an effective way to enable discovery of intellectual property while protecting the interests of the IP inventors and/or owners.
+Conciliator is an open source project that explores how to best work with AI agents that search for IP. It provides an effective way to enable discovery of intellectual property while protecting the interests of the IP inventors and/or owners. The project focuses on balancing openness with appropriate protections.
 
 This is an experimental part of the SafeIdea project that we're working on. Ping us at Cart@shipstone.com to learn more.
 
