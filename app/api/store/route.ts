@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest } from 'next/server'
 import {
   // abi,
   // genSession,
@@ -7,56 +7,56 @@ import {
   // getModel,
   // imageAI,
   // pinata,
-} from "../utils";
+} from '../utils'
 // import { createWalletClient, decodeEventLog, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount } from 'viem/accounts'
 // import { filecoinCalibration } from "viem/chains";
 // import { waitForTransactionReceipt } from "viem/actions";
-import { createAsAgent } from "web-storage-wrapper";
+import { createAsAgent } from 'web-storage-wrapper'
 import // createLitClient,
 // LIT_ABILITY,
 // LIT_NETWORK,
 // LitAccessControlConditionResource,
 // LitActionResource,
-"lit-wrapper";
-import { getUser } from "../stytch";
-import { getFirestore } from "../firebase";
-import { fetch } from "undici";
-import type { IPDoc } from "@/lib/types";
-import { Timestamp } from "firebase-admin/firestore";
+'lit-wrapper'
+import { getUser } from '../stytch'
+import { getFirestore } from '../firebase'
+import { fetch } from 'undici'
+import type { IPDoc } from '@/lib/types'
+import { Timestamp } from 'firebase-admin/firestore'
 
-export const runtime = "nodejs";
+export const runtime = 'nodejs'
 
 function clean(obj: unknown): unknown {
   if (obj == null) {
-    return undefined;
+    return undefined
   }
   if (obj && Array.isArray(obj)) {
-    return obj.map(clean);
+    return obj.map(clean)
   }
-  if (obj && typeof obj === "object") {
-    const cleanedObj: Record<string, unknown> = {};
+  if (obj && typeof obj === 'object') {
+    const cleanedObj: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined) {
-        const item = clean(value);
+        const item = clean(value)
         if (item) {
-          cleanedObj[key] = item;
+          cleanedObj[key] = item
         }
       }
     }
     if (Object.keys(cleanedObj).length === 0) {
-      return undefined;
+      return undefined
     }
-    return cleanedObj;
+    return cleanedObj
   }
-  return obj;
+  return obj
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getUser(req);
+    const user = await getUser(req)
 
-    const body = await req.json();
+    const body = await req.json()
     // const { name: _name, content, description, encrypted } = body;
     const {
       name: _name,
@@ -65,12 +65,12 @@ export async function POST(req: NextRequest) {
       downSampledEncrypted,
       category,
       tags,
-    } = body;
+    } = body
     // const name = _name || "Untitled";
     const account = privateKeyToAccount(
-      (process.env.FILCOIN_PK || "") as `0x${string}`
-    );
-    console.log("account", account.address);
+      (process.env.FILCOIN_PK || '') as `0x${string}`
+    )
+    console.log('account', account.address)
     // const litClient = await createLitClient({
     //   litNetwork: LIT_NETWORK.Datil,
     //   debug: false,
@@ -107,15 +107,15 @@ export async function POST(req: NextRequest) {
     //   },
     // ]);
     const w3Client = await createAsAgent(
-      process.env.STORACHA_AGENT_KEY || "",
-      process.env.STORACHA_AGENT_PROOF || ""
-    );
+      process.env.STORACHA_AGENT_KEY || '',
+      process.env.STORACHA_AGENT_PROOF || ''
+    )
     const encryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(encrypted))],
       {
-        type: "application/json",
+        type: 'application/json',
       }
-    );
+    )
     const encryptedCid = await w3Client.uploadFile(
       // {
       //   async arrayBuffer() {
@@ -123,13 +123,13 @@ export async function POST(req: NextRequest) {
       //   },
       // } as any
       encryptedBlob
-    );
+    )
     const downSampledEncryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(downSampledEncrypted))],
       {
-        type: "application/json",
+        type: 'application/json',
       }
-    );
+    )
     const downSampledEncryptedCid = await w3Client.uploadFile(
       // {
       //   async arrayBuffer() {
@@ -137,36 +137,36 @@ export async function POST(req: NextRequest) {
       //   },
       // } as any
       downSampledEncryptedBlob
-    );
+    )
     const imageCid = await imageAI.images
       .generate({
-        model: getModel("IMAGE"),
+        model: getModel('IMAGE'),
         prompt: `Generate and image which accurately represents a supposed document
     with the title \`${_name}\` and the descriptions \`${description}\`. If there are any word flagged as inappropriate,
     then just pick the closest word to it. If there is none, then pick a random word.
     I would like to always get an image, even if it's not 100% accurate.`,
-        response_format: "url",
-        size: "1024x1024",
-        quality: "standard",
+        response_format: 'url',
+        size: '1024x1024',
+        quality: 'standard',
         n: 1,
       })
       .then(async (response) => {
-        const { url } = response.data[0];
+        const { url } = response.data[0]
         if (url) {
           const buffer = await fetch(url).then((res) => {
             if (!res.ok) {
-              throw new Error("Bad");
+              throw new Error('Bad')
             }
-            return res.arrayBuffer();
-          });
-          const blob = new Blob([buffer]);
-          return await w3Client.uploadFile(blob);
+            return res.arrayBuffer()
+          })
+          const blob = new Blob([buffer])
+          return await w3Client.uploadFile(blob)
         }
       })
       .catch((error) => {
-        console.error("Errornect generating image:", error);
-      });
-    const firestore = await getFirestore();
+        console.error('Errornect generating image:', error)
+      })
+    const firestore = await getFirestore()
     const data: IPDoc = clean({
       ...(imageCid
         ? {
@@ -174,11 +174,11 @@ export async function POST(req: NextRequest) {
               cid: imageCid?.toString(),
               width: 1024,
               height: 1024,
-              mimeType: "image/png",
+              mimeType: 'image/png',
             },
           }
         : {}),
-      tokenId: "",
+      tokenId: '',
       encrypted: {
         cid: encryptedCid.toString(),
         acl: JSON.stringify(encrypted.unifiedAccessControlConditions),
@@ -198,8 +198,8 @@ export async function POST(req: NextRequest) {
         ),
         hash: downSampledEncrypted.dataToEncryptHash,
       },
-    }) as IPDoc;
-    const doc = await firestore.collection("ip").add(data);
+    }) as IPDoc
+    const doc = await firestore.collection('ip').add(data)
 
     // const _decrypted = await litClient.decrypt({
     //   accessControlConditions: encrypted.unifiedAccessControlConditions,
@@ -384,13 +384,13 @@ export async function POST(req: NextRequest) {
     //       headers: { "Content-Type": "application/json" },
     //     });
     return new Response(JSON.stringify({ ...data, id: doc.id }), {
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+    console.error(error)
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

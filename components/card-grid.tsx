@@ -51,7 +51,7 @@ const CardGrid = () => {
       setItems([...items, ...data])
       setLoaded(true)
     },
-    [items, stytchClient?.session.getTokens]
+    [items, stytchClient?.session]
   )
 
   useEffect(() => {

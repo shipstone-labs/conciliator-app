@@ -1,17 +1,17 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest } from 'next/server'
 // import { abi, getModel, imageAI, pinata } from "../utils";
 // import { readContract } from "viem/actions";
 // import { filecoinCalibration } from "viem/chains";
 // import { createWalletClient, http } from "viem";
 // import { privateKeyToAccount } from "viem/accounts";
-import { getFirestore } from "../firebase";
-import { getUser } from "../stytch";
+import { getFirestore } from '../firebase'
+import { getUser } from '../stytch'
 
-export const runtime = "nodejs";
+export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
-    await getUser(req);
+    await getUser(req)
 
     // const { start: _start, limit: _limit } = await req.json();
     // let tokenId = BigInt(_start || 1);
@@ -27,15 +27,15 @@ export async function POST(req: NextRequest) {
     //   chain: filecoinCalibration,
     //   transport: http(),
     // });
-    const fb = await getFirestore();
-    const doc = await fb.collection("ip").orderBy("createdAt", "desc").get();
+    const fb = await getFirestore()
+    const doc = await fb.collection('ip').orderBy('createdAt', 'desc').get()
     const docs = doc.docs.map((d) => {
-      const data = d.data();
-      const key = [data.tokenId || d.id, data];
-      return key;
-    }) as [number, Record<string, unknown>][];
-    const seenTokenIds = new Map<number, Record<string, unknown>>(docs);
-    const tokens = Array.from(seenTokenIds.values());
+      const data = d.data()
+      const key = [data.tokenId || d.id, data]
+      return key
+    }) as [number, Record<string, unknown>][]
+    const seenTokenIds = new Map<number, Record<string, unknown>>(docs)
+    const tokens = Array.from(seenTokenIds.values())
     // const seenTokenIds = new Map<number, Record<string, unknown>>(docs)
     // while (true) {
     //   try {
@@ -102,13 +102,13 @@ export async function POST(req: NextRequest) {
 
     return new Response(JSON.stringify(tokens), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+    console.error(error)
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
