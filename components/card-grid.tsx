@@ -13,21 +13,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import HomeLink from './HomeLink'
 import { useStytch } from '@stytch/nextjs'
+import { cidAsURL, type IPDoc } from '@/lib/types'
 
 const itemsPerPage = 16 // 4 Cards per page
-
-export type Data = {
-  name: string
-  url: string
-  description: string
-  tokenId: number
-}
 
 const CardGrid = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [imageWidth, setImageWidth] = useState(200) // Default width
 
-  const [items, setItems] = useState<Data[]>([])
+  const [items, setItems] = useState<IPDoc[]>([])
   const [loaded, setLoaded] = useState(false)
   const [loading, setLoading] = useState(false)
   const stytchClient = useStytch()
@@ -54,7 +48,7 @@ const CardGrid = () => {
         console.log(await response.text())
         throw new Error('Failed to retrieve items')
       }
-      const data = (await response.json()) as Data[]
+      const data = ((await response.json()) || []) as IPDoc[]
       setItems([...items, ...data])
       setLoaded(true)
     },
@@ -132,14 +126,7 @@ const CardGrid = () => {
             {/* Image */}
             <CardContent className="flex justify-center p-4">
               <Image
-                src={`${item.url.replace(
-                  /ipfs:\/\//,
-                  '/api/download/'
-                )}?img-width=${imageWidth}&img-dpr=${
-                  typeof window !== 'undefined'
-                    ? window.devicePixelRatio || 1
-                    : 1
-                }`}
+                src={cidAsURL(item?.image?.cid) || '/images/placeholder.png'}
                 alt={item.name}
                 width={200}
                 height={200}
@@ -168,7 +155,7 @@ const CardGrid = () => {
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                   disabled:opacity-50 disabled:pointer-events-none ring-offset-background
                   shadow-lg hover:shadow-primary/30 transition-all"
-                href={`/discovery/${item.tokenId}`}
+                href={`/discovery/${item.id}`}
               >
                 Learn More
               </Link>

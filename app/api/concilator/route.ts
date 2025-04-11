@@ -29,16 +29,16 @@ export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, tokenId } = (await req.json()) as {
+    const { messages, id } = (await req.json()) as {
       messages: {
         role: "user" | "assistant" | "system";
         content: string;
       }[];
-      tokenId: string;
+      id: string;
     };
 
     const fs = await getFirestore();
-    const doc = await fs.collection("ip").doc(tokenId).get();
+    const doc = await fs.collection("ip").doc(id).get();
     const data = doc.data() as IPDoc;
     if (!data) {
       throw new Error("Document not found");
@@ -150,10 +150,33 @@ ${data.description}`,
       });
       global.document = { dispatchEvent: (_event: Event) => true } as Document;
       await litClient.connect();
+      const url = cidAsURL(data.downSampled.cid);
+      const encrypted: {
+        ciphertext: string;
+        dataToEncryptHash: string;
+        unifiedAccessControlConditions: unknown;
+      } = url
+        ? await fetch(url).then((res) => {
+            if (!res.ok) {
+              throw new Error("Failed to fetch encrypted data");
+            }
+            return res.json();
+          })
+        : undefined;
+      if (
+        data.downSampled.acl !==
+        JSON.stringify(encrypted.unifiedAccessControlConditions)
+      ) {
+        throw new Error("Access control conditions do not match");
+      }
+      if (data.downSampled.hash !== encrypted.dataToEncryptHash) {
+        console.log(data.downSampled.hash, encrypted.dataToEncryptHash);
+        throw new Error("Hash does not match");
+      }
       const accsInput =
         await LitAccessControlConditionResource.generateResourceString(
-          JSON.parse(data.encrypted.acl),
-          data.encrypted.hash
+          JSON.parse(data.downSampled.acl),
+          data.downSampled.hash
         );
 
       // const { capacityDelegationAuthSig } =
@@ -179,28 +202,18 @@ ${data.description}`,
           ability: LIT_ABILITY.AccessControlConditionDecryption,
         },
       ]);
-      const encrypted = await fetch(cidAsURL(data.downSampled.cid))
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Failed to fetch encrypted data");
-          }
-          return res.json();
-        })
-        .then((res) => res.ciphertext);
 
+      console.log("encrypted", {
+        ...encrypted,
+        ciphertext: `${encrypted.ciphertext.slice(0, 100)}...`,
+      });
       const _decrypted = await litClient.decrypt({
         accessControlConditions: JSON.parse(data.downSampled.acl),
-        ciphertext: encrypted,
-        dataToEncryptHash: data.downSampled.hash,
+        ciphertext: encrypted.ciphertext,
+        dataToEncryptHash: encrypted.dataToEncryptHash,
         chain: "filecoin",
         sessionSigs,
       });
-
-      console.log("raw decrypted", _decrypted);
-      console.log(
-        "raw decrypted",
-        new TextDecoder().decode(_decrypted.decryptedData)
-      );
 
       const content = new TextDecoder().decode(_decrypted.decryptedData);
 

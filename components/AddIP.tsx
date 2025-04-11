@@ -139,33 +139,38 @@ const AppIP = () => {
           return encryptedContent
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
+      const body = {
+        name,
+        content,
+        encrypted: {
+          ...encrypted,
+          unifiedAccessControlConditions,
+        },
+        downSampledEncrypted: {
+          ...downSampledEncrypted,
+          unifiedAccessControlConditions,
+        },
+        description,
+      }
+      console.log('Storing invention:', body)
       const data = await fetch('/api/store', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session_jwt}`,
         },
-        body: JSON.stringify({
-          name,
-          content,
-          encrypted: {
-            ...encrypted,
-            unifiedAccessControlConditions,
-          },
-          downSampledEncrypted: {
-            ...downSampledEncrypted,
-            unifiedAccessControlConditions,
-          },
-          description,
-        }),
+        // NOTE: This format is not identical to the final IPDoc,
+        // Because some processing is done on the server side.
+        body: JSON.stringify(body),
       }).then((res) => {
         if (!res.ok) {
           throw new Error('Failed to store invention')
         }
         return res.json()
       })
-      const { tokenId } = data
-      window.location.href = `/details/${tokenId}`
+      const { id } = data
+      console.log(data)
+      window.location.href = `/details/${id}`
     } catch (err) {
       console.error('API Key validation error:', err)
       setError((err as { message: string }).message)

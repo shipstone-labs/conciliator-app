@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "predev": "pnpm run build-wrappers",
-    "dev": "next dev",
+    "dev": "bash -c 'trap \"kill 0\" SIGINT; next dev | grep --color=always -v \"nextjs_original-stack-frames\"'",
     "prebuild": "pnpm run build-wrappers",
     "build": "next build",
     "build:plain": "next build",

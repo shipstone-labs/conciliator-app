@@ -82,44 +82,61 @@ export default function Authenticated({
       )
       const task = async () => {
         const litModule = await import('lit-wrapper')
-
         try {
           if (requireFirebase && !firebaseActive.current) {
-            firebaseActive.current = true
-            await fetch('/api/exchange', {
-              headers: {
-                Authorization: `Bearer ${
-                  stytchClient.session.getTokens?.()?.session_jwt
-                }`,
-              },
-            })
-              .then((res) => {
-                if (!res.ok) {
-                  throw new Error('Failed to fetch token')
-                }
-                return res.json()
+            const { currentUser } = getAuth()
+            const fbUser =
+              user &&
+              isInitialized &&
+              currentUser &&
+              currentUser?.uid === user?.user_id
+                ? (currentUser as unknown as UserCredential)
+                : undefined
+            if (fbUser) {
+              setSessionSigs((state) =>
+                amendLoggedIn({
+                  ...state,
+                  fbUser,
+                })
+              )
+              firebaseActive.current = true
+            } else {
+              firebaseActive.current = true
+              await fetch('/api/exchange', {
+                headers: {
+                  Authorization: `Bearer ${
+                    stytchClient.session.getTokens?.()?.session_jwt
+                  }`,
+                },
               })
-              .catch((error) => {
-                console.error('Error fetching token', error)
-                firebaseActive.current = false
-              })
-              .then((res) => {
-                return signInWithCustomToken(getAuth(), res.token).then(
-                  (fbUser) => {
-                    setSessionSigs((state) =>
-                      amendLoggedIn({
-                        ...state,
-                        fbUser,
-                      })
-                    )
-                    firebaseActive.current = true
+                .then((res) => {
+                  if (!res.ok) {
+                    throw new Error('Failed to fetch token')
                   }
-                )
-              })
-              .catch((error) => {
-                console.error(error)
-                firebaseActive.current = false
-              })
+                  return res.json()
+                })
+                .catch((error) => {
+                  console.error('Error fetching token', error)
+                  firebaseActive.current = false
+                })
+                .then((res) => {
+                  return signInWithCustomToken(getAuth(), res.token).then(
+                    (fbUser) => {
+                      setSessionSigs((state) =>
+                        amendLoggedIn({
+                          ...state,
+                          fbUser,
+                        })
+                      )
+                      firebaseActive.current = true
+                    }
+                  )
+                })
+                .catch((error) => {
+                  console.error(error)
+                  firebaseActive.current = false
+                })
+            }
           }
           if (requireLit && !litActive.current) {
             litActive.current = true
@@ -146,11 +163,7 @@ export default function Authenticated({
               }
               let pkps = await provider.fetchPKPsThroughRelayer(authMethod)
               if (pkps.length <= 0) {
-                const auth = await provider.mintPKPThroughRelayer(
-                  authMethod,
-                  options
-                )
-                console.log('auth', auth)
+                await provider.mintPKPThroughRelayer(authMethod, options)
                 pkps = await provider.fetchPKPsThroughRelayer(authMethod)
               }
               const sessionSigs = await litClient.getPkpSessionSigs({

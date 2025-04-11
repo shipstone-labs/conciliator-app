@@ -16,15 +16,15 @@ import Loading from './Loading'
 import { useIP } from '@/hooks/useIP'
 
 const DetailIP = ({
-  tokenId,
+  docId,
   onNewIP,
 }: {
-  tokenId: string
+  docId: string
   onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
   const router = useRouter()
 
-  const ideaData = useIP(tokenId)
+  const ideaData = useIP(docId)
 
   // For now, use placeholder data
   // const ideaData = {
@@ -39,7 +39,7 @@ const DetailIP = ({
 
   // Function to navigate to the discovery page
   const goToDiscovery = () => {
-    router.push(`/discovery/${tokenId}`)
+    router.push(`/discovery/${docId}`)
   }
 
   if (!ideaData) {

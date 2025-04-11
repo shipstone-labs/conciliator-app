@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation'
 
 export default function Token() {
   const params = useParams()
-  const tokenId = params?.tokenId as string // Retrieve the tokenId from the dynamic route
+  const docId = params?.id as string // Retrieve the tokenId from the dynamic route
 
   const handleCreateNewIP = () => {
     // Redirect to the root page
@@ -14,7 +14,7 @@ export default function Token() {
   }
   return (
     <Authenticated>
-      <QuestionIP tokenId={tokenId} onNewIP={handleCreateNewIP} />
+      <QuestionIP docId={docId} onNewIP={handleCreateNewIP} />
     </Authenticated>
   )
 }

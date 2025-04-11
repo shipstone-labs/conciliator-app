@@ -21,6 +21,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 - Document encryption and storage
 - Terms setting for idea sharing
 - Creates a new Idea page with a unique tokenId
+- Each token has a document "id" and an optional tokenId number
 - Component: `AddIP.tsx`
 
 ### 3. Idea Discovery Page (`/idea-discovery`) **(TBD)**
@@ -31,7 +32,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 - Would replace or enhance current `/list-ip` functionality
 - Implementation needs: Search algorithms, filtering system, recommendation engine
 
-### 4. Idea Analytics Page (`/[tokenId]/analytics`) **(TBD)**
+### 4. Idea Analytics Page (`/[id]/analytics`) **(TBD)**
 - Displays view counts for the idea
 - Shows interaction metrics with Idea Discovery
 - Lists purchase/access statistics
@@ -62,17 +63,17 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 
 ### 7. Individual Idea Page
 - Split into two specialized views:
-  - Details View (`/details/[tokenId]`) - Shows idea details and information
+  - Details View (`/details/[id]`) - Shows idea details and information
     - Component: `DetailIP.tsx` 
-    - Implementation: `/app/details/[tokenId]/page.tsx`
+    - Implementation: `/app/details/[id]/page.tsx`
     - Features:
       - Displays idea title, description, metadata, and tags
       - Shows creation date and category information
       - "Explore in Discovery" button to navigate to discovery view
       - Informational card explaining Discovery mode
-  - Discovery View (`/discovery/[tokenId]`) - Q&A interface via the Conciliator
+  - Discovery View (`/discovery/[id]`) - Q&A interface via the Conciliator
     - Component: `QuestionIP.tsx` 
-    - Implementation: `/app/discovery/[tokenId]/page.tsx`
+    - Implementation: `/app/discovery/[id]/page.tsx`
     - Features:
       - Interactive Q&A with document through Conciliator API
       - Conversational interface for idea exploration
@@ -111,13 +112,13 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
   - `/app/api/concilator/route.ts` - Main API logic
   - `/app/api/concilator/system.hbs` - System prompt template
 
-### 4. Analytics API (`/api/analytics/[tokenId]`) **(TBD)**
+### 4. Analytics API (`/api/analytics/[id]`) **(TBD)**
 - Retrieves engagement metrics for specific ideas
 - Tracks views, interactions, and purchases
 - Called from: Idea Analytics page
 - Implementation needs: Metrics collection system, database schema for analytics
 
-### 5. Chat API (`/api/chat`)
+### 5. Chat API (`/api/chat`) REMOVED
 - General chat functionality
 - Called from: Various pages with chat components
 - Implementation: `/app/api/chat/route.ts`
@@ -159,7 +160,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 │               │◄──Required─────┤                 │   │             │
 │     Idea      │                │  Authentication │   │ Individual  │
 │   Discovery   │────────────────►                │◄──┤  Idea Page  │
-│     (TBD)     │                │                │   │ /[tokenId]  │
+│     (TBD)     │                │                │   │ /[id]  │
 └───────────────┘                └────────┬───────┘   │             │
                                           │          └──────┬──────┘
                                           │                 │
@@ -168,7 +169,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 │               │                 │               │  │                 │
 │   Add Idea    │                 │   Store API   │  │ Idea Analytics  │
 │   /add-ip     │─────────────────►               │  │     (TBD)       │
-│               │   Create Idea   │               │  │ /[tokenId]/     │
+│               │   Create Idea   │               │  │ /[id]/     │
 └───────────────┘                 └───────────────┘  │  analytics      │
                                                      └─────────────────┘
 
@@ -213,7 +214,7 @@ This document outlines the structure of the SafeIdea/Conciliator application, in
 ### 4. Protected Routes
 - `/add-ip` - Requires auth to add ideas
 - `/idea-discovery` - Auth required to browse ideas **(TBD)**
-- `/[tokenId]/analytics` - Auth required for metrics **(TBD)**
+- `/[id]/analytics` - Auth required for metrics **(TBD)**
 - `/account` - Auth required to view/edit profile **(TBD)**
 - `/my-ideas` - Auth required to see owned/accessed ideas **(TBD)**
 - Individual Idea pages - Auth required for interaction

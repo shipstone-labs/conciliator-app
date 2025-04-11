@@ -25,10 +25,10 @@ const AppStates = {
 }
 
 const QuestionIP = ({
-  tokenId,
+  docId,
   onNewIP,
 }: {
-  tokenId: string
+  docId: string
   onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
   const [appState, setAppState] = useState(AppStates.LOADING)
@@ -36,11 +36,11 @@ const QuestionIP = ({
   const [messages, setMessages] = useState<
     { role: 'user' | 'assistant' | 'system'; content: string }[]
   >([])
-  const ipDoc = useIP(tokenId)
+  const ipDoc = useIP(docId)
   const stytchClient = useStytch()
 
   useEffect(() => {
-    if (tokenId) {
+    if (docId) {
       if (!messages.length) {
         ;(async () => {
           setIsLoading(true)
@@ -53,7 +53,7 @@ const QuestionIP = ({
               }`,
             },
             body: JSON.stringify({
-              tokenId,
+              id: docId,
               messages,
             }),
           }).then((res) => {
@@ -70,7 +70,7 @@ const QuestionIP = ({
     } else {
       setAppState(AppStates.START)
     }
-  }, [tokenId, messages, stytchClient?.session?.getTokens])
+  }, [docId, messages, stytchClient?.session?.getTokens])
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
@@ -90,7 +90,7 @@ const QuestionIP = ({
             }`,
           },
           body: JSON.stringify({
-            tokenId,
+            id: docId,
             messages: [...messages, userMessage],
           }),
         }).then((res) => {
@@ -107,7 +107,7 @@ const QuestionIP = ({
         setIsLoading(false)
       }
     },
-    [messages, tokenId, stytchClient?.session?.getTokens]
+    [messages, docId, stytchClient?.session?.getTokens]
   )
 
   const handleSave = useCallback(async () => {
@@ -119,7 +119,7 @@ const QuestionIP = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          tokenId,
+          id: docId,
           messages,
         }),
       }).then((res) => {
@@ -134,7 +134,7 @@ const QuestionIP = ({
     } finally {
       setIsLoading(false)
     }
-  }, [messages, tokenId])
+  }, [messages, docId])
 
   if (appState === AppStates.LOADING || !ipDoc) {
     return <Loading />
