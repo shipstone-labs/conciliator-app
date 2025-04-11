@@ -11,8 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
-import Loading from './Loading'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP } from '@/hooks/useIP'
 
 const DetailIP = ({
@@ -43,7 +42,14 @@ const DetailIP = ({
   }
 
   if (!ideaData) {
-    return <Loading />
+    return (
+      <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden p-8">
+        <div className="flex flex-col items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+          <p className="text-white/70">Loading idea details...</p>
+        </div>
+      </Card>
+    )
   }
   return (
     <div className="w-full py-8">
@@ -56,16 +62,16 @@ const DetailIP = ({
           </p>
         </div>
 
-        {/* Main idea card */}
+        {/* Main idea card - only show when not loading and no error */}
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
           <CardHeader className="pb-4 border-b border-white/10">
             <CardTitle className="text-2xl font-bold text-primary">
-              {ideaData.name || 'Unknown Title'}
+              {ideaData.name}
             </CardTitle>
             <div className="flex flex-wrap gap-2 mt-3">
-              {ideaData.tags?.map((tag) => (
+              {ideaData.tags?.map((tag, index) => (
                 <span
-                  key={tag}
+                  key={index}
                   className="px-3 py-1 text-xs font-medium bg-white/10 text-white/80 rounded-full"
                 >
                   {tag}
@@ -120,7 +126,7 @@ const DetailIP = ({
           </CardFooter>
         </Card>
 
-        {/* Info card about the Discovery feature */}
+        {/* Info card about the Discovery feature - only show when data is loaded */}
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl">
           <CardContent className="p-5 flex gap-4 items-center">
             <div className="bg-primary/20 p-3 rounded-full">
