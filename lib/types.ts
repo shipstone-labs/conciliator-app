@@ -39,13 +39,14 @@ export function cidAsURL(cid?: string) {
   return `https://w3s.link/ipfs/${cid}`
 }
 
-export function formatDate(date: any): string {
+export function formatDate(date: unknown): string {
   if (!date) return 'Unknown Date'
 
   // Handle Firebase Timestamp objects (they have a toDate method)
   if (
     typeof date === 'object' &&
-    date.toDate &&
+    date !== null &&
+    'toDate' in date &&
     typeof date.toDate === 'function'
   ) {
     return date.toDate().toLocaleDateString()
@@ -60,7 +61,7 @@ export function formatDate(date: any): string {
   if (typeof date === 'string') {
     try {
       return new Date(date).toLocaleDateString()
-    } catch {
+    } catch (_error) {
       return date
     }
   }
