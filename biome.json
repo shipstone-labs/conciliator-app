@@ -10,14 +10,16 @@
     "ignore": [
       "dist/",
       "node_modules/",
-      ".nuxt/",
+      ".next/",
       ".output/",
       ".wrangler",
+      ".vercel",
       "**/*.vue",
       "./.dev.vars",
       "package.json",
       "db.json",
-      "components/transactions/**"
+      "components/transactions/**",
+      "hardhat"
     ]
   },
   "formatter": {
@@ -36,7 +38,8 @@
         "noUnusedVariables": "error"
       },
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noArrayIndexKey": "off"
       },
       "complexity": {
         "noForEach": "off"

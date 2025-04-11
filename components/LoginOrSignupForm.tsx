@@ -1,116 +1,114 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useStytch } from "@stytch/nextjs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from 'react'
+import { useStytch } from '@stytch/nextjs'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const LoginOrSignupForm = () => {
-  const stytch = useStytch();
+  const stytch = useStytch()
 
   // Authentication states
-  const [methodId, setMethodId] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showCodeInput, setShowCodeInput] = useState(false);
-  const [rememberDevice, setRememberDevice] = useState(true);
+  const [methodId, setMethodId] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [code, setCode] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showCodeInput, setShowCodeInput] = useState(false)
+  const [rememberDevice, setRememberDevice] = useState(true)
 
   // Handle sending email OTP
   const handleSendEmailOTP = async () => {
-    if (!email || !email.includes("@")) {
-      setError("Please enter a valid email address");
-      return;
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
       const response = await stytch.otps.email.send(email, {
         expiration_minutes: 10,
-      });
+      })
 
-      setMethodId(response.method_id);
-      setShowCodeInput(true);
-      setError(null);
+      setMethodId(response.method_id)
+      setShowCodeInput(true)
+      setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send email OTP");
-      console.error("Error sending email OTP:", err);
+      setError(err instanceof Error ? err.message : 'Failed to send email OTP')
+      console.error('Error sending email OTP:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Handle sending SMS OTP
   const handleSendSmsOTP = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
-      setError("Please enter a valid phone number");
-      return;
+      setError('Please enter a valid phone number')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const formattedPhone = phoneNumber.startsWith("+")
+      const formattedPhone = phoneNumber.startsWith('+')
         ? phoneNumber
-        : `+1${phoneNumber.replace(/[^0-9]/g, "")}`;
+        : `+1${phoneNumber.replace(/[^0-9]/g, '')}`
 
       const response = await stytch.otps.sms.send(formattedPhone, {
         expiration_minutes: 10,
-      });
+      })
 
-      setMethodId(response.method_id);
-      setShowCodeInput(true);
-      setError(null);
+      setMethodId(response.method_id)
+      setShowCodeInput(true)
+      setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send SMS OTP");
-      console.error("Error sending SMS OTP:", err);
+      setError(err instanceof Error ? err.message : 'Failed to send SMS OTP')
+      console.error('Error sending SMS OTP:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Handle verifying OTP code
   const handleVerifyOTP = async () => {
     if (!code || !methodId) {
-      setError("Please enter the verification code");
-      return;
+      setError('Please enter the verification code')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
       await stytch.otps.authenticate(code, methodId, {
         session_duration_minutes: 60,
-      });
+      })
 
       // No need to redirect here - the Authenticated component will handle that
-      setError(null);
+      setError(null)
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Invalid verification code"
-      );
-      console.error("Error verifying OTP:", err);
+      setError(err instanceof Error ? err.message : 'Invalid verification code')
+      console.error('Error verifying OTP:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Reset form to try a different method
   const handleBack = () => {
-    setShowCodeInput(false);
-    setMethodId(null);
-    setCode("");
-    setError(null);
-  };
+    setShowCodeInput(false)
+    setMethodId(null)
+    setCode('')
+    setError(null)
+  }
 
   return (
     <div className="w-full max-w-md mx-auto p-6 space-y-6">
@@ -147,7 +145,7 @@ export const LoginOrSignupForm = () => {
               onClick={handleSendEmailOTP}
               disabled={isLoading}
             >
-              {isLoading ? "Sending..." : "Send verification code"}
+              {isLoading ? 'Sending...' : 'Send verification code'}
             </Button>
           </TabsContent>
 
@@ -166,7 +164,7 @@ export const LoginOrSignupForm = () => {
               onClick={handleSendSmsOTP}
               disabled={isLoading}
             >
-              {isLoading ? "Sending..." : "Send verification code"}
+              {isLoading ? 'Sending...' : 'Send verification code'}
             </Button>
           </TabsContent>
         </Tabs>
@@ -210,7 +208,7 @@ export const LoginOrSignupForm = () => {
               disabled={isLoading}
               className="flex-1"
             >
-              {isLoading ? "Verifying..." : "Verify code"}
+              {isLoading ? 'Verifying...' : 'Verify code'}
             </Button>
           </div>
         </div>
@@ -220,5 +218,5 @@ export const LoginOrSignupForm = () => {
         By continuing, you agree to our Terms of Service and Privacy Policy.
       </p>
     </div>
-  );
-};
+  )
+}

@@ -1,65 +1,102 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useEffect, useState, useCallback } from 'react'
+import Loading from '@/components/Loading'
+
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip";
-import Image from "next/image";
-import Link from "next/link";
-import HomeLink from "./HomeLink";
+} from '@/components/ui/tooltip'
+import Image from 'next/image'
+import Link from 'next/link'
+import HomeLink from './HomeLink'
+import { useStytch } from '@stytch/nextjs'
+import { cidAsURL, type IPDoc } from '@/lib/types'
 
-const itemsPerPage = 16; // 4 Cards per page
+const itemsPerPage = 16 // 4 Cards per page
 
-export type Data = {
-  name: string;
-  url: string;
-  description: string;
-  tokenId: number;
-};
+const CardGrid = () => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [imageWidth, setImageWidth] = useState(200) // Default width
 
-type Props = {
-  items: Data[];
-  onRetrieve: (start: number, limit: number) => Promise<void>;
-};
+  const [items, setItems] = useState<IPDoc[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const stytchClient = useStytch()
+  const onRetrieve = useCallback(
+    async (_start: number, limit: number) => {
+      let start = _start
+      if (start < items.length) {
+        start = items.length
+      }
+      const response = await fetch('/api/list', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${
+            stytchClient?.session?.getTokens?.()?.session_jwt
+          }`,
+        },
+        body: JSON.stringify({
+          start,
+          limit,
+        }),
+      })
+      if (!response.ok) {
+        console.log(await response.text())
+        throw new Error('Failed to retrieve items')
+      }
+      const data = ((await response.json()) || []) as IPDoc[]
+      setItems([...items, ...data])
+      setLoaded(true)
+    },
+    [items, stytchClient?.session.getTokens]
+  )
 
-const CardGrid = ({ items, onRetrieve }: Props) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [imageWidth, setImageWidth] = useState(200); // Default width
+  useEffect(() => {
+    if (!loading) {
+      setLoading(true)
+      onRetrieve(0, 10)
+    }
+  }, [onRetrieve, loading])
 
   // Responsive image size calculation
   useEffect(() => {
     const updateImageWidth = () => {
-      const screenWidth = window.innerWidth;
+      const screenWidth = window.innerWidth
 
       if (screenWidth < 640) {
-        setImageWidth(150); // Mobile
+        setImageWidth(150) // Mobile
       } else if (screenWidth < 1024) {
-        setImageWidth(180); // Tablet
+        setImageWidth(180) // Tablet
       } else {
-        setImageWidth(250); // Desktop
+        setImageWidth(250) // Desktop
       }
-    };
+    }
 
-    updateImageWidth(); // Set initial width
-    window.addEventListener("resize", updateImageWidth);
+    updateImageWidth() // Set initial width
+    window.addEventListener('resize', updateImageWidth)
 
-    return () => window.removeEventListener("resize", updateImageWidth);
-  }, []);
-  const totalPages = Math.ceil(items.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage);
+    return () => window.removeEventListener('resize', updateImageWidth)
+  }, [])
+  const totalPages = Math.ceil(items.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage)
 
   const goToPage = (page: number) => {
     if (page > totalPages) {
-      onRetrieve(items.length, itemsPerPage);
+      onRetrieve(items.length, itemsPerPage)
     }
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      setCurrentPage(page)
     }
-  };
+  }
+
+  if (!loaded) {
+    return <Loading />
+  }
 
   return (
     <div className="w-full flex flex-col items-center p-3">
@@ -89,17 +126,10 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
             {/* Image */}
             <CardContent className="flex justify-center p-4">
               <Image
-                src={`${item.url.replace(
-                  /ipfs:\/\//,
-                  "/api/download/"
-                )}?img-width=${imageWidth}&img-dpr=${
-                  typeof window !== "undefined"
-                    ? window.devicePixelRatio || 1
-                    : 1
-                }`}
+                src={cidAsURL(item?.image?.cid) || '/images/placeholder.png'}
                 alt={item.name}
-                width={200}
-                height={200}
+                width={imageWidth}
+                height={imageWidth}
                 className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all"
               />
             </CardContent>
@@ -125,7 +155,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                   disabled:opacity-50 disabled:pointer-events-none ring-offset-background
                   shadow-lg hover:shadow-primary/30 transition-all"
-                href={`/discovery/${item.tokenId}`}
+                href={`/discovery/${item.id}`}
               >
                 Learn More
               </Link>
@@ -153,8 +183,8 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
             onClick={() => goToPage(i + 1)}
             className={`px-4 py-2 h-11 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all ${
               currentPage === i + 1
-                ? "bg-primary text-black font-medium"
-                : "bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70"
+                ? 'bg-primary text-black font-medium'
+                : 'bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70'
             }`}
           >
             {i + 1}
@@ -170,7 +200,7 @@ const CardGrid = ({ items, onRetrieve }: Props) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CardGrid;
+export default CardGrid

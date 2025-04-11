@@ -1,9 +1,9 @@
-"use client";
-import Image from "next/image";
-import type { FC } from "react";
+'use client'
+import Image from 'next/image'
+import type { FC } from 'react'
 
 interface LogoProps {
-  showText?: boolean;
+  showText?: boolean
 }
 
 export const Logo: FC<LogoProps> = ({ showText = true }) => (
@@ -30,4 +30,4 @@ export const Logo: FC<LogoProps> = ({ showText = true }) => (
       </div>
     )}
   </div>
-);
+)

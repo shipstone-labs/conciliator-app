@@ -1,147 +1,144 @@
-"use client";
+'use client'
 
-import { type MouseEvent, useCallback, useEffect, useState } from "react";
+import { type MouseEvent, useCallback, useEffect, useState } from 'react'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Chat from "./chat";
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Chat from './chat'
 // Logo removed from non-home pages
-import Loading from "./Loading";
+import Loading from './Loading'
+import { useIP } from '@/hooks/useIP'
+import { useStytch } from '@stytch/nextjs'
 // Link and Image imports removed - no longer needed
 
 const AppStates = {
-  LOADING: "loading",
-  START: "start",
-  DISCUSSION: "discussion",
-  EVALUATION: "evaluation",
-  END: "end",
-};
+  LOADING: 'loading',
+  START: 'start',
+  DISCUSSION: 'discussion',
+  EVALUATION: 'evaluation',
+  END: 'end',
+}
 
 const QuestionIP = ({
-  tokenId,
+  docId,
   onNewIP,
 }: {
-  tokenId: string;
-  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void;
+  docId: string
+  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
-  const [appState, setAppState] = useState(AppStates.LOADING);
-  const [name, setName] = useState("");
-  const [degraded, setDegraded] = useState(false);
-  const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [appState, setAppState] = useState(AppStates.LOADING)
+  const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState<
-    { role: "user" | "assistant" | "system"; content: string }[]
-  >([]);
+    { role: 'user' | 'assistant' | 'system'; content: string }[]
+  >([])
+  const ipDoc = useIP(docId)
+  const stytchClient = useStytch()
 
   useEffect(() => {
-    if (tokenId) {
+    if (docId) {
       if (!messages.length) {
-        (async () => {
-          setIsLoading(true);
-          const {
-            messages: _resultMessages,
-            name,
-            description,
-          } = await fetch("/api/concilator", {
-            method: "POST",
+        ;(async () => {
+          setIsLoading(true)
+          const { messages: _resultMessages } = await fetch('/api/concilator', {
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
+              authorization: `Bearer ${
+                stytchClient?.session?.getTokens()?.session_jwt
+              }`,
             },
             body: JSON.stringify({
-              tokenId,
+              id: docId,
               messages,
             }),
           }).then((res) => {
             if (!res.ok) {
-              throw new Error("Failed to store invention");
+              throw new Error('Failed to store invention')
             }
-            return res.json();
-          });
-          setDescription(description);
-          setName(name);
-          setMessages(_resultMessages);
-          setIsLoading(false);
-          setAppState(AppStates.DISCUSSION);
-        })();
+            return res.json()
+          })
+          setMessages(_resultMessages)
+          setIsLoading(false)
+          setAppState(AppStates.DISCUSSION)
+        })()
       }
     } else {
-      setAppState(AppStates.START);
+      setAppState(AppStates.START)
     }
-  }, [tokenId, messages]);
+  }, [docId, messages, stytchClient?.session?.getTokens])
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
         // First update the messages array with the user's question so it's visible immediately
-        const userMessage = { role: "user" as const, content: question };
-        setMessages((prevMessages) => [...prevMessages, userMessage]);
+        const userMessage = { role: 'user' as const, content: question }
+        setMessages((prevMessages) => [...prevMessages, userMessage])
 
         // Then make the API request
-        const {
-          messages: _resultMessages,
-          name,
-          description,
-        } = await fetch("/api/concilator", {
-          method: "POST",
+        const { messages: _resultMessages } = await fetch('/api/concilator', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${
+              stytchClient?.session?.getTokens?.()?.session_jwt
+            }`,
           },
           body: JSON.stringify({
-            tokenId,
+            id: docId,
             messages: [...messages, userMessage],
-            degraded,
           }),
         }).then((res) => {
           if (!res.ok) {
-            throw new Error("Failed to process request");
+            throw new Error('Failed to process request')
           }
-          return res.json();
-        });
+          return res.json()
+        })
 
-        setDescription(description);
-        setName(name);
-        setMessages(_resultMessages);
+        setMessages(_resultMessages)
       } catch (error) {
-        console.error("Error processing request:", error);
+        console.error('Error processing request:', error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     },
-    [messages, tokenId, degraded]
-  );
+    [messages, docId, stytchClient?.session?.getTokens]
+  )
 
   const handleSave = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const data = await fetch("/api/snapshot", {
-        method: "POST",
+      const data = await fetch('/api/snapshot', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name,
-          description,
+          id: docId,
           messages,
         }),
       }).then((res) => {
         if (!res.ok) {
-          throw new Error("Failed to store invention");
+          throw new Error('Failed to store invention')
         }
-        return res.json();
-      });
-      return data as { IpfsHash: string };
+        return res.json()
+      })
+      return data
     } catch (err) {
-      console.log(err);
+      console.log(err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [description, messages, name]);
+  }, [messages, docId])
+
+  if (appState === AppStates.LOADING || !ipDoc) {
+    return <Loading />
+  }
 
   const renderDiscussionState = () => (
     <Chat
@@ -149,13 +146,10 @@ const QuestionIP = ({
       onSend={handleAskQuestion}
       onNewIP={onNewIP}
       onSave={handleSave}
-      name={name}
-      degraded={degraded}
-      setDegraded={setDegraded}
-      description={description}
+      doc={ipDoc}
       isLoading={isLoading}
     />
-  );
+  )
 
   const renderEvaluationState = () => (
     <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
@@ -185,7 +179,7 @@ const QuestionIP = ({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 
   const renderEndState = () => (
     <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
@@ -200,8 +194,8 @@ const QuestionIP = ({
       <CardContent className="space-y-4">
         <Button
           onClick={() => {
-            setAppState(AppStates.DISCUSSION);
-            setMessages([]);
+            setAppState(AppStates.DISCUSSION)
+            setMessages([])
           }}
           className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-md transition-all shadow-lg hover:shadow-primary/30 hover:scale-105"
         >
@@ -209,11 +203,8 @@ const QuestionIP = ({
         </Button>
       </CardContent>
     </Card>
-  );
+  )
 
-  if (appState === AppStates.LOADING && tokenId) {
-    return <Loading />;
-  }
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -223,7 +214,7 @@ const QuestionIP = ({
         {appState === AppStates.END && renderEndState()}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default QuestionIP;
+export default QuestionIP

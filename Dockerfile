@@ -1,4 +1,5 @@
 # syntax=docker.io/docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv
 
 FROM node:22-alpine AS base
 
@@ -8,10 +9,6 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat python3 make g++ git wget tar build-base bsd-compat-headers
       
 WORKDIR /app
-
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
-COPY packages ./packages
 
 ARG TINYGO_VERSION=0.30.0
 ARG GO_VERSION=1.21.6
@@ -28,13 +25,17 @@ ENV PATH="${PATH}:/usr/local/go/bin:/usr/local/tinygo/bin:/root/go/bin"
 RUN mkdir -p /root/go
 ENV GOPATH="/root/go"
 
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile && pnpm build-wrappers; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
+COPY packages/lit-wrapper/package.json ./packages/lit-wrapper/
+COPY packages/web-storage-wrapper/package.json ./packages/web-storage-wrapper/
+COPY packages/lilypad-wrapper/package.json ./packages/lilypad-wrapper/
 
+RUN corepack enable pnpm && pnpm i --frozen-lockfile
+
+COPY packages ./packages
+
+RUN pnpm build-wrappers
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -50,18 +51,18 @@ ARG NEXT_PUBLIC_STYTCH_APP_ID
 ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
 ARG NEXT_PUBLIC_LIT_CONTRACT_ADDRESS
 ARG NEXT_PUBLIC_LIT_ADDRESS
+ARG NEXT_PUBLIC_FIREBASE_CONFIG={"project_id":"some-hack"}
+
+ENV STYTCH_APP_ID=build-value
+ENV STYTCH_APP_SECRET=something
+ENV STYTCH_ENV=test
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build:plain; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+RUN corepack enable pnpm && pnpm run build:plain
 
 # Production image, copy all the files and run next
 FROM base AS runner

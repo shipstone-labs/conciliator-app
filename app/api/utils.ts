@@ -1,11 +1,11 @@
-import type { LitNodeClient, LitResourceAbilityRequest, AuthCallbackParams } from "lit-wrapper";
+import type {
+  LitNodeClient,
+  LitResourceAbilityRequest,
+  AuthCallbackParams,
+} from "lit-wrapper";
 import { OpenAI, type ClientOptions } from "openai";
 import { PinataSDK } from "pinata-web3";
 import type { PrivateKeyAccount, SignableMessage } from "viem";
-
-export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
-  .split(",")
-  .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
 
 const NAMES = [
   {

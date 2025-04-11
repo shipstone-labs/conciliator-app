@@ -1,45 +1,46 @@
-import { authContext } from "@/app/authLayout";
-import { useStytchUser } from "@stytch/nextjs";
-import { type PropsWithChildren, useCallback, useContext } from "react";
-import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
+import { useStytch, useStytchUser } from '@stytch/nextjs'
+import { type PropsWithChildren, useCallback } from 'react'
+import { Button } from './ui/button'
+import { useRouter } from 'next/navigation'
+import { useSession } from '@/hooks/useSession'
 
 export default function LogoffButton({
   children,
   ...rest
 }: PropsWithChildren<Record<string, unknown>>) {
   // Handle logout
-  const router = useRouter();
-  const { user, isInitialized } = useStytchUser();
-  const { loggingOff, setLoggingOff, stytchClient } = useContext(authContext);
+  const router = useRouter()
+  const { user, isInitialized } = useStytchUser()
+  const { isLoggingOff, setLoggingOff } = useSession()
+  const stytchClient = useStytch()
   const doLogout = useCallback(() => {
-    if (loggingOff) return;
-    setLoggingOff(true);
+    if (isLoggingOff) return
+    setLoggingOff(true)
     stytchClient.session
       .revoke()
       .catch(() => {
-        alert("Unable to log out, try again later");
-        setLoggingOff(false);
+        alert('Unable to log out, try again later')
+        setLoggingOff(false)
       })
       .then(() => {
-        router.replace("/");
-      });
-  }, [setLoggingOff, loggingOff, stytchClient, router]);
+        router.replace('/')
+      })
+  }, [setLoggingOff, isLoggingOff, stytchClient, router])
   if (!isInitialized || !user) {
-    return null;
+    return null
   }
   if (children) {
     return (
       <Button
         onClick={doLogout}
         variant="ghost"
-        disabled={loggingOff}
+        disabled={isLoggingOff}
         asChild
         {...rest}
       >
         {children}
       </Button>
-    );
+    )
   }
-  return <Button onClick={doLogout}>Logout</Button>;
+  return <Button onClick={doLogout}>Logout</Button>
 }

@@ -1,42 +1,55 @@
 import type { NextConfig } from "next";
+import { resolve } from "path";
 import webpack from "webpack";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "w3s.link",
+        port: "",
+        pathname: "/ipfs/**",
+      },
+    ],
+  },
   webpack: (config, { isServer }) => {
     // Handle browser-compatibility for Node.js built-ins
     // Provide empty implementations for Node.js built-ins
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
-      crypto: false,
-      stream: false,
-      buffer: false,
-      util: false,
-      os: false,
-      zlib: false,
-    };
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false, // resolve(__dirname, "node_modules/crypto-browserify"),
+        stream: false,
+        buffer: false,
+        util: false,
+        os: false,
+        zlib: false,
+      };
 
-    // Map Node.js imports to browser-compatible versions
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "node:fs": false,
-      "node:events": false,
-      "node:path": false,
-      "node:crypto": false,
-      crypto: false,
-      "node:stream": false,
-      "node:buffer": false,
-      "@walletconnect/types": false,
-      "@walletconnect/web3-provider": false,
-      "@walletconnect/core": false,
-      "@walletconnect/sign-client": false,
-    };
+      // Map Node.js imports to browser-compatible versions
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "node:fs": false,
+        "node:events": false,
+        "node:path": false,
+        "node:crypto": false,
+        crypto: false,
+        "node:stream": false,
+        "node:buffer": false,
+        "@walletconnect/types": false,
+        "@walletconnect/web3-provider": false,
+        "@walletconnect/core": false,
+        "@walletconnect/sign-client": false,
+      };
+    }
 
     if (isServer) {
       // Replace node-fetch with empty module or a custom implementation
-      config.resolve.alias["node-fetch"] = false;
+      // config.resolve.alias["node-fetch"] = false;
       // config.resolve.mainFields = ["main", "module"]; // Prefer 'main' (CJS) over 'module' (ESM)
     }
 

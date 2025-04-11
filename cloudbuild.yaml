@@ -44,6 +44,7 @@ steps:
           --build-arg=NEXT_PUBLIC_LIT_RELAY_API_KEY=$_NEXT_PUBLIC_LIT_RELAY_API_KEY \
           --build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS \
           --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
+          --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
           .
 
   # Push with commit SHA
@@ -70,18 +71,20 @@ steps:
       - -c
       - |
         # Set tag based on branch or PR
+        DO_ROLLOUT=""
         if [[ "$BRANCH_NAME" == "main" ]]; then
           # No tag for main branch
-          TAG_OPTION=""
+          TAG_OPTION="--no-traffic"
+          DO_ROLLOUT="yes"
         elif [[ "$BRANCH_NAME" == "legacy" ]]; then
           # Tag as legacy for legacy branch
-          TAG_OPTION="--tag=legacy"
+          TAG_OPTION="--tag=legacy --no-traffic"
         elif [[ "$_PR_NUMBER" != "" ]]; then
           # Tag with PR number for pull requests
-          TAG_OPTION="--tag=pr-$_PR_NUMBER"
+          TAG_OPTION="--tag=pr-$_PR_NUMBER --no-traffic"
         else
           # Default: no tag
-          TAG_OPTION=""
+          TAG_OPTION="--no-traffic"
         fi
         
         # Execute the deploy command with dynamic tag
@@ -93,6 +96,14 @@ steps:
           --region=$_DEPLOY_REGION \
           --quiet \
           $$TAG_OPTION
+        if [[ "$$DO_ROLLOUT" == "yes" ]]
+        then
+          gcloud run services update-traffic $_SERVICE_NAME \
+            --platform=managed \
+            --to-latest \
+            --region=$_DEPLOY_REGION \
+            --quiet
+        fi
 images:
   - >-
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA
@@ -107,12 +118,13 @@ substitutions:
   _PLATFORM: managed
   _SERVICE_NAME: conciliator
   _DEPLOY_REGION: us-central1
-  _NEXT_PUBLIC_STYTCH_PROJECT_ENV: test
-  _NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: public-token-test-32ccb142-bf26-4bd7-a4f6-5c3b71b94955
-  _NEXT_PUBLIC_STYTCH_APP_ID: project-test-df5856de-9131-412e-bee2-f8155431b86a
-  _NEXT_PUBLIC_LIT_RELAY_API_KEY: test-api-key
-  _NEXT_PUBLIC_LIT_CONTRACT_ADDRESS: '0x262B5cb19B39a813C3E4366BC9d92573128139ba'
-  _NEXT_PUBLIC_LIT_ADDRESS: '0xa6985f885c29cff477212ba5b2fb7679f83555b6'
+  _NEXT_PUBLIC_STYTCH_PROJECT_ENV: ''
+  _NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN: ''
+  _NEXT_PUBLIC_STYTCH_APP_ID: ''
+  _NEXT_PUBLIC_LIT_RELAY_API_KEY: ''
+  _NEXT_PUBLIC_LIT_CONTRACT_ADDRESS: ''
+  _NEXT_PUBLIC_LIT_ADDRESS: ''
+  _NEXT_PUBLIC_FIREBASE_CONFIG: ''
 
 tags:
   - gcp-cloud-build-deploy-cloud-run

@@ -1,159 +1,161 @@
-"use client";
+'use client'
 
-import { useCallback, useContext, useState } from "react";
-import { useStytch } from "@stytch/nextjs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Modal } from "@/components/ui/modal";
-import { authContext } from "@/app/authLayout";
+import { useCallback, useContext, useState } from 'react'
+import { useStytch } from '@stytch/nextjs'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Modal } from '@/components/ui/modal'
+import { sessionContext } from './Authenticated'
 
 interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
+  isOpen: boolean
+  onClose: () => void
+  onSuccess?: () => void
 }
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
-  const stytch = useStytch();
-  const { loggingOff } = useContext(authContext);
+  const stytch = useStytch()
+  const { isLoggingOff } = useContext(sessionContext)
   // Authentication states
-  const [methodId, setMethodId] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showCodeInput, setShowCodeInput] = useState(false);
-  const [rememberDevice, setRememberDevice] = useState(true);
+  const [methodId, setMethodId] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [code, setCode] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showCodeInput, setShowCodeInput] = useState(false)
+  const [rememberDevice, setRememberDevice] = useState(true)
 
   // Reset form state when closing modal
   const handleClose = useCallback(() => {
     // Reset all state
-    setMethodId(null);
-    setEmail("");
-    setPhoneNumber("");
-    setCode("");
-    setError(null);
-    setShowCodeInput(false);
-    setIsLoading(false);
+    setMethodId(null)
+    setEmail('')
+    setPhoneNumber('')
+    setCode('')
+    setError(null)
+    setShowCodeInput(false)
+    setIsLoading(false)
 
     // Call the parent's onClose
-    onClose();
-  }, [onClose]);
+    onClose()
+  }, [onClose])
 
   // Handle sending email OTP
   const handleSendEmailOTP = async () => {
-    if (!email || !email.includes("@")) {
-      setError("Please enter a valid email address");
-      return;
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
       const response = await stytch.otps.email.loginOrCreate(email, {
         expiration_minutes: 10,
-      });
+      })
 
-      setMethodId(response.method_id);
-      setShowCodeInput(true);
-      setError(null);
+      setMethodId(response.method_id)
+      setShowCodeInput(true)
+      setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send email OTP");
-      console.error("Error sending email OTP:", err);
+      setError(err instanceof Error ? err.message : 'Failed to send email OTP')
+      console.error('Error sending email OTP:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Handle sending SMS OTP
   const handleSendSmsOTP = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
-      setError("Please enter a valid phone number");
-      return;
+      setError('Please enter a valid phone number')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const formattedPhone = phoneNumber.startsWith("+")
+      const formattedPhone = phoneNumber.startsWith('+')
         ? phoneNumber
-        : `+1${phoneNumber.replace(/[^0-9]/g, "")}`;
+        : `+1${phoneNumber.replace(/[^0-9]/g, '')}`
 
       const response = await stytch.otps.sms.loginOrCreate(formattedPhone, {
         expiration_minutes: 10,
-      });
+      })
 
-      setMethodId(response.method_id);
-      setShowCodeInput(true);
-      setError(null);
+      setMethodId(response.method_id)
+      setShowCodeInput(true)
+      setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send SMS OTP");
-      console.error("Error sending SMS OTP:", err);
+      setError(err instanceof Error ? err.message : 'Failed to send SMS OTP')
+      console.error('Error sending SMS OTP:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleEnter = useCallback((callback: () => void) => {
     return (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        callback();
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        callback()
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Handle verifying OTP code
   const handleVerifyOTP = useCallback(async () => {
     if (!code || !methodId) {
-      setError("Please enter the verification code");
-      return;
+      setError('Please enter the verification code')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
       await stytch.otps.authenticate(code, methodId, {
         session_duration_minutes: 60,
-      });
+      })
 
       // Authentication successful
-      setError(null);
+      setError(null)
 
       // Call onSuccess if provided
       if (onSuccess) {
-        onSuccess();
+        onSuccess()
       }
 
       // Close the modal
-      handleClose();
+      handleClose()
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Invalid verification code"
-      );
-      console.error("Error verifying OTP:", err);
+      setError(err instanceof Error ? err.message : 'Invalid verification code')
+      console.error('Error verifying OTP:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [code, methodId, onSuccess, stytch.otps, handleClose]);
+  }, [code, methodId, onSuccess, stytch.otps, handleClose])
 
   // Reset form to try a different method
   const handleBack = useCallback(() => {
-    setShowCodeInput(false);
-    setMethodId(null);
-    setCode("");
-    setError(null);
-  }, []);
+    setShowCodeInput(false)
+    setMethodId(null)
+    setCode('')
+    setError(null)
+  }, [])
 
   return (
-    <Modal isOpen={isOpen && !loggingOff} onClose={handleClose} title="Sign In">
+    <Modal
+      isOpen={isOpen && !isLoggingOff}
+      onClose={handleClose}
+      title="Sign In"
+    >
       <div className="mt-4 space-y-6">
         {error && (
           <Alert
@@ -187,7 +189,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 onClick={handleSendEmailOTP}
                 disabled={isLoading}
               >
-                {isLoading ? "Sending..." : "Send verification code"}
+                {isLoading ? 'Sending...' : 'Send verification code'}
               </Button>
             </TabsContent>
 
@@ -207,7 +209,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 onClick={handleSendSmsOTP}
                 disabled={isLoading}
               >
-                {isLoading ? "Sending..." : "Send verification code"}
+                {isLoading ? 'Sending...' : 'Send verification code'}
               </Button>
             </TabsContent>
           </Tabs>
@@ -254,7 +256,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 disabled={isLoading}
                 className="flex-1"
               >
-                {isLoading ? "Verifying..." : "Verify code"}
+                {isLoading ? 'Verifying...' : 'Verify code'}
               </Button>
             </div>
           </div>
@@ -265,5 +267,5 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         </p>
       </div>
     </Modal>
-  );
-};
+  )
+}

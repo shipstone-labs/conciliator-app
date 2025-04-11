@@ -1,26 +1,26 @@
-"use client";
+'use client'
 
-import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface LoadingProps {
-  small?: boolean;
-  className?: string;
-  showText?: boolean;
-  text?: string;
+  small?: boolean
+  className?: string
+  showText?: boolean
+  text?: string
 }
 
 const Loading = ({
   small = false,
-  className = "",
+  className = '',
   showText = true,
-  text = "Loading the Idea Database",
+  text = 'Loading the Idea Database',
 }: LoadingProps) => (
   <div
     className={cn(
-      "flex items-center justify-center",
-      small ? "h-auto" : "h-screen",
-      "bg-transparent",
+      'flex items-center justify-center',
+      small ? 'h-auto' : 'h-screen',
+      'bg-transparent',
       className
     )}
   >
@@ -31,6 +31,6 @@ const Loading = ({
       ) : null}
     </div>
   </div>
-);
+)
 
-export default Loading;
+export default Loading
