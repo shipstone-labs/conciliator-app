@@ -50,42 +50,54 @@ function HomeApp() {
               We help creators and inventors store, share, and monetize their
               ideas securely.
             </p>
+            <div className="mt-6 text-lg leading-relaxed text-white/90">
+              <p className="mb-3">SafeIdea provides three key benefits:</p>
+              <ul className="space-y-2 list-disc pl-6">
+                <li>
+                  <span className="font-medium text-primary">
+                    Secure storage
+                  </span>{' '}
+                  - Establishes proof that you had a specific idea at a
+                  particular time
+                </li>
+                <li>
+                  <span className="font-medium text-primary">
+                    Controlled sharing
+                  </span>{' '}
+                  - Creates records of who accessed your work and when
+                </li>
+                <li>
+                  <span className="font-medium text-primary">
+                    Monetization opportunities
+                  </span>{' '}
+                  - Connects you with ways to monetize your ideas on your terms
+                </li>
+              </ul>
+            </div>
             <p className="mt-6 text-lg leading-relaxed text-white/90">
-              To try it out, click on the{' '}
-              <span className="text-primary font-semibold">Add Idea</span>{' '}
-              button below to upload your invention details. This version works
-              best with text or markdown documents. If you&apos;d like to
-              explore existing ideas, click on the{' '}
-              <span className="text-secondary font-semibold">
-                Explore Ideas
-              </span>{' '}
-              button to browse what&apos;s already in the system.
-            </p>
-            <p className="mt-6 text-lg leading-relaxed text-white/90">
-              SafeIdea provides three key benefits: First, secure storage
-              establishes proof that you had a specific idea at a particular
-              time. Second, controlled sharing creates records of who accessed
-              your work and when. Third, our platform connects you with
-              opportunities to monetize your ideas on your terms.
-            </p>
-            <p className="mt-6 text-lg leading-relaxed text-white/90">
-              This version of SafeIdea was designed to leverage technology
-              within the{' '}
-              <span className="text-accent font-semibold">
+              SafeIdea leverages technology within the{' '}
+              <a
+                href="https://fil.org/ecosystem-explorer"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent font-semibold hover:underline"
+              >
                 Filecoin ecosystem
-              </span>
+              </a>
               . We&apos;re using tokens from the Filecoin system,
               Storacha&apos;s file storage tools and Lilypad&apos;s AI modules.
               We&apos;re using LIT Protocol for encryption, which is integrated
-              with Storacha. SafeIdea is an open source project, necessary if
-              you want to make sure the developers don&apos;t know about your
-              secrets.
+              with Storacha.
+              <p className="mt-4 text-lg leading-relaxed text-white/90">
+                SafeIdea is an open source project, necessary if you want to
+                make sure the developers don&apos;t know about your secrets.
+              </p>
             </p>
             <p className="mt-6 text-lg leading-relaxed text-white/90">
-              SafeIdea launches commercially in late 2025. Want early access?
-              Apply now for our beta program. We&apos;re looking for inventors
-              and creators ready to help us protect their intellectual property
-              in the digital age.
+              SafeIdea plans to launch commercially in late 2025. Want early
+              access? Apply now for our beta program. We&apos;re looking for
+              inventors and creators ready to help us protect their intellectual
+              property in the digital age.
             </p>
           </CardContent>
         </Card>

@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
-import HomeLink from './HomeLink'
 import { useStytch } from '@stytch/nextjs'
 import { cidAsURL, type IPDoc } from '@/lib/types'
 
@@ -100,7 +99,8 @@ const CardGrid = () => {
 
   return (
     <div className="w-full flex flex-col items-center p-3">
-      <HomeLink />
+      {/* HomeLink component removed - now using global header navigation instead */}
+      {/* <HomeLink /> */}
 
       {/* Card Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">

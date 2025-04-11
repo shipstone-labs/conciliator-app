@@ -21,11 +21,11 @@ export const Logo: FC<LogoProps> = ({ showText = true }) => (
     {/* Text Container - Only shown when showText is true */}
     {showText && (
       <div className="text-center mt-6">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-          SafeIdea: Securely Store, Share and Monetize Digital Assets
+        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          SafeIdea
         </h1>
         <p className="mt-2 text-base text-white/70">
-          Includes the Conciliator Agentic Discovery project
+          Securely Store, Share and Monetize Digital Assets
         </p>
       </div>
     )}
