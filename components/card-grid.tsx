@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
-import HomeLink from './HomeLink'
 import { useStytch } from '@stytch/nextjs'
 import { cidAsURL, type IPDoc } from '@/lib/types'
 
