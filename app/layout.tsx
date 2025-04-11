@@ -1,17 +1,17 @@
-import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { appConfig } from "./config.mjs";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Footer } from "@/components/Footer";
-import AuthLayout from "./authLayout";
-import NavigationHeader from "@/components/NavigationHeader";
+import type { Metadata, Viewport } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { appConfig } from './config.mjs'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { Footer } from '@/components/Footer'
+import AuthLayout from './authLayout'
+import NavigationHeader from '@/components/NavigationHeader'
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const viewport: Viewport = {
   themeColor: appConfig.themeColor,
-};
+}
 
 export const metadata: Metadata = {
   title: appConfig.appName,
@@ -21,12 +21,12 @@ export const metadata: Metadata = {
   applicationName: appConfig.appName,
   description: appConfig.description,
   other: appConfig.msapplication,
-};
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <TooltipProvider>
@@ -46,5 +46,5 @@ export default function RootLayout({
         </body>
       </html>
     </TooltipProvider>
-  );
+  )
 }

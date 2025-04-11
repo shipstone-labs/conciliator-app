@@ -27,20 +27,8 @@ const templateText = templateFile.toString();
 
 export const runtime = "nodejs";
 
-// You'll set these in your .env.local file
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "localhost:*")
-  .split(",")
-  .map((origin) => new RegExp(origin.replace(/\*/g, ".*")));
-
 export async function POST(req: NextRequest) {
   try {
-    const origin = req.headers.get("origin") || "";
-    const correctDomain = ALLOWED_ORIGINS.find((reg) => reg.test(origin));
-    if (!correctDomain) {
-      console.error("Invalid domain", origin);
-      return new Response("Unauthorized", { status: 403 });
-    }
-
     const { messages, tokenId } = (await req.json()) as {
       messages: {
         role: "user" | "assistant" | "system";
@@ -52,7 +40,9 @@ export async function POST(req: NextRequest) {
     const fs = await getFirestore();
     const doc = await fs.collection("ip").doc(tokenId).get();
     const data = doc.data() as IPDoc;
-
+    if (!data) {
+      throw new Error("Document not found");
+    }
     // const wallet = createWalletClient({
     //   account: privateKeyToAccount(
     //     (process.env.FILCOIN_PK || "") as `0x${string}`

@@ -1,103 +1,107 @@
-"use client";
+'use client'
 
-import { useEffect, useState, useCallback } from "react";
-import Loading from "@/components/Loading";
+import { useEffect, useState, useCallback } from 'react'
+import Loading from '@/components/Loading'
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip";
-import Image from "next/image";
-import Link from "next/link";
-import HomeLink from "./HomeLink";
+} from '@/components/ui/tooltip'
+import Image from 'next/image'
+import Link from 'next/link'
+import HomeLink from './HomeLink'
+import { useStytch } from '@stytch/nextjs'
 
-const itemsPerPage = 16; // 4 Cards per page
+const itemsPerPage = 16 // 4 Cards per page
 
 export type Data = {
-  name: string;
-  url: string;
-  description: string;
-  tokenId: number;
-};
+  name: string
+  url: string
+  description: string
+  tokenId: number
+}
 
 const CardGrid = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [imageWidth, setImageWidth] = useState(200); // Default width
+  const [currentPage, setCurrentPage] = useState(1)
+  const [imageWidth, setImageWidth] = useState(200) // Default width
 
-  const [items, setItems] = useState<Data[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const [loading, setLoading] = useState(false);
-
+  const [items, setItems] = useState<Data[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const stytchClient = useStytch()
   const onRetrieve = useCallback(
     async (_start: number, limit: number) => {
-      let start = _start;
+      let start = _start
       if (start < items.length) {
-        start = items.length;
+        start = items.length
       }
-      const response = await fetch("/api/list", {
-        method: "POST",
+      const response = await fetch('/api/list', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${
+            stytchClient?.session?.getTokens?.()?.session_jwt
+          }`,
         },
         body: JSON.stringify({
           start,
           limit,
         }),
-      });
+      })
       if (!response.ok) {
-        console.log(await response.text());
-        throw new Error("Failed to retrieve items");
+        console.log(await response.text())
+        throw new Error('Failed to retrieve items')
       }
-      const data = (await response.json()) as Data[];
-      setItems([...items, ...data]);
-      setLoaded(true);
+      const data = (await response.json()) as Data[]
+      setItems([...items, ...data])
+      setLoaded(true)
     },
-    [items]
-  );
+    [items, stytchClient?.session.getTokens]
+  )
 
   useEffect(() => {
     if (!loading) {
-      setLoading(true);
-      onRetrieve(0, 10);
+      setLoading(true)
+      onRetrieve(0, 10)
     }
-  }, [onRetrieve, loading]);
+  }, [onRetrieve, loading])
 
   // Responsive image size calculation
   useEffect(() => {
     const updateImageWidth = () => {
-      const screenWidth = window.innerWidth;
+      const screenWidth = window.innerWidth
 
       if (screenWidth < 640) {
-        setImageWidth(150); // Mobile
+        setImageWidth(150) // Mobile
       } else if (screenWidth < 1024) {
-        setImageWidth(180); // Tablet
+        setImageWidth(180) // Tablet
       } else {
-        setImageWidth(250); // Desktop
+        setImageWidth(250) // Desktop
       }
-    };
+    }
 
-    updateImageWidth(); // Set initial width
-    window.addEventListener("resize", updateImageWidth);
+    updateImageWidth() // Set initial width
+    window.addEventListener('resize', updateImageWidth)
 
-    return () => window.removeEventListener("resize", updateImageWidth);
-  }, []);
-  const totalPages = Math.ceil(items.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage);
+    return () => window.removeEventListener('resize', updateImageWidth)
+  }, [])
+  const totalPages = Math.ceil(items.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage)
 
   const goToPage = (page: number) => {
     if (page > totalPages) {
-      onRetrieve(items.length, itemsPerPage);
+      onRetrieve(items.length, itemsPerPage)
     }
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      setCurrentPage(page)
     }
-  };
+  }
 
   if (!loaded) {
-    return <Loading />;
+    return <Loading />
   }
 
   return (
@@ -130,9 +134,9 @@ const CardGrid = () => {
               <Image
                 src={`${item.url.replace(
                   /ipfs:\/\//,
-                  "/api/download/"
+                  '/api/download/'
                 )}?img-width=${imageWidth}&img-dpr=${
-                  typeof window !== "undefined"
+                  typeof window !== 'undefined'
                     ? window.devicePixelRatio || 1
                     : 1
                 }`}
@@ -192,8 +196,8 @@ const CardGrid = () => {
             onClick={() => goToPage(i + 1)}
             className={`px-4 py-2 h-11 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all ${
               currentPage === i + 1
-                ? "bg-primary text-black font-medium"
-                : "bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70"
+                ? 'bg-primary text-black font-medium'
+                : 'bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70'
             }`}
           >
             {i + 1}
@@ -209,7 +213,7 @@ const CardGrid = () => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CardGrid;
+export default CardGrid

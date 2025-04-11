@@ -1,19 +1,19 @@
-import resolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import json from "@rollup/plugin-json";
-import replace from "@rollup/plugin-replace";
-import virtual from '@rollup/plugin-virtual';
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import replace from '@rollup/plugin-replace'
+import virtual from '@rollup/plugin-virtual'
 
 // Create a global window shim
 const globals = `
 const window = globalThis;
-`;
+`
 
 export default {
-  input: "./dist/index.js",
+  input: './dist/index.js',
   output: {
-    file: "./dist/index.js",
-    format: "esm",
+    file: './dist/index.js',
+    format: 'esm',
     sourcemap: false, // Explicitly disable source maps to avoid conflicts with webpack
     // Don't preserve modules - bundle everything
     preserveModules: false,
@@ -23,15 +23,15 @@ export default {
     generatedCode: {
       constBindings: true,
       arrowFunctions: true,
-      objectShorthand: true
-    }
+      objectShorthand: true,
+    },
   },
   plugins: [
     // Add window global shim at the beginning of the bundle
     {
       name: 'globals',
       banner() {
-        return globals;
+        return globals
       },
     },
     // Stub out modules that shouldn't be included in the worker bundle
@@ -54,9 +54,9 @@ export default {
     }),
     json(),
     replace({
-      "process.env.NODE_ENV": JSON.stringify("production"),
-      "global.window": "globalThis",
-      "typeof window": "typeof globalThis",
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      'global.window': 'globalThis',
+      'typeof window': 'typeof globalThis',
       preventAssignment: true,
     }),
     // Uncomment to enable minification
@@ -64,11 +64,11 @@ export default {
   ],
   onwarn(warning, warn) {
     // Suppress circular dependency warnings
-    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    if (warning.code === 'CIRCULAR_DEPENDENCY') return
     // Suppress this is undefined warnings (common in browser code)
-    if (warning.code === "THIS_IS_UNDEFINED") return;
-    warn(warning);
+    if (warning.code === 'THIS_IS_UNDEFINED') return
+    warn(warning)
   },
   // We don't want ANY externals - everything should be bundled
   external: [],
-};
+}

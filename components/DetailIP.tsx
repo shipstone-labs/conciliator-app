@@ -1,30 +1,30 @@
-"use client";
+'use client'
 
-import type { MouseEvent } from "react";
+import type { MouseEvent } from 'react'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
-import Loading from "./Loading";
-import { useIP } from "@/hooks/useIP";
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { ArrowRight } from 'lucide-react'
+import Loading from './Loading'
+import { useIP } from '@/hooks/useIP'
 
 const DetailIP = ({
   tokenId,
   onNewIP,
 }: {
-  tokenId: string;
-  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void;
+  tokenId: string
+  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
-  const router = useRouter();
+  const router = useRouter()
 
-  const ideaData = useIP(tokenId);
+  const ideaData = useIP(tokenId)
 
   // For now, use placeholder data
   // const ideaData = {
@@ -39,11 +39,11 @@ const DetailIP = ({
 
   // Function to navigate to the discovery page
   const goToDiscovery = () => {
-    router.push(`/discovery/${tokenId}`);
-  };
+    router.push(`/discovery/${tokenId}`)
+  }
 
   if (!ideaData) {
-    return <Loading />;
+    return <Loading />
   }
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
@@ -60,7 +60,7 @@ const DetailIP = ({
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
           <CardHeader className="pb-4 border-b border-white/10">
             <CardTitle className="text-2xl font-bold text-primary">
-              {ideaData.name || "Unknown Title"}
+              {ideaData.name || 'Unknown Title'}
             </CardTitle>
             <div className="flex flex-wrap gap-2 mt-3">
               {ideaData.tags?.map((tag) => (
@@ -90,7 +90,7 @@ const DetailIP = ({
                   Created On
                 </h3>
                 <p className="text-white/90">
-                  {ideaData.createdAt?.toLocaleDateString()}
+                  {ideaData.createdAt?.toLocaleDateString?.() || 'Unknown Date'}
                 </p>
               </div>
               <div>
@@ -146,7 +146,7 @@ const DetailIP = ({
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DetailIP;
+export default DetailIP

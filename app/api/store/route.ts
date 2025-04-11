@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest } from 'next/server'
 import {
   ALLOWED_ORIGINS,
   // abi,
@@ -8,37 +8,37 @@ import {
   // getModel,
   // imageAI,
   // pinata,
-} from "../utils";
+} from '../utils'
 // import { createWalletClient, decodeEventLog, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount } from 'viem/accounts'
 // import { filecoinCalibration } from "viem/chains";
 // import { waitForTransactionReceipt } from "viem/actions";
-import { createAsAgent } from "web-storage-wrapper";
+import { createAsAgent } from 'web-storage-wrapper'
 import {
   // createLitClient,
   // LIT_ABILITY,
   LIT_NETWORK,
   // LitAccessControlConditionResource,
   // LitActionResource,
-} from "lit-wrapper";
-import { getUser } from "../stytch";
-import { getFirestore } from "../firebase";
-import { fetch } from "undici";
-import type { IPDoc } from "@/lib/types";
+} from 'lit-wrapper'
+import { getUser } from '../stytch'
+import { getFirestore } from '../firebase'
+import { fetch } from 'undici'
+import type { IPDoc } from '@/lib/types'
 
-export const runtime = "nodejs";
+export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getUser(req);
-    const origin = req.headers.get("origin") || req.headers.get("host") || "";
-    const correctDomain = ALLOWED_ORIGINS.find((reg) => reg.test(origin));
+    const user = await getUser(req)
+    const origin = req.headers.get('origin') || req.headers.get('host') || ''
+    const correctDomain = ALLOWED_ORIGINS.find((reg) => reg.test(origin))
     if (!correctDomain) {
-      console.error("Invalid domain", origin);
-      return new Response("Unauthorized", { status: 403 });
+      console.error('Invalid domain', origin)
+      return new Response('Unauthorized', { status: 403 })
     }
 
-    const body = await req.json();
+    const body = await req.json()
     // const { name: _name, content, description, encrypted } = body;
     const {
       name: _name,
@@ -48,12 +48,12 @@ export async function POST(req: NextRequest) {
       creator,
       category,
       tags,
-    } = body;
+    } = body
     // const name = _name || "Untitled";
     const account = privateKeyToAccount(
-      (process.env.FILCOIN_PK || "") as `0x${string}`
-    );
-    console.log("account", account.address);
+      (process.env.FILCOIN_PK || '') as `0x${string}`
+    )
+    console.log('account', account.address)
     // const litClient = await createLitClient({
     //   litNetwork: LIT_NETWORK.Datil,
     //   debug: false,
@@ -90,28 +90,28 @@ export async function POST(req: NextRequest) {
     //   },
     // ]);
     console.log(
-      "encrypted",
+      'encrypted',
       Object.keys(encrypted),
       encrypted.ciphertext?.length || 0,
       LIT_NETWORK
-    );
+    )
     console.log(
-      "downSampledEncrypted",
+      'downSampledEncrypted',
       Object.keys(downSampledEncrypted),
       downSampledEncrypted.ciphertext?.length || 0,
       LIT_NETWORK
-    );
+    )
 
     const w3Client = await createAsAgent(
-      process.env.STORACHA_AGENT_KEY || "",
-      process.env.STORACHA_AGENT_PROOF || ""
-    );
+      process.env.STORACHA_AGENT_KEY || '',
+      process.env.STORACHA_AGENT_PROOF || ''
+    )
     const encryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(encrypted))],
       {
-        type: "application/json",
+        type: 'application/json',
       }
-    );
+    )
     const encryptedCid = await w3Client.uploadFile(
       // {
       //   async arrayBuffer() {
@@ -119,13 +119,13 @@ export async function POST(req: NextRequest) {
       //   },
       // } as any
       encryptedBlob
-    );
+    )
     const downSampledEncryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(encrypted))],
       {
-        type: "application/json",
+        type: 'application/json',
       }
-    );
+    )
     const downSampledEncryptedCid = await w3Client.uploadFile(
       // {
       //   async arrayBuffer() {
@@ -133,30 +133,30 @@ export async function POST(req: NextRequest) {
       //   },
       // } as any
       downSampledEncryptedBlob
-    );
+    )
     const imageCid = await imageAI.images
       .generate({
-        model: getModel("IMAGE"),
+        model: getModel('IMAGE'),
         prompt: `Generate and image which accurately represents a supposed document
     with the title \`${_name}\` and the descriptions \`${description}\`. If there are any word flagged as inappropriate,
     then just pick the closest word to it. If there is none, then pick a random word.
     I would like to always get an image, even if it's not 100% accurate.`,
-        response_format: "url",
-        size: "1024x1024",
-        quality: "standard",
+        response_format: 'url',
+        size: '1024x1024',
+        quality: 'standard',
         n: 1,
       })
       .then(async (response) => {
-        const { url } = response.data[0];
+        const { url } = response.data[0]
         if (url) {
-          const blob = await fetch(url).then((res) => res.arrayBuffer());
-          return await w3Client.uploadFile(new Blob([blob]));
+          const blob = await fetch(url).then((res) => res.arrayBuffer())
+          return await w3Client.uploadFile(new Blob([blob]))
         }
       })
       .catch((error) => {
-        console.error("Errornect generating image:", error);
-      });
-    const firestore = await getFirestore();
+        console.error('Errornect generating image:', error)
+      })
+    const firestore = await getFirestore()
     const data: IPDoc = {
       ...(imageCid
         ? {
@@ -164,11 +164,11 @@ export async function POST(req: NextRequest) {
               cid: imageCid?.toString(),
               width: 1024,
               height: 1024,
-              mimeType: "image/png",
+              mimeType: 'image/png',
             },
           }
         : {}),
-      tokenId: "",
+      tokenId: '',
       encrypted: {
         cid: encryptedCid.toString(),
         acl: encrypted.unifiedAccessControlConditions,
@@ -187,12 +187,12 @@ export async function POST(req: NextRequest) {
         acl: downSampledEncrypted.unifiedAccessControlConditions,
         hash: downSampledEncrypted.dataToEncryptHash,
       },
-    };
-    const doc = await firestore.collection("ip").add(data);
+    }
+    const doc = await firestore.collection('ip').add(data)
     doc.update({
       tokenId: doc.id, // By default we just have tokenIds and id the same.
-    });
-    console.log("doc", doc.id, doc.path);
+    })
+    console.log('doc', doc.id, doc.path)
 
     // const _decrypted = await litClient.decrypt({
     //   accessControlConditions: encrypted.unifiedAccessControlConditions,
@@ -377,13 +377,13 @@ export async function POST(req: NextRequest) {
     //       headers: { "Content-Type": "application/json" },
     //     });
     return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+    console.error(error)
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

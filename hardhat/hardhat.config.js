@@ -1,11 +1,11 @@
-require("@nomiclabs/hardhat-ethers");
-require("@nomiclabs/hardhat-waffle");
-require("@nomiclabs/hardhat-etherscan");
+require('@nomiclabs/hardhat-ethers')
+require('@nomiclabs/hardhat-waffle')
+require('@nomiclabs/hardhat-etherscan')
 
-require("dotenv").config(); // Load environment variables from .env
+require('dotenv').config() // Load environment variables from .env
 
 module.exports = {
-  solidity: "0.8.20", // Specify the Solidity compiler version
+  solidity: '0.8.20', // Specify the Solidity compiler version
   optimize: {
     enabled: true,
     runs: 200,
@@ -16,7 +16,7 @@ module.exports = {
 
     // Filecoin Hyperspace testnet
     hyperspace: {
-      url: "https://filecoin-calibration.chainup.net/rpc/v1", // RPC endpoint for Hyperspace
+      url: 'https://filecoin-calibration.chainup.net/rpc/v1', // RPC endpoint for Hyperspace
       chainId: 314159, // Filecoin Hyperspace network chain ID
       accounts: [process.env.PRIVATE_KEY], // Use your wallet private key from .env
     },
@@ -25,7 +25,7 @@ module.exports = {
     mainnet: {
       url:
         process.env.MAINNET_RPC_URL ||
-        "https://mainnet.infura.io/v3/YOUR_INFURA_KEY",
+        'https://mainnet.infura.io/v3/YOUR_INFURA_KEY',
       chainId: 1,
       accounts: [process.env.PRIVATE_KEY],
     },
@@ -34,7 +34,7 @@ module.exports = {
     goerli: {
       url:
         process.env.GOERLI_RPC_URL ||
-        "https://goerli.infura.io/v3/YOUR_INFURA_KEY",
+        'https://goerli.infura.io/v3/YOUR_INFURA_KEY',
       chainId: 5,
       accounts: [process.env.PRIVATE_KEY],
     },
@@ -42,11 +42,11 @@ module.exports = {
   etherscan: {
     customChains: [
       {
-        network: "hyperspace",
+        network: 'hyperspace',
         chainId: 314159,
         urls: {
-          apiURL: "https://calibration.filfox.info/api", // API endpoint for Filfox Calibration Explorer
-          browserURL: "https://calibration.filfox.info", // Explorer URL
+          apiURL: 'https://calibration.filfox.info/api', // API endpoint for Filfox Calibration Explorer
+          browserURL: 'https://calibration.filfox.info', // Explorer URL
         },
       },
     ],
@@ -54,4 +54,4 @@ module.exports = {
       hyperspace: process.env.HYPERSPACE_KEY, // For verifying contracts (supports Filecoin block explorers if applicable)
     },
   },
-};
+}

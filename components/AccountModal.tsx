@@ -1,79 +1,80 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { Modal } from "@/components/ui/modal";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useStytchUser } from "@stytch/nextjs";
+import { useState, useEffect } from 'react'
+import { Modal } from '@/components/ui/modal'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useStytchUser } from '@stytch/nextjs'
 
 interface AccountModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
-  const { user } = useStytchUser();
-  const [displayName, setDisplayName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const { user } = useStytchUser()
+  const [displayName, setDisplayName] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   // Load user data when modal opens
   useEffect(() => {
     if (isOpen && user) {
       // For now, we're getting the display name from local storage
       // In a production app, this would come from a database
-      const savedName = localStorage.getItem(`user_displayname_${user.user_id}`) || "";
-      setDisplayName(savedName);
+      const savedName =
+        localStorage.getItem(`user_displayname_${user.user_id}`) || ''
+      setDisplayName(savedName)
     }
-  }, [isOpen, user]);
+  }, [isOpen, user])
 
   // Identify the primary contact method (email or phone)
   const getUserContactInfo = () => {
-    if (!user) return "Not signed in";
-    
+    if (!user) return 'Not signed in'
+
     // Check for email
     if (user.emails && user.emails.length > 0) {
-      return user.emails[0].email;
+      return user.emails[0].email
     }
-    
+
     // Check for phone
     if (user.phone_numbers && user.phone_numbers.length > 0) {
-      return user.phone_numbers[0].phone_number;
+      return user.phone_numbers[0].phone_number
     }
-    
-    return "Contact information not available";
-  };
+
+    return 'Contact information not available'
+  }
 
   // Handle saving changes
   const handleSave = async () => {
     if (!user) {
-      setError("User not authenticated");
-      return;
+      setError('User not authenticated')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
+    setIsLoading(true)
+    setError(null)
+    setSuccess(false)
 
     try {
       // Save display name to local storage for demo purposes
       // In a production app, this would be saved to a database
-      localStorage.setItem(`user_displayname_${user.user_id}`, displayName);
-      
+      localStorage.setItem(`user_displayname_${user.user_id}`, displayName)
+
       // Show success message briefly
-      setSuccess(true);
+      setSuccess(true)
       setTimeout(() => {
-        onClose();
-      }, 1500);
+        onClose()
+      }, 1500)
     } catch (err) {
-      setError("Failed to save changes");
-      console.error("Error saving user data:", err);
+      setError('Failed to save changes')
+      console.error('Error saving user data:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Account Settings">
@@ -88,27 +89,35 @@ export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
         )}
 
         {success && (
-          <Alert
-            className="bg-green-500/10 border-green-500/30"
-          >
+          <Alert className="bg-green-500/10 border-green-500/30">
             <AlertDescription>Changes saved successfully</AlertDescription>
           </Alert>
         )}
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground/90">
+          <label
+            htmlFor="contact"
+            className="text-sm font-medium text-foreground/90"
+          >
             Contact Information
           </label>
-          <div className="p-3 bg-muted/30 rounded-md border border-border/40">
+          <div
+            id="contact"
+            className="p-3 bg-muted/30 rounded-md border border-border/40"
+          >
             {getUserContactInfo()}
           </div>
           <p className="text-xs text-muted-foreground">
-            This is the contact method you used to sign in. It is not shown to other users.
+            This is the contact method you used to sign in. It is not shown to
+            other users.
           </p>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="display-name" className="text-sm font-medium text-foreground/90">
+          <label
+            htmlFor="display-name"
+            className="text-sm font-medium text-foreground/90"
+          >
             Display Name (Optional)
           </label>
           <Input
@@ -125,11 +134,7 @@ export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
         </div>
 
         <div className="flex justify-end space-x-3 pt-4">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
@@ -137,10 +142,10 @@ export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
             disabled={isLoading}
             className="bg-primary hover:bg-primary/90"
           >
-            {isLoading ? "Saving..." : "Save"}
+            {isLoading ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
     </Modal>
-  );
-};
+  )
+}

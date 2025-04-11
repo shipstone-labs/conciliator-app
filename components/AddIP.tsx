@@ -1,42 +1,42 @@
-"use client";
+'use client'
 
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect } from 'react'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
-import { Textarea } from "./ui/textarea";
-import { Modal } from "./ui/modal";
-import { useSession } from "@/hooks/useSession";
-import type { EncryptResponse } from "lit-wrapper";
-import { useAuth } from "@/hooks/useAuth";
-import { downsample } from "@/lib/downsample";
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Loader2 } from 'lucide-react'
+import { Textarea } from './ui/textarea'
+import { Modal } from './ui/modal'
+import { useSession } from '@/hooks/useSession'
+import type { EncryptResponse } from 'lit-wrapper'
+import { downsample } from '@/lib/downsample'
+import { useStytch } from '@stytch/nextjs'
 
 const AppIP = () => {
   // Removed user authentication check since it's handled by the main navigation
-  const [content, setContent] = useState("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
-  const [businessModel, setBusinessModel] = useState("Protected Evaluation");
-  const [evaluationPeriod, setEvaluationPeriod] = useState("one-day");
-  const [dayPrice, setDayPrice] = useState("5.00");
-  const [weekPrice, setWeekPrice] = useState("25.00");
-  const [monthPrice, setMonthPrice] = useState("90.00");
-  const [ndaConfirmed, setNdaConfirmed] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const { stytchClient } = useAuth();
+  const [content, setContent] = useState('')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
+  const [businessModel, setBusinessModel] = useState('Protected Evaluation')
+  const [evaluationPeriod, setEvaluationPeriod] = useState('one-day')
+  const [dayPrice, setDayPrice] = useState('5.00')
+  const [weekPrice, setWeekPrice] = useState('25.00')
+  const [monthPrice, setMonthPrice] = useState('90.00')
+  const [ndaConfirmed, setNdaConfirmed] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const stytchClient = useStytch()
 
   // =====================================================
   // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
@@ -47,48 +47,46 @@ const AppIP = () => {
   // 3. Remove the testTokenCounter from the dependency array
   // 4. Remove the test-specific code from handleFileSelection
   // =====================================================
-  const [testTokenCounter, setTestTokenCounter] = useState(1000);
-  const { litClient } = useSession();
+  const [testTokenCounter, setTestTokenCounter] = useState(1000)
+  const { litClient } = useSession()
 
   const handleStore = useCallback(async () => {
-    setError(null);
-    setIsLoading(true);
+    setError(null)
+    setIsLoading(true)
 
     // TESTING SHORTCUT: Check for test.md content
     // REMOVE THIS ENTIRE IF-BLOCK FOR PRODUCTION
-    if (content.includes("TEST_MODE") || name.toLowerCase().includes("test")) {
-      console.log(
-        "TEST MODE ACTIVATED - Bypassing encryption and tokenization"
-      );
+    if (content.includes('TEST_MODE') || name.toLowerCase().includes('test')) {
+      console.log('TEST MODE ACTIVATED - Bypassing encryption and tokenization')
       // Increment test token for unique test IDs
-      const testTokenId = testTokenCounter;
-      setTestTokenCounter((prev) => prev + 1);
+      const testTokenId = testTokenCounter
+      setTestTokenCounter((prev) => prev + 1)
 
       // Simulate API delay
       setTimeout(() => {
-        setIsLoading(false);
+        setIsLoading(false)
         // Redirect to details page with test token ID
-        window.location.href = `/details/${testTokenId}`;
-      }, 1000);
-      return;
+        window.location.href = `/details/${testTokenId}`
+      }, 1000)
+      return
     }
     // =====================================================
 
     // Normal production flow
     try {
       if (!litClient) {
-        throw new Error("Lit client is not initialized");
+        throw new Error('Lit client is not initialized')
       }
       const unifiedAccessControlConditions = [
         {
-          conditionType: "evmBasic",
+          conditionType: 'evmBasic',
           contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
-          standardContractType: "",
-          chain: "filecoin",
-          method: "",
-          parameters: [":userAddress"],
+          standardContractType: '',
+          chain: 'filecoin',
+          method: '',
+          parameters: [':userAddress'],
           returnValueTest: {
-            comparator: "=",
+            comparator: '=',
             value: process.env.NEXT_PUBLIC_LIT_ADDRESS,
           },
         },
@@ -104,20 +102,20 @@ const AppIP = () => {
         //     value: "0",
         //   },
         // },
-        { conditionType: "operator", operator: "or" },
+        { conditionType: 'operator', operator: 'or' },
         {
-          conditionType: "evmBasic",
-          contractAddress: "",
-          standardContractType: "timestamp",
-          chain: "filecoin",
-          method: "eth_getBlockByNumber",
-          parameters: ["latest"],
+          conditionType: 'evmBasic',
+          contractAddress: '',
+          standardContractType: 'timestamp',
+          chain: 'filecoin',
+          method: 'eth_getBlockByNumber',
+          parameters: ['latest'],
           returnValueTest: {
-            comparator: ">=",
+            comparator: '>=',
             value: Math.round((Date.now() + 10000) / 1000).toString(),
           },
         },
-      ];
+      ]
       const encrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(content),
@@ -125,10 +123,10 @@ const AppIP = () => {
         })
         .then(async (encryptedContent: EncryptResponse) => {
           if (!encryptedContent) {
-            throw new Error("Failed to encrypt content");
+            throw new Error('Failed to encrypt content')
           }
-          return encryptedContent;
-        });
+          return encryptedContent
+        })
       const downSampledEncrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(downsample(content)),
@@ -136,15 +134,15 @@ const AppIP = () => {
         })
         .then(async (encryptedContent: EncryptResponse) => {
           if (!encryptedContent) {
-            throw new Error("Failed to encrypt content");
+            throw new Error('Failed to encrypt content')
           }
-          return encryptedContent;
-        });
-      const { session_jwt } = stytchClient.session.getTokens() || {};
-      const data = await fetch("/api/store", {
-        method: "POST",
+          return encryptedContent
+        })
+      const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
+      const data = await fetch('/api/store', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${session_jwt}`,
         },
         body: JSON.stringify({
@@ -162,17 +160,17 @@ const AppIP = () => {
         }),
       }).then((res) => {
         if (!res.ok) {
-          throw new Error("Failed to store invention");
+          throw new Error('Failed to store invention')
         }
-        return res.json();
-      });
-      const { tokenId } = data;
-      window.location.href = `/details/${tokenId}`;
+        return res.json()
+      })
+      const { tokenId } = data
+      window.location.href = `/details/${tokenId}`
     } catch (err) {
-      console.error("API Key validation error:", err);
-      setError((err as { message: string }).message);
+      console.error('API Key validation error:', err)
+      setError((err as { message: string }).message)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
     // ⚠️ Remove testTokenCounter when removing test mode
   }, [
@@ -181,66 +179,66 @@ const AppIP = () => {
     name,
     testTokenCounter,
     litClient,
-    stytchClient.session,
-  ]);
+    stytchClient?.session,
+  ])
 
   const handleOpenFileDialog = useCallback(() => {
-    setIsModalOpen(true);
-  }, []);
+    setIsModalOpen(true)
+  }, [])
 
   const handleFileSelection = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+      const file = e.target.files?.[0]
+      if (!file) return
 
       // Check file size (2MB limit)
       if (file.size > 2 * 1024 * 1024) {
-        setError("File size exceeds 2MB limit");
-        return;
+        setError('File size exceeds 2MB limit')
+        return
       }
 
       // Check file type (only text and markdown)
-      if (!file.type.includes("text") && !file.name.endsWith(".md")) {
-        setError("Only text and markdown files are supported");
-        return;
+      if (!file.type.includes('text') && !file.name.endsWith('.md')) {
+        setError('Only text and markdown files are supported')
+        return
       }
 
       // =====================================================
       // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
       // This section detects test.md files and enables test mode
       // =====================================================
-      const isTestFile = file.name.toLowerCase() === "test.md";
+      const isTestFile = file.name.toLowerCase() === 'test.md'
 
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (event) => {
-        let fileContent = event.target?.result as string;
+        let fileContent = event.target?.result as string
 
         // If this is a test file, add TEST_MODE marker
         // REMOVE THIS BLOCK FOR PRODUCTION
-        if (isTestFile && !fileContent.includes("TEST_MODE")) {
-          fileContent = `TEST_MODE\n\n${fileContent}`;
-          console.log("Test file detected - Adding TEST_MODE marker");
+        if (isTestFile && !fileContent.includes('TEST_MODE')) {
+          fileContent = `TEST_MODE\n\n${fileContent}`
+          console.log('Test file detected - Adding TEST_MODE marker')
         }
 
-        setContent(fileContent);
-        setIsModalOpen(false);
+        setContent(fileContent)
+        setIsModalOpen(false)
 
         // If it's a test file, show a helpful message
         // REMOVE THIS BLOCK FOR PRODUCTION
         if (isTestFile) {
-          setError(null); // Clear any previous errors
+          setError(null) // Clear any previous errors
         }
         // =====================================================
-      };
-      reader.readAsText(file);
+      }
+      reader.readAsText(file)
     },
     []
-  );
+  )
 
   // Reset terms when content changes
   useEffect(() => {
-    setTermsAccepted(false);
-  }, []);
+    setTermsAccepted(false)
+  }, [])
 
   return (
     <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
@@ -333,7 +331,7 @@ const AppIP = () => {
                     File uploaded successfully
                   </p>
                   <Button
-                    onClick={() => setContent("")}
+                    onClick={() => setContent('')}
                     variant="ghost"
                     size="sm"
                     className="text-secondary hover:text-secondary/80 hover:bg-muted/30 rounded-xl"
@@ -420,7 +418,7 @@ const AppIP = () => {
                   Connecting to the Conciliator (this may take a minute or so)
                 </>
               ) : (
-                "View Idea Page"
+                'View Idea Page'
               )}
             </Button>
 
@@ -503,27 +501,34 @@ const AppIP = () => {
                       Evaluation Period
                     </label>
                     <div className="space-y-3">
-                      <div 
-                        className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-day" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod("one-day")}
+                      <div
+                        className={`flex items-center space-x-2 p-3 border ${
+                          evaluationPeriod === 'one-day'
+                            ? 'border-primary/50'
+                            : 'border-white/20'
+                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
+                        onClick={() => setEvaluationPeriod('one-day')}
                       >
                         <input
                           type="radio"
                           id="one-day"
                           name="evaluation-period"
                           value="one-day"
-                          checked={evaluationPeriod === "one-day"}
-                          onChange={() => setEvaluationPeriod("one-day")}
+                          checked={evaluationPeriod === 'one-day'}
+                          onChange={() => setEvaluationPeriod('one-day')}
                           className="text-primary rounded-full"
                         />
-                        <label htmlFor="one-day" className="text-white cursor-pointer flex-grow">
+                        <label
+                          htmlFor="one-day"
+                          className="text-white cursor-pointer flex-grow"
+                        >
                           One Day
                         </label>
                         <div className="flex items-center">
                           <span className="text-white/70 mr-2">$</span>
-                          <input 
-                            type="number" 
-                            min="0" 
+                          <input
+                            type="number"
+                            min="0"
                             step="0.01"
                             value={dayPrice}
                             onChange={(e) => setDayPrice(e.target.value)}
@@ -532,28 +537,35 @@ const AppIP = () => {
                           />
                         </div>
                       </div>
-                      
-                      <div 
-                        className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-week" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod("one-week")}
+
+                      <div
+                        className={`flex items-center space-x-2 p-3 border ${
+                          evaluationPeriod === 'one-week'
+                            ? 'border-primary/50'
+                            : 'border-white/20'
+                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
+                        onClick={() => setEvaluationPeriod('one-week')}
                       >
                         <input
                           type="radio"
                           id="one-week"
                           name="evaluation-period"
                           value="one-week"
-                          checked={evaluationPeriod === "one-week"}
-                          onChange={() => setEvaluationPeriod("one-week")}
+                          checked={evaluationPeriod === 'one-week'}
+                          onChange={() => setEvaluationPeriod('one-week')}
                           className="text-primary rounded-full"
                         />
-                        <label htmlFor="one-week" className="text-white cursor-pointer flex-grow">
+                        <label
+                          htmlFor="one-week"
+                          className="text-white cursor-pointer flex-grow"
+                        >
                           One Week
                         </label>
                         <div className="flex items-center">
                           <span className="text-white/70 mr-2">$</span>
-                          <input 
-                            type="number" 
-                            min="0" 
+                          <input
+                            type="number"
+                            min="0"
                             step="0.01"
                             value={weekPrice}
                             onChange={(e) => setWeekPrice(e.target.value)}
@@ -562,28 +574,35 @@ const AppIP = () => {
                           />
                         </div>
                       </div>
-                      
-                      <div 
-                        className={`flex items-center space-x-2 p-3 border ${evaluationPeriod === "one-month" ? "border-primary/50" : "border-white/20"} bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod("one-month")}
+
+                      <div
+                        className={`flex items-center space-x-2 p-3 border ${
+                          evaluationPeriod === 'one-month'
+                            ? 'border-primary/50'
+                            : 'border-white/20'
+                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
+                        onClick={() => setEvaluationPeriod('one-month')}
                       >
                         <input
                           type="radio"
                           id="one-month"
                           name="evaluation-period"
                           value="one-month"
-                          checked={evaluationPeriod === "one-month"}
-                          onChange={() => setEvaluationPeriod("one-month")}
+                          checked={evaluationPeriod === 'one-month'}
+                          onChange={() => setEvaluationPeriod('one-month')}
                           className="text-primary rounded-full"
                         />
-                        <label htmlFor="one-month" className="text-white cursor-pointer flex-grow">
+                        <label
+                          htmlFor="one-month"
+                          className="text-white cursor-pointer flex-grow"
+                        >
                           One Month
                         </label>
                         <div className="flex items-center">
                           <span className="text-white/70 mr-2">$</span>
-                          <input 
-                            type="number" 
-                            min="0" 
+                          <input
+                            type="number"
+                            min="0"
                             step="0.01"
                             value={monthPrice}
                             onChange={(e) => setMonthPrice(e.target.value)}
@@ -608,8 +627,12 @@ const AppIP = () => {
                       onChange={() => setNdaConfirmed(!ndaConfirmed)}
                       className="rounded border-white/20 bg-muted/30 text-primary"
                     />
-                    <label htmlFor="nda-confirmed" className="text-white/90 cursor-pointer">
-                      I understand that transactions will require a signed NDA with purchaser
+                    <label
+                      htmlFor="nda-confirmed"
+                      className="text-white/90 cursor-pointer"
+                    >
+                      I understand that transactions will require a signed NDA
+                      with purchaser
                     </label>
                   </div>
                 </div>
@@ -627,12 +650,12 @@ const AppIP = () => {
                   <Button
                     onClick={() => {
                       if (!ndaConfirmed) {
-                        alert("Please confirm you have a signed NDA in place");
-                        return;
+                        alert('Please confirm you have a signed NDA in place')
+                        return
                       }
                       // Save terms logic would go here
-                      setTermsAccepted(true);
-                      setIsTermsModalOpen(false);
+                      setTermsAccepted(true)
+                      setIsTermsModalOpen(false)
                     }}
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
                     disabled={!ndaConfirmed}
@@ -646,7 +669,7 @@ const AppIP = () => {
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AppIP;
+export default AppIP

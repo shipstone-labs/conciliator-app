@@ -1,100 +1,107 @@
-"use client";
+'use client'
 
 import {
   createContext,
   type PropsWithChildren,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
-} from "react";
-import { AuthModal } from "./AuthModal";
-import { authContext } from "@/app/authLayout";
-import { useStytchUser } from "@stytch/nextjs";
-import Loading from "./Loading";
-import type { LitNodeClient } from "lit-wrapper";
-import { publicKeyToAddress } from "viem/utils";
+} from 'react'
+import { AuthModal } from './AuthModal'
+import { useStytch, useStytchUser } from '@stytch/nextjs'
+import Loading from './Loading'
+import type { LitNodeClient } from 'lit-wrapper'
+import { publicKeyToAddress } from 'viem/utils'
 import {
   getAuth,
   signInWithCustomToken,
   type UserCredential,
-} from "firebase/auth";
+} from 'firebase/auth'
 
 export type Session = {
-  litClient?: LitNodeClient;
+  litClient?: LitNodeClient
   sessionSigs?: {
-    authMethod: string;
-    pkpPublicKey: string;
-    address: `0x${string}`;
-    sessionSigs: unknown;
-  };
-  fbUser?: UserCredential;
-  stytchUser?: ReturnType<typeof useStytchUser>["user"];
-  isLoggedIn?: boolean;
-};
+    authMethod: string
+    pkpPublicKey: string
+    address: `0x${string}`
+    sessionSigs: unknown
+  }
+  fbUser?: UserCredential
+  isLoggedIn: boolean
+  isLoggingOff: boolean
+  setLoggingOff: (loggingOff: boolean) => void
+}
 
-export const sessionContext = createContext<Session>({});
+export const sessionContext = createContext<Session>({
+  setLoggingOff: () => {},
+  isLoggedIn: false,
+  isLoggingOff: false,
+})
 export default function Authenticated({
   children,
   requireLit = false,
   requireFirebase = true,
 }: PropsWithChildren<{ requireLit?: boolean; requireFirebase?: boolean }>) {
-  const { user, isInitialized } = useStytchUser();
-  const { loggingOff, stytchClient } = useContext(authContext);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [sessionSigs, setSessionSigs] = useState<Session>({});
-  const litActive = useRef(false);
-  const firebaseActive = useRef(false);
+  const { user, isInitialized } = useStytchUser()
+  const stytchClient = useStytch()
+  const [isLoggingOff, setLoggingOff] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [sessionSigs, setSessionSigs] = useState<Session>({
+    isLoggingOff,
+    setLoggingOff,
+    isLoggedIn: false,
+  })
+  const litActive = useRef(false)
+  const firebaseActive = useRef(false)
   // Show auth modal if not authenticated and not ignored
   const amendLoggedIn = useCallback(
     (state: Session) => {
-      let isLoggedIn = true;
-      if (!state.stytchUser) {
-        isLoggedIn = false;
+      let isLoggedIn = true
+      if (!user) {
+        isLoggedIn = false
       } else if (requireLit && !state.sessionSigs) {
-        isLoggedIn = false;
+        isLoggedIn = false
       } else if (requireFirebase && !state.fbUser) {
-        isLoggedIn = false;
+        isLoggedIn = false
       }
-      return { ...state, isLoggedIn };
+      return { ...state, isLoggedIn }
     },
-    [requireLit, requireFirebase]
-  );
+    [requireLit, requireFirebase, user]
+  )
 
   useEffect(() => {
     if (isInitialized && !user) {
-      setShowAuthModal(true);
+      setShowAuthModal(true)
     }
     if (isInitialized && user) {
       setSessionSigs((state) =>
         amendLoggedIn({
           ...state,
-          stytchUser: user,
         })
-      );
+      )
       const task = async () => {
-        const litModule = await import("lit-wrapper");
+        const litModule = await import('lit-wrapper')
 
         try {
           if (requireFirebase && !firebaseActive.current) {
-            firebaseActive.current = true;
-            await fetch("/api/exchange", {
+            firebaseActive.current = true
+            await fetch('/api/exchange', {
               headers: {
                 Authorization: `Bearer ${
-                  stytchClient.session.getTokens()?.session_jwt
+                  stytchClient.session.getTokens?.()?.session_jwt
                 }`,
               },
             })
               .then((res) => {
                 if (!res.ok) {
-                  throw new Error("Failed to fetch token");
+                  throw new Error('Failed to fetch token')
                 }
-                return res.json();
+                return res.json()
               })
               .catch((error) => {
-                console.error("Error fetching token", error);
-                firebaseActive.current = false;
+                console.error('Error fetching token', error)
+                firebaseActive.current = false
               })
               .then((res) => {
                 return signInWithCustomToken(getAuth(), res.token).then(
@@ -104,23 +111,23 @@ export default function Authenticated({
                         ...state,
                         fbUser,
                       })
-                    );
-                    firebaseActive.current = true;
+                    )
+                    firebaseActive.current = true
                   }
-                );
+                )
               })
               .catch((error) => {
-                console.error(error);
-                firebaseActive.current = false;
-              });
+                console.error(error)
+                firebaseActive.current = false
+              })
           }
           if (requireLit && !litActive.current) {
-            litActive.current = true;
+            litActive.current = true
             try {
               const litClient = await litModule.createLitClient({
                 litNetwork: litModule.LIT_NETWORK.Datil,
-              });
-              litClient.connect();
+              })
+              litClient.connect()
               const { authMethod, provider } = await litModule.authenticate(
                 litClient,
                 {
@@ -129,22 +136,22 @@ export default function Authenticated({
                   accessToken: stytchClient.session.getTokens()?.session_jwt,
                   relayApiKey: process.env.NEXT_PUBLIC_LIT_RELAY_API_KEY,
                 }
-              );
+              )
               // -- setting scope for the auth method
               // <https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes>
               const options = {
                 permittedAuthMethodScopes: [
                   [litModule.AUTH_METHOD_SCOPE.SignAnything],
                 ],
-              };
-              let pkps = await provider.fetchPKPsThroughRelayer(authMethod);
+              }
+              let pkps = await provider.fetchPKPsThroughRelayer(authMethod)
               if (pkps.length <= 0) {
                 const auth = await provider.mintPKPThroughRelayer(
                   authMethod,
                   options
-                );
-                console.log("auth", auth);
-                pkps = await provider.fetchPKPsThroughRelayer(authMethod);
+                )
+                console.log('auth', auth)
+                pkps = await provider.fetchPKPsThroughRelayer(authMethod)
               }
               const sessionSigs = await litClient.getPkpSessionSigs({
                 pkpPublicKey: pkps[0].publicKey,
@@ -152,12 +159,12 @@ export default function Authenticated({
                 authMethods: [authMethod],
                 resourceAbilityRequests: [
                   {
-                    resource: new litModule.LitPKPResource("*"),
+                    resource: new litModule.LitPKPResource('*'),
                     ability: litModule.LIT_ABILITY.PKPSigning,
                   },
                 ],
                 expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
-              });
+              })
               setSessionSigs((state) =>
                 amendLoggedIn({
                   ...state,
@@ -171,34 +178,38 @@ export default function Authenticated({
                     sessionSigs,
                   },
                 })
-              );
+              )
             } catch {
-              litActive.current = false;
+              litActive.current = false
             }
           }
         } catch (initError) {
-          console.error("Error initializing Lit client:", initError);
+          console.error('Error initializing Lit client:', initError)
         }
-      };
-      task();
+      }
+      task()
     }
   }, [
     isInitialized,
     user,
-    stytchClient.session,
     requireLit,
     requireFirebase,
     amendLoggedIn,
-  ]);
+    stytchClient,
+  ])
 
   // Handle successful authentication
   const handleAuthSuccess = useCallback(() => {
-    setShowAuthModal(false);
-  }, []);
+    setShowAuthModal(false)
+  }, [])
   return (
     <>
       <sessionContext.Provider value={sessionSigs}>
-        {sessionSigs.isLoggedIn && !loggingOff ? children : <Loading />}
+        {sessionSigs.isLoggedIn && !sessionSigs.isLoggingOff ? (
+          children
+        ) : (
+          <Loading />
+        )}
       </sessionContext.Provider>
 
       {/* Authentication Modal */}
@@ -208,5 +219,5 @@ export default function Authenticated({
         onSuccess={handleAuthSuccess}
       />
     </>
-  );
+  )
 }

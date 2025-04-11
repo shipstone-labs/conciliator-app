@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "predev": "pnpm run build-wrappers",
-    "dev": "next dev | grep --color=always -v 'nextjs_original-stack-frames'",
+    "dev": "next dev",
     "prebuild": "pnpm run build-wrappers",
     "build": "next build",
     "build:plain": "next build",
@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "next lint",
     "lint:biome": "biome lint .",
-    "check": "biome check --apply .",
+    "check": "biome check .",
     "format": "biome format --write .",
     "prepages:build": "pnpm run build-wrappers",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
