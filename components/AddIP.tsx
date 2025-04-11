@@ -197,6 +197,12 @@ const AppIP = () => {
     name,
     testTokenCounter,
     litClient,
+    businessModel,
+    evaluationPeriod,
+    dayPrice,
+    weekPrice,
+    monthPrice,
+    ndaConfirmed,
     stytchClient?.session,
   ])
 
