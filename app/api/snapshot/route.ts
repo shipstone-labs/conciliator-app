@@ -1,23 +1,23 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest } from 'next/server'
 // import { abi } from "../utils";
 // import { createWalletClient, decodeEventLog, http } from "viem";
-import type { IPDoc } from "@/lib/types";
-import { getFirestore } from "../firebase";
-import { createAsAgent } from "@/packages/web-storage-wrapper/dist";
+import type { IPDoc } from '@/lib/types'
+import { getFirestore } from '../firebase'
+import { createAsAgent } from '@/packages/web-storage-wrapper/dist'
 // import { createWalletClient, http } from "viem";
 // import { privateKeyToAccount } from "viem/accounts";
 // import { filecoinCalibration } from "viem/chains";
 // import { waitForTransactionReceipt } from "viem/actions";
 
-export const runtime = "nodejs";
+export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { id, messages } = body;
-    const fs = await getFirestore();
-    const doc = await fs.collection("ip").doc(id).get();
-    const data = doc.data() as IPDoc;
+    const body = await req.json()
+    const { id, messages } = body
+    const fs = await getFirestore()
+    const doc = await fs.collection('ip').doc(id).get()
+    const data = doc.data() as IPDoc
 
     const blob = new Blob([
       new TextEncoder().encode(
@@ -27,11 +27,11 @@ export async function POST(req: NextRequest) {
           messages,
         })
       ),
-    ]);
+    ])
     const w3Client = await createAsAgent(
-      process.env.STORACHA_AGENT_KEY || "",
-      process.env.STORACHA_AGENT_PROOF || ""
-    );
+      process.env.STORACHA_AGENT_KEY || '',
+      process.env.STORACHA_AGENT_PROOF || ''
+    )
     const upload = await w3Client.uploadFile(
       // {
       //   async arrayBuffer() {
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       //   },
       // } as any
       blob
-    );
+    )
 
     // const wallet = createWalletClient({
     //   account: privateKeyToAccount(
@@ -86,13 +86,13 @@ export async function POST(req: NextRequest) {
     // }
 
     return new Response(JSON.stringify(upload.toString()), {
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+    console.error(error)
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

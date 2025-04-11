@@ -1,5 +1,5 @@
-import type { NextRequest } from "next/server";
-import { completionAI, genSession, /* abi, */ getModel } from "../utils";
+import type { NextRequest } from 'next/server'
+import { completionAI, genSession, /* abi, */ getModel } from '../utils'
 // import { call, readContract } from "viem/actions";
 // import { filecoinCalibration } from "viem/chains";
 // import {
@@ -11,37 +11,37 @@ import { completionAI, genSession, /* abi, */ getModel } from "../utils";
 // } from "viem";
 // import { privateKeyToAccount } from "viem/accounts";
 // Dynamic import for the template file
-import templateFile from "./system.hbs";
-import { getFirestore } from "../firebase";
-import { cidAsURL, type IPDoc } from "@/lib/types";
+import templateFile from './system.hbs'
+import { getFirestore } from '../firebase'
+import { cidAsURL, type IPDoc } from '@/lib/types'
 import {
   createLitClient,
   LIT_ABILITY,
   LIT_NETWORK,
   LitAccessControlConditionResource,
   LitActionResource,
-} from "lit-wrapper";
+} from 'lit-wrapper'
 // import { SignableMessage } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-const templateText = templateFile.toString();
+import { privateKeyToAccount } from 'viem/accounts'
+const templateText = templateFile.toString()
 
-export const runtime = "nodejs";
+export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
     const { messages, id } = (await req.json()) as {
       messages: {
-        role: "user" | "assistant" | "system";
-        content: string;
-      }[];
-      id: string;
-    };
+        role: 'user' | 'assistant' | 'system'
+        content: string
+      }[]
+      id: string
+    }
 
-    const fs = await getFirestore();
-    const doc = await fs.collection("ip").doc(id).get();
-    const data = doc.data() as IPDoc;
+    const fs = await getFirestore()
+    const doc = await fs.collection('ip').doc(id).get()
+    const data = doc.data() as IPDoc
     if (!data) {
-      throw new Error("Document not found");
+      throw new Error('Document not found')
     }
     // const wallet = createWalletClient({
     //   account: privateKeyToAccount(
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
           description: data.description,
           messages: [
             {
-              role: "assistant",
+              role: 'assistant',
               content: `Welcome to the ${data.name} session! I am ready to answer questions about this invention with the following description
 
 ${data.description}`,
@@ -92,92 +92,92 @@ ${data.description}`,
         }),
         {
           status: 200,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         }
-      );
+      )
     }
     const request = [
       {
-        role: "system",
-        content: "",
+        role: 'system',
+        content: '',
       },
-    ] as { role: "user" | "assistant" | "system"; content: string }[];
-    const yesItems: boolean[] = [];
+    ] as { role: 'user' | 'assistant' | 'system'; content: string }[]
+    const yesItems: boolean[] = []
     for (const message of messages) {
-      if (message.role === "assistant") {
+      if (message.role === 'assistant') {
         request.push({
           ...message,
-          content: message.content?.replace(/^(Yes|No|Stop)/i, "$1") || "",
-        });
-        if (/Stop/i.test(request.at(-1)?.content || "")) {
+          content: message.content?.replace(/^(Yes|No|Stop)/i, '$1') || '',
+        })
+        if (/Stop/i.test(request.at(-1)?.content || '')) {
           return new Response(
-            JSON.stringify({ success: false, error: "Completed" }),
+            JSON.stringify({ success: false, error: 'Completed' }),
             {
               status: 200,
-              headers: { "Content-Type": "application/json" },
+              headers: { 'Content-Type': 'application/json' },
             }
-          );
+          )
         }
-        if (/Yes/i.test(request.at(-1)?.content || "")) {
-          yesItems.push(true);
+        if (/Yes/i.test(request.at(-1)?.content || '')) {
+          yesItems.push(true)
         } else {
-          yesItems.push(false);
+          yesItems.push(false)
         }
       } else {
-        request.push(message);
+        request.push(message)
       }
     }
-    const runs: number[] = [];
-    let acc = 0;
+    const runs: number[] = []
+    let acc = 0
     for (const item of yesItems) {
       if (item) {
-        acc++;
-        continue;
+        acc++
+        continue
       }
       if (acc > 0) {
-        runs.push(acc);
+        runs.push(acc)
       }
-      acc = 0;
+      acc = 0
     }
-    const consecutiveYesCount = Math.max(...runs);
+    const consecutiveYesCount = Math.max(...runs)
     if (consecutiveYesCount < 5) {
       const account = privateKeyToAccount(
-        (process.env.FILCOIN_PK || "") as `0x${string}`
-      );
+        (process.env.FILCOIN_PK || '') as `0x${string}`
+      )
       const litClient = await createLitClient({
         litNetwork: LIT_NETWORK.Datil,
         debug: false,
-      });
-      global.document = { dispatchEvent: (_event: Event) => true } as Document;
-      await litClient.connect();
-      const url = cidAsURL(data.downSampled.cid);
+      })
+      global.document = { dispatchEvent: (_event: Event) => true } as Document
+      await litClient.connect()
+      const url = cidAsURL(data.downSampled.cid)
       const encrypted: {
-        ciphertext: string;
-        dataToEncryptHash: string;
-        unifiedAccessControlConditions: unknown;
+        ciphertext: string
+        dataToEncryptHash: string
+        unifiedAccessControlConditions: unknown
       } = url
         ? await fetch(url).then((res) => {
             if (!res.ok) {
-              throw new Error("Failed to fetch encrypted data");
+              throw new Error('Failed to fetch encrypted data')
             }
-            return res.json();
+            return res.json()
           })
-        : undefined;
+        : undefined
       if (
         data.downSampled.acl !==
         JSON.stringify(encrypted.unifiedAccessControlConditions)
       ) {
-        throw new Error("Access control conditions do not match");
+        throw new Error('Access control conditions do not match')
       }
       if (data.downSampled.hash !== encrypted.dataToEncryptHash) {
-        console.log(data.downSampled.hash, encrypted.dataToEncryptHash);
-        throw new Error("Hash does not match");
+        console.log(data.downSampled.hash, encrypted.dataToEncryptHash)
+        throw new Error('Hash does not match')
       }
       const accsInput =
         await LitAccessControlConditionResource.generateResourceString(
           JSON.parse(data.downSampled.acl),
           data.downSampled.hash
-        );
+        )
 
       // const { capacityDelegationAuthSig } =
       //   await litClient.createCapacityDelegationAuthSig({
@@ -194,56 +194,56 @@ ${data.description}`,
 
       const sessionSigs = await genSession(account, litClient, [
         {
-          resource: new LitActionResource("*"),
+          resource: new LitActionResource('*'),
           ability: LIT_ABILITY.LitActionExecution,
         },
         {
           resource: new LitAccessControlConditionResource(accsInput),
           ability: LIT_ABILITY.AccessControlConditionDecryption,
         },
-      ]);
+      ])
 
-      console.log("encrypted", {
+      console.log('encrypted', {
         ...encrypted,
         ciphertext: `${encrypted.ciphertext.slice(0, 100)}...`,
-      });
+      })
       const _decrypted = await litClient.decrypt({
         accessControlConditions: JSON.parse(data.downSampled.acl),
         ciphertext: encrypted.ciphertext,
         dataToEncryptHash: encrypted.dataToEncryptHash,
-        chain: "filecoin",
+        chain: 'filecoin',
         sessionSigs,
-      });
+      })
 
-      const content = new TextDecoder().decode(_decrypted.decryptedData);
+      const content = new TextDecoder().decode(_decrypted.decryptedData)
 
       const _data: Record<string, string> = {
         title: data.name,
         description: data.description,
         content,
         consecutiveYesCount: `${consecutiveYesCount}`,
-      };
+      }
       const _content = templateText.replace(
         /\{\{([^}]*)\}\}/g,
         (_match, name) => {
-          return _data[name.trim()] || "";
+          return _data[name.trim()] || ''
         }
-      );
-      request[0].content = _content;
+      )
+      request[0].content = _content
       const completion = await completionAI.chat.completions.create({
-        model: getModel("COMPLETION"), // Use the appropriate model
+        model: getModel('COMPLETION'), // Use the appropriate model
         messages: request,
-      });
+      })
       const answerContent = completion.choices
         .flatMap(
-          ({ message: { content = "" } = { content: "" } }) =>
-            content?.split("\n") || ""
+          ({ message: { content = '' } = { content: '' } }) =>
+            content?.split('\n') || ''
         )
-        .join("\n");
-      console.log("conciliator", consecutiveYesCount, yesItems, answerContent);
-      messages.push({ content: answerContent, role: "assistant" });
+        .join('\n')
+      console.log('conciliator', consecutiveYesCount, yesItems, answerContent)
+      messages.push({ content: answerContent, role: 'assistant' })
     } else {
-      messages.push({ content: "Stop", role: "assistant" });
+      messages.push({ content: 'Stop', role: 'assistant' })
     }
     return new Response(
       JSON.stringify({
@@ -252,23 +252,23 @@ ${data.description}`,
         description: data.description,
       }),
       {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
-    );
+    )
   } catch (error) {
-    console.error(error);
+    console.error(error)
     const { message, request_id, status, name, headers } = error as {
-      message?: string;
-      request_id?: string;
-      status?: number;
-      name?: string;
-      headers?: Record<string, unknown>;
-    };
+      message?: string
+      request_id?: string
+      status?: number
+      name?: string
+      headers?: Record<string, unknown>
+    }
     return new Response(
       JSON.stringify({
         success: false,
         error: {
-          message: message || "Internal Server Error",
+          message: message || 'Internal Server Error',
           request_id,
           status,
           name,
@@ -277,8 +277,8 @@ ${data.description}`,
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
-    );
+    )
   }
 }

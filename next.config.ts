@@ -1,16 +1,15 @@
-import type { NextConfig } from "next";
-import { resolve } from "path";
-import webpack from "webpack";
+import type { NextConfig } from 'next'
+import webpack from 'webpack'
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "w3s.link",
-        port: "",
-        pathname: "/ipfs/**",
+        protocol: 'https',
+        hostname: 'w3s.link',
+        port: '',
+        pathname: '/ipfs/**',
       },
     ],
   },
@@ -28,23 +27,23 @@ const nextConfig: NextConfig = {
         util: false,
         os: false,
         zlib: false,
-      };
+      }
 
       // Map Node.js imports to browser-compatible versions
       config.resolve.alias = {
         ...config.resolve.alias,
-        "node:fs": false,
-        "node:events": false,
-        "node:path": false,
-        "node:crypto": false,
+        'node:fs': false,
+        'node:events': false,
+        'node:path': false,
+        'node:crypto': false,
         crypto: false,
-        "node:stream": false,
-        "node:buffer": false,
-        "@walletconnect/types": false,
-        "@walletconnect/web3-provider": false,
-        "@walletconnect/core": false,
-        "@walletconnect/sign-client": false,
-      };
+        'node:stream': false,
+        'node:buffer': false,
+        '@walletconnect/types': false,
+        '@walletconnect/web3-provider': false,
+        '@walletconnect/core': false,
+        '@walletconnect/sign-client': false,
+      }
     }
 
     if (isServer) {
@@ -57,52 +56,52 @@ const nextConfig: NextConfig = {
     // Create a mapping for explicit variable replacement
     const env: Record<string, string> = {
       // Explicitly replace each environment variable
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
-    };
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    }
 
     // Also create a mapping for any other NEXT_PUBLIC_ variables
     // that might be present but not explicitly listed above
     Object.keys(process.env).forEach((key) => {
-      if (key.startsWith("NEXT_PUBLIC_") && !env[`process.env.${key}`]) {
-        env[`process.env.${key}`] = JSON.stringify(process.env[key]);
+      if (key.startsWith('NEXT_PUBLIC_') && !env[`process.env.${key}`]) {
+        env[`process.env.${key}`] = JSON.stringify(process.env[key])
       }
-    });
+    })
 
     // CRITICAL: Do NOT map "process.env" as a whole object - this can break variable replacement
-    config.plugins.push(new webpack.DefinePlugin(env));
+    config.plugins.push(new webpack.DefinePlugin(env))
 
     // Add support for Handlebars templates
     config.module.rules.push({
       test: /\.hbs$/,
       resourceQuery: { not: [/raw/] },
-      use: "raw-loader",
-    });
+      use: 'raw-loader',
+    })
 
     // Add support for Handlebars templates with ?raw query
     config.module.rules.push({
       test: /\.hbs$/,
       resourceQuery: /raw/,
-      type: "asset/source",
-    });
+      type: 'asset/source',
+    })
 
-    return config;
+    return config
   },
   // Skip module checking for wrapper packages and their external dependencies
   serverExternalPackages: [
     // Lit Protocol
-    "lit-wrapper",
-    "@lit-protocol/constants",
-    "@lit-protocol/lit-node-client",
+    'lit-wrapper',
+    '@lit-protocol/constants',
+    '@lit-protocol/lit-node-client',
     // Web3 Storage
-    "web-storage-wrapper",
-    "@web3-storage/w3up-client",
-    "@noble/ed25519",
-    "multiformats",
+    'web-storage-wrapper',
+    '@web3-storage/w3up-client',
+    '@noble/ed25519',
+    'multiformats',
     // Lilypad
-    "lilypad-wrapper",
+    'lilypad-wrapper',
   ],
   // Configure React runtime
   reactStrictMode: true,
-};
+}
 
-export default nextConfig;
+export default nextConfig

@@ -61,6 +61,7 @@
       "enabled": true
     },
     "formatter": {
+      "enabled": true,
       "quoteStyle": "single",
       "semicolons": "asNeeded",
       "trailingCommas": "es5"

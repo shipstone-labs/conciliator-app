@@ -393,14 +393,7 @@ export default function ChatUI({
       cycleRunning.current = false
       setCycleInProgress(false)
     }
-  }, [
-    hasStop,
-    messages,
-    onSend,
-    isStopping,
-    doc,
-    stytchClient?.session?.getTokens,
-  ])
+  }, [hasStop, messages, onSend, isStopping, doc, stytchClient?.session])
 
   // Add a mounted ref to track component lifecycle
   const isMounted = useRef(true)

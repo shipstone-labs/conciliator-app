@@ -63,7 +63,6 @@ ENV STYTCH_ENV=test
 # ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN corepack enable pnpm && pnpm run build:plain
-RUN rm notthere
 
 # Production image, copy all the files and run next
 FROM base AS runner

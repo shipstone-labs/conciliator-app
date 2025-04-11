@@ -70,7 +70,7 @@ const QuestionIP = ({
     } else {
       setAppState(AppStates.START)
     }
-  }, [docId, messages, stytchClient?.session?.getTokens])
+  }, [docId, messages, stytchClient?.session])
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
@@ -107,7 +107,7 @@ const QuestionIP = ({
         setIsLoading(false)
       }
     },
-    [messages, docId, stytchClient?.session?.getTokens]
+    [messages, docId, stytchClient?.session]
   )
 
   const handleSave = useCallback(async () => {
