@@ -37,51 +37,63 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Fetch idea details
-    // For testing/development, we'll return mock data for any tokenId
-    // In production, this would be replaced with actual database queries
-    
-    // TEMPORARY: Mock data for development purposes
-    // This simulates a database lookup without requiring the actual database to be set up
-    const mockIdeaData = {
-      name: `Idea #${tokenId}`,
-      description: "This is a detailed description of the idea. It would typically include information about the concept, potential applications, and other relevant details that the creator wants to share.",
-      createdAt: new Date().toLocaleDateString(),
-      creator: "Current User",
-      category: "Intellectual Property",
-      tags: ["Innovation", "Technology", "IP"]
-    };
-    
-    return new Response(JSON.stringify(mockIdeaData), {
-      headers: { "Content-Type": "application/json" },
-    });
+    // Fetch idea details from Firestore
+    try {
+      const db = await getFirestore();
+      const ideaRef = db.collection("ideas").doc(tokenId.toString());
+      const ideaDoc = await ideaRef.get();
 
-    /* 
-    // PRODUCTION CODE - Uncomment when database is ready
-    const db = await getFirestore();
-    const ideaRef = db.collection("ideas").doc(tokenId.toString());
-    const ideaDoc = await ideaRef.get();
+      if (!ideaDoc.exists) {
+        console.log(`Idea not found for tokenId: ${tokenId}, using fallback data`);
+        
+        // Fallback for development/testing
+        // For tokens that were created before we implemented Firestore storage
+        const mockIdeaData = {
+          name: `Idea #${tokenId}`,
+          description: "This is a development placeholder for an idea that was created before database integration.",
+          createdAt: new Date().toLocaleDateString(),
+          creator: "Current User",
+          category: "Intellectual Property",
+          tags: ["Innovation", "Technology", "IP"]
+        };
+        
+        return new Response(JSON.stringify(mockIdeaData), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
 
-    if (!ideaDoc.exists) {
-      return new Response(JSON.stringify({ error: "Idea not found" }), {
-        status: 404,
+      // Return idea data from Firestore
+      const ideaData = ideaDoc.data();
+      console.log(`Retrieved idea data for tokenId: ${tokenId}`);
+      
+      // Format the response with defined fallbacks for any missing fields
+      return new Response(JSON.stringify({
+        name: ideaData.name || "Untitled Idea",
+        description: ideaData.description || "No description provided",
+        createdAt: ideaData.createdAt || new Date().toLocaleDateString(),
+        creator: ideaData.creator || "Anonymous",
+        category: ideaData.category || "Intellectual Property",
+        tags: ideaData.tags || ["IP"],
+        cid: ideaData.cid || null
+      }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (dbError) {
+      console.error("Database error while fetching idea:", dbError);
+      
+      // Fallback for database errors
+      return new Response(JSON.stringify({
+        name: `Idea #${tokenId}`,
+        description: "Unable to retrieve full idea details at this time.",
+        createdAt: new Date().toLocaleDateString(),
+        creator: "Unknown",
+        category: "Intellectual Property",
+        tags: ["IP"],
+        error: "Database connection issue"
+      }), {
         headers: { "Content-Type": "application/json" },
       });
     }
-
-    // Return idea data
-    const ideaData = ideaDoc.data();
-    return new Response(JSON.stringify({
-      name: ideaData.name || "Untitled Idea",
-      description: ideaData.description || "No description provided",
-      createdAt: ideaData.createdAt || new Date().toLocaleDateString(),
-      creator: ideaData.creator || "Anonymous",
-      category: ideaData.category || "Intellectual Property",
-      tags: ideaData.tags || ["IP"]
-    }), {
-      headers: { "Content-Type": "application/json" },
-    });
-    */
 
   } catch (error) {
     console.error("Error fetching idea details:", error);
