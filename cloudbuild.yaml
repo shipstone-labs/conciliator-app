@@ -71,18 +71,20 @@ steps:
       - -c
       - |
         # Set tag based on branch or PR
+        DO_ROLLOUT=""
         if [[ "$BRANCH_NAME" == "main" ]]; then
           # No tag for main branch
-          TAG_OPTION=""
+          TAG_OPTION="--no-traffic"
+          DO_ROLLOUT="yes"
         elif [[ "$BRANCH_NAME" == "legacy" ]]; then
           # Tag as legacy for legacy branch
-          TAG_OPTION="--tag=legacy"
+          TAG_OPTION="--tag=legacy --no-traffic"
         elif [[ "$_PR_NUMBER" != "" ]]; then
           # Tag with PR number for pull requests
-          TAG_OPTION="--tag=pr-$_PR_NUMBER"
+          TAG_OPTION="--tag=pr-$_PR_NUMBER --no-traffic"
         else
           # Default: no tag
-          TAG_OPTION=""
+          TAG_OPTION="--no-traffic"
         fi
         
         # Execute the deploy command with dynamic tag
@@ -94,6 +96,14 @@ steps:
           --region=$_DEPLOY_REGION \
           --quiet \
           $$TAG_OPTION
+        if [[ "$DO_ROLLOUT" == "yes" ]]
+        then
+          gcloud run services update-traffic $_SERVICE_NAME \
+            --platform=managed \
+            --to-latest \
+            --region=$_DEPLOY_REGION \
+            --quiet
+        fi
 images:
   - >-
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA
