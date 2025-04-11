@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react'
 export function useIP(tokenId: string) {
   const [ideaData, setIdeaData] = useState<IPDoc | undefined>()
   useEffect(() => {
+    // Guard clause to prevent executing with undefined tokenId
+    if (!tokenId) return;
+    
     const fetchData = async () => {
       // Move Firestore initialization inside the effect
       const fs = getFirestore()
