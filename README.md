@@ -1,6 +1,6 @@
-Welcome to the Conciliator Project
+# Welcome to the Conciliator Project
 
-Conciliator is a open source project that explores how to best work with AI agents that search for IP. It provides an effective way to enable discovery of IP while protecting the interests of the IP inventors and/or owners. 
+Conciliator is an open source project that explores how to best work with AI agents that search for IP. It provides an effective way to enable discovery of intellectual property while protecting the interests of the IP inventors and/or owners.
 
 This is an experimental part of the SafeIdea project that we're working on. Ping us at Cart@shipstone.com to learn more.
 
@@ -40,4 +40,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 This is currently being deployed on cloudflare and should work in fleek.
 
-Force re-deploy 5
+## Support
+
+If you have questions about the Conciliator Project, please reach out to the team at Cart@shipstone.com.
