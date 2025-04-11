@@ -46,6 +46,38 @@ steps:
         # Pull the cache image if it exists (won't fail if it doesn't)
         docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
 
+        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+          # Install GitHub CLI if needed
+          apt-get update -y && apt-get install -y gh
+          
+          # Authenticate with GitHub using service account token
+          gcloud secrets versions access latest --secret=github-token | gh auth login --with-token
+          
+          # Create deployment and get deployment ID
+          echo "Creating GitHub deployment..."
+          DEPLOYMENT_PAYLOAD=$(gh api \
+            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments \
+            -X POST \
+            -f ref="PR #$_PR_NUMBER" \
+            -f environment="cloud-run-$_DEPLOY_REGION" \
+            -f description="Deploy to Cloud Run" \
+            -f auto_merge=false \
+            -f required_contexts='[]')
+          
+          DEPLOYMENT_ID=$(echo "$DEPLOYMENT_PAYLOAD" | grep -o '"id": [0-9]*' | head -1 | awk '{print $2}')
+          echo "Created deployment ID: $DEPLOYMENT_ID"
+          
+          # Save deployment ID for potential failure notification
+          echo "$DEPLOYMENT_ID" > /workspace/deployment_id
+          
+          # Update deployment status to in_progress
+          gh api \
+            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+            -X POST \
+            -f state="in_progress" \
+            -f description="Building Container..."
+        fi
+
   # Build with cache
   - name: 'gcr.io/cloud-builders/docker'
     id: Build
@@ -98,6 +130,7 @@ steps:
         CACHE_TAG=$$(cat /workspace/cache_tag.txt)
         docker tag $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
         docker push $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: Deploy
     entrypoint: bash
@@ -125,6 +158,23 @@ steps:
           TAG_OPTION="--no-traffic"
         fi
         
+        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+          # Install GitHub CLI if needed
+          apt-get update -y && apt-get install -y gh
+          
+          # Authenticate with GitHub using service account token
+          gcloud secrets versions access latest --secret=github-token | gh auth login --with-token
+          
+          DEPLOYMENT_ID=$(cat /workspace/deployment_id)
+          
+          # Update deployment status to in_progress
+          gh api \
+            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+            -X POST \
+            -f state="in_progress" \
+            -f description="Deploying Container..."
+        fi
+
         # Execute the deploy command with dynamic tag
         # Use $$ to escape bash variables in Cloud Build YAML
         gcloud run services update $_SERVICE_NAME \
@@ -150,12 +200,20 @@ steps:
         echo "Deployment URL: $REVISION_URL"
         
         # Create GitHub deployment and update status if this is a PR build
-        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
-          # Install GitHub CLI if needed
-          apt-get update -y && apt-get install -y gh
+        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then          
+          # Deploy happens here (already done above)
           
           # Build URL for logs
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
+          
+          # Update deployment status to success with deployment URL
+          gh api \
+            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+            -X POST \
+            -f state="success" \
+            -f description="Deployed to Cloud Run" \
+            -f environment_url="$REVISION_URL" \
+            -f log_url="$BUILD_URL"
           
           # Also post a comment for easier access
           gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($REVISION_URL) | [View logs]($BUILD_URL)"
@@ -171,18 +229,15 @@ steps:
     args:
       - -c
       - |
-        if [ "$(cat /workspace/build_status)" != "failed" ]; then
-          echo "Build failed, skipping deploy"
-          exit 0
-        fi
         if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
           # Only run this if we haven't marked success
           if [[ ! -f /workspace/deployment_success ]]; then
-            # Install GitHub CLI
             apt-get update -y && apt-get install -y gh
-            
+          
             # Authenticate with GitHub using service account token
-            echo "$_GITHUB_TOKEN" | gh auth login --with-token
+            gcloud secrets versions access latest --secret=github-token | gh auth login --with-token
+          
+            DEPLOYMENT_ID=$(cat /workspace/deployment_id)
             
             # Build URL and notify failure
             BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
