@@ -158,9 +158,9 @@ const CardGrid = () => {
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                   disabled:opacity-50 disabled:pointer-events-none ring-offset-background
                   shadow-lg hover:shadow-primary/30 transition-all"
-                href={`/discovery/${item.id}`}
+                href={`/details/${item.id}`}
               >
-                Learn More
+                View Details
               </Link>
             </CardContent>
           </Card>

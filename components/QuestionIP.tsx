@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Chat from './chat'
@@ -14,7 +15,8 @@ import Chat from './chat'
 import Loading from './Loading'
 import { useIP } from '@/hooks/useIP'
 import { useStytch } from '@stytch/nextjs'
-// Link and Image imports removed - no longer needed
+import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 
 const AppStates = {
   LOADING: 'loading',
@@ -31,6 +33,8 @@ const QuestionIP = ({
   docId: string
   onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
+  const router = useRouter()
+  const ideaData = useIP(docId) // Get idea data for context
   const [appState, setAppState] = useState(AppStates.LOADING)
   const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState<
@@ -136,24 +140,49 @@ const QuestionIP = ({
     }
   }, [messages, docId])
 
+  // Function to navigate back to details page
+  const goToDetails = useCallback(() => {
+    router.push(`/details/${docId}`)
+  }, [router, docId])
+
   if (appState === AppStates.LOADING || !ipDoc) {
-    return <Loading />
+    return (
+      <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden p-8">
+        <div className="flex flex-col items-center justify-center py-8">
+          <Loading />
+          <p className="text-white/70 mt-4">Loading discovery session...</p>
+        </div>
+      </Card>
+    )
   }
 
   const renderDiscussionState = () => (
-    <Chat
-      messages={messages}
-      onSend={handleAskQuestion}
-      onNewIP={onNewIP}
-      onSave={handleSave}
-      doc={ipDoc}
-      isLoading={isLoading}
-    />
+    <div className="space-y-4">
+      {/* Add Return to Details button above chat */}
+      <div className="mb-4">
+        <Button
+          onClick={goToDetails}
+          variant="outline"
+          className="text-white/90 hover:bg-white/10 flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" /> Return to Details
+        </Button>
+      </div>
+
+      <Chat
+        messages={messages}
+        onSend={handleAskQuestion}
+        onNewIP={onNewIP}
+        onSave={handleSave}
+        doc={ipDoc}
+        isLoading={isLoading}
+      />
+    </div>
   )
 
   const renderEvaluationState = () => (
     <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-4 border-b border-white/10">
         <CardTitle className="text-2xl font-bold text-primary">
           Value Assessment
         </CardTitle>
@@ -183,8 +212,8 @@ const QuestionIP = ({
 
   const renderEndState = () => (
     <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+      <CardHeader className="pb-4 border-b border-white/10">
+        <CardTitle className="text-2xl font-bold text-primary">
           Session Complete
         </CardTitle>
         <CardDescription className="text-white/90 mt-2">
@@ -207,8 +236,37 @@ const QuestionIP = ({
 
   return (
     <div className="w-full py-8">
-      <div className="max-w-6xl mx-auto space-y-8 px-4">
-        {/* Home link removed - now available in global header */}
+      <div className="max-w-4xl mx-auto space-y-8 px-4">
+        {/* Unified header with details page */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-primary mb-2">Discovery Mode</h1>
+          {ideaData && (
+            <div className="mt-1 mb-4">
+              <h2 className="text-xl font-medium text-white/90">{ideaData.name || "Untitled Idea"}</h2>
+              <div className="flex justify-center mt-2 gap-2">
+                {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (
+                  ideaData.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 text-xs font-medium bg-white/10 text-white/80 rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))
+                ) : (
+                  <span className="px-3 py-1 text-xs font-medium bg-white/10 text-white/60 rounded-full">
+                    {ideaData.category || "Intellectual Property"}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          <p className="text-white/70">
+            Explore your idea through interactive conversation
+          </p>
+        </div>
+        
+        {/* Render appropriate state */}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}
         {appState === AppStates.END && renderEndState()}
