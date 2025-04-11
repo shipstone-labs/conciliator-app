@@ -96,7 +96,7 @@ steps:
           --region=$_DEPLOY_REGION \
           --quiet \
           $$TAG_OPTION
-        if [[ "$DO_ROLLOUT" == "yes" ]]
+        if [[ "$$DO_ROLLOUT" == "yes" ]]
         then
           gcloud run services update-traffic $_SERVICE_NAME \
             --platform=managed \
