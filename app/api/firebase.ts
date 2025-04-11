@@ -5,17 +5,18 @@ import 'firebase-admin/auth'
 import type { SessionsAuthenticateResponse } from 'stytch'
 
 let inited = false
-let app: firebase.app.App | undefined = undefined
+// We don't use this variable directly but keep it for reference
+let _app: firebase.app.App | undefined = undefined
 
 function init() {
   if (!inited) {
     try {
       // Check if we already have an initialized Firebase app
       try {
-        app = firebase.app()
+        _app = firebase.app()
         inited = true
         return
-      } catch (e) {
+      } catch (_e) {
         // No app exists yet, continue with initialization
       }
 
@@ -33,7 +34,7 @@ function init() {
           private_key: 'fake-private-key'
         }
         
-        app = firebase.initializeApp({
+        _app = firebase.initializeApp({
           projectId: 'development-project',
           credential: firebase.credential.cert(mockCredential as firebase.ServiceAccount),
         })
@@ -52,7 +53,7 @@ function init() {
             private_key: serviceAccount.private_key || serviceAccount.privateKey || 'fake-private-key'
           }
           
-          app = firebase.initializeApp({
+          _app = firebase.initializeApp({
             projectId: certData.projectId,
             credential: firebase.credential.cert(certData as firebase.ServiceAccount),
           })
@@ -69,7 +70,7 @@ function init() {
             private_key: 'fake-private-key'
           }
           
-          app = firebase.initializeApp({
+          _app = firebase.initializeApp({
             projectId: 'development-project',
             credential: firebase.credential.cert(mockCredential as firebase.ServiceAccount),
           })
