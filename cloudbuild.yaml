@@ -15,13 +15,13 @@ steps:
           FILTER_TAG="pr-$_PR_NUMBER"
         else
           # Replace slashes with hyphens for branch name
-          BRANCH_SAFE=$BRANCH_NAME
-          BRANCH_SAFE=${BRANCH_SAFE//\//-}
-          FILTER_TAG="$BRANCH_SAFE"
+          BRANCH_SAFE=$$BRANCH_NAME
+          BRANCH_SAFE=$${BRANCH_SAFE//\//-}
+          FILTER_TAG="$$BRANCH_SAFE"
         fi
         
         # Add tags to current build to make it identifiable
-        gcloud builds update $BUILD_ID --add-tags=$$FILTER_TAG || true
+        gcloud builds update $$BUILD_ID --add-tags=$$FILTER_TAG || true
         
         # Get running builds with the same tag
         running_builds=$(gcloud builds list --ongoing --filter="tags=$$FILTER_TAG AND id!=$$BUILD_ID" --format="value(id)")
