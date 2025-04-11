@@ -11,6 +11,17 @@ export type IPDocJSON = {
     mint: `0x${string}`
     transfer: `0x${string}`
   }
+  // Terms information for the idea
+  terms?: {
+    businessModel: string
+    evaluationPeriod: string
+    pricing: {
+      dayPrice: string
+      weekPrice: string
+      monthPrice: string
+    }
+    ndaRequired: boolean
+  }
   image?: { cid: string; width: number; height: number; mimeType: string }
   encrypted: {
     cid: string
