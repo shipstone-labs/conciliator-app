@@ -196,15 +196,15 @@ steps:
         # Get the Cloud Run URL for this revision
         SERVICE_URL=$(gcloud run services describe $_SERVICE_NAME --region=$_DEPLOY_REGION --format='value(status.url)')
         CACHE_TAG=$(cat /workspace/cache_tag.txt)
-        REVISION_URL="${SERVICE_URL}?tag=${CACHE_TAG}"
-        echo "Deployment URL: $REVISION_URL"
+        REVISION_URL="$${SERVICE_URL}?tag=$${CACHE_TAG}"
+        echo "Deployment URL: $$REVISION_URL"
         
         # Create GitHub deployment and update status if this is a PR build
         if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then          
           # Deploy happens here (already done above)
           
           # Build URL for logs
-          BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
+          BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
           
           # Update deployment status to success with deployment URL
           gh api \
@@ -212,11 +212,11 @@ steps:
             -X POST \
             -f state="success" \
             -f description="Deployed to Cloud Run" \
-            -f environment_url="$REVISION_URL" \
-            -f log_url="$BUILD_URL"
+            -f environment_url="$$REVISION_URL" \
+            -f log_url="$$BUILD_URL"
           
           # Also post a comment for easier access
-          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($REVISION_URL) | [View logs]($$BUILD_URL)"
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)"
           
           # Mark deployment as successful for the final status check
           touch /workspace/deployment_success
