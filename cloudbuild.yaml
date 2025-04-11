@@ -1,4 +1,23 @@
 steps:
+  # Post build start notification with logs URL
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: NotifyBuildStart
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+          # Install GitHub CLI if needed
+          apt-get update -y && apt-get install -y gh
+          
+          # Authenticate with GitHub using service account token
+          echo "$_GITHUB_TOKEN" | gh auth login --with-token
+          
+          # Post build URL to the PR
+          BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "🔄 Build started: [View logs]($BUILD_URL)"
+        fi
+
   # Set up cache tag based on branch/PR
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: SetupCacheVars
@@ -35,7 +54,7 @@ steps:
       - -c
       - |
         CACHE_TAG=$$(cat /workspace/cache_tag.txt)
-        docker build \
+        if ! docker build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
           --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
@@ -46,13 +65,24 @@ steps:
           --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
           --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
           .
+        then
+          echo "Build failed"
+          echo "failed" > /workspace/build_status
+          exit 0
+        fi
 
   # Push with commit SHA
   - name: 'gcr.io/cloud-builders/docker'
     id: Push
+    entrypoint: bash
     args:
-      - 'push'
-      - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA'
+      - -c
+      - |
+        if [ "$(cat /workspace/build_status)" == "failed" ]; then
+          echo "Build failed, skipping push"
+          exit 0
+        fi
+        docker push '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA'
       
   # Tag and push with cache tag
   - name: 'gcr.io/cloud-builders/docker'
@@ -61,6 +91,10 @@ steps:
     args:
       - -c
       - |
+        if [ "$(cat /workspace/build_status)" == "failed" ]; then
+          echo "Build failed, skipping tag"
+          exit 0
+        fi
         CACHE_TAG=$$(cat /workspace/cache_tag.txt)
         docker tag $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
         docker push $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
@@ -70,6 +104,10 @@ steps:
     args:
       - -c
       - |
+        if [ "$(cat /workspace/build_status)" == "failed" ]; then
+          echo "Build failed, skipping deploy"
+          exit 0
+        fi
         # Set tag based on branch or PR
         DO_ROLLOUT=""
         if [[ "$BRANCH_NAME" == "main" ]]; then
@@ -104,6 +142,67 @@ steps:
             --region=$_DEPLOY_REGION \
             --quiet
         fi
+        
+        # Get the Cloud Run URL for this revision
+        SERVICE_URL=$(gcloud run services describe $_SERVICE_NAME --region=$_DEPLOY_REGION --format='value(status.url)')
+        CACHE_TAG=$(cat /workspace/cache_tag.txt)
+        REVISION_URL="${SERVICE_URL}?tag=${CACHE_TAG}"
+        echo "Deployment URL: $REVISION_URL"
+        
+        # Create GitHub deployment and update status if this is a PR build
+        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+          # Install GitHub CLI if needed
+          apt-get update -y && apt-get install -y gh
+          
+          # Build URL for logs
+          BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
+          
+          # Also post a comment for easier access
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($REVISION_URL) | [View logs]($BUILD_URL)"
+          
+          # Mark deployment as successful for the final status check
+          touch /workspace/deployment_success
+        fi
+# Add a final notification step to handle failures
+  - name: 'gcr.io/cloud-builders/curl'
+    id: NotifyFailure
+    waitFor: ['Build'] # This makes it run after the build step, regardless of build success
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if [ "$(cat /workspace/build_status)" != "failed" ]; then
+          echo "Build failed, skipping deploy"
+          exit 0
+        fi
+        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+          # Only run this if we haven't marked success
+          if [[ ! -f /workspace/deployment_success ]]; then
+            # Install GitHub CLI
+            apt-get update -y && apt-get install -y gh
+            
+            # Authenticate with GitHub using service account token
+            echo "$_GITHUB_TOKEN" | gh auth login --with-token
+            
+            # Build URL and notify failure
+            BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$BUILD_ID?project=$PROJECT_ID"
+            gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "❌ Build failed: [View logs]($BUILD_URL)"
+            
+            # Create deployment status if a deployment was created
+            if [[ -f /workspace/deployment_id ]]; then
+              DEPLOYMENT_ID=$(cat /workspace/deployment_id)
+              gh api \
+                repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$DEPLOYMENT_ID/statuses \
+                -X POST \
+                -f state="failure" \
+                -f description="Deployment failed" \
+                -f log_url="$BUILD_URL"
+            fi
+          fi
+        fi
+        # Always exit with success to avoid breaking the build further
+        exit 0
+
 images:
   - >-
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA
@@ -125,6 +224,9 @@ substitutions:
   _NEXT_PUBLIC_LIT_CONTRACT_ADDRESS: ''
   _NEXT_PUBLIC_LIT_ADDRESS: ''
   _NEXT_PUBLIC_FIREBASE_CONFIG: ''
+  _GITHUB_TOKEN: ''
+  _GITHUB_OWNER: ''
+  _GITHUB_REPO: ''
 
 tags:
   - gcp-cloud-build-deploy-cloud-run
