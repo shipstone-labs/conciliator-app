@@ -246,8 +246,8 @@ const AppIP = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background p-6 bg-gradient-to-b from-[hsl(var(--gradient-start))] to-[hsl(var(--gradient-end))]">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="w-full py-8">
+      <div className="max-w-6xl mx-auto space-y-8 px-4">
         {/* Logo removed from non-home pages - now using global header logo
         <Link
           href="/"
