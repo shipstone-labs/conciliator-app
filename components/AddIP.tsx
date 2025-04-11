@@ -151,6 +151,19 @@ const AppIP = () => {
           unifiedAccessControlConditions,
         },
         description,
+        category: businessModel || 'Intellectual Property',
+        tags: ['IP', evaluationPeriod],
+        // Include all terms information
+        terms: {
+          businessModel,
+          evaluationPeriod,
+          pricing: {
+            dayPrice,
+            weekPrice,
+            monthPrice
+          },
+          ndaRequired: ndaConfirmed
+        }
       }
       console.log('Storing invention:', body)
       const data = await fetch('/api/store', {
