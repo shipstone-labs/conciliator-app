@@ -92,7 +92,14 @@ steps:
           echo "Cache image pulled successfully"
           FROM_CACHE="--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:$$CACHE_TAG"
         else
-          echo "Cache image not found, proceeding without it"
+          if docker pull docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest;
+          then
+            echo "Cache image pulled successfully"
+            FROM_CACHE="--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest"
+          else
+            # Cache image not found, proceed without it
+            echo "Cache image not found, proceeding without it"
+          fi
         fi
 
         export DOCKER_BUILDKIT=1
