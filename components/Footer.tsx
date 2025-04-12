@@ -1,21 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Modal } from '@/components/ui/modal'
-import { logHydration } from '@/lib/debugUtils'
 
 export function Footer() {
-  // Log initialization
-  logHydration('Footer', 'init');
-  
   const [isTermsOpen, setIsTermsOpen] = useState(false)
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
-  
-  // Log effect and cleanup
-  useEffect(() => {
-    logHydration('Footer', 'effect');
-    return () => logHydration('Footer', 'unmount');
-  }, []);
 
   return (
     <>

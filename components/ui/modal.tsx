@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
-import { logHydration } from '@/lib/debugUtils'
 
 interface ModalProps {
   isOpen: boolean
@@ -12,9 +11,6 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
-  // Log modal initialization
-  logHydration('Modal', 'init', { isOpen, title });
-  
   // Close on escape key
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -22,23 +18,21 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     }
 
     if (isOpen) {
-      logHydration('Modal', 'opening', { title });
       document.addEventListener('keydown', handleEscape)
       // Prevent scrolling when modal is open
       document.body.style.overflow = 'hidden'
     }
 
     return () => {
-      if (isOpen) {
-        logHydration('Modal', 'closing', { title });
-      }
       document.removeEventListener('keydown', handleEscape)
       // Restore scrolling when modal is closed
       document.body.style.overflow = 'auto'
     }
-  }, [isOpen, onClose, title])
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
+
+  console.log('Modal rendering with isOpen:', isOpen)
 
   // Close when clicking on backdrop (outside of modal content)
   const handleBackdropClick = (e: React.MouseEvent) => {

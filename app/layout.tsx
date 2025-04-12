@@ -6,7 +6,6 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { Footer } from '@/components/Footer'
 import AuthLayout from './authLayout'
 import NavigationHeader from '@/components/NavigationHeader'
-import { logHydration } from '@/lib/debugUtils'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,9 +28,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Log server/client rendering
-  logHydration('RootLayout', 'init');
-  
   return (
     <TooltipProvider>
       <html lang="en" className="dark">
