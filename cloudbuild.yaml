@@ -92,7 +92,7 @@ steps:
           echo "Cache image pulled successfully"
           FROM_CACHE="--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:$$CACHE_TAG"
         else
-          if docker pull docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest;
+          if docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest;
           then
             echo "Cache image pulled successfully"
             FROM_CACHE="--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest"
