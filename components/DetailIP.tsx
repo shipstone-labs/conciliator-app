@@ -110,17 +110,19 @@ const DetailIP = ({
                 <h3 className="text-sm font-medium text-white/50 mb-1">
                   Category
                 </h3>
-                <p className="text-white/90">{ideaData.category || 'Intellectual Property'}</p>
+                <p className="text-white/90">
+                  {ideaData.category || 'Intellectual Property'}
+                </p>
               </div>
             </div>
-            
+
             {/* Access Terms Section - Show if terms information exists */}
             {ideaData.terms && (
               <div className="border-t border-white/10 pt-5 mt-5">
                 <h3 className="text-lg font-medium text-primary mb-3">
                   Access Terms
                 </h3>
-                
+
                 <div className="space-y-4">
                   {/* Business Model */}
                   <div className="flex items-start gap-2">
@@ -128,58 +130,79 @@ const DetailIP = ({
                       <div className="w-4 h-4 text-primary">🔒</div>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-white/70">Business Model:</h4>
+                      <h4 className="text-sm font-medium text-white/70">
+                        Business Model:
+                      </h4>
                       <p className="text-white/90">
-                        {ideaData.terms.businessModel || ideaData.category || 'Protected Evaluation'}
+                        {ideaData.terms.businessModel ||
+                          ideaData.category ||
+                          'Protected Evaluation'}
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Evaluation Period */}
                   <div className="flex items-start gap-2">
                     <div className="bg-primary/20 p-1.5 rounded-full">
                       <div className="w-4 h-4 text-primary">⏱️</div>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-white/70">Evaluation Period:</h4>
+                      <h4 className="text-sm font-medium text-white/70">
+                        Evaluation Period:
+                      </h4>
                       <p className="text-white/90">
-                        {ideaData.terms.evaluationPeriod || (Array.isArray(ideaData.tags) && ideaData.tags.length > 1 ? ideaData.tags[1] : 'Standard')}
+                        {ideaData.terms.evaluationPeriod ||
+                          (Array.isArray(ideaData.tags) &&
+                          ideaData.tags.length > 1
+                            ? ideaData.tags[1]
+                            : 'Standard')}
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Pricing Options - Show if pricing information exists */}
                   {ideaData.terms.pricing && (
                     <div className="mt-4">
-                      <h4 className="text-sm font-medium text-white/70 mb-2">Pricing Options:</h4>
+                      <h4 className="text-sm font-medium text-white/70 mb-2">
+                        Pricing Options:
+                      </h4>
                       <div className="grid grid-cols-3 gap-3">
                         {/* Day Price */}
                         <div className="p-3 border border-white/10 rounded-xl bg-muted/20">
                           <p className="text-white/70 text-xs">One Day</p>
                           <p className="text-primary font-medium mt-1">
-                            ${parseFloat(ideaData.terms.pricing.dayPrice || '5.00').toFixed(2)}
+                            $
+                            {parseFloat(
+                              ideaData.terms.pricing.dayPrice || '5.00'
+                            ).toFixed(2)}
                           </p>
                         </div>
-                        
+
                         {/* Week Price */}
                         <div className="p-3 border border-white/10 rounded-xl bg-muted/20">
                           <p className="text-white/70 text-xs">One Week</p>
                           <p className="text-primary font-medium mt-1">
-                            ${parseFloat(ideaData.terms.pricing.weekPrice || '25.00').toFixed(2)}
+                            $
+                            {parseFloat(
+                              ideaData.terms.pricing.weekPrice || '25.00'
+                            ).toFixed(2)}
                           </p>
                         </div>
-                        
+
                         {/* Month Price */}
                         <div className="p-3 border border-white/10 rounded-xl bg-muted/20">
                           <p className="text-white/70 text-xs">One Month</p>
                           <p className="text-primary font-medium mt-1">
-                            ${parseFloat(ideaData.terms.pricing.monthPrice || '90.00').toFixed(2)}
+                            $
+                            {parseFloat(
+                              ideaData.terms.pricing.monthPrice || '90.00'
+                            ).toFixed(2)}
                           </p>
                         </div>
                       </div>
                     </div>
                   )}
-                  
+
                   {/* NDA Information */}
                   {ideaData.terms.ndaRequired !== undefined && (
                     <div className="mt-4 p-3 border border-white/20 rounded-xl bg-muted/20">
@@ -188,8 +211,8 @@ const DetailIP = ({
                           <div className="w-4 h-4 text-primary">📝</div>
                         </div>
                         <p className="text-white/90">
-                          {ideaData.terms.ndaRequired 
-                            ? 'NDA Required: Access to this idea requires a signed Non-Disclosure Agreement.' 
+                          {ideaData.terms.ndaRequired
+                            ? 'NDA Required: Access to this idea requires a signed Non-Disclosure Agreement.'
                             : 'NDA Not Required: This idea can be accessed without a signed NDA.'}
                         </p>
                       </div>

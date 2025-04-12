@@ -114,7 +114,7 @@ steps:
     args:
       - -c
       - |
-        if [ -f /workspace/build_failed ]; then
+        if [ -f /workspace/failed ]; then
           echo "Build failed, skipping push"
           exit 0
         fi
@@ -127,7 +127,7 @@ steps:
     args:
       - -c
       - |
-        if [ -f /workspace/build_failed  ]; then
+        if [ -f /workspace/failed  ]; then
           echo "Build failed, skipping tag"
           exit 0
         fi
@@ -142,7 +142,7 @@ steps:
     args:
       - -c
       - |
-        if [ -f /workspace/build_failed ]; then
+        if [ -f /workspace/failed ]; then
           echo "Build failed, skipping deploy"
           exit 0
         fi

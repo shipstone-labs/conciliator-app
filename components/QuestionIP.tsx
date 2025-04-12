@@ -238,10 +238,14 @@ const QuestionIP = ({
       <div className="max-w-4xl mx-auto space-y-8 px-4">
         {/* Unified header with details page */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Discovery Mode</h1>
+          <h1 className="text-3xl font-bold text-primary mb-2">
+            Discovery Mode
+          </h1>
           {ideaData && (
             <div className="mt-1 mb-4">
-              <h2 className="text-xl font-medium text-white/90">{ideaData.name || "Untitled Idea"}</h2>
+              <h2 className="text-xl font-medium text-white/90">
+                {ideaData.name || 'Untitled Idea'}
+              </h2>
               <div className="flex justify-center mt-2 gap-2">
                 {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (
                   ideaData.tags.map((tag, index) => (
@@ -254,7 +258,7 @@ const QuestionIP = ({
                   ))
                 ) : (
                   <span className="px-3 py-1 text-xs font-medium bg-white/10 text-white/60 rounded-full">
-                    {ideaData.category || "Intellectual Property"}
+                    {ideaData.category || 'Intellectual Property'}
                   </span>
                 )}
               </div>
@@ -264,7 +268,7 @@ const QuestionIP = ({
             Explore your idea through interactive conversation
           </p>
         </div>
-        
+
         {/* Render appropriate state */}
         {appState === AppStates.DISCUSSION && renderDiscussionState()}
         {appState === AppStates.EVALUATION && renderEvaluationState()}

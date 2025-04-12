@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { getFirestore } from '../firebase'
-import type { IPDoc } from '@/lib/types'
+import type { IPDocJSON } from '@/lib/internalTypes'
+import { getUser } from '../stytch'
+import { Timestamp } from 'firebase-admin/firestore'
 
 export const runtime = 'nodejs'
 
