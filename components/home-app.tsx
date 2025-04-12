@@ -102,6 +102,11 @@ function HomeApp() {
                 >
                   Add Idea
                 </Link>
+                <button
+                  className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
+                >
+                  My Ideas
+                </button>
                 <Link
                   href="/list-ip"
                   className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
