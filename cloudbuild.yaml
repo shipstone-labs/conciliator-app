@@ -58,12 +58,12 @@ steps:
           DEPLOYMENT_PAYLOAD=$(gh api \
             repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments \
             -X POST \
-            -f ref="PR #$_PR_NUMBER" \
-            -f environment="cloud-run-$_DEPLOY_REGION" \
-            -f description="Deploy to Cloud Run" \
-            -f auto_merge=false \
-            -f required_contexts='[]')
-          
+            -f "ref=PR #$_PR_NUMBER" \
+            -f "environment=cloud-run-$_DEPLOY_REGION" \
+            -f "description=Deploy to Cloud Run" \
+            -f 'auto_merge=false' \
+            -f 'required_contexts=[]')
+          echo "Deployment payload: $$DEPLOYMENT_PAYLOAD"
           DEPLOYMENT_ID=$(echo "$$DEPLOYMENT_PAYLOAD" | grep -o '"id": [0-9]*' | head -1 | awk '{print $$2}')
           echo "Created deployment ID: $$DEPLOYMENT_ID"
           
@@ -210,9 +210,9 @@ steps:
           gh api \
             repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
             -X POST \
-            -f state="success" \
-            -f description="Deployed to Cloud Run" \
-            -f environment_url="$$REVISION_URL" \
+            -f state=success" \
+            -f "description=Deployed to Cloud Run" \
+            -f "environment_url=$$REVISION_URL" \
             -f log_url="$$BUILD_URL"
           
           # Also post a comment for easier access
