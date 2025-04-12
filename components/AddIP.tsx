@@ -18,6 +18,8 @@ import { useSession } from '@/hooks/useSession'
 import type { EncryptResponse } from 'lit-wrapper'
 import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
+import { collection, doc, getFirestore } from 'firebase/firestore'
+import { bytesToHex } from 'viem'
 
 const AppIP = () => {
   // Removed user authentication check since it's handled by the main navigation
@@ -48,7 +50,7 @@ const AppIP = () => {
   // 4. Remove the test-specific code from handleFileSelection
   // =====================================================
   const [testTokenCounter, setTestTokenCounter] = useState(1000)
-  const { litClient } = useSession()
+  const { litClient, sessionSigs } = useSession()
 
   const handleStore = useCallback(async () => {
     setError(null)
@@ -77,6 +79,11 @@ const AppIP = () => {
       if (!litClient) {
         throw new Error('Lit client is not initialized')
       }
+      const fb = getFirestore()
+      const ref = doc(collection(fb, 'ip'))
+      const id = ref.id
+      const tokenId = bytesToHex(new TextEncoder().encode(id))
+      const { address } = sessionSigs || {}
       const unifiedAccessControlConditions = [
         {
           conditionType: 'evmBasic',
@@ -90,29 +97,17 @@ const AppIP = () => {
             value: process.env.NEXT_PUBLIC_LIT_ADDRESS,
           },
         },
-        // {
-        //   conditionType: "evmBasic",
-        //   contractAddress: "",
-        //   standardContractType: "",
-        //   chain: "base",
-        //   method: "eth_getBalance",
-        //   parameters: [":userAddress", "latest"],
-        //   returnValueTest: {
-        //     comparator: ">",
-        //     value: "0",
-        //   },
-        // },
         { conditionType: 'operator', operator: 'or' },
         {
           conditionType: 'evmBasic',
-          contractAddress: '',
-          standardContractType: 'timestamp',
+          contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
+          standardContractType: 'ERC1155',
           chain: 'filecoin',
-          method: 'eth_getBlockByNumber',
-          parameters: ['latest'],
+          method: 'balanceOf',
+          parameters: [':userAddress', tokenId],
           returnValueTest: {
             comparator: '>=',
-            value: Math.round((Date.now() + 10000) / 1000).toString(),
+            value: '0',
           },
         },
       ]
@@ -140,6 +135,12 @@ const AppIP = () => {
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
       const body = {
+        id,
+        to: address,
+        metadata: {
+          tokenId,
+          cid: '',
+        },
         name,
         content,
         encrypted: {
@@ -152,8 +153,7 @@ const AppIP = () => {
         },
         description,
       }
-      console.log('Storing invention:', body)
-      const data = await fetch('/api/store', {
+      await fetch('/api/store', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,8 +168,6 @@ const AppIP = () => {
         }
         return res.json()
       })
-      const { id } = data
-      console.log(data)
       window.location.href = `/details/${id}`
     } catch (err) {
       console.error('API Key validation error:', err)
@@ -185,6 +183,7 @@ const AppIP = () => {
     testTokenCounter,
     litClient,
     stytchClient?.session,
+    sessionSigs,
   ])
 
   const handleOpenFileDialog = useCallback(() => {
@@ -404,8 +403,8 @@ const AppIP = () => {
             <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
               <p className="text-sm text-white/90">
                 Clicking <strong>View Idea Page</strong> takes you to your new
-                Idea page. You can share this page address with others to explore
-                your secure idea.
+                Idea page. You can share this page address with others to
+                explore your secure idea.
               </p>
             </div>
 
@@ -420,18 +419,22 @@ const AppIP = () => {
                 onClick={handleStore}
                 className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12 mt-4"
                 disabled={
-                  isLoading || !content || !name || !description || !termsAccepted
+                  isLoading ||
+                  !content ||
+                  !name ||
+                  !description ||
+                  !termsAccepted
                 }
               >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Creating your Idea page (this may take a minute or so)
-                </>
-              ) : (
-                'View Idea Page'
-              )}
-            </Button>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Creating your Idea page (this may take a minute or so)
+                  </>
+                ) : (
+                  'View Idea Page'
+                )}
+              </Button>
             </div>
 
             {/* File upload modal */}

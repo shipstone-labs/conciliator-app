@@ -5,7 +5,10 @@ export type IPDoc = {
   creator: string // userId
   category: string
   tags: string[] // This wasn't populated yet.
-  tokenId: string
+  metadata: {
+    tokenId: string
+    cid: string
+  }
   image?: { cid: string; width: number; height: number; mimeType: string }
   encrypted: {
     cid: string

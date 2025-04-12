@@ -6,12 +6,12 @@ steps:
     args:
       - -c
       - |
-        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+        if [[ "$_PR_NUMBER" != "" ]]; then
           # Install GitHub CLI if needed
           apt-get update -y && apt-get install -y gh
           
           # Authenticate with GitHub using service account token
-          echo "$_GITHUB_TOKEN" | gh auth login --with-token
+          gcloud secrets versions access latest --secret=github-token | gh auth login --with-token
           
           # Post build URL to the PR
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
@@ -46,7 +46,7 @@ steps:
         # Pull the cache image if it exists (won't fail if it doesn't)
         docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
 
-        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+        if [[ "$_PR_NUMBER" != "" ]]; then
           # Install GitHub CLI if needed
           apt-get update -y && apt-get install -y gh
           
@@ -158,7 +158,7 @@ steps:
           TAG_OPTION="--no-traffic"
         fi
         
-        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+        if [[ "$_PR_NUMBER" != "" ]]; then
           # Install GitHub CLI if needed
           apt-get update -y && apt-get install -y gh
           
@@ -200,7 +200,7 @@ steps:
         echo "Deployment URL: $$REVISION_URL"
         
         # Create GitHub deployment and update status if this is a PR build
-        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then          
+        if [[ "$_PR_NUMBER" != "" ]]; then          
           # Deploy happens here (already done above)
           
           # Build URL for logs
@@ -229,7 +229,7 @@ steps:
     args:
       - -c
       - |
-        if [[ "$_PR_NUMBER" != "" && "$_GITHUB_TOKEN" != "" ]]; then
+        if [[ "$_PR_NUMBER" != "" ]]; then
           # Only run this if we haven't marked success
           if [[ ! -f /workspace/deployment_success ]]; then
             apt-get update -y && apt-get install -y gh
@@ -279,7 +279,6 @@ substitutions:
   _NEXT_PUBLIC_LIT_CONTRACT_ADDRESS: ''
   _NEXT_PUBLIC_LIT_ADDRESS: ''
   _NEXT_PUBLIC_FIREBASE_CONFIG: ''
-  _GITHUB_TOKEN: ''
   _GITHUB_OWNER: ''
   _GITHUB_REPO: ''
 

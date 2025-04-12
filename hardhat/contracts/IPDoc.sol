@@ -15,7 +15,7 @@ contract IPDoc is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ERC1
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     constructor(address defaultAdmin, address pauser, address minter)
-        ERC1155("https://safeidea.net")
+        ERC1155("https://safeidea.net/doc/{id}")
     {
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
         _grantRole(PAUSER_ROLE, pauser);
