@@ -76,6 +76,16 @@ export async function POST(req: NextRequest) {
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
     )
+    const firestore = await getFirestore()
+    const status = firestore.collection('audit').doc(id)
+    await status.set({
+      status: 'Storing document',
+      creator: user.user.user_id,
+      address: to,
+      tokenId,
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+    })
     const encryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(encrypted))],
       {
@@ -83,6 +93,10 @@ export async function POST(req: NextRequest) {
       }
     )
     const encryptedCid = await w3Client.uploadFile(encryptedBlob)
+    await status.update({
+      status: 'Storing downsampled document',
+      updatedAt: Timestamp.fromDate(new Date()),
+    })
     const downSampledEncryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(downSampledEncrypted))],
       {
@@ -92,6 +106,10 @@ export async function POST(req: NextRequest) {
     const downSampledEncryptedCid = await w3Client.uploadFile(
       downSampledEncryptedBlob
     )
+    await status.update({
+      status: 'Generating token image',
+      updatedAt: Timestamp.fromDate(new Date()),
+    })
     const imageCid = await imageAI.images
       .generate({
         model: getModel('IMAGE'),
@@ -113,6 +131,14 @@ export async function POST(req: NextRequest) {
             }
             return res.arrayBuffer()
           })
+          status.set({
+            status: 'Storing token image',
+            creator: user.user.user_id,
+            address: to,
+            tokenId,
+            createdAt: Timestamp.fromDate(new Date()),
+            updatedAt: Timestamp.fromDate(new Date()),
+          })
           const blob = new Blob([buffer])
           return await w3Client.uploadFile(blob)
         }
@@ -120,7 +146,6 @@ export async function POST(req: NextRequest) {
       .catch((error) => {
         console.error('Errornect generating image:', error)
       })
-    const firestore = await getFirestore()
     const now = new Date()
     const data: IPDocJSON = clean({
       ...rest,
@@ -161,6 +186,10 @@ export async function POST(req: NextRequest) {
       account,
       chain: filecoinCalibration,
       transport: http(),
+    })
+    await status.update({
+      status: 'Minting IPDoc token',
+      updatedAt: Timestamp.fromDate(new Date()),
     })
     const mint = await wallet
       .writeContract({
