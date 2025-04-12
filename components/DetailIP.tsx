@@ -67,7 +67,7 @@ const DetailIP = ({
               className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all mb-4"
               priority
             />
-            <h1 className="text-3xl font-bold text-primary mb-2">Idea Details</h1>
+            <h1 className="text-3xl font-bold text-primary mb-2">{ideaData.name}</h1>
             <p className="text-white/70">
               Review your idea information and proceed to discovery
             </p>
@@ -77,10 +77,7 @@ const DetailIP = ({
         {/* Main idea card - only show when not loading and no error */}
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
           <CardHeader className="pb-4 border-b border-white/10">
-            <CardTitle className="text-2xl font-bold text-primary">
-              {ideaData.name}
-            </CardTitle>
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2 justify-center">
               {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (
                 ideaData.tags.map((tag, index) => (
                   <span
