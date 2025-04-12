@@ -17,7 +17,14 @@ import {
 
 // This is a placeholder for the actual login detection logic
 function HomeApp() {
+  // Log HomeApp component render
+  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] HomeApp component rendering`);
+  
   const { user, isInitialized } = useStytchUser()
+  
+  // Log auth state
+  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] HomeApp auth state:`, 
+    { isInitialized, hasUser: !!user });
   return (
     <>
       {' '}
@@ -131,13 +138,20 @@ function HomeApp() {
 }
 
 function RootHomeApp({ detectLogin = false }: { detectLogin?: boolean }) {
+  // Log RootHomeApp component render
+  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] RootHomeApp component rendering`, 
+    { detectLogin });
+
   if (detectLogin) {
+    console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] RootHomeApp rendering with AuthenticatedLayout`);
     return (
       <AuthenticatedLayout>
         <HomeApp />
       </AuthenticatedLayout>
     )
   }
+  
+  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] RootHomeApp rendering without AuthenticatedLayout`);
   return <HomeApp />
 }
 
