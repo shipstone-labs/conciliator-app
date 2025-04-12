@@ -22,7 +22,7 @@ import // createLitClient,
 import { getUser } from '../stytch'
 import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
-import { cidAsURL, type IPDoc } from '@/lib/internalTypes'
+import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import { Timestamp } from 'firebase-admin/firestore'
 
 export const runtime = 'nodejs'
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       })
     const firestore = await getFirestore()
     const now = new Date()
-    const data: IPDoc = clean({
+    const data: IPDocJSON = clean({
       ...rest,
       name: _name,
       description,
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
         ),
         hash: downSampledEncrypted.dataToEncryptHash,
       },
-    }) as IPDoc
+    }) as IPDocJSON
     const doc = await firestore.collection('ip').doc(id)
     const wallet = createWalletClient({
       account,
@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
           ...rest,
           encrypted: data.encrypted,
           downSampled: data.downSampled,
-          createdAt: Timestamp.fromDate(now),
+          createdAt: now.toISOString(),
           creator: to,
         },
       },

@@ -13,7 +13,7 @@ import { completionAI, genSession, /* abi, */ getModel } from '../utils'
 // Dynamic import for the template file
 import templateFile from './system.hbs'
 import { getFirestore } from '../firebase'
-import { cidAsURL, type IPDoc } from '@/lib/internalTypes'
+import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import {
   createLitClient,
   LIT_ABILITY,
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     const fs = await getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
-    const data = doc.data() as IPDoc
+    const data = doc.data() as IPDocJSON
     if (!data) {
       throw new Error('Document not found')
     }

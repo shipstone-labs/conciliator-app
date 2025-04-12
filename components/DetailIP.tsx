@@ -13,6 +13,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP } from '@/hooks/useIP'
+import { formatDate } from '@/lib/types'
 
 const DetailIP = ({
   docId,
@@ -96,8 +97,7 @@ const DetailIP = ({
                   Created On
                 </h3>
                 <p className="text-white/90">
-                  {ideaData.createdAt?.toDate?.()?.toLocaleDateString?.() ||
-                    'Unknown Date'}
+                  {formatDate(ideaData.createdAt)}
                 </p>
               </div>
               <div>

@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { getFirestore } from '../firebase'
 import { getUser } from '@/app/api/stytch'
-import type { IPDoc } from '@/lib/internalTypes'
+import type { IPDocJSON } from '@/lib/internalTypes'
 import { Timestamp } from 'firebase-admin/firestore'
 
 export const runtime = 'nodejs'
@@ -62,7 +62,9 @@ export async function POST(req: NextRequest) {
       }
 
       // Return idea data from Firestore
-      const ideaData: IPDoc | undefined = ideaDoc.data() as IPDoc | undefined
+      const ideaData: IPDocJSON | undefined = ideaDoc.data() as
+        | IPDocJSON
+        | undefined
       console.log(`Retrieved idea data for tokenId: ${tokenId}`)
 
       // Format the response with defined fallbacks for any missing fields

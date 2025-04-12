@@ -20,6 +20,7 @@ import {
   Shield,
 } from 'lucide-react'
 import { Timestamp } from 'firebase/firestore'
+import { formatDate } from '@/lib/types'
 
 export default function EnhancedDetailPage() {
   const router = useRouter()
@@ -113,7 +114,7 @@ export default function EnhancedDetailPage() {
 
                     <div className="flex items-center gap-2 text-white/70">
                       <Calendar className="h-4 w-4" />
-                      <span>Published on {ideaData.createdAt}</span>
+                      <span>Published on {formatDate(ideaData.createdAt)}</span>
                     </div>
 
                     <div className="flex items-center gap-2 text-white/70">

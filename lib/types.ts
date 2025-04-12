@@ -37,3 +37,26 @@ export function castToUIDoc(record: IPDocJSON | IPDoc): IPDoc {
     createdAt: castToTimestamp(record.createdAt as Timestamp),
   }
 }
+
+export function formatDate(_date: Timestamp | Date | string | number): string {
+  if (!_date) {
+    return '- no date -'
+  }
+  let date = _date
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }
+  if (typeof date === 'string' || typeof date === 'number') {
+    date = new Date(date)
+  } else if (date instanceof Timestamp) {
+    date = date.toDate()
+  } else if (date instanceof Date) {
+    // do nothing
+  }
+  return date.toLocaleString('en-US', options)
+}
