@@ -225,7 +225,7 @@ steps:
           touch /workspace/deployment_success
         fi
 # Add a final notification step to handle failures
-  - name: 'gcr.io/cloud-builders/curl'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyFailure
     waitFor: ['Build'] # This makes it run after the build step, regardless of build success
     entrypoint: bash
