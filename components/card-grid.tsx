@@ -12,7 +12,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useStytch } from '@stytch/nextjs'
-import { cidAsURL, type IPDoc } from '@/lib/types'
+import { cidAsURL, type IPDoc } from '@/lib/internalTypes'
 
 const itemsPerPage = 16 // 4 Cards per page
 

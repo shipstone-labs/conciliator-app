@@ -1,4 +1,4 @@
-import type { IPDoc } from '@/lib/types'
+import { castToUIDoc, type IPDoc } from '@/lib/types'
 import { doc, getDoc, getFirestore } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { bytesToString, hexToBytes } from 'viem'
@@ -15,7 +15,7 @@ export function useIP(_tokenId: string) {
     const fetchData = async () => {
       const docRef = await getDoc(doc(fs, 'ip', tokenId))
       if (docRef.exists()) {
-        setIdexData(docRef.data() as IPDoc)
+        setIdexData(castToUIDoc(docRef.data() as IPDoc))
       } else {
         setIdexData(undefined)
       }

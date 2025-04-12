@@ -134,6 +134,7 @@ const AppIP = () => {
           return encryptedContent
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
+      console.log(address)
       const body = {
         id,
         to: address,
@@ -142,7 +143,7 @@ const AppIP = () => {
           cid: '',
         },
         name,
-        content,
+        description,
         encrypted: {
           ...encrypted,
           unifiedAccessControlConditions,
@@ -151,7 +152,6 @@ const AppIP = () => {
           ...downSampledEncrypted,
           unifiedAccessControlConditions,
         },
-        description,
       }
       await fetch('/api/store', {
         method: 'POST',

@@ -19,6 +19,7 @@ import {
   DollarSign,
   Shield,
 } from 'lucide-react'
+import { Timestamp } from 'firebase/firestore'
 
 export default function EnhancedDetailPage() {
   const router = useRouter()
@@ -29,7 +30,7 @@ export default function EnhancedDetailPage() {
     title: 'Decentralized Carbon Credit Marketplace',
     description:
       'A blockchain-based platform that enables transparent trading of verified carbon credits, connecting carbon offset projects directly with businesses and individuals seeking to reduce their environmental footprint. The platform uses blockchain technology to track carbon credit ownership, retirement, and environmental impact with complete transparency and provides tools for project verification and impact measurement.',
-    createdAt: 'January 15, 2025',
+    createdAt: Timestamp.fromDate(new Date('2025-01-15')),
     creator: 'EcoBlock Foundation',
     category: 'Sustainability',
     tags: ['Blockchain', 'Carbon Credits', 'Climate Tech', 'Sustainability'],

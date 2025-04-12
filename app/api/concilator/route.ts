@@ -13,7 +13,7 @@ import { completionAI, genSession, /* abi, */ getModel } from '../utils'
 // Dynamic import for the template file
 import templateFile from './system.hbs'
 import { getFirestore } from '../firebase'
-import { cidAsURL, type IPDoc } from '@/lib/types'
+import { cidAsURL, type IPDoc } from '@/lib/internalTypes'
 import {
   createLitClient,
   LIT_ABILITY,

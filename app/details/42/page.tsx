@@ -19,6 +19,7 @@ import {
   DollarSign,
   Shield,
 } from 'lucide-react'
+import { Timestamp } from 'firebase/firestore'
 
 export default function EnhancedDetailPage() {
   const router = useRouter()
@@ -29,7 +30,7 @@ export default function EnhancedDetailPage() {
     title: 'Neuromorphic Computing Platform for Edge AI',
     description:
       'A hardware and software platform that mimics brain architecture for ultra-efficient AI processing at the edge. This system combines memristor-based computing elements with specialized neural network architectures to achieve 100x better energy efficiency compared to traditional GPUs, enabling advanced AI capabilities in resource-constrained environments like IoT devices, wearables, and autonomous vehicles.',
-    createdAt: 'March 14, 2025',
+    createdAt: Timestamp.fromDate(new Date('2025-03-14')),
     creator: 'NeuroEdge Systems',
     category: 'Artificial Intelligence',
     tags: ['Neuromorphic Computing', 'Edge AI', 'IoT', 'Energy Efficiency'],

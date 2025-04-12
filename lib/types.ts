@@ -1,32 +1,39 @@
-export type IPDoc = {
-  id: string // firestore doc id
-  name: string
-  description: string
-  creator: string // userId
-  category: string
-  tags: string[] // This wasn't populated yet.
-  metadata: {
-    tokenId: string
-    cid: string
-  }
-  image?: { cid: string; width: number; height: number; mimeType: string }
-  encrypted: {
-    cid: string
-    acl: string // JSON in here (firestore has problems with arrays in arrays)
-    hash: string
-  }
-  downSampled: {
-    cid: string
-    acl: string // JSON in here
-    hash: string
-  }
-  updatedAt: Date
-  createdAt: Date
+import { Timestamp } from 'firebase/firestore'
+import type { IPDocJSON } from './internalTypes'
+
+export type IPDoc = IPDocJSON & {
+  updatedAt: Timestamp
+  createdAt: Timestamp
 }
 
-export function cidAsURL(cid?: string) {
-  if (!cid) {
-    return undefined
+export function castToTimestamp(date: unknown): Timestamp {
+  if (date instanceof Timestamp) {
+    return date
   }
-  return `https://w3s.link/ipfs/${cid}`
+  if (typeof date === 'number') {
+    return new Timestamp(date, 0)
+  }
+  if (typeof date === 'string') {
+    return new Timestamp(Date.parse(date), 0)
+  }
+  if (
+    date &&
+    typeof date === 'object' &&
+    '_seconds' in date &&
+    '_nanoseconds' in date
+  ) {
+    return new Timestamp(
+      (date as { _seconds: number })._seconds,
+      (date as { _nanoseconds: number })._nanoseconds
+    )
+  }
+  return new Timestamp(0, 0)
+}
+
+export function castToUIDoc(record: IPDocJSON | IPDoc): IPDoc {
+  return {
+    ...record,
+    updatedAt: castToTimestamp(record.updatedAt as Timestamp),
+    createdAt: castToTimestamp(record.createdAt as Timestamp),
+  }
 }

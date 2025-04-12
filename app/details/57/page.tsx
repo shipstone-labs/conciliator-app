@@ -19,6 +19,7 @@ import {
   DollarSign,
   Shield,
 } from 'lucide-react'
+import { Timestamp } from 'firebase/firestore'
 
 export default function EnhancedDetailPage() {
   const router = useRouter()
@@ -29,7 +30,7 @@ export default function EnhancedDetailPage() {
     title: 'Synthetic Biology Platform for Carbon Capture',
     description:
       'A platform for engineering microorganisms that efficiently capture atmospheric carbon dioxide and convert it into valuable materials. This biotechnology solution uses directed evolution and computational design to create specialized bacteria that can sequester CO2 at rates exceeding natural processes by 50x, while producing biodegradable plastics, building materials, or fuel precursors as valuable byproducts.',
-    createdAt: 'February 28, 2025',
+    createdAt: Timestamp.fromDate(new Date('2025-02-28')),
     creator: 'BioCarbonTech',
     category: 'Biotechnology',
     tags: [

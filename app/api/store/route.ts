@@ -22,7 +22,7 @@ import // createLitClient,
 import { getUser } from '../stytch'
 import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
-import { cidAsURL, type IPDoc } from '@/lib/types'
+import { cidAsURL, type IPDoc } from '@/lib/internalTypes'
 import { Timestamp } from 'firebase-admin/firestore'
 
 export const runtime = 'nodejs'
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       to,
+      id,
       metadata: { tokenId } = {},
       encrypted,
       downSampledEncrypted,
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
       description,
       ...rest
     } = body
+    console.log('body', { to, id, name: _name, description, ...rest })
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`
     )
@@ -154,23 +156,24 @@ export async function POST(req: NextRequest) {
         hash: downSampledEncrypted.dataToEncryptHash,
       },
     }) as IPDoc
-    const doc = await firestore.collection('ip').doc(tokenId)
+    const doc = await firestore.collection('ip').doc(id)
     const wallet = createWalletClient({
       account,
       chain: filecoinCalibration,
       transport: http(),
     })
-    wallet
+    const mintHash = await wallet
       .writeContract({
         functionName: 'mint',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, tokenId, 1, '0x'],
+        args: [to, tokenId, 1, '0x'],
       })
-      .then((hash) => {
-        return waitForTransactionReceipt(wallet, {
+      .then(async (hash) => {
+        await waitForTransactionReceipt(wallet, {
           hash,
         })
+        return hash
       })
     const metadata = {
       name: _name,
@@ -181,7 +184,7 @@ export async function POST(req: NextRequest) {
           ...rest,
           encrypted: data.encrypted,
           downSampled: data.downSampled,
-          createdAt: now.toUTCString(),
+          createdAt: Timestamp.fromDate(now),
           creator: to,
         },
       },
@@ -193,27 +196,16 @@ export async function POST(req: NextRequest) {
       }
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
-    await wallet
-      .writeContract({
-        functionName: 'setTokenURI',
-        abi,
-        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [tokenId, cidAsURL(data.encrypted.cid)],
-      })
-      .then((hash) => {
-        return waitForTransactionReceipt(wallet, {
-          hash,
-        })
-      })
     const update = {
       ...data,
       metadata: {
         cid: metadataCid.toString(),
         tokenId,
+        transaction: mintHash,
       },
     }
     console.log('update', update)
-    await doc.update(update)
+    await doc.set(update)
     return new Response(JSON.stringify({ ...data, id: doc.id }), {
       headers: { 'Content-Type': 'application/json' },
     })

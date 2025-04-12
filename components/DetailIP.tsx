@@ -24,13 +24,13 @@ const DetailIP = ({
   const router = useRouter()
 
   const ideaData = useIP(docId)
-
+  console.log(ideaData)
   // For now, use placeholder data
   // const ideaData = {
   //   title: "Advanced AI-Powered Content Generator",
   //   description:
   //     "A sophisticated AI system that generates high-quality content tailored to specific industries and audiences. The system leverages cutting-edge machine learning models to understand context, brand voice, and audience preferences to create engaging articles, social media posts, and marketing materials that resonate with target demographics.",
-  //   createdAt: new Date().toLocaleDateString(),
+  //   createdAt: Timestamp.fromDate(new Date()),
   //   creator: "Demo User",
   //   category: "Artificial Intelligence",
   //   tags: ["AI", "Content Creation", "Machine Learning", "Marketing"],
@@ -96,7 +96,8 @@ const DetailIP = ({
                   Created On
                 </h3>
                 <p className="text-white/90">
-                  {ideaData.createdAt?.toLocaleDateString?.() || 'Unknown Date'}
+                  {ideaData.createdAt?.toDate?.()?.toLocaleDateString?.() ||
+                    'Unknown Date'}
                 </p>
               </div>
               <div>
