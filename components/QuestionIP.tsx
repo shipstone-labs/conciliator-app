@@ -33,13 +33,15 @@ const QuestionIP = ({
   onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
   const router = useRouter()
-  const ideaData = useIP(docId) // Get idea data for context
+  // Only call useIP once and use it for both references
+  const ipDoc = useIP(docId)
+  // Use the same data for ideaData reference
+  const ideaData = ipDoc
   const [appState, setAppState] = useState(AppStates.LOADING)
   const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState<
     { role: 'user' | 'assistant' | 'system'; content: string }[]
   >([])
-  const ipDoc = useIP(docId)
   const stytchClient = useStytch()
 
   useEffect(() => {
