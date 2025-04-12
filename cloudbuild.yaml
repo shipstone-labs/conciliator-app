@@ -89,10 +89,11 @@ steps:
         docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
 
         export DOCKER_BUILDKIT=1
-        if ! docker build \
-          --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
+        if ! docker buildx build \
+          --push=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
           --cache-to=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG,mode=max,image-manifest=true,oci-mediatypes=true \
+          --push=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
           --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
           --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
           --build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID \
@@ -107,19 +108,6 @@ steps:
           exit 0
         fi
 
-  # Push with commit SHA
-  - name: 'gcr.io/cloud-builders/docker'
-    id: Push
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        if [ -f /workspace/build_failed ]; then
-          echo "Build failed, skipping push"
-          exit 0
-        fi
-        docker push '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA'
-      
   # Tag and push with cache tag
   - name: 'gcr.io/cloud-builders/docker'
     id: TagForCache
