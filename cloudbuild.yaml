@@ -62,7 +62,7 @@ steps:
             -f "environment=cloud-run-$_DEPLOY_REGION" \
             -f "description=Deploy to Cloud Run" \
             -F auto_merge=false \
-            -F required_contexts=[])
+            -F 'required_contexts=[]')
           echo "Deployment payload: $$DEPLOYMENT_PAYLOAD"
           DEPLOYMENT_ID=$(echo "$$DEPLOYMENT_PAYLOAD" | grep -o '"id": [0-9]*' | head -1 | awk '{print $$2}')
           echo "Created deployment ID: $$DEPLOYMENT_ID"
