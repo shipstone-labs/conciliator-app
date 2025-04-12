@@ -204,7 +204,7 @@ export default function ChatUI({
               stytchClient?.session?.getTokens?.()?.session_jwt || ''
             }`,
           },
-          body: JSON.stringify({ messages, tokenId: doc.tokenId }),
+          body: JSON.stringify({ messages, id: doc.id }),
           signal,
         })
 
