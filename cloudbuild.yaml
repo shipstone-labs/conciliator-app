@@ -61,7 +61,7 @@ steps:
             -f "ref=$COMMIT_SHA" \
             -f "environment=cloud-run-$_DEPLOY_REGION" \
             -f "description=Deploy to Cloud Run" \
-            -F auto_merge=false)
+            -F auto_merge=false || echo "")
           echo "Deployment payload: $$DEPLOYMENT_PAYLOAD"
           DEPLOYMENT_ID=$(echo "$$DEPLOYMENT_PAYLOAD" | grep -o '"id": [0-9]*' | head -1 | awk '{print $$2}')
           echo "Created deployment ID: $$DEPLOYMENT_ID"
@@ -69,12 +69,14 @@ steps:
           # Save deployment ID for potential failure notification
           echo "$$DEPLOYMENT_ID" > /workspace/deployment_id
           
-          # Update deployment status to in_progress
-          gh api \
-            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
-            -X POST \
-            -F state=in_progress \
-            -f description="Building Container..."
+          if [[ "$$DEPLOYMENT_ID" != "" ]]; then
+            # Update deployment status to in_progress
+            gh api \
+              repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
+              -X POST \
+              -F state=in_progress \
+              -f description="Building Container..."
+          fi
         fi
 
   # Build with cache
@@ -166,12 +168,14 @@ steps:
           
           DEPLOYMENT_ID=$(cat /workspace/deployment_id)
           
-          # Update deployment status to in_progress
-          gh api \
-            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
-            -X POST \
-            -F state=in_progress \
-            -f description="Deploying Container..."
+          if [[ "$$DEPLOYMENT_ID" != "" ]]; then
+            # Update deployment status to in_progress
+            gh api \
+              repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
+              -X POST \
+              -F state=in_progress \
+              -f description="Deploying Container..."
+          fi
         fi
 
         # Execute the deploy command with dynamic tag
@@ -245,12 +249,14 @@ steps:
             # Create deployment status if a deployment was created
             if [[ -f /workspace/deployment_id ]]; then
               DEPLOYMENT_ID=$(cat /workspace/deployment_id)
-              gh api \
-                repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
-                -X POST \
-                -F state=failure \
-                -f description="Deployment failed" \
-                -f log_url="$$BUILD_URL"
+              if [[ "$$DEPLOYMENT_ID" != "" ]]; then
+                gh api \
+                  repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
+                  -X POST \
+                  -F state=failure \
+                  -f description="Deployment failed" \
+                  -f log_url="$$BUILD_URL"
+              fi
             fi
           fi
         fi
