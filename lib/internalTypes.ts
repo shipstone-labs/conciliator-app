@@ -8,7 +8,8 @@ export type IPDocJSON = {
   metadata: {
     tokenId: `0x${string}`
     cid: string
-    transaction: `0x${string}`
+    mint: `0x${string}`
+    transfer: `0x${string}`
   }
   image?: { cid: string; width: number; height: number; mimeType: string }
   encrypted: {

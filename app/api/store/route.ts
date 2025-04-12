@@ -162,12 +162,25 @@ export async function POST(req: NextRequest) {
       chain: filecoinCalibration,
       transport: http(),
     })
-    const mintHash = await wallet
+    const mint = await wallet
       .writeContract({
         functionName: 'mint',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [to, tokenId, 1, '0x'],
+        args: [account.address, tokenId, 1, '0x'],
+      })
+      .then(async (hash) => {
+        await waitForTransactionReceipt(wallet, {
+          hash,
+        })
+        return hash
+      })
+    const transfer = await wallet
+      .writeContract({
+        functionName: 'transferSingle',
+        abi,
+        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+        args: [account.address, account.address, to, tokenId, 1],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -201,7 +214,8 @@ export async function POST(req: NextRequest) {
       metadata: {
         cid: metadataCid.toString(),
         tokenId,
-        transaction: mintHash,
+        mint,
+        transfer,
       },
     }
     console.log('update', update)
