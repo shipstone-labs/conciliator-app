@@ -75,23 +75,8 @@ function HomeApp() {
               </ul>
             </div>
             <p className="mt-6 text-lg leading-relaxed text-white/90">
-              SafeIdea leverages technology within the{' '}
-              <a
-                href="https://fil.org/ecosystem-explorer"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent font-semibold hover:underline"
-              >
-                Filecoin ecosystem
-              </a>
-              . We&apos;re using tokens from the Filecoin system,
-              Storacha&apos;s file storage tools and Lilypad&apos;s AI modules.
-              We&apos;re using LIT Protocol for encryption, which is integrated
-              with Storacha.
-              <p className="mt-4 text-lg leading-relaxed text-white/90">
-                SafeIdea is an open source project, necessary if you want to
-                make sure the developers don&apos;t know about your secrets.
-              </p>
+              SafeIdea is an open source project, necessary if you want to
+              make sure the developers don&apos;t know about your secrets.
             </p>
             <div className="mt-6 text-lg leading-relaxed text-white/90">
               SafeIdea plans to launch commercially in late 2025. Want early
