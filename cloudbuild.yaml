@@ -86,12 +86,19 @@ steps:
         CACHE_TAG=$$(cat /workspace/cache_tag.txt)
 
         # Pull the cache image if it exists (won't fail if it doesn't)
-        docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
+        FROM_CACHE=""
+        if docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:$$CACHE_TAG;
+        then
+          echo "Cache image pulled successfully"
+          FROM_CACHE="--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:$$CACHE_TAG"
+        else
+          echo "Cache image not found, proceeding without it"
+        fi
 
         export DOCKER_BUILDKIT=1
         if ! docker buildx build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
-          --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
+          $$FROM_CACHE \
           --cache-to=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG,mode=max,image-manifest=true,oci-mediatypes=true \
           --push \
           --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
@@ -108,19 +115,19 @@ steps:
           exit 0
         fi
 
-  # Tag and push with cache tag
-  - name: 'gcr.io/cloud-builders/docker'
-    id: TagForCache
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        if [ -f /workspace/build_failed  ]; then
-          echo "Build failed, skipping tag"
-          exit 0
-        fi
-        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
-        docker push $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
+  # # Tag and push with cache tag
+  # - name: 'gcr.io/cloud-builders/docker'
+  #   id: TagForCache
+  #   entrypoint: bash
+  #   args:
+  #     - -c
+  #     - |
+  #       if [ -f /workspace/build_failed  ]; then
+  #         echo "Build failed, skipping tag"
+  #         exit 0
+  #       fi
+  #       CACHE_TAG=$$(cat /workspace/cache_tag.txt)
+  #       docker push $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: Deploy
