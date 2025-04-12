@@ -60,7 +60,7 @@ const DetailIP = ({
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center">
             <Image
-              src={ideaData.image?.cid ? cidAsURL(ideaData.image.cid) : '/svg/Black+Yellow.svg'}
+              src={ideaData.image?.cid ? (cidAsURL(ideaData.image.cid) || '/svg/Black+Yellow.svg') : '/svg/Black+Yellow.svg'}
               alt={ideaData.name || 'Idea Image'}
               width={160}
               height={160}
