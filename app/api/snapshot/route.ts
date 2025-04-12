@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 // import { abi } from "../utils";
 // import { createWalletClient, decodeEventLog, http } from "viem";
-import type { IPDoc } from '@/lib/types'
+import type { IPDocJSON } from '@/lib/internalTypes'
 import { getFirestore } from '../firebase'
 import { createAsAgent } from '@/packages/web-storage-wrapper/dist'
 // import { createWalletClient, http } from "viem";
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const { id, messages } = body
     const fs = await getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
-    const data = doc.data() as IPDoc
+    const data = doc.data() as IPDocJSON
 
     const blob = new Blob([
       new TextEncoder().encode(

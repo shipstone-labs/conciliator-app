@@ -12,7 +12,8 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useStytch } from '@stytch/nextjs'
-import { cidAsURL, type IPDoc } from '@/lib/types'
+import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
+import { castToUIDoc } from '@/lib/types'
 
 const itemsPerPage = 16 // 4 Cards per page
 
@@ -20,7 +21,7 @@ const CardGrid = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [imageWidth, setImageWidth] = useState(200) // Default width
 
-  const [items, setItems] = useState<IPDoc[]>([])
+  const [items, setItems] = useState<IPDocJSON[]>([])
   const [loaded, setLoaded] = useState(false)
   const [loading, setLoading] = useState(false)
   const stytchClient = useStytch()
@@ -47,7 +48,9 @@ const CardGrid = () => {
         console.log(await response.text())
         throw new Error('Failed to retrieve items')
       }
-      const data = ((await response.json()) || []) as IPDoc[]
+      const data = ((await response.json()) || []).map((item: IPDocJSON) =>
+        castToUIDoc(item)
+      )
       setItems([...items, ...data])
       setLoaded(true)
     },

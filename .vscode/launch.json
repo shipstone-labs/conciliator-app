@@ -5,6 +5,15 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch verify",
+      "request": "launch",
+      "runtimeArgs": ["hardhat", "run", "scripts/verify2.js"],
+      "runtimeExecutable": "npx",
+      "cwd": "${workspaceFolder}/hardhat",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    },
+    {
       "name": "Launch via pnpm",
       "request": "launch",
       "runtimeArgs": ["dev"],

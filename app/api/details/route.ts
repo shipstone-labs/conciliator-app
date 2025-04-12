@@ -1,6 +1,5 @@
 import type { NextRequest } from 'next/server'
 import { getFirestore } from '../firebase'
-import { getUser } from '@/app/api/stytch'
 import type { IPDoc } from '@/lib/types'
 
 export const runtime = 'nodejs'
@@ -49,7 +48,7 @@ export async function POST(req: NextRequest) {
           name: `Idea #${tokenId}`,
           description:
             'This is a development placeholder for an idea that was created before database integration.',
-          createdAt: new Date().toLocaleDateString(),
+          createdAt: Timestamp.fromDate(new Date()),
           creator: 'Current User',
           category: 'Intellectual Property',
           tags: ['Innovation', 'Technology', 'IP'],
@@ -61,7 +60,9 @@ export async function POST(req: NextRequest) {
       }
 
       // Return idea data from Firestore
-      const ideaData: IPDoc | undefined = ideaDoc.data() as IPDoc | undefined
+      const ideaData: IPDocJSON | undefined = ideaDoc.data() as
+        | IPDocJSON
+        | undefined
       console.log(`Retrieved idea data for tokenId: ${tokenId}`)
 
       // Format the response with defined fallbacks for any missing fields
