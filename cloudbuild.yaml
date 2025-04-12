@@ -100,7 +100,7 @@ steps:
           .
         then
           echo "Build failed"
-          echo "failed" > /workspace/build_status
+          touch /workspace/failed
           exit 0
         fi
 
@@ -111,7 +111,7 @@ steps:
     args:
       - -c
       - |
-        if [ "$(cat /workspace/build_status)" == "failed" ]; then
+        if [ -f /workspace/build_failed ]; then
           echo "Build failed, skipping push"
           exit 0
         fi
@@ -124,7 +124,7 @@ steps:
     args:
       - -c
       - |
-        if [ "$(cat /workspace/build_status)" == "failed" ]; then
+        if [ -f /workspace/build_failed  ]; then
           echo "Build failed, skipping tag"
           exit 0
         fi
@@ -139,7 +139,7 @@ steps:
     args:
       - -c
       - |
-        if [ "$(cat /workspace/build_status)" == "failed" ]; then
+        if [ -f /workspace/build_failed ]; then
           echo "Build failed, skipping deploy"
           exit 0
         fi
