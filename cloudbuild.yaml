@@ -210,14 +210,16 @@ steps:
           # Build URL for logs
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
           
-          # Update deployment status to success with deployment URL
-          gh api \
-            repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
-            -X POST \
-            -F state=success \
-            -f "description=Deployed to Cloud Run" \
-            -f "environment_url=$$REVISION_URL" \
-            -f log_url="$$BUILD_URL"
+          if [[ "$$DEPLOYMENT_ID" != "" ]]; then
+            # Update deployment status to success
+            gh api \
+              repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments/$$DEPLOYMENT_ID/statuses \
+              -X POST \
+              -F state=success \
+              -f description="Deployed to Cloud Run" \
+              -f environment_url=$$REVISION_URL \
+              -f log_url="$$BUILD_URL"
+          fi
           
           # Also post a comment for easier access
           gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)"
