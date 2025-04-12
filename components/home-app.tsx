@@ -29,15 +29,15 @@ function HomeApp() {
     <>
       {' '}
       {/* Logout button removed - now in hamburger menu */}
-      {/* Top-right Auth Button (below menubar) */}
-      {!isInitialized ? null : !user ? (
+      {/* Top-right Auth Button (below menubar) - COMMENTED OUT TO TEST HYDRATION */}
+      {/* {!isInitialized ? null : !user ? (
         <div className="fixed top-20 right-4 z-20">
           <AuthButton
             text="Sign In / Register"
             className="bg-primary hover:bg-primary/80 text-black font-medium rounded-xl shadow-lg hover:shadow-xl hover:scale-105"
           />
         </div>
-      ) : null}
+      ) : null} */}
       <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
         <Logo />
 
@@ -109,9 +109,10 @@ function HomeApp() {
           </CardContent>
         </Card>
 
-        {/* Button Section */}
+        {/* Button Section - COMMENTED OUT CONDITIONAL RENDERING TO TEST HYDRATION */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
-          {
+          {/* No buttons shown during initial render for consistent hydration */}
+          {/* {
             !isInitialized ? (
               <Loading />
             ) : isInitialized && user ? (
@@ -129,8 +130,8 @@ function HomeApp() {
                   Explore Ideas
                 </Link>
               </>
-            ) : null /* Removed AuthButton from here */
-          }
+            ) : null 
+          } */}
         </div>
       </div>
     </>
