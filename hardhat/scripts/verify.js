@@ -81,22 +81,23 @@ async function resolveSolidityImports(entryFilePath) {
 // Example Usage
 ;(async () => {
   try {
-    const entryFilePath = './contracts/IPDocV2.sol' // Replace with your entry Solidity file
+    const entryFilePath = './contracts/IPDocV7.sol' // Replace with your entry Solidity file
     // const result = await resolveSolidityImports(entryFilePath);
 
-    // Rename the entry file key to "MyContract.sol"
-    // const entryFileName = path.basename(entryFilePath);
-    // result.sourceFiles[entryFileName] = result.sourceFiles[entryFilePath];
-    // delete result.sourceFiles[entryFilePath];
     const data = JSON.parse(
       fs.readFileSync(
-        'artifacts/build-info/6dc82e58c9fb68116d49bc17662acac2.json',
+        'artifacts/build-info/96d77622737cf1f6b542c4574793ce44.json',
         'utf8'
       )
     )
+    // Rename the entry file key to "MyContract.sol"
+    const entryFileName = path.basename(entryFilePath);
+    data.input.sources[entryFileName] = data.input.sources[entryFilePath];
+    delete data.input.sources[entryFilePath];
+
     const body = JSON.stringify(
       {
-        address: '0xdDaD7109e0656d788344b3D41722d4A17bE2470B',
+        address: '0xB6Bf914f3E25c49A26C19A51e316b8aB1560F2fB',
         language: 'Solidity',
         compiler: 'v0.8.20+commit.a1b79de6',
         optimize: false,

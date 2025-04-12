@@ -8,7 +8,7 @@ import {
   // imageAI,
   // pinata,
 } from '../utils'
-import { createWalletClient, http } from 'viem'
+import { createWalletClient, http, parseEventLogs } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
 import { waitForTransactionReceipt } from 'viem/actions'
@@ -95,6 +95,17 @@ export async function POST(req: NextRequest) {
       createdAt: Timestamp.fromDate(new Date()),
       updatedAt: Timestamp.fromDate(new Date()),
     })
+    async function setStatus(message: string, extra?: Record<string, unknown>) {
+      await status.update({
+        status: message,
+      })
+      await auditTable.add({
+        status: message,
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+        ...extra,
+      })
+    }
     const encryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(encrypted))],
       {
@@ -102,10 +113,7 @@ export async function POST(req: NextRequest) {
       }
     )
     const encryptedCid = await w3Client.uploadFile(encryptedBlob)
-    await status.update({
-      status: 'Storing downsampled document',
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus('Storing downsampled document in storacha')
     const downSampledEncryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(downSampledEncrypted))],
       {
@@ -115,10 +123,7 @@ export async function POST(req: NextRequest) {
     const downSampledEncryptedCid = await w3Client.uploadFile(
       downSampledEncryptedBlob
     )
-    await status.update({
-      status: 'Generating token image',
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus('Generating token image')
     await auditTable.add({
       status: 'Generating token image',
       createdAt: Timestamp.fromDate(new Date()),
@@ -145,10 +150,7 @@ export async function POST(req: NextRequest) {
             }
             return res.arrayBuffer()
           })
-          await status.update({
-            status: 'Storing token image',
-            updatedAt: Timestamp.fromDate(new Date()),
-          })
+          await setStatus('Storing token image')
           const blob = new Blob([buffer])
           return await w3Client.uploadFile(blob)
         }
@@ -197,21 +199,36 @@ export async function POST(req: NextRequest) {
       chain: filecoinCalibration,
       transport: http(),
     })
-    await status.update({
-      status: 'Minting IPDocV2 token',
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
-    await auditTable.add({
-      status: 'Minting IPDocV2 token',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus(`Creating native token ID for ${tokenId}`)
+    const nativeTokenId = await wallet
+      .writeContract({
+        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+        abi,
+        functionName: 'createId',
+        args: [tokenId],
+      })
+      .then(async (hash) => {
+        const { logs } = await waitForTransactionReceipt(wallet, {
+          hash,
+        })
+        const decoded = parseEventLogs({
+          logs,
+          abi,
+          eventName: 'IdCreated',
+        })
+        return (
+          (decoded[0] as unknown as { args: unknown })?.args as {
+            tokenId: bigint
+          }
+        ).tokenId
+      })
+    await setStatus(`Minting IPDocV2 token ${nativeTokenId}`)
     const mint = await wallet
       .writeContract({
         functionName: 'mint',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, tokenId, 1, '0x'],
+        args: [account.address, nativeTokenId, 1, '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -219,21 +236,13 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
-    await status.update({
-      status: `Transferring token to you ${to}`,
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
-    await auditTable.add({
-      status: `Transferring token to you ${to}`,
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus(`Transferring token ${nativeTokenId} to you ${to}`)
     const transfer = await wallet
       .writeContract({
         functionName: 'safeTransferFrom',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, to, tokenId, 1, '0x'],
+        args: [account.address, to, nativeTokenId, 1, '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -241,15 +250,7 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
-    await status.update({
-      status: 'Storing token metadata',
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
-    await auditTable.add({
-      status: 'Storing token metadata',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus('Storing token metadata')
     const metadata = {
       name: _name,
       description,
@@ -257,6 +258,7 @@ export async function POST(req: NextRequest) {
       properties: {
         properties: {
           ...rest,
+          tokenId,
           encrypted: data.encrypted,
           downSampled: data.downSampled,
           createdAt: now.toISOString(),
@@ -285,7 +287,7 @@ export async function POST(req: NextRequest) {
         functionName: 'setTokenURI',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [tokenId, cidAsURL(metadataCid.toString())],
+        args: [nativeTokenId, cidAsURL(metadataCid.toString())],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -293,34 +295,19 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
-    await status.update({
-      status: 'Updating database',
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
-    await auditTable.add({
-      status: 'Updating database',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus('Updating database')
     const updateData = {
       ...data,
       metadata: {
         cid: metadataCid.toString(),
         tokenId,
+        nativeTokenId: `${nativeTokenId}`,
         mint,
         transfer,
         update,
       },
     }
-    await status.update({
-      status: 'Finished',
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
-    await auditTable.add({
-      status: 'Create Finished',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus('Finished')
     console.log('update', updateData)
     await doc.set(updateData)
     return new Response(JSON.stringify({ ...data, id: doc.id }), {

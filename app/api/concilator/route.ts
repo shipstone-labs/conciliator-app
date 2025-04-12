@@ -23,6 +23,7 @@ import {
 } from 'lit-wrapper'
 // import { SignableMessage } from "viem";
 import { privateKeyToAccount } from 'viem/accounts'
+import { Timestamp } from 'firebase-admin/firestore'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
 
     const fs = await getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
+    const auditTable = fs.collection('audit').doc(id).collection('details')
     const data = doc.data() as IPDocJSON
     if (!data) {
       throw new Error('Document not found')
@@ -151,7 +153,7 @@ ${data.description}`,
       global.document = { dispatchEvent: (_event: Event) => true } as Document
       await litClient.connect()
       const url = cidAsURL(data.downSampled.cid)
-      const encrypted: {
+      const downSampled: {
         ciphertext: string
         dataToEncryptHash: string
         unifiedAccessControlConditions: unknown
@@ -165,12 +167,12 @@ ${data.description}`,
         : undefined
       if (
         data.downSampled.acl !==
-        JSON.stringify(encrypted.unifiedAccessControlConditions)
+        JSON.stringify(downSampled.unifiedAccessControlConditions)
       ) {
         throw new Error('Access control conditions do not match')
       }
-      if (data.downSampled.hash !== encrypted.dataToEncryptHash) {
-        console.log(data.downSampled.hash, encrypted.dataToEncryptHash)
+      if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
+        console.log(data.downSampled.hash, downSampled.dataToEncryptHash)
         throw new Error('Hash does not match')
       }
       const accsInput =
@@ -203,14 +205,55 @@ ${data.description}`,
         },
       ])
 
-      console.log('encrypted', {
-        ...encrypted,
-        ciphertext: `${encrypted.ciphertext.slice(0, 100)}...`,
+      console.log(
+        'downSampled',
+        JSON.stringify(
+          {
+            user: account.address,
+            ...downSampled,
+            ciphertext: `${downSampled.ciphertext.slice(0, 100)}...`,
+          },
+          null,
+          2
+        )
+      )
+
+      const output = await litClient.executeJs({
+        code: `async function run() {
+  try {
+    const input = await Lit.Actions.decryptAndCombine({
+      accessControlConditions,
+      ciphertext,
+      dataToEncryptHash,
+      chain,
+    });
+
+    Lit.Actions.setResponse({
+      response: JSON.stringify({
+        input
+      }),
+    });
+  } catch (error) {
+    console.error("Error during execution:", error);
+    Lit.Actions.setResponse({ response: error.message });
+  }
+}
+run();`,
+        // cid: CID,
+        sessionSigs,
+        jsParams: {
+          accessControlConditions: downSampled.unifiedAccessControlConditions,
+          ciphertext: downSampled.ciphertext,
+          dataToEncryptHash: downSampled.dataToEncryptHash,
+          chain: 'filecoin',
+        },
       })
+      console.log(output)
+
       const _decrypted = await litClient.decrypt({
-        accessControlConditions: JSON.parse(data.downSampled.acl),
-        ciphertext: encrypted.ciphertext,
-        dataToEncryptHash: encrypted.dataToEncryptHash,
+        accessControlConditions: downSampled.unifiedAccessControlConditions,
+        ciphertext: downSampled.ciphertext,
+        dataToEncryptHash: downSampled.dataToEncryptHash,
         chain: 'filecoin',
         sessionSigs,
       })
@@ -245,6 +288,15 @@ ${data.description}`,
     } else {
       messages.push({ content: 'Stop', role: 'assistant' })
     }
+    await auditTable.add({
+      status: 'Conciliator answered',
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+      data: {
+        question: messages.at(-2)?.content,
+        answer: messages.at(-1)?.content,
+      },
+    })
     return new Response(
       JSON.stringify({
         messages,

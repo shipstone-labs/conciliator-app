@@ -39,10 +39,18 @@ export type IPDocJSON = {
 }
 
 export type IPAuditJSON = {
+  id: string // firestore doc id
   status: string
   creator: string
   address: `0x${string}`
   tokenId: `0x${string}`
+  updatedAt: unknown
+  createdAt: unknown
+}
+
+export type IPAuditDetailsJSON = {
+  id: string // firestore doc id
+  status: string
   updatedAt: unknown
   createdAt: unknown
 }

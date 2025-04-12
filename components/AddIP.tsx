@@ -24,7 +24,6 @@ import type { IPAudit } from '@/lib/types'
 
 const AppIP = () => {
   const fb = getFirestore()
-
   // Removed user authentication check since it's handled by the main navigation
   const [content, setContent] = useState('')
   const [name, setName] = useState('')
@@ -57,6 +56,51 @@ const AppIP = () => {
   const [testTokenCounter, setTestTokenCounter] = useState(1000)
   const { litClient, sessionSigs } = useSession()
 
+  useEffect(() => {
+    const docId = '7HkK5fVayOAcijt6lhWR'
+    fetch('/api/prestore', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
+      },
+      body: JSON.stringify({ id: docId }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          console.error('Failed to fetch prestore data')
+          return
+        }
+        return res.json()
+      })
+      .then((doc) => {
+        console.log('fetched', doc)
+        fetch('/api/prestore', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
+          },
+          body: JSON.stringify({ id: docId }),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              console.error('Failed to fetch prestore data')
+              return
+            }
+            return res.json()
+          })
+          .then((doc) => {
+            console.log('fetched', doc)
+          })
+          .catch((error) => {
+            console.error('Error fetching prestore data:', error)
+          })
+      })
+      .catch((error) => {
+        console.error('Error fetching prestore data:', error)
+      })
+  }, [])
   useEffect(() => {
     if (docId) {
       const statusDoc = doc(fb, 'audit', docId)
@@ -114,14 +158,38 @@ const AppIP = () => {
         },
         { conditionType: 'operator', operator: 'or' },
         {
-          conditionType: 'evmBasic',
+          conditionType: 'evmContract',
           contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
-          standardContractType: 'ERC1155',
+          functionName: 'balanceOf',
+          functionParams: [':userAddress', BigInt(tokenId).toString()],
+          functionAbi: {
+            inputs: [
+              {
+                internalType: 'address',
+                name: 'account',
+                type: 'address',
+              },
+              {
+                internalType: 'uint256',
+                name: 'id',
+                type: 'uint256',
+              },
+            ],
+            name: 'balanceOf',
+            outputs: [
+              {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+              },
+            ],
+            stateMutability: 'view',
+            type: 'function',
+          },
           chain: 'filecoin',
-          method: 'balanceOf',
-          parameters: [':userAddress', tokenId],
           returnValueTest: {
-            comparator: '>=',
+            key: '',
+            comparator: '>',
             value: '0',
           },
         },
