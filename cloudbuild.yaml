@@ -43,9 +43,6 @@ steps:
         echo "$$CACHE_TAG" > /workspace/cache_tag.txt
         echo "Using cache tag: $$CACHE_TAG"
         
-        # Pull the cache image if it exists (won't fail if it doesn't)
-        docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
-
         if [[ "$_PR_NUMBER" != "" ]]; then
           # Install GitHub CLI if needed
           apt-get update -y && apt-get install -y gh
@@ -86,6 +83,9 @@ steps:
     args:
       - -c
       - |
+        # Pull the cache image if it exists (won't fail if it doesn't)
+        docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || 0
+
         CACHE_TAG=$$(cat /workspace/cache_tag.txt)
         if ! docker build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
