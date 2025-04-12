@@ -177,10 +177,10 @@ export async function POST(req: NextRequest) {
       })
     const transfer = await wallet
       .writeContract({
-        functionName: 'transferSingle',
+        functionName: 'safeTransferFrom',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, account.address, to, tokenId, 1],
+        args: [account.address, to, tokenId, 1, '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
