@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP } from '@/hooks/useIP'
 import { formatDate } from '@/lib/types'
+import { cidAsURL } from '@/lib/internalTypes'
 
 const DetailIP = ({
   docId,
@@ -55,12 +56,22 @@ const DetailIP = ({
   return (
     <div className="w-full py-8">
       <div className="max-w-4xl mx-auto space-y-8 px-4">
-        {/* Header with page title */}
+        {/* Header with page title and image */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Idea Details</h1>
-          <p className="text-white/70">
-            Review your idea information and proceed to discovery
-          </p>
+          <div className="flex flex-col items-center justify-center">
+            <Image
+              src={ideaData.image?.cid ? cidAsURL(ideaData.image.cid) : '/svg/Black+Yellow.svg'}
+              alt={ideaData.name || 'Idea Image'}
+              width={160}
+              height={160}
+              className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all mb-4"
+              priority
+            />
+            <h1 className="text-3xl font-bold text-primary mb-2">Idea Details</h1>
+            <p className="text-white/70">
+              Review your idea information and proceed to discovery
+            </p>
+          </div>
         </div>
 
         {/* Main idea card - only show when not loading and no error */}
