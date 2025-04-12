@@ -18,10 +18,13 @@ import { useSession } from '@/hooks/useSession'
 import type { EncryptResponse } from 'lit-wrapper'
 import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
-import { collection, doc, getFirestore } from 'firebase/firestore'
+import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import { bytesToHex } from 'viem'
+import type { IPAudit } from '@/lib/types'
 
 const AppIP = () => {
+  const fb = getFirestore()
+
   // Removed user authentication check since it's handled by the main navigation
   const [content, setContent] = useState('')
   const [name, setName] = useState('')
@@ -39,7 +42,9 @@ const AppIP = () => {
   const [ndaConfirmed, setNdaConfirmed] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const stytchClient = useStytch()
-
+  const [docId, setDocId] = useState('')
+  const [status, setStatus] = useState<IPAudit>()
+  const [localStatus, setLocalStatus] = useState('')
   // =====================================================
   // TEMPORARY TEST MODE - REMOVE FOR PRODUCTION
   // =====================================================
@@ -52,9 +57,19 @@ const AppIP = () => {
   const [testTokenCounter, setTestTokenCounter] = useState(1000)
   const { litClient, sessionSigs } = useSession()
 
+  useEffect(() => {
+    if (docId) {
+      const statusDoc = doc(fb, 'audit', docId)
+      return onSnapshot(statusDoc, (doc) => {
+        setStatus((doc.data() as IPAudit) || undefined)
+      })
+    }
+  }, [docId, fb])
+
   const handleStore = useCallback(async () => {
     setError(null)
     setIsLoading(true)
+    setLocalStatus('Encrypting your idea')
 
     // TESTING SHORTCUT: Check for test.md content
     // REMOVE THIS ENTIRE IF-BLOCK FOR PRODUCTION
@@ -79,10 +94,10 @@ const AppIP = () => {
       if (!litClient) {
         throw new Error('Lit client is not initialized')
       }
-      const fb = getFirestore()
       const ref = doc(collection(fb, 'ip'))
       const id = ref.id
       const tokenId = bytesToHex(new TextEncoder().encode(id))
+      setDocId(id)
       const { address } = sessionSigs || {}
       const unifiedAccessControlConditions = [
         {
@@ -122,9 +137,12 @@ const AppIP = () => {
           }
           return encryptedContent
         })
+      setLocalStatus('Downsampling your idea')
+      const downSampled = await downsample(content)
+      setLocalStatus('Encrypting downsampled content')
       const downSampledEncrypted = await litClient
         .encrypt({
-          dataToEncrypt: new TextEncoder().encode(downsample(content)),
+          dataToEncrypt: new TextEncoder().encode(downSampled),
           unifiedAccessControlConditions,
         })
         .then(async (encryptedContent: EncryptResponse) => {
@@ -166,6 +184,7 @@ const AppIP = () => {
           ndaRequired: ndaConfirmed,
         },
       }
+      setLocalStatus('Uploading encrypted content')
       await fetch('/api/store', {
         method: 'POST',
         headers: {
@@ -200,15 +219,10 @@ const AppIP = () => {
     dayPrice,
     weekPrice,
     monthPrice,
-    ndaConfirmed,
+    fb,
     stytchClient?.session,
     sessionSigs,
-    businessModel,
     ndaConfirmed,
-    dayPrice,
-    weekPrice,
-    monthPrice,
-    evaluationPeriod,
   ])
 
   const handleOpenFileDialog = useCallback(() => {
@@ -454,12 +468,26 @@ const AppIP = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating a site for your Idea. This may take a minute or two.
+                    <span className="text-white/90">
+                      {status?.status ||
+                        localStatus ||
+                        'Creating a site for your Idea. This may take a minute or two.'}
+                    </span>
                   </>
                 ) : (
                   'View Idea Page'
                 )}
               </Button>
+              {status?.status || localStatus ? (
+                <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+                  <div className="flex items-center">
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <span className="text-white/90">
+                      {status?.status || localStatus || ''}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             {/* File upload modal */}
@@ -698,7 +726,7 @@ const AppIP = () => {
                 </div>
               </div>
             </Modal>
-            
+
             {/* Hidden file input for the Select File button to reference */}
             <input
               type="file"

@@ -1,7 +1,12 @@
 import { Timestamp } from 'firebase/firestore'
-import type { IPDocJSON } from './internalTypes'
+import type { IPAuditJSON, IPDocJSON } from './internalTypes'
 
 export type IPDoc = IPDocJSON & {
+  updatedAt: Timestamp
+  createdAt: Timestamp
+}
+
+export type IPAudit = IPAuditJSON & {
   updatedAt: Timestamp
   createdAt: Timestamp
 }
@@ -28,6 +33,14 @@ export function castToTimestamp(date: unknown): Timestamp {
     )
   }
   return new Timestamp(0, 0)
+}
+
+export function castAuditToUIDoc(record: IPAuditJSON): IPAudit {
+  return {
+    ...record,
+    updatedAt: castToTimestamp(record.updatedAt),
+    createdAt: castToTimestamp(record.createdAt),
+  }
 }
 
 export function castToUIDoc(record: IPDocJSON | IPDoc): IPDoc {

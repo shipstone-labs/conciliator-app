@@ -4,7 +4,7 @@ const { Wallet } = require('ethers')
 async function main() {
   const wallet = new Wallet(process.env.PRIVATE_KEY)
   console.log(wallet.address)
-  const DocumentToken = await hre.ethers.getContractFactory('IPDoc')
+  const DocumentToken = await hre.ethers.getContractFactory('IPDocV2')
   const contract = await DocumentToken.deploy(wallet.address, wallet.address, wallet.address)
 
   await contract.deployed()

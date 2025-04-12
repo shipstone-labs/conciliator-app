@@ -896,6 +896,37 @@ export const abi = [
     inputs: [
       {
         internalType: 'string',
+        name: 'baseURI',
+        type: 'string',
+      },
+    ],
+    name: 'setBaseURI',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'string',
+        name: 'tokenURI',
+        type: 'string',
+      },
+    ],
+    name: 'setTokenURI',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'string',
         name: 'newuri',
         type: 'string',
       },
@@ -967,7 +998,7 @@ export const abi = [
     inputs: [
       {
         internalType: 'uint256',
-        name: '',
+        name: 'tokenId',
         type: 'uint256',
       },
     ],
