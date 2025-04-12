@@ -473,13 +473,6 @@ const AppIP = () => {
                   Select a text or markdown file containing your idea
                   description. This file will be encrypted and stored securely.
                 </p>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileSelection}
-                  accept=".txt,.md,.markdown,text/plain,text/markdown"
-                  className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl"
-                />
                 <div className="flex justify-end space-x-3 mt-4">
                   <Button
                     variant="ghost"
@@ -705,6 +698,15 @@ const AppIP = () => {
                 </div>
               </div>
             </Modal>
+            
+            {/* Hidden file input for the Select File button to reference */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelection}
+              accept=".txt,.md,.markdown,text/plain,text/markdown"
+              className="hidden"
+            />
           </CardContent>
         </Card>
       </div>
