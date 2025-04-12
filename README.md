@@ -2,6 +2,9 @@
 
 Conciliator is an open source project that explores how to best work with AI agents that search for IP. It provides an effective way to enable discovery of intellectual property while protecting the interests of the IP inventors and/or owners. The project focuses on balancing openness with appropriate protections.
 
+## Detail Cleanup Branch
+This branch is focused on cleaning up and enhancing the details page interface.
+
 This is an experimental part of the SafeIdea project that we're working on. Ping us at Cart@shipstone.com to learn more.
 
 Also, we wanted to demonstrate how different LLMs can talk to eachother. Here's an informative conversation with Google Gemini: https://docs.google.com/document/d/e/2PACX-1vQYlzI-nmG1LpdEigAESJ_njDDtylSxnsx40RXAo7mYkfib57Q1E6yfhNM5erBKr_SqM4uxjDSo42_j/pub
