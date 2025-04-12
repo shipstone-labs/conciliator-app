@@ -5,13 +5,11 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
-  CardFooter,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Loader2, X } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP } from '@/hooks/useIP'
 import { formatDate } from '@/lib/types'
 import { cidAsURL } from '@/lib/internalTypes'
@@ -19,6 +17,7 @@ import { Modal } from '@/components/ui/modal'
 
 const DetailIP = ({
   docId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNewIP,
 }: {
   docId: string
