@@ -454,7 +454,7 @@ const AppIP = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating your Idea page (this may take a minute or so)
+                    Creating a site for your Idea. This may take a minute or two.
                   </>
                 ) : (
                   'View Idea Page'
