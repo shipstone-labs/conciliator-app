@@ -92,6 +92,7 @@ steps:
         if ! docker build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
+          --cache-to=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG,mode=max,image-manifest=true,oci-mediatypes=true \
           --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
           --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
           --build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID \
@@ -99,7 +100,6 @@ steps:
           --build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS \
           --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
           --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
-          --build-arg BUILDKIT_INLINE_CACHE=1 \
           .
         then
           echo "Build failed"
@@ -132,8 +132,6 @@ steps:
           exit 0
         fi
         CACHE_TAG=$$(cat /workspace/cache_tag.txt)
-        docker tag $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
-          $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
         docker push $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
