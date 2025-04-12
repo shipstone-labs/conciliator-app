@@ -57,7 +57,7 @@ function HomeApp() {
                   <span className="font-medium text-primary">
                     Secure storage
                   </span>{' '}
-                  - Establishes proof that you had a specific idea at a
+                  - Proves that you had a specific idea at a
                   particular time
                 </li>
                 <li>
