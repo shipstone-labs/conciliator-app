@@ -89,17 +89,17 @@ const DetailIP = ({
 
           <CardContent className="pt-6 space-y-5">
             <div>
-              <h3 className="text-sm font-medium text-white/50 mb-2">
+              <h3 className="text-sm font-medium text-white/60 mb-2">
                 Description
               </h3>
               <p className="text-white/90 leading-relaxed">
-                {ideaData.description}
+                {ideaData.description || 'No description available.'}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
               <div>
-                <h3 className="text-sm font-medium text-white/50 mb-1">
+                <h3 className="text-sm font-medium text-white/60 mb-1">
                   Created On
                 </h3>
                 <p className="text-white/90">
@@ -107,7 +107,7 @@ const DetailIP = ({
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-white/50 mb-1">
+                <h3 className="text-sm font-medium text-white/60 mb-1">
                   Category
                 </h3>
                 <p className="text-white/90">{ideaData.category || 'Intellectual Property'}</p>
@@ -125,7 +125,7 @@ const DetailIP = ({
                   {/* Business Model */}
                   <div className="flex items-start gap-2">
                     <div className="bg-primary/20 p-1.5 rounded-full">
-                      <div className="w-4 h-4 text-primary">🔒</div>
+                      <div className="w-4 h-4 text-primary" role="img" aria-label="Lock">🔒</div>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">Business Model:</h4>
@@ -138,7 +138,7 @@ const DetailIP = ({
                   {/* Evaluation Period */}
                   <div className="flex items-start gap-2">
                     <div className="bg-primary/20 p-1.5 rounded-full">
-                      <div className="w-4 h-4 text-primary">⏱️</div>
+                      <div className="w-4 h-4 text-primary" role="img" aria-label="Timer">⏱️</div>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">Evaluation Period:</h4>
@@ -152,7 +152,7 @@ const DetailIP = ({
                   {ideaData.terms.pricing && (
                     <div className="mt-4">
                       <h4 className="text-sm font-medium text-white/70 mb-2">Pricing Options:</h4>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {/* Day Price */}
                         <div className="p-3 border border-white/10 rounded-xl bg-muted/20">
                           <p className="text-white/70 text-xs">One Day</p>
@@ -185,7 +185,7 @@ const DetailIP = ({
                     <div className="mt-4 p-3 border border-white/20 rounded-xl bg-muted/20">
                       <div className="flex items-center gap-2">
                         <div className="bg-primary/20 p-1.5 rounded-full">
-                          <div className="w-4 h-4 text-primary">📝</div>
+                          <div className="w-4 h-4 text-primary" role="img" aria-label="Document">📝</div>
                         </div>
                         <p className="text-white/90">
                           {ideaData.terms.ndaRequired 
@@ -200,38 +200,41 @@ const DetailIP = ({
             )}
           </CardContent>
 
-          <CardFooter className="flex justify-between items-center border-t border-white/10 pt-5">
+          <CardFooter className="flex flex-col sm:flex-row justify-between items-center border-t border-white/10 pt-5 gap-4">
             <Button
               onClick={onNewIP}
               variant="ghost"
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              aria-label="Create a new idea"
+              className="text-white/70 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-primary/40 focus:outline-none w-full sm:w-auto"
             >
               Create New Idea
             </Button>
 
             <Button
               onClick={goToDiscovery}
-              className="bg-primary hover:bg-primary/80 text-black font-medium py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 flex items-center gap-2"
+              aria-label="Explore this idea in Discovery mode"
+              className="bg-primary hover:bg-primary/80 text-black font-medium py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 flex items-center gap-2 focus:ring-2 focus:ring-primary focus:outline-none w-full sm:w-auto"
             >
-              Explore in Discovery <ArrowRight className="w-4 h-4" />
+              Explore in Discovery <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Button>
           </CardFooter>
         </Card>
 
         {/* Info card about the Discovery feature - only show when data is loaded */}
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl">
-          <CardContent className="p-5 flex gap-4 items-center">
-            <div className="bg-primary/20 p-3 rounded-full">
+          <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
+            <div className="bg-primary/20 p-3 rounded-full shrink-0">
               <Image
                 src="/svg/Black+Yellow.svg"
-                alt="Discovery"
+                alt="Discovery Mode Icon"
                 width={32}
                 height={32}
                 className="rounded-full"
+                priority
               />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-primary mb-1">
+              <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left">
                 Discovery Mode
               </h3>
               <p className="text-white/80 text-sm">
