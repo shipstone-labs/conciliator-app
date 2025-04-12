@@ -58,7 +58,7 @@ steps:
           DEPLOYMENT_PAYLOAD=$(gh api \
             repos/$_GITHUB_OWNER/$_GITHUB_REPO/deployments \
             -X POST \
-            -f "ref=PR #$_PR_NUMBER" \
+            -f "ref=$_HEAD_BRANCH" \
             -f "environment=cloud-run-$_DEPLOY_REGION" \
             -f "description=Deploy to Cloud Run" \
             -F auto_merge=false)
