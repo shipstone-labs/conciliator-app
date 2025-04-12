@@ -90,10 +90,10 @@ steps:
 
         export DOCKER_BUILDKIT=1
         if ! docker buildx build \
-          --push=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
+          --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
           --cache-to=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG,mode=max,image-manifest=true,oci-mediatypes=true \
-          --push=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
+          --push \
           --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
           --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
           --build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID \
