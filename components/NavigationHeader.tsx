@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Menu } from 'lucide-react'
 import { useStytch, useStytchUser } from '@stytch/nextjs'
 import { useRouter } from 'next/navigation'
+import { logHydration } from '@/lib/debugUtils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,20 @@ export default function NavigationHeader() {
   const { isLoggingOff, setLoggingOff } = useSession()
   const stytchClient = useStytch()
 
+  // Log the component initialization with auth state
+  logHydration('NavigationHeader', 'init', { 
+    isInitialized, 
+    hasUser: !!user,
+    isLoggingOff
+  });
+
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
+
+  // Log when component finishes rendering and cleanup
+  useEffect(() => {
+    logHydration('NavigationHeader', 'effect');
+    return () => logHydration('NavigationHeader', 'unmount');
+  }, []);
 
   // Only show account options if user is authenticated
   const isAuthenticated = isInitialized && user

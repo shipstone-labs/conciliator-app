@@ -3,6 +3,7 @@
 import { StytchProvider } from '@stytch/nextjs'
 import { createStytchUIClient } from '@stytch/nextjs/ui'
 import type { PropsWithChildren } from 'react'
+import { logHydration } from '@/lib/debugUtils'
 
 // Stytch client configuration
 const stytchOptions = {
@@ -21,5 +22,6 @@ const stytchClient = createStytchUIClient(
 )
 
 export default function AuthLayout({ children }: PropsWithChildren) {
+  logHydration('AuthLayout', 'init', { hasStytchClient: !!stytchClient });
   return <StytchProvider stytch={stytchClient}>{children}</StytchProvider>
 }

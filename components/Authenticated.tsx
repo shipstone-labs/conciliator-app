@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { logHydration } from '@/lib/debugUtils'
 import { AuthModal } from './AuthModal'
 import { useStytch, useStytchUser } from '@stytch/nextjs'
 import Loading from './Loading'
@@ -43,6 +44,9 @@ export default function Authenticated({
   requireLit = false,
   requireFirebase = true,
 }: PropsWithChildren<{ requireLit?: boolean; requireFirebase?: boolean }>) {
+  // Log component initialization with requirements
+  logHydration('Authenticated', 'init', { requireLit, requireFirebase });
+  
   const { user, isInitialized } = useStytchUser()
   const stytchClient = useStytch()
   const [isLoggingOff, setLoggingOff] = useState(false)
@@ -71,10 +75,18 @@ export default function Authenticated({
   )
 
   useEffect(() => {
+    // Log initial auth state
+    logHydration('Authenticated', 'effect-auth', { 
+      isInitialized,
+      hasUser: !!user
+    });
+    
     if (isInitialized && !user) {
       setShowAuthModal(true)
+      logHydration('Authenticated', 'showing-auth-modal');
     }
     if (isInitialized && user) {
+      logHydration('Authenticated', 'user-authenticated');
       setSessionSigs((state) =>
         amendLoggedIn({
           ...state,

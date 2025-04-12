@@ -4,8 +4,15 @@ import * as React from 'react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 import { cn } from '@/lib/utils'
+import { logHydration } from '@/lib/debugUtils'
 
-const TooltipProvider = TooltipPrimitive.Provider
+// Wrap the provider to add logging
+const TooltipProviderWithLogging = ({ children, ...props }: React.ComponentProps<typeof TooltipPrimitive.Provider>) => {
+  logHydration('TooltipProvider', 'render');
+  return <TooltipPrimitive.Provider {...props}>{children}</TooltipPrimitive.Provider>
+}
+
+const TooltipProvider = TooltipProviderWithLogging
 
 const Tooltip = TooltipPrimitive.Root
 
