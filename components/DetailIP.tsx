@@ -1,6 +1,6 @@
 'use client'
 
-import type { MouseEvent } from 'react'
+import { MouseEvent, useState } from 'react'
 import {
   Card,
   CardContent,
@@ -11,10 +11,11 @@ import {
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2, X } from 'lucide-react'
 import { useIP } from '@/hooks/useIP'
 import { formatDate } from '@/lib/types'
 import { cidAsURL } from '@/lib/internalTypes'
+import { Modal } from '@/components/ui/modal'
 
 const DetailIP = ({
   docId,
@@ -24,6 +25,8 @@ const DetailIP = ({
   onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
   const router = useRouter()
+  const [ndaChecked, setNdaChecked] = useState(false)
+  const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
 
   const ideaData = useIP(docId)
   console.log(ideaData)
@@ -134,8 +137,8 @@ const DetailIP = ({
                 <div className="space-y-4">
                   {/* Business Model */}
                   <div className="flex items-start gap-2">
-                    <div className="bg-primary/20 p-1.5 rounded-full">
-                      <div className="w-4 h-4 text-primary" role="img" aria-label="Lock">🔒</div>
+                    <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
+                      <div className="text-primary" role="img" aria-label="Lock">🔒</div>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">
@@ -151,8 +154,8 @@ const DetailIP = ({
 
                   {/* Evaluation Period */}
                   <div className="flex items-start gap-2">
-                    <div className="bg-primary/20 p-1.5 rounded-full">
-                      <div className="w-4 h-4 text-primary" role="img" aria-label="Timer">⏱️</div>
+                    <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
+                      <div className="text-primary" role="img" aria-label="Timer">⏱️</div>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">
@@ -168,13 +171,22 @@ const DetailIP = ({
                     </div>
                   </div>
 
-                  {/* Pricing Options - Show if pricing information exists */}
+                  {/* Access Options - Show if pricing information exists */}
                   {ideaData.terms.pricing && (
                     <div className="mt-4">
-                      <h4 className="text-sm font-medium text-white/70 mb-2">Pricing Options:</h4>
+                      <h4 className="text-sm font-medium text-white/70 mb-2">Access Options:</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {/* Day Price */}
-                        <div className="p-3 border border-white/10 rounded-xl bg-muted/20">
+                        <div 
+                          className={`p-3 border rounded-xl transition-all ${
+                            ndaChecked 
+                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50' 
+                              : 'border-white/10 bg-muted/20 opacity-50'
+                          }`}
+                          onClick={() => ndaChecked && setIsAccessModalOpen(true)}
+                          role={ndaChecked ? "button" : ""}
+                          tabIndex={ndaChecked ? 0 : -1}
+                        >
                           <p className="text-white/70 text-xs">One Day</p>
                           <p className="text-primary font-medium mt-1">
                             $
@@ -185,7 +197,16 @@ const DetailIP = ({
                         </div>
 
                         {/* Week Price */}
-                        <div className="p-3 border border-white/10 rounded-xl bg-muted/20">
+                        <div 
+                          className={`p-3 border rounded-xl transition-all ${
+                            ndaChecked 
+                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50' 
+                              : 'border-white/10 bg-muted/20 opacity-50'
+                          }`}
+                          onClick={() => ndaChecked && setIsAccessModalOpen(true)}
+                          role={ndaChecked ? "button" : ""}
+                          tabIndex={ndaChecked ? 0 : -1}
+                        >
                           <p className="text-white/70 text-xs">One Week</p>
                           <p className="text-primary font-medium mt-1">
                             $
@@ -196,7 +217,16 @@ const DetailIP = ({
                         </div>
 
                         {/* Month Price */}
-                        <div className="p-3 border border-white/10 rounded-xl bg-muted/20">
+                        <div 
+                          className={`p-3 border rounded-xl transition-all ${
+                            ndaChecked 
+                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50' 
+                              : 'border-white/10 bg-muted/20 opacity-50'
+                          }`}
+                          onClick={() => ndaChecked && setIsAccessModalOpen(true)}
+                          role={ndaChecked ? "button" : ""}
+                          tabIndex={ndaChecked ? 0 : -1}
+                        >
                           <p className="text-white/70 text-xs">One Month</p>
                           <p className="text-primary font-medium mt-1">
                             $
@@ -212,15 +242,31 @@ const DetailIP = ({
                   {/* NDA Information */}
                   {ideaData.terms.ndaRequired !== undefined && (
                     <div className="mt-4 p-3 border border-white/20 rounded-xl bg-muted/20">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-primary/20 p-1.5 rounded-full">
-                          <div className="w-4 h-4 text-primary" role="img" aria-label="Document">📝</div>
+                      <div className="flex items-start gap-2">
+                        <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
+                          <div className="text-primary text-xs" role="img" aria-label="Document">📝</div>
                         </div>
-                        <p className="text-white/90">
-                          {ideaData.terms.ndaRequired
-                            ? 'NDA Required: Access to this idea requires a signed Non-Disclosure Agreement.'
-                            : 'NDA Not Required: This idea can be accessed without a signed NDA.'}
-                        </p>
+                        <div>
+                          <p className="text-white/90 mb-2">
+                            {ideaData.terms.ndaRequired
+                              ? 'NDA Required: Access to this idea requires a signed Non-Disclosure Agreement.'
+                              : 'NDA Not Required: This idea can be accessed without a signed NDA.'}
+                          </p>
+                          {ideaData.terms.ndaRequired && (
+                            <div className="flex items-center mt-2">
+                              <input
+                                type="checkbox"
+                                id="nda-confirmation"
+                                checked={ndaChecked}
+                                onChange={(e) => setNdaChecked(e.target.checked)}
+                                className="mr-2 rounded border-white/20 bg-muted/30 text-primary"
+                              />
+                              <label htmlFor="nda-confirmation" className="text-white/80 text-sm">
+                                I have signed the required Non-Disclosure Agreement (NDA).
+                              </label>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -229,51 +275,65 @@ const DetailIP = ({
             )}
           </CardContent>
 
-          <CardFooter className="flex flex-col sm:flex-row justify-between items-center border-t border-white/10 pt-5 gap-4">
-            <Button
-              onClick={onNewIP}
-              variant="ghost"
-              aria-label="Create a new idea"
-              className="text-white/70 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-primary/40 focus:outline-none w-full sm:w-auto"
-            >
-              Create New Idea
-            </Button>
-
-            <Button
-              onClick={goToDiscovery}
-              aria-label="Explore this idea in Discovery mode"
-              className="bg-primary hover:bg-primary/80 text-black font-medium py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 flex items-center gap-2 focus:ring-2 focus:ring-primary focus:outline-none w-full sm:w-auto"
-            >
-              Explore in Discovery <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Button>
-          </CardFooter>
+          {/* Footer buttons removed */}
+          
         </Card>
 
-        {/* Info card about the Discovery feature - only show when data is loaded */}
-        <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl">
-          <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
-            <div className="bg-primary/20 p-3 rounded-full shrink-0">
-              <Image
-                src="/svg/Black+Yellow.svg"
-                alt="Discovery Mode Icon"
-                width={32}
-                height={32}
-                className="rounded-full"
-                priority
-              />
+        {/* Clickable Discovery Mode card */}
+        <div 
+          onClick={goToDiscovery}
+          className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          role="button"
+          tabIndex={0}
+          aria-label="Go to Discovery Mode"
+          onKeyDown={(e) => e.key === 'Enter' && goToDiscovery()}
+        >
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+            <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
+              <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
+                <Image
+                  src="/svg/Black+Yellow.svg"
+                  alt="Discovery Mode Icon"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  priority
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
+                  Discovery Mode <ArrowRight className="w-4 h-4 inline-block" aria-hidden="true" />
+                </h3>
+                <p className="text-white/80 text-sm">
+                  In Discovery mode, you can interact with AI agents to explore
+                  your idea&apos;s potential applications and receive valuable
+                  feedback from simulated stakeholders.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Access Option Modal */}
+        <Modal
+          isOpen={isAccessModalOpen}
+          onClose={() => setIsAccessModalOpen(false)}
+          title="Select Access Option"
+        >
+          <div className="space-y-4">
+            <p className="text-white/90">
+              Click on the Access Option you wish to acquire.
+            </p>
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                onClick={() => setIsAccessModalOpen(false)}
+                className="bg-primary hover:bg-primary/80 text-black font-medium px-5 py-2 rounded-xl"
+              >
+                Close
+              </Button>
             </div>
-            <div>
-              <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left">
-                Discovery Mode
-              </h3>
-              <p className="text-white/80 text-sm">
-                In Discovery mode, you can interact with AI agents to explore
-                your idea&apos;s potential applications and receive valuable
-                feedback from simulated stakeholders.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </Modal>
       </div>
     </div>
   )
