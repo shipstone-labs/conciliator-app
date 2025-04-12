@@ -17,14 +17,7 @@ import {
 
 // This is a placeholder for the actual login detection logic
 function HomeApp() {
-  // Log HomeApp component render
-  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] HomeApp component rendering`);
-  
   const { user, isInitialized } = useStytchUser()
-  
-  // Log auth state
-  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] HomeApp auth state:`, 
-    { isInitialized, hasUser: !!user });
   return (
     <>
       {' '}
@@ -100,12 +93,12 @@ function HomeApp() {
                 make sure the developers don&apos;t know about your secrets.
               </p>
             </p>
-            <p className="mt-6 text-lg leading-relaxed text-white/90">
+            <div className="mt-6 text-lg leading-relaxed text-white/90">
               SafeIdea plans to launch commercially in late 2025. Want early
               access? Apply now for our beta program. We&apos;re looking for
               inventors and creators ready to help us protect their intellectual
               property in the digital age.
-            </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -137,22 +130,12 @@ function HomeApp() {
   )
 }
 
-function RootHomeApp({ detectLogin = false }: { detectLogin?: boolean }) {
-  // Log RootHomeApp component render
-  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] RootHomeApp component rendering`, 
-    { detectLogin });
-
-  if (detectLogin) {
-    console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] RootHomeApp rendering with AuthenticatedLayout`);
-    return (
-      <AuthenticatedLayout>
-        <HomeApp />
-      </AuthenticatedLayout>
-    )
-  }
-  
-  console.log(`[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] RootHomeApp rendering without AuthenticatedLayout`);
-  return <HomeApp />
+function RootHomeApp() {
+  return (
+    <AuthenticatedLayout>
+      <HomeApp />
+    </AuthenticatedLayout>
+  )
 }
 
 export default RootHomeApp
