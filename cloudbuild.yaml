@@ -90,12 +90,12 @@ steps:
         if docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:$$CACHE_TAG;
         then
           echo "Cache image pulled successfully"
-          FROM_CACHE="--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:$$CACHE_TAG"
+          FROM_CACHE="--cache-from=type=registry,ref=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:$$CACHE_TAG"
         else
           if docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest;
           then
             echo "Cache image pulled successfully"
-            FROM_CACHE="--cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest"
+            FROM_CACHE="--cache-from=from=type=registry,ref=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME/cache:main-latest"
           else
             # Cache image not found, proceed without it
             echo "Cache image not found, proceeding without it"
@@ -104,9 +104,9 @@ steps:
 
         export DOCKER_BUILDKIT=1
         if ! docker buildx build \
-          --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
+          --tag=runner:$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA,push=true \
           $$FROM_CACHE \
-          --cache-to=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG,mode=max,image-manifest=true,oci-mediatypes=true \
+          --cache-to=type=repository,ref=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG,push=true \
           --push \
           --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
           --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
