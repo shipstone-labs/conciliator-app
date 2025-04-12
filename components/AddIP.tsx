@@ -152,6 +152,19 @@ const AppIP = () => {
           ...downSampledEncrypted,
           unifiedAccessControlConditions,
         },
+        category: businessModel || 'Intellectual Property',
+        tags: ['IP', evaluationPeriod],
+        // Include all terms information
+        terms: {
+          businessModel,
+          evaluationPeriod,
+          pricing: {
+            dayPrice,
+            weekPrice,
+            monthPrice,
+          },
+          ndaRequired: ndaConfirmed,
+        },
       }
       await fetch('/api/store', {
         method: 'POST',
@@ -182,8 +195,20 @@ const AppIP = () => {
     name,
     testTokenCounter,
     litClient,
+    businessModel,
+    evaluationPeriod,
+    dayPrice,
+    weekPrice,
+    monthPrice,
+    ndaConfirmed,
     stytchClient?.session,
     sessionSigs,
+    businessModel,
+    ndaConfirmed,
+    dayPrice,
+    weekPrice,
+    monthPrice,
+    evaluationPeriod,
   ])
 
   const handleOpenFileDialog = useCallback(() => {
