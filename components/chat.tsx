@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card'
-import Link from 'next/link'
+// import Link from 'next/link' - removed unused import
 import type { IPDoc } from '@/lib/types'
 import { useStytch } from '@stytch/nextjs'
 
@@ -69,6 +69,7 @@ export default function ChatUI({
   messages,
   doc,
   onSend,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNewIP,
   onSave,
 }: {
