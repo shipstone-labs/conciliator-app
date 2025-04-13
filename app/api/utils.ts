@@ -1,3 +1,4 @@
+import { getFirestore, Timestamp, Transaction } from 'firebase-admin/firestore'
 import type {
   LitNodeClient,
   LitResourceAbilityRequest,
@@ -5,7 +6,13 @@ import type {
 } from 'lit-wrapper'
 import { OpenAI, type ClientOptions } from 'openai'
 import { PinataSDK } from 'pinata-web3'
-import type { PrivateKeyAccount, SignableMessage } from 'viem'
+import {
+  createPublicClient,
+  http,
+  type PrivateKeyAccount,
+  type SignableMessage,
+} from 'viem'
+import { filecoinCalibration } from 'viem/chains'
 
 const NAMES = [
   {
@@ -75,158 +82,70 @@ export const pinata = new PinataSDK({
 export const abi = [
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'defaultAdmin',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'pauser',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'minter',
-        type: 'address',
-      },
+      { internalType: 'address', name: 'defaultAdmin', type: 'address' },
+      { internalType: 'address', name: 'pauser', type: 'address' },
+      { internalType: 'address', name: 'minter', type: 'address' },
     ],
     stateMutability: 'nonpayable',
     type: 'constructor',
   },
-  {
-    inputs: [],
-    name: 'AccessControlBadConfirmation',
-    type: 'error',
-  },
+  { inputs: [], name: 'AccessControlBadConfirmation', type: 'error' },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'bytes32',
-        name: 'neededRole',
-        type: 'bytes32',
-      },
+      { internalType: 'address', name: 'account', type: 'address' },
+      { internalType: 'bytes32', name: 'neededRole', type: 'bytes32' },
     ],
     name: 'AccessControlUnauthorizedAccount',
     type: 'error',
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'balance',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'needed',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
+      { internalType: 'address', name: 'sender', type: 'address' },
+      { internalType: 'uint256', name: 'balance', type: 'uint256' },
+      { internalType: 'uint256', name: 'needed', type: 'uint256' },
+      { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
     ],
     name: 'ERC1155InsufficientBalance',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'approver',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: 'approver', type: 'address' }],
     name: 'ERC1155InvalidApprover',
     type: 'error',
   },
   {
     inputs: [
-      {
-        internalType: 'uint256',
-        name: 'idsLength',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'valuesLength',
-        type: 'uint256',
-      },
+      { internalType: 'uint256', name: 'idsLength', type: 'uint256' },
+      { internalType: 'uint256', name: 'valuesLength', type: 'uint256' },
     ],
     name: 'ERC1155InvalidArrayLength',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: 'operator', type: 'address' }],
     name: 'ERC1155InvalidOperator',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'receiver',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: 'receiver', type: 'address' }],
     name: 'ERC1155InvalidReceiver',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
     name: 'ERC1155InvalidSender',
     type: 'error',
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'owner',
-        type: 'address',
-      },
+      { internalType: 'address', name: 'operator', type: 'address' },
+      { internalType: 'address', name: 'owner', type: 'address' },
     ],
     name: 'ERC1155MissingApprovalForAll',
     type: 'error',
   },
-  {
-    inputs: [],
-    name: 'EnforcedPause',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'ExpectedPause',
-    type: 'error',
-  },
+  { inputs: [], name: 'EnforcedPause', type: 'error' },
+  { inputs: [], name: 'ExpectedPause', type: 'error' },
   {
     anonymous: false,
     inputs: [
@@ -242,12 +161,7 @@ export const abi = [
         name: 'operator',
         type: 'address',
       },
-      {
-        indexed: false,
-        internalType: 'bool',
-        name: 'approved',
-        type: 'bool',
-      },
+      { indexed: false, internalType: 'bool', name: 'approved', type: 'bool' },
     ],
     name: 'ApprovalForAll',
     type: 'event',
@@ -287,12 +201,7 @@ export const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
+      { indexed: true, internalType: 'bytes32', name: 'role', type: 'bytes32' },
       {
         indexed: true,
         internalType: 'bytes32',
@@ -312,12 +221,7 @@ export const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
+      { indexed: true, internalType: 'bytes32', name: 'role', type: 'bytes32' },
       {
         indexed: true,
         internalType: 'address',
@@ -337,12 +241,7 @@ export const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
+      { indexed: true, internalType: 'bytes32', name: 'role', type: 'bytes32' },
       {
         indexed: true,
         internalType: 'address',
@@ -368,18 +267,8 @@ export const abi = [
         name: 'operator',
         type: 'address',
       },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
+      { indexed: true, internalType: 'address', name: 'from', type: 'address' },
+      { indexed: true, internalType: 'address', name: 'to', type: 'address' },
       {
         indexed: false,
         internalType: 'uint256[]',
@@ -405,24 +294,9 @@ export const abi = [
         name: 'operator',
         type: 'address',
       },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
+      { indexed: true, internalType: 'address', name: 'from', type: 'address' },
+      { indexed: true, internalType: 'address', name: 'to', type: 'address' },
+      { indexed: false, internalType: 'uint256', name: 'id', type: 'uint256' },
       {
         indexed: false,
         internalType: 'uint256',
@@ -436,18 +310,8 @@ export const abi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'value',
-        type: 'string',
-      },
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
+      { indexed: false, internalType: 'string', name: 'value', type: 'string' },
+      { indexed: true, internalType: 'uint256', name: 'id', type: 'uint256' },
     ],
     name: 'URI',
     type: 'event',
@@ -468,120 +332,56 @@ export const abi = [
   {
     inputs: [],
     name: 'DEFAULT_ADMIN_ROLE',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'MINTER_ROLE',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'PAUSER_ROLE',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'URI_SETTER_ROLE',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
+      { internalType: 'address', name: 'account', type: 'address' },
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
     ],
     name: 'balanceOf',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'address[]',
-        name: 'accounts',
-        type: 'address[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
+      { internalType: 'address[]', name: 'accounts', type: 'address[]' },
+      { internalType: 'uint256[]', name: 'ids', type: 'uint256[]' },
     ],
     name: 'balanceOfBatch',
-    outputs: [
-      {
-        internalType: 'uint256[]',
-        name: '',
-        type: 'uint256[]',
-      },
-    ],
+    outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'value',
-        type: 'uint256',
-      },
+      { internalType: 'address', name: 'account', type: 'address' },
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
+      { internalType: 'uint256', name: 'value', type: 'uint256' },
     ],
     name: 'burn',
     outputs: [],
@@ -590,21 +390,9 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'values',
-        type: 'uint256[]',
-      },
+      { internalType: 'address', name: 'account', type: 'address' },
+      { internalType: 'uint256[]', name: 'ids', type: 'uint256[]' },
+      { internalType: 'uint256[]', name: 'values', type: 'uint256[]' },
     ],
     name: 'burnBatch',
     outputs: [],
@@ -612,131 +400,53 @@ export const abi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'externalId',
-        type: 'bytes32',
-      },
-    ],
+    inputs: [{ internalType: 'bytes32', name: 'externalId', type: 'bytes32' }],
     name: 'createId',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'bytes32[]',
-        name: 'externalIds',
-        type: 'bytes32[]',
-      },
+      { internalType: 'bytes32[]', name: 'externalIds', type: 'bytes32[]' },
     ],
     name: 'createIds',
-    outputs: [
-      {
-        internalType: 'uint256[]',
-        name: '',
-        type: 'uint256[]',
-      },
-    ],
+    outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: 'id', type: 'uint256' }],
     name: 'exists',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
     name: 'getExternalId',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'externalId',
-        type: 'bytes32',
-      },
-    ],
+    inputs: [{ internalType: 'bytes32', name: 'externalId', type: 'bytes32' }],
     name: 'getId',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
-    ],
+    inputs: [{ internalType: 'bytes32', name: 'role', type: 'bytes32' }],
     name: 'getRoleAdmin',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
+      { internalType: 'bytes32', name: 'role', type: 'bytes32' },
+      { internalType: 'address', name: 'account', type: 'address' },
     ],
     name: 'grantRole',
     outputs: [],
@@ -745,74 +455,30 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
+      { internalType: 'bytes32', name: 'role', type: 'bytes32' },
+      { internalType: 'address', name: 'account', type: 'address' },
     ],
     name: 'hasRole',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
+      { internalType: 'address', name: 'account', type: 'address' },
+      { internalType: 'address', name: 'operator', type: 'address' },
     ],
     name: 'isApprovedForAll',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'amount',
-        type: 'uint256',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
+      { internalType: 'address', name: 'account', type: 'address' },
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
+      { internalType: 'uint256', name: 'amount', type: 'uint256' },
+      { internalType: 'bytes', name: 'data', type: 'bytes' },
     ],
     name: 'mint',
     outputs: [],
@@ -821,26 +487,10 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'amounts',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
+      { internalType: 'address', name: 'to', type: 'address' },
+      { internalType: 'uint256[]', name: 'ids', type: 'uint256[]' },
+      { internalType: 'uint256[]', name: 'amounts', type: 'uint256[]' },
+      { internalType: 'bytes', name: 'data', type: 'bytes' },
     ],
     name: 'mintBatch',
     outputs: [],
@@ -857,28 +507,14 @@ export const abi = [
   {
     inputs: [],
     name: 'paused',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
-      {
-        internalType: 'address',
-        name: 'callerConfirmation',
-        type: 'address',
-      },
+      { internalType: 'bytes32', name: 'role', type: 'bytes32' },
+      { internalType: 'address', name: 'callerConfirmation', type: 'address' },
     ],
     name: 'renounceRole',
     outputs: [],
@@ -887,16 +523,8 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'role',
-        type: 'bytes32',
-      },
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
+      { internalType: 'bytes32', name: 'role', type: 'bytes32' },
+      { internalType: 'address', name: 'account', type: 'address' },
     ],
     name: 'revokeRole',
     outputs: [],
@@ -905,31 +533,11 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'values',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
+      { internalType: 'address', name: 'from', type: 'address' },
+      { internalType: 'address', name: 'to', type: 'address' },
+      { internalType: 'uint256[]', name: 'ids', type: 'uint256[]' },
+      { internalType: 'uint256[]', name: 'values', type: 'uint256[]' },
+      { internalType: 'bytes', name: 'data', type: 'bytes' },
     ],
     name: 'safeBatchTransferFrom',
     outputs: [],
@@ -938,31 +546,11 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'value',
-        type: 'uint256',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
+      { internalType: 'address', name: 'from', type: 'address' },
+      { internalType: 'address', name: 'to', type: 'address' },
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
+      { internalType: 'uint256', name: 'value', type: 'uint256' },
+      { internalType: 'bytes', name: 'data', type: 'bytes' },
     ],
     name: 'safeTransferFrom',
     outputs: [],
@@ -971,16 +559,8 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
-      {
-        internalType: 'bool',
-        name: 'approved',
-        type: 'bool',
-      },
+      { internalType: 'address', name: 'operator', type: 'address' },
+      { internalType: 'bool', name: 'approved', type: 'bool' },
     ],
     name: 'setApprovalForAll',
     outputs: [],
@@ -988,13 +568,7 @@ export const abi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'string',
-        name: 'baseURI',
-        type: 'string',
-      },
-    ],
+    inputs: [{ internalType: 'string', name: 'baseURI', type: 'string' }],
     name: 'setBaseURI',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -1002,16 +576,8 @@ export const abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'string',
-        name: 'tokenURI',
-        type: 'string',
-      },
+      { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+      { internalType: 'string', name: 'tokenURI', type: 'string' },
     ],
     name: 'setTokenURI',
     outputs: [],
@@ -1019,66 +585,30 @@ export const abi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'string',
-        name: 'newuri',
-        type: 'string',
-      },
-    ],
+    inputs: [{ internalType: 'string', name: 'newuri', type: 'string' }],
     name: 'setURI',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'bytes4',
-        name: 'interfaceId',
-        type: 'bytes4',
-      },
-    ],
+    inputs: [{ internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' }],
     name: 'supportsInterface',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'totalSupply',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: 'id', type: 'uint256' }],
     name: 'totalSupply',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
@@ -1090,21 +620,9 @@ export const abi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
     name: 'uri',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
     stateMutability: 'view',
     type: 'function',
   },
@@ -1177,4 +695,46 @@ export const genSession = async (
   return sessionSigs
 }
 
+export async function getNonce(address: `0x${string}`) {
+  const client = createPublicClient({
+    chain: filecoinCalibration,
+    transport: http(),
+  })
+  const nonce = await client.getTransactionCount({
+    address,
+  })
+  const firestore = await getFirestore()
+  const doc = firestore.collection('nonce').doc(address)
+  const docSnap = await doc.get()
+  if (!docSnap.exists) {
+    await doc.set({ nonce, createdAt: Timestamp.fromDate(new Date()) })
+  }
+  let finalNonce = nonce
+  await firestore.runTransaction(async (transaction: Transaction) => {
+    const current = await transaction.get(doc)
+    const { nonce: currentNonce } = current.data() || { nonce }
+    const newNonce = Math.max(nonce, currentNonce)
+    console.log(nonce, currentNonce)
+    transaction.update(doc, { nonce: newNonce })
+    finalNonce = newNonce
+  })
+  return {
+    nonce: async () => {
+      try {
+        await doc.update({ nonce: finalNonce + 1 })
+      } catch (error) {
+        console.error(error)
+      }
+      return finalNonce++
+    },
+    revert: async () => {
+      try {
+        await doc.update({ nonce: finalNonce - 1 })
+      } catch (error) {
+        console.error(error)
+      }
+      finalNonce--
+    },
+  }
+}
 export async function getStorachaClient() {}

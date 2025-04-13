@@ -8,7 +8,7 @@ import {
   // imageAI,
   // pinata,
 } from '../utils'
-import { createWalletClient, http, parseEventLogs } from 'viem'
+import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
 import { waitForTransactionReceipt } from 'viem/actions'
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     const {
       to,
       id,
-      metadata: { tokenId } = {},
+      metadata: { tokenId, nativeTokenId } = {},
       encrypted,
       downSampledEncrypted,
       name: _name,
@@ -199,36 +199,13 @@ export async function POST(req: NextRequest) {
       chain: filecoinCalibration,
       transport: http(),
     })
-    await setStatus(`Creating native token ID for ${tokenId}`)
-    const nativeTokenId = await wallet
-      .writeContract({
-        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        abi,
-        functionName: 'createId',
-        args: [tokenId],
-      })
-      .then(async (hash) => {
-        const { logs } = await waitForTransactionReceipt(wallet, {
-          hash,
-        })
-        const decoded = parseEventLogs({
-          logs,
-          abi,
-          eventName: 'IdCreated',
-        })
-        return (
-          (decoded[0] as unknown as { args: unknown })?.args as {
-            tokenId: bigint
-          }
-        ).tokenId
-      })
-    await setStatus(`Minting IPDocV2 token ${nativeTokenId}`)
+    await setStatus(`Minting IPDocV8 token ID ${nativeTokenId}`)
     const mint = await wallet
       .writeContract({
         functionName: 'mint',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, nativeTokenId, 1, '0x'],
+        args: [account.address, BigInt(nativeTokenId), 1, '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -236,7 +213,7 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
-    await setStatus(`Transferring token ${nativeTokenId} to you ${to}`)
+    await setStatus(`Transferring token ID ${nativeTokenId} to you ${to}`)
     const transfer = await wallet
       .writeContract({
         functionName: 'safeTransferFrom',
@@ -273,15 +250,7 @@ export async function POST(req: NextRequest) {
       }
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
-    await status.update({
-      status: 'Setting token metadata URI',
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
-    await auditTable.add({
-      status: 'Setting token metadata URI',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
-    })
+    await setStatus('Setting token metadata URI')
     const update = await wallet
       .writeContract({
         functionName: 'setTokenURI',

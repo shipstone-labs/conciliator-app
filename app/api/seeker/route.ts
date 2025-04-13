@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     if (!data) {
       throw new Error('Document not found')
     }
-    const { name, description: _description } = data
+    const { name, description } = data
     const messages: {
       role: 'assistant' | 'user' | 'system'
       content: string

@@ -19,7 +19,6 @@ import type { EncryptResponse } from 'lit-wrapper'
 import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
-import { bytesToHex } from 'viem'
 import type { IPAudit } from '@/lib/types'
 
 const AppIP = () => {
@@ -55,52 +54,30 @@ const AppIP = () => {
   // =====================================================
   const [testTokenCounter, setTestTokenCounter] = useState(1000)
   const { litClient, sessionSigs } = useSession()
-
-  useEffect(() => {
-    const docId = '7HkK5fVayOAcijt6lhWR'
-    fetch('/api/prestore', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
-      },
-      body: JSON.stringify({ id: docId }),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          console.error('Failed to fetch prestore data')
-          return
-        }
-        return res.json()
+  const ids = useCallback(
+    async (id: string) => {
+      return fetch('/api/prestore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
+        },
+        body: JSON.stringify({ id }),
       })
-      .then((doc) => {
-        console.log('fetched', doc)
-        fetch('/api/prestore', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
-          },
-          body: JSON.stringify({ id: docId }),
+        .then((res) => {
+          if (!res.ok) {
+            console.error('Failed to fetch prestore data')
+            return undefined
+          }
+          return res.json()
         })
-          .then((res) => {
-            if (!res.ok) {
-              console.error('Failed to fetch prestore data')
-              return
-            }
-            return res.json()
-          })
-          .then((doc) => {
-            console.log('fetched', doc)
-          })
-          .catch((error) => {
-            console.error('Error fetching prestore data:', error)
-          })
-      })
-      .catch((error) => {
-        console.error('Error fetching prestore data:', error)
-      })
-  }, [])
+        .then((ids) => {
+          console.log(ids)
+          return ids
+        }) as Promise<{ tokenId: `0x${string}`; nativeTokenId: string }>
+    },
+    [stytchClient?.session?.getTokens]
+  )
   useEffect(() => {
     if (docId) {
       const statusDoc = doc(fb, 'audit', docId)
@@ -140,8 +117,10 @@ const AppIP = () => {
       }
       const ref = doc(collection(fb, 'ip'))
       const id = ref.id
-      const tokenId = bytesToHex(new TextEncoder().encode(id))
+      setLocalStatus('Creating native token ID')
+      const { tokenId, nativeTokenId } = await ids(id)
       setDocId(id)
+      console.log(tokenId, nativeTokenId)
       const { address } = sessionSigs || {}
       const unifiedAccessControlConditions = [
         {
@@ -161,7 +140,7 @@ const AppIP = () => {
           conditionType: 'evmContract',
           contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
           functionName: 'balanceOf',
-          functionParams: [':userAddress', BigInt(tokenId).toString()],
+          functionParams: [':userAddress', nativeTokenId],
           functionAbi: {
             inputs: [
               {
@@ -194,6 +173,7 @@ const AppIP = () => {
           },
         },
       ]
+      setLocalStatus('Encrypting your idea')
       const encrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(content),
@@ -207,7 +187,7 @@ const AppIP = () => {
         })
       setLocalStatus('Downsampling your idea')
       const downSampled = await downsample(content)
-      setLocalStatus('Encrypting downsampled content')
+      setLocalStatus('Encrypting downsampled idea')
       const downSampledEncrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(downSampled),
@@ -226,6 +206,7 @@ const AppIP = () => {
         to: address,
         metadata: {
           tokenId,
+          nativeTokenId,
           cid: '',
         },
         name,
@@ -290,6 +271,7 @@ const AppIP = () => {
     fb,
     stytchClient?.session,
     sessionSigs,
+    ids,
     ndaConfirmed,
   ])
 

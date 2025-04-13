@@ -1634,10 +1634,10 @@
         "IPDocV6"
       ]
     },
-    "/Users/andy/Development/my-conciliate-app/hardhat/contracts/IPDocV7.sol": {
-      "lastModificationDate": 1744497040964,
-      "contentHash": "b37ae2ecea4cc7e8728031981ab8bf92",
-      "sourceName": "contracts/IPDocV7.sol",
+    "/Users/andy/Development/my-conciliate-app/hardhat/contracts/IPDocV8.sol": {
+      "lastModificationDate": 1744497307866,
+      "contentHash": "80955adbe79a235e93355597f700dcab",
+      "sourceName": "contracts/IPDocV8.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
@@ -1674,7 +1674,7 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "IPDocV7"
+        "IPDocV8"
       ]
     }
   }
