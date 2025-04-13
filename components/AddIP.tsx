@@ -127,7 +127,7 @@ const AppIP = () => {
           conditionType: 'evmBasic',
           contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
           standardContractType: '',
-          chain: 'filecoin',
+          chain: 'filecoinCalibrationTestnet',
           method: '',
           parameters: [':userAddress'],
           returnValueTest: {
@@ -140,7 +140,7 @@ const AppIP = () => {
           conditionType: 'evmBasic',
           contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
           standardContractType: 'ERC1155',
-          chain: 'filecoin',
+          chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
           parameters: [':userAddress', nativeTokenId],
           returnValueTest: {

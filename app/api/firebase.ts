@@ -1,17 +1,18 @@
 import * as firebase from 'firebase-admin'
 import 'firebase-admin/firestore'
 import 'firebase-admin/auth'
+import 'firebase-admin/storage'
 
 import type { SessionsAuthenticateResponse } from 'stytch'
 
 let inited = false
+let sa: Record<string, unknown> = {}
 function init() {
   if (!inited) {
+    sa = JSON.parse(process.env.FIREBASE_SA || '{}')
     try {
       firebase.initializeApp({
-        credential: firebase.credential.cert(
-          JSON.parse(process.env.FIREBASE_SA || '{}')
-        ),
+        credential: firebase.credential.cert(sa),
       })
     } catch {}
     inited = true
@@ -24,7 +25,17 @@ export async function getToken(user: SessionsAuthenticateResponse) {
   return await firebase.auth().createCustomToken(uid)
 }
 
-export async function getFirestore() {
+export function getFirestore() {
   init()
   return firebase.firestore()
+}
+
+export function getStorage() {
+  init()
+  return firebase.storage()
+}
+
+export function getBucket() {
+  init()
+  return firebase.storage().bucket(`${sa.project_id}.firebasestorage.app`)
 }

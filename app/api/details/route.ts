@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch idea details from Firestore
     try {
-      const db = await getFirestore()
+      const db = getFirestore()
       const ideaRef = db.collection('ideas').doc(tokenId.toString())
       const ideaDoc = await ideaRef.get()
 

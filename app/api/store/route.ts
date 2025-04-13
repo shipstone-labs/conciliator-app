@@ -13,12 +13,6 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
 import { waitForTransactionReceipt } from 'viem/actions'
 import { createAsAgent } from 'web-storage-wrapper'
-import // createLitClient,
-// LIT_ABILITY,
-// LIT_NETWORK,
-// LitAccessControlConditionResource,
-// LitActionResource,
-'lit-wrapper'
 import { getUser } from '../stytch'
 import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
@@ -74,14 +68,14 @@ export async function POST(req: NextRequest) {
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
     )
-    const firestore = await getFirestore()
+    const firestore = getFirestore()
     const status = firestore.collection('audit').doc(id)
     const auditTable = firestore
       .collection('audit')
       .doc(id)
       .collection('details')
     await status.set({
-      status: 'Storing document',
+      status: 'Storing encrypted document in storacha',
       creator: user.user.user_id,
       address: to,
       tokenId,
@@ -89,7 +83,7 @@ export async function POST(req: NextRequest) {
       updatedAt: Timestamp.fromDate(new Date()),
     })
     await auditTable.add({
-      status: 'Storing document',
+      status: 'Storing encrypted document in storacha',
       createdAt: Timestamp.fromDate(new Date()),
       updatedAt: Timestamp.fromDate(new Date()),
     })
@@ -111,7 +105,7 @@ export async function POST(req: NextRequest) {
       }
     )
     const encryptedCid = await w3Client.uploadFile(encryptedBlob)
-    await setStatus('Storing downsampled document in storacha')
+    await setStatus('Storing downsampled encrypted document in storacha')
     const downSampledEncryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(downSampledEncrypted))],
       {
@@ -121,7 +115,7 @@ export async function POST(req: NextRequest) {
     const downSampledEncryptedCid = await w3Client.uploadFile(
       downSampledEncryptedBlob
     )
-    await setStatus('Generating token image')
+    await setStatus('AI generating token image from name and description')
     await auditTable.add({
       status: 'Generating token image',
       createdAt: Timestamp.fromDate(new Date()),
@@ -148,7 +142,7 @@ export async function POST(req: NextRequest) {
             }
             return res.arrayBuffer()
           })
-          await setStatus('Storing token image')
+          await setStatus('Storing AI generated token image')
           const blob = new Blob([buffer])
           return await w3Client.uploadFile(blob)
         }
@@ -225,7 +219,9 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
-    await setStatus('Storing token metadata')
+    await setStatus(
+      `Storing IPDocV8 token metadata for token ID ${nativeTokenId}`
+    )
     const metadata = {
       name: _name,
       description,
@@ -248,7 +244,7 @@ export async function POST(req: NextRequest) {
       }
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
-    await setStatus('Setting token metadata URI')
+    await setStatus(`Setting token metadata URI on token ID ${nativeTokenId}`)
     const update = await wallet
       .writeContract({
         functionName: 'setTokenURI',
@@ -262,7 +258,7 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
-    await setStatus('Updating database')
+    await setStatus('Updating database record with token information')
     const updateData = {
       ...data,
       metadata: {

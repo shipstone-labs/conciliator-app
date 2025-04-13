@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     await getUser(req)
 
-    const fs = await getFirestore()
+    const fs = getFirestore()
 
     const doc = await fs.collection('ip').doc(id).get()
     const data = doc.data()
