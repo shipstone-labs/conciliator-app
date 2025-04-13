@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  MouseEvent,
   type PropsWithChildren,
   useCallback,
   useEffect,
@@ -284,17 +285,25 @@ export default function Authenticated({
   }, [])
 
   const pathname = usePathname()
-  const onClose = useMemo(() => {
-    if (pathname === '/') {
+  const onClose = useMemo(
+    (event?: MouseEvent<HTMLElement>) => {
+      if (!event) {
+        return () => {
+          setShowAuthModal(false)
+        }
+      }
+      if (pathname === '/') {
+        return () => {
+          setShowAuthModal(false)
+        }
+      }
       return () => {
         setShowAuthModal(false)
+        window.location.href = '/'
       }
-    }
-    return () => {
-      setShowAuthModal(false)
-      window.location.href = '/'
-    }
-  }, [pathname])
+    },
+    [pathname]
+  )
   return (
     <>
       <sessionContext.Provider value={sessionSigs}>

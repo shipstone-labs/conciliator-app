@@ -41,8 +41,6 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   if (!isOpen) return null
 
-  console.log('Modal rendering with isOpen:', isOpen)
-
   return (
     <div
       className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-auto"

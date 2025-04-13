@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     const litClient = await getLit()
     const { capacityDelegationAuthSig } =
       await litClient.createCapacityDelegationAuthSig({
-        uses: '10',
+        uses: '1',
         dAppOwnerWallet: {
           signMessage: (message: SignableMessage) =>
             wallet.signMessage({ message }),

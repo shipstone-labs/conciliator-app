@@ -74,7 +74,6 @@ const AppIP = () => {
           return res.json()
         })
         .then((ids) => {
-          console.log(ids)
           return ids
         }) as Promise<{ tokenId: `0x${string}`; nativeTokenId: string }>
     },

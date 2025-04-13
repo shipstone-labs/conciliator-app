@@ -7,7 +7,6 @@ import Image from 'next/image'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
-import { useStytchUser } from '@stytch/nextjs'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { Modal } from '@/components/ui/modal'
@@ -32,14 +31,9 @@ const DetailIP = ({
   const { litClient, delegatedSessionSigs } = useSession()
   const config = useAppConfig()
 
-  const { user } = useStytchUser()
   const router = useRouter()
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
-  const isOwner = ideaData?.creator === user?.user_id
-  console.log(audit)
-  console.log(ideaData)
-  console.log(isOwner)
 
   useEffect(() => {
     if (isViewLoading.current) {
@@ -89,8 +83,6 @@ const DetailIP = ({
           sessionSigs,
           capacityDelegationAuthSig,
         } as unknown as Parameters<typeof litClient.decrypt>[0]
-        console.log('session', sessionSigs, capacityDelegationAuthSig)
-        console.log(request)
         const decrypted = await litClient.decrypt(request).catch((error) => {
           console.error('Error decrypting data:', error)
           // Too bad, but don't retry.
