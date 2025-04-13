@@ -30,11 +30,9 @@ export async function POST(req: NextRequest) {
       size: 32,
       dir: 'right',
     })
-    console.log('tokenId', tokenId)
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`
     )
-    console.log('account', account.address)
     const wallet = createWalletClient({
       account,
       chain: filecoinCalibration,
@@ -63,7 +61,6 @@ export async function POST(req: NextRequest) {
           const { logs } = await waitForTransactionReceipt(wallet, {
             hash,
           })
-          console.log('logs', logs)
           const decoded = parseEventLogs({
             logs,
             abi,

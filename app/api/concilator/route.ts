@@ -218,37 +218,37 @@ ${data.description}`,
         )
       )
 
-      const output = await litClient.executeJs({
-        code: `async function run() {
-  try {
-    const input = await Lit.Actions.decryptAndCombine({
-      accessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-      chain,
-    });
+      //       const output = await litClient.executeJs({
+      //         code: `async function run() {
+      //   try {
+      //     const input = await Lit.Actions.decryptAndCombine({
+      //       accessControlConditions,
+      //       ciphertext,
+      //       dataToEncryptHash,
+      //       chain,
+      //     });
 
-    Lit.Actions.setResponse({
-      response: JSON.stringify({
-        input
-      }),
-    });
-  } catch (error) {
-    console.error("Error during execution:", error);
-    Lit.Actions.setResponse({ response: error.message });
-  }
-}
-run();`,
-        // cid: CID,
-        sessionSigs,
-        jsParams: {
-          accessControlConditions: downSampled.unifiedAccessControlConditions,
-          ciphertext: downSampled.ciphertext,
-          dataToEncryptHash: downSampled.dataToEncryptHash,
-          chain: 'filecoin',
-        },
-      })
-      console.log(output)
+      //     Lit.Actions.setResponse({
+      //       response: JSON.stringify({
+      //         input
+      //       }),
+      //     });
+      //   } catch (error) {
+      //     console.error("Error during execution:", error);
+      //     Lit.Actions.setResponse({ response: error.message });
+      //   }
+      // }
+      // run();`,
+      //         // cid: CID,
+      //         sessionSigs,
+      //         jsParams: {
+      //           accessControlConditions: downSampled.unifiedAccessControlConditions,
+      //           ciphertext: downSampled.ciphertext,
+      //           dataToEncryptHash: downSampled.dataToEncryptHash,
+      //           chain: 'filecoin',
+      //         },
+      //       })
+      //       console.log(output)
 
       const _decrypted = await litClient.decrypt({
         accessControlConditions: downSampled.unifiedAccessControlConditions,
@@ -283,7 +283,7 @@ run();`,
             content?.split('\n') || ''
         )
         .join('\n')
-      console.log('conciliator', consecutiveYesCount, yesItems, answerContent)
+      // console.log('conciliator', consecutiveYesCount, yesItems, answerContent)
       messages.push({ content: answerContent, role: 'assistant' })
     } else {
       messages.push({ content: 'Stop', role: 'assistant' })

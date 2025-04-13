@@ -45,7 +45,8 @@ const CardGrid = () => {
         }),
       })
       if (!response.ok) {
-        console.log(await response.text())
+        const error = await response.text()
+        console.log(error)
         throw new Error('Failed to retrieve items')
       }
       const data = ((await response.json()) || []).map((item: IPDocJSON) =>

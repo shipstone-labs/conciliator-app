@@ -714,7 +714,6 @@ export async function getNonce(address: `0x${string}`) {
     const current = await transaction.get(doc)
     const { nonce: currentNonce } = current.data() || { nonce }
     const newNonce = Math.max(nonce, currentNonce)
-    console.log(nonce, currentNonce)
     transaction.update(doc, { nonce: newNonce })
     finalNonce = newNonce
   })

@@ -67,11 +67,9 @@ export async function POST(req: NextRequest) {
       description,
       ...rest
     } = body
-    console.log('body', { to, id, name: _name, description, ...rest })
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`
     )
-    console.log('account', account.address)
     const w3Client = await createAsAgent(
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
@@ -277,7 +275,6 @@ export async function POST(req: NextRequest) {
       },
     }
     await setStatus('Finished')
-    console.log('update', updateData)
     await doc.set(updateData)
     return new Response(JSON.stringify({ ...data, id: doc.id }), {
       headers: { 'Content-Type': 'application/json' },
