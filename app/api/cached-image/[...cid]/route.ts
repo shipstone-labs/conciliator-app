@@ -19,34 +19,35 @@ export async function GET(
   const width = searchParams.get('width') || '800'
   const quality = searchParams.get('quality') || '75'
 
-  // Path in Firebase Storage
-  const storagePath = `ipfs-cache/${cidPath}_${width}_${quality}.jpg`
+  // Base storage path (without extension)
+  const basePath = `ipfs-cache/${cidPath}_${width}_${quality}`
 
   try {
-    // Initialize Firebase (also initializes Firestore from your existing code)
+    // Initialize Firebase
     const bucket = getBucket()
 
-    // Check if image exists in Firebase Storage
-    const [exists] = await bucket.file(storagePath).exists()
+    // Look for files with this base path (regardless of extension)
+    const file = bucket.file(basePath)
+    // Get the file's metadata to get the correct content type
+    const [metadata] = await file.getMetadata().catch(() => [null])
 
-    if (exists) {
-      console.log(
-        `Serving cached image for CID: ${cidPath} from Firebase Storage`
-      )
+    // If we found a cached file
+    if (metadata) {
+      const contentType = metadata.contentType || 'application/octet-stream'
 
-      // Get image from Firebase Storage
-      const [buffer] = await bucket.file(storagePath).download()
+      // Create a readable stream from the file
+      const fileStream = file.createReadStream()
 
-      return new NextResponse(buffer, {
+      // Use NextResponse.json() to create a streaming response
+      return new NextResponse(fileStream as unknown as ReadableStream, {
         headers: {
-          'Content-Type': 'image/jpeg',
+          'Content-Type': contentType,
           'Cache-Control': 'public, max-age=31536000, immutable',
         },
       })
     }
 
     // Image not cached, fetch from IPFS with timeout
-    console.log(`Fetching image for CID: ${cidPath} from IPFS`)
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
 
@@ -63,25 +64,65 @@ export async function GET(
         throw new Error(`IPFS fetch failed with status: ${response.status}`)
       }
 
-      // Get image buffer
-      const buffer = Buffer.from(await response.arrayBuffer())
+      // Get the content type from the response
+      const contentType =
+        response.headers.get('Content-Type') || 'application/octet-stream'
 
-      // Save to Firebase Storage
-      const file = bucket.file(storagePath)
+      // Create a storage path with the proper extension
+      const finalStoragePath = `${basePath}`
 
-      await file.save(buffer, {
+      // Create a file reference in Firebase Storage
+      const file = bucket.file(finalStoragePath)
+
+      // Create a writable stream to Firebase Storage
+      const writeStream = file.createWriteStream({
         metadata: {
-          contentType: response.headers.get('Content-Type') || 'image/jpeg',
+          contentType: contentType,
           cacheControl: 'public, max-age=31536000, immutable',
+          metadata: {
+            originalCid: cidPath,
+            width: width,
+            quality: quality,
+            cachedAt: new Date().toISOString(),
+          },
         },
       })
 
-      console.log(`Cached image for CID: ${cidPath} in Firebase Storage`)
+      // Get the response body as a readable stream
+      const responseStream = response.body
 
-      // Return the image
-      return new NextResponse(buffer, {
+      if (!responseStream) {
+        throw new Error('No response body stream available')
+      }
+
+      // Create a clone of the response to use for the client
+      const clonedResponse = response.clone()
+      const clientStream = clonedResponse.body
+
+      if (!clientStream) {
+        throw new Error('Failed to clone response stream')
+      }
+
+      // We'll need to buffer the response for Firebase Storage
+      // since stream conversion is tricky in this environment
+      const responseBuffer = Buffer.from(await response.arrayBuffer())
+
+      // Write the buffer to Firebase Storage
+      const streamPromise = new Promise((resolve, reject) => {
+        writeStream.on('finish', resolve)
+        writeStream.on('error', reject)
+        writeStream.end(responseBuffer)
+      })
+
+      // Start the streaming process in the background
+      streamPromise.catch((err) => {
+        console.error('Error saving to Firebase Storage:', err)
+      })
+
+      // Return the image stream directly to the client without waiting for caching to complete
+      return new NextResponse(clientStream, {
         headers: {
-          'Content-Type': response.headers.get('Content-Type') || 'image/jpeg',
+          'Content-Type': contentType,
           'Cache-Control': 'public, max-age=31536000, immutable',
         },
       })

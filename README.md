@@ -47,10 +47,6 @@ This is currently being deployed on cloudflare and should work in fleek.
 
 If you have questions about the Conciliator Project, please reach out to the team at Cart@shipstone.com.
 
-## Testing
-
-The Conciliator Project includes comprehensive testing to ensure code quality and prevent regressions. We regularly review and update our testing approach to improve stability.
-
 ## Deployment
 
 This project is configured for deployment on Cloudflare Pages with automatic builds and previews for each PR.

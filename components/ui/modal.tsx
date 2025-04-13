@@ -1,18 +1,20 @@
 'use client'
 
-import * as React from 'react'
+import { useCallback, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
 interface ModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose?: () => void
   title: string
   children: React.ReactNode
 }
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   // Close on escape key
-  React.useEffect(() => {
+  useEffect(() => {
+    if (!onClose) return
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
@@ -29,15 +31,17 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       document.body.style.overflow = 'auto'
     }
   }, [isOpen, onClose])
+  // Close when clicking on backdrop (outside of modal content) if not prevented
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target === e.currentTarget && onClose) onClose()
+    },
+    [onClose]
+  )
 
   if (!isOpen) return null
 
   console.log('Modal rendering with isOpen:', isOpen)
-
-  // Close when clicking on backdrop (outside of modal content)
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) onClose()
-  }
 
   return (
     <div
@@ -53,13 +57,15 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       >
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-xl font-semibold">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-2xl text-gray-400 hover:text-gray-100 transition-colors"
-          >
-            &times;
-          </button>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-2xl text-gray-400 hover:text-gray-100 transition-colors"
+            >
+              &times;
+            </button>
+          )}
         </div>
         <div className="p-6 overflow-y-auto">{children}</div>
       </div>

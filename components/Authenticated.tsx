@@ -5,6 +5,7 @@ import {
   type PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -18,6 +19,7 @@ import {
   signInWithCustomToken,
   type UserCredential,
 } from 'firebase/auth'
+import { usePathname } from 'next/navigation'
 
 export type Session = {
   litClient?: LitNodeClient
@@ -215,6 +217,19 @@ export default function Authenticated({
   const handleAuthSuccess = useCallback(() => {
     setShowAuthModal(false)
   }, [])
+
+  const pathname = usePathname()
+  const onClose = useMemo(() => {
+    if (pathname === '/') {
+      return () => {
+        setShowAuthModal(false)
+      }
+    }
+    return () => {
+      setShowAuthModal(false)
+      window.location.href = '/'
+    }
+  }, [pathname])
   return (
     <>
       <sessionContext.Provider value={sessionSigs}>
@@ -227,8 +242,8 @@ export default function Authenticated({
 
       {/* Authentication Modal */}
       <AuthModal
+        onClose={onClose}
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
       />
     </>

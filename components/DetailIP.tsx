@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -12,6 +12,7 @@ import { useStytchUser } from '@stytch/nextjs'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { Modal } from '@/components/ui/modal'
+import { where } from 'firebase/firestore'
 
 const DetailIP = ({
   docId,
@@ -30,16 +31,6 @@ const DetailIP = ({
   console.log(audit)
   console.log(ideaData)
   console.log(isOwner)
-  // For now, use placeholder data
-  // const ideaData = {
-  //   title: "Advanced AI-Powered Content Generator",
-  //   description:
-  //     "A sophisticated AI system that generates high-quality content tailored to specific industries and audiences. The system leverages cutting-edge machine learning models to understand context, brand voice, and audience preferences to create engaging articles, social media posts, and marketing materials that resonate with target demographics.",
-  //   createdAt: Timestamp.fromDate(new Date()),
-  //   creator: "Demo User",
-  //   category: "Artificial Intelligence",
-  //   tags: ["AI", "Content Creation", "Machine Learning", "Marketing"],
-  // };
 
   // Function to navigate to the discovery page
   const goToDiscovery = () => {
