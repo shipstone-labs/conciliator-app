@@ -10,6 +10,8 @@ import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
 import { useStytchUser } from '@stytch/nextjs'
 import { cidAsURL } from '@/lib/internalTypes'
+import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
+import CachedImage from '@/components/CachedImage'
 import { Modal } from '@/components/ui/modal'
 
 const DetailIP = ({
@@ -61,10 +63,10 @@ const DetailIP = ({
         {/* Header with page title and image */}
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center">
-            <img
+            <CachedImage
               src={
                 ideaData.image?.cid
-                  ? cidAsURL(ideaData.image.cid) || '/svg/Black+Yellow.svg'
+                  ? enhancedCidAsURL(ideaData.image.cid) || '/svg/Black+Yellow.svg'
                   : '/svg/Black+Yellow.svg'
               }
               alt={ideaData.name || 'Idea Image'}

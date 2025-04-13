@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { completionAI, genSession, /* abi, */ getModel } from '../utils'
+import { completionAI, genSession, getLit, /* abi, */ getModel } from '../utils'
 // import { call, readContract } from "viem/actions";
 // import { filecoinCalibration } from "viem/chains";
 // import {
@@ -15,9 +15,7 @@ import templateFile from './system.hbs'
 import { getFirestore } from '../firebase'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import {
-  createLitClient,
   LIT_ABILITY,
-  LIT_NETWORK,
   LitAccessControlConditionResource,
   LitActionResource,
 } from 'lit-wrapper'
@@ -38,7 +36,7 @@ export async function POST(req: NextRequest) {
       id: string
     }
 
-    const fs = await getFirestore()
+    const fs = getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
     const auditTable = fs.collection('audit').doc(id).collection('details')
     const data = doc.data() as IPDocJSON
@@ -146,12 +144,7 @@ ${data.description}`,
       const account = privateKeyToAccount(
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )
-      const litClient = await createLitClient({
-        litNetwork: LIT_NETWORK.Datil,
-        debug: false,
-      })
-      global.document = { dispatchEvent: (_event: Event) => true } as Document
-      await litClient.connect()
+      const litClient = await getLit()
       const url = cidAsURL(data.downSampled.cid)
       const downSampled: {
         ciphertext: string

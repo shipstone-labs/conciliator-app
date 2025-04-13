@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     //   chain: filecoinCalibration,
     //   transport: http(),
     // });
-    const fb = await getFirestore()
+    const fb = getFirestore()
     const doc = await fb.collection('ip').orderBy('createdAt', 'desc').get()
     const docs = doc.docs.map((d) => {
       const data = d.data()
