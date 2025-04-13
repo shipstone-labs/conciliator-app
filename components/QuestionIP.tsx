@@ -239,12 +239,12 @@ const QuestionIP = ({
         {/* Unified header with details page */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">
-            Discovery Mode
+            {ideaData?.name || 'Untitled Idea'}
           </h1>
           {ideaData && (
             <div className="mt-1 mb-4">
               <h2 className="text-xl font-medium text-white/90">
-                {ideaData.name || 'Untitled Idea'}
+                Agent View
               </h2>
               <div className="flex justify-center mt-2 gap-2">
                 {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (

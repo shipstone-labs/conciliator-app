@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card'
-import Link from 'next/link'
+// import Link from 'next/link' - removed unused import
 import type { IPDoc } from '@/lib/types'
 import { useStytch } from '@stytch/nextjs'
 
@@ -69,6 +69,7 @@ export default function ChatUI({
   messages,
   doc,
   onSend,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNewIP,
   onSave,
 }: {
@@ -751,19 +752,7 @@ export default function ChatUI({
               </div>
             </div>
             <div className="mt-4 flex space-x-2">
-              {onNewIP ? (
-                <button
-                  type="button"
-                  onClick={onNewIP}
-                  className="bg-background/40 text-white/80 px-6 py-2 rounded-lg transition
-      backdrop-blur-sm border border-white/10
-      focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-opacity-50 
-      hover:bg-background/60
-      disabled:bg-background/20 disabled:text-white/30 disabled:cursor-not-allowed disabled:hover:bg-background/20 disabled:focus:ring-0"
-                >
-                  Create a New IP
-                </button>
-              ) : null}
+              {/* Create a New IP button removed */}
               <button
                 type="button"
                 onClick={onAutoComplete}
@@ -787,7 +776,7 @@ export default function ChatUI({
                     ? 'Stop'
                     : isStopping
                       ? 'Stopping...'
-                      : 'Start Auto-Discovery'}
+                      : 'Test Your Agent'}
               </button>
               {onSave ? (
                 <button
@@ -808,17 +797,7 @@ export default function ChatUI({
                   Save Chat Snapshot
                 </button>
               ) : null}
-              <Link
-                type="button"
-                href="/list-ip"
-                className="bg-background/40 text-white/80 px-6 py-2 rounded-lg transition
-      backdrop-blur-sm border border-white/10
-      focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-opacity-50 
-      hover:bg-background/60
-      disabled:bg-background/20 disabled:text-white/30 disabled:cursor-not-allowed disabled:hover:bg-background/20 disabled:focus:ring-0"
-              >
-                IP Docs
-              </Link>
+              {/* IP Docs link removed */}
             </div>
           </div>
           <div className="w-full">
