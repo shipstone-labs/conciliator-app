@@ -1,4 +1,8 @@
-import { getFirestore, Timestamp, Transaction } from 'firebase-admin/firestore'
+import {
+  getFirestore,
+  Timestamp,
+  type Transaction,
+} from 'firebase-admin/firestore'
 import {
   type LitNodeClient,
   type LitResourceAbilityRequest,
@@ -667,7 +671,7 @@ export const genSession = async (
   resources: LitResourceAbilityRequest[]
 ) => {
   const sessionSigs = await client.getSessionSigs({
-    chain: 'filecoin',
+    chain: 'filecoinCalibrationTestnet',
     resourceAbilityRequests: resources,
     authNeededCallback: async (params: AuthCallbackParams) => {
       if (!params.expiration) {
@@ -747,12 +751,14 @@ export async function getLit() {
     return await litClient
   }
   litClient = (async () => {
+    const now = Date.now()
     const litClient = await createLitClient({
       litNetwork: LIT_NETWORK.Datil,
       debug: false,
     })
     global.document = { dispatchEvent: (_event: Event) => true } as Document
     await litClient.connect()
+    console.log(`lit connect took ${Math.round((Date.now() - now) / 1000)}s`)
     return litClient
   })()
   return await litClient

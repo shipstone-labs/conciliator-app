@@ -6,6 +6,7 @@ import {
   type IPAudit,
   type IPDoc,
 } from '@/lib/types'
+import { useStytchUser } from '@stytch/nextjs'
 import {
   collection,
   doc,
@@ -21,24 +22,66 @@ import {
   query,
   type QueryCompositeFilterConstraint,
   startAfter,
+  type Timestamp,
+  where,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
-export function useIP(tokenId: string) {
+export function useIP(docId: string) {
   const [ideaData, setIdeaData] = useState<IPDoc | undefined>()
+  const { user } = useStytchUser()
   useEffect(() => {
+    if (!user) {
+      setIdeaData(undefined)
+      return
+    }
     const fetchData = async () => {
       const fs = getFirestore()
-      const docRef = await getDoc(doc(fs, 'ip', tokenId))
+      const docRef = await getDoc(doc(fs, 'ip', docId))
+
       if (docRef.exists()) {
-        setIdeaData(castToUIDoc({ ...docRef.data(), id: docRef.id } as IPDoc))
+        const { creator } = docRef.data() as { creator?: string }
+        let hasAccess = creator === user.user_id
+        if (!hasAccess) {
+          const deals = await getDocs(
+            query(
+              query(
+                collection(fs, 'ip', docId, 'deals'),
+                where('to', '==', user.user_id)
+              ),
+              orderBy('createdAt', 'desc')
+            )
+          )
+          hasAccess = deals.docs
+            .map(
+              (doc) =>
+                ({
+                  ...doc.data(),
+                  id: doc.id,
+                }) as { expiresAt?: Timestamp }
+            )
+            .some((deal) => {
+              const { expiresAt } = deal
+              if (expiresAt) {
+                return expiresAt.toDate() > new Date()
+              }
+              return true
+            })
+        }
+        setIdeaData(
+          castToUIDoc({
+            ...docRef.data(),
+            id: docRef.id,
+            canView: hasAccess,
+          } as IPDoc)
+        )
       } else {
         setIdeaData(undefined)
       }
     }
 
     fetchData()
-  }, [tokenId])
+  }, [docId, user])
 
   return ideaData
 }

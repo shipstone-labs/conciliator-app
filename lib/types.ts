@@ -8,6 +8,7 @@ import type {
 export type IPDoc = IPDocJSON & {
   updatedAt: Timestamp
   createdAt: Timestamp
+  canView?: boolean
 }
 
 export type IPAudit = IPAuditJSON & {
