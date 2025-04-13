@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Loading from '@/components/Loading'
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -9,95 +9,48 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip'
-import Image from 'next/image'
 import Link from 'next/link'
-import { useStytch } from '@stytch/nextjs'
-import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
-import { castToUIDoc } from '@/lib/types'
+import { cidAsURL } from '@/lib/internalTypes'
+import { useIPs } from '@/hooks/useIP'
 
 const itemsPerPage = 16 // 4 Cards per page
 
+function getImageWidth() {
+  const screenWidth = window.innerWidth
+  if (screenWidth < 640) {
+    return 150 // Mobile
+  }
+  if (screenWidth < 1024) {
+    return 180 // Tablet
+  }
+  return 250 // Desktop
+}
+
 const CardGrid = () => {
+  const [imageWidth, setImageWidth] = useState(getImageWidth()) // Default width
   const [currentPage, setCurrentPage] = useState(1)
-  const [imageWidth, setImageWidth] = useState(200) // Default width
-
-  const [items, setItems] = useState<IPDocJSON[]>([])
-  const [loaded, setLoaded] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const stytchClient = useStytch()
-  const onRetrieve = useCallback(
-    async (_start: number, limit: number) => {
-      let start = _start
-      if (start < items.length) {
-        start = items.length
-      }
-      const response = await fetch('/api/list', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${
-            stytchClient?.session?.getTokens?.()?.session_jwt
-          }`,
-        },
-        body: JSON.stringify({
-          start,
-          limit,
-        }),
-      })
-      if (!response.ok) {
-        const error = await response.text()
-        console.log(error)
-        throw new Error('Failed to retrieve items')
-      }
-      const data = ((await response.json()) || []).map((item: IPDocJSON) =>
-        castToUIDoc(item)
-      )
-      setItems([...items, ...data])
-      setLoaded(true)
-    },
-    [items, stytchClient?.session]
-  )
-
-  useEffect(() => {
-    if (!loading) {
-      setLoading(true)
-      onRetrieve(0, 10)
-    }
-  }, [onRetrieve, loading])
+  const { data: visibleItems, pages: totalPages } = useIPs(
+    'createdAt',
+    'desc',
+    itemsPerPage,
+    currentPage
+  ) || { pages: 1 }
 
   // Responsive image size calculation
   useEffect(() => {
     const updateImageWidth = () => {
-      const screenWidth = window.innerWidth
-
-      if (screenWidth < 640) {
-        setImageWidth(150) // Mobile
-      } else if (screenWidth < 1024) {
-        setImageWidth(180) // Tablet
-      } else {
-        setImageWidth(250) // Desktop
-      }
+      const newWidth = getImageWidth()
+      setImageWidth(newWidth)
     }
-
-    updateImageWidth() // Set initial width
     window.addEventListener('resize', updateImageWidth)
-
     return () => window.removeEventListener('resize', updateImageWidth)
   }, [])
-  const totalPages = Math.ceil(items.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage)
 
-  const goToPage = (page: number) => {
-    if (page > totalPages) {
-      onRetrieve(items.length, itemsPerPage)
-    }
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-    }
-  }
+  const goToPage = useCallback((page: number) => {
+    setCurrentPage(page)
+  }, [])
 
-  if (!loaded) {
+  if (!visibleItems) {
     return <Loading />
   }
 
@@ -129,7 +82,7 @@ const CardGrid = () => {
 
             {/* Image */}
             <CardContent className="flex justify-center p-4">
-              <Image
+              <img
                 src={cidAsURL(item?.image?.cid) || '/images/placeholder.png'}
                 alt={item.name}
                 width={imageWidth}

@@ -135,7 +135,19 @@ const AppIP = () => {
             value: process.env.NEXT_PUBLIC_LIT_ADDRESS,
           },
         },
-        // { conditionType: 'operator', operator: 'or' },
+        { conditionType: 'operator', operator: 'or' },
+        {
+          conditionType: 'evmBasic',
+          contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
+          standardContractType: 'ERC1155',
+          chain: 'filecoin',
+          method: 'balanceOf',
+          parameters: [':userAddress', nativeTokenId],
+          returnValueTest: {
+            comparator: '>',
+            value: '0',
+          },
+        },
         // {
         //   conditionType: 'evmContract',
         //   contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
@@ -327,7 +339,7 @@ const AppIP = () => {
           href="/"
           className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
         >
-          <Image
+          <img
             src="/svg/Black+Yellow.svg"
             alt="Home"
             width={26}

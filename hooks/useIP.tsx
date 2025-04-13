@@ -9,11 +9,16 @@ import {
 import {
   collection,
   doc,
+  type DocumentReference,
   getDoc,
+  getDocs,
   getFirestore,
+  limit,
   onSnapshot,
   orderBy,
+  type OrderByDirection,
   query,
+  startAfter,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
@@ -24,7 +29,7 @@ export function useIP(tokenId: string) {
       const fs = getFirestore()
       const docRef = await getDoc(doc(fs, 'ip', tokenId))
       if (docRef.exists()) {
-        setIdeaData(castToUIDoc(docRef.data() as IPDoc))
+        setIdeaData(castToUIDoc({ ...docRef.data(), id: docRef.id } as IPDoc))
       } else {
         setIdeaData(undefined)
       }
@@ -33,6 +38,50 @@ export function useIP(tokenId: string) {
     fetchData()
   }, [tokenId])
 
+  return ideaData
+}
+
+export function useIPs(
+  _orderBy = 'createdAt',
+  _orderDir: OrderByDirection = 'desc',
+  _limit = 10,
+  _page = 1
+) {
+  const [ideaData, setIdeaData] = useState<{
+    data: IPDoc[] | undefined
+    pages: number
+  }>()
+  const [pages, setPages] = useState<
+    Record<number, DocumentReference | undefined>
+  >({ 1: undefined })
+  useEffect(() => {
+    const doIt = async () => {
+      const fs = getFirestore()
+      let qry = query(collection(fs, 'ip'), orderBy(_orderBy, _orderDir))
+      const _startAfter = pages[_page]
+      if (!_startAfter && _page > 1) {
+        console.error('Last page')
+        return
+      }
+      if (_startAfter) {
+        qry = query(qry, startAfter(_startAfter))
+      }
+      qry = query(qry, limit(_limit))
+      const snapshot = await getDocs(qry)
+      let last: DocumentReference | undefined = undefined
+      const data = snapshot.docs.map((doc) => {
+        last = doc.ref
+        return castToUIDoc({ ...doc.data(), id: doc.id } as IPDoc)
+      })
+      const _pages = pages
+      if (last) {
+        _pages[_page + 1] = last
+        setPages(_pages)
+      }
+      setIdeaData({ data, pages: Object.keys(pages).length })
+    }
+    doIt()
+  }, [_orderBy, _orderDir, _limit, _page, pages[_page]])
   return ideaData
 }
 
