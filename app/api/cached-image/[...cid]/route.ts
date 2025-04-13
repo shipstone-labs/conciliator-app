@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import * as firebase from 'firebase-admin'
 import 'firebase-admin/storage'
 import { getBucket } from '@/app/api/firebase'
 

@@ -57,8 +57,7 @@ function HomeApp() {
                   <span className="font-medium text-primary">
                     Secure storage
                   </span>{' '}
-                  - Proves that you had a specific idea at a
-                  particular time
+                  - Proves that you had a specific idea at a particular time
                 </li>
                 <li>
                   <span className="font-medium text-primary">
@@ -102,9 +101,7 @@ function HomeApp() {
                 >
                   Add Idea
                 </Link>
-                <button
-                  className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
-                >
+                <button className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center">
                   My Ideas
                 </button>
                 <Link

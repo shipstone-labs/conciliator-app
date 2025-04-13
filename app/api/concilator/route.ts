@@ -244,7 +244,10 @@ ${data.description}`,
       //       console.log(output)
 
       const _decrypted = await litClient.decrypt({
-        accessControlConditions: downSampled.unifiedAccessControlConditions,
+        accessControlConditions:
+          downSampled.unifiedAccessControlConditions as Parameters<
+            typeof litClient.decrypt
+          >[0]['accessControlConditions'],
         ciphertext: downSampled.ciphertext,
         dataToEncryptHash: downSampled.dataToEncryptHash,
         chain: 'filecoin',

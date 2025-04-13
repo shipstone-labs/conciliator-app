@@ -243,9 +243,7 @@ const QuestionIP = ({
           </h1>
           {ideaData && (
             <div className="mt-1 mb-4">
-              <h2 className="text-xl font-medium text-white/90">
-                Agent View
-              </h2>
+              <h2 className="text-xl font-medium text-white/90">Agent View</h2>
               <div className="flex justify-center mt-2 gap-2">
                 {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (
                   ideaData.tags.map((tag, index) => (

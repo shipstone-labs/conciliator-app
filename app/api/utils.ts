@@ -741,7 +741,7 @@ export async function getNonce(address: `0x${string}`) {
 }
 export async function getStorachaClient() {}
 
-let litClient: Promise<LitNodeClient | undefined>
+let litClient: Promise<LitNodeClient> | undefined
 export async function getLit() {
   if (litClient) {
     return await litClient
