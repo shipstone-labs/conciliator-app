@@ -16,7 +16,7 @@ type CachedImageProps = {
   className?: string
   fallbackSrc?: string
   priority?: boolean
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
