@@ -16,3 +16,6 @@ Dockerfile
 .DS_Store
 /*.log
 /.dockerignore
+/LICENSE
+/.vscode
+/.gitignore
