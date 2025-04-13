@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { id, messages } = body
-    const fs = await getFirestore()
+    const fs = getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
     const data = doc.data() as IPDocJSON
 

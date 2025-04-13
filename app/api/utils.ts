@@ -1,8 +1,10 @@
 import { getFirestore, Timestamp, Transaction } from 'firebase-admin/firestore'
-import type {
-  LitNodeClient,
-  LitResourceAbilityRequest,
-  AuthCallbackParams,
+import {
+  type LitNodeClient,
+  type LitResourceAbilityRequest,
+  type AuthCallbackParams,
+  createLitClient,
+  LIT_NETWORK,
 } from 'lit-wrapper'
 import { OpenAI, type ClientOptions } from 'openai'
 import { PinataSDK } from 'pinata-web3'
@@ -703,7 +705,7 @@ export async function getNonce(address: `0x${string}`) {
   const nonce = await client.getTransactionCount({
     address,
   })
-  const firestore = await getFirestore()
+  const firestore = getFirestore()
   const doc = firestore.collection('nonce').doc(address)
   const docSnap = await doc.get()
   if (!docSnap.exists) {
@@ -715,6 +717,7 @@ export async function getNonce(address: `0x${string}`) {
     const { nonce: currentNonce } = current.data() || { nonce }
     const newNonce = Math.max(nonce, currentNonce)
     transaction.update(doc, { nonce: newNonce })
+    console.log('nonce', newNonce)
     finalNonce = newNonce
   })
   return {
@@ -737,3 +740,20 @@ export async function getNonce(address: `0x${string}`) {
   }
 }
 export async function getStorachaClient() {}
+
+let litClient: Promise<LitNodeClient | undefined>
+export async function getLit() {
+  if (litClient) {
+    return await litClient
+  }
+  litClient = (async () => {
+    const litClient = await createLitClient({
+      litNetwork: LIT_NETWORK.Datil,
+      debug: false,
+    })
+    global.document = { dispatchEvent: (_event: Event) => true } as Document
+    await litClient.connect()
+    return litClient
+  })()
+  return await litClient
+}

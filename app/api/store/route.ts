@@ -13,12 +13,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
 import { waitForTransactionReceipt } from 'viem/actions'
 import { createAsAgent } from 'web-storage-wrapper'
-import // createLitClient,
-// LIT_ABILITY,
-// LIT_NETWORK,
-// LitAccessControlConditionResource,
-// LitActionResource,
-'lit-wrapper'
+;('lit-wrapper')
 import { getUser } from '../stytch'
 import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
@@ -74,7 +69,7 @@ export async function POST(req: NextRequest) {
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
     )
-    const firestore = await getFirestore()
+    const firestore = getFirestore()
     const status = firestore.collection('audit').doc(id)
     const auditTable = firestore
       .collection('audit')

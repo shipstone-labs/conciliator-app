@@ -59,7 +59,5 @@ export function cidAsURL(cid?: string) {
   if (!cid) {
     return undefined
   }
-  return cid.startsWith('bafy')
-    ? `https://${cid}.ipfs.w3s.link/`
-    : `https://w3s.link/ipfs/${cid}`
+  return `https://w3s.link/ipfs/${cid}`
 }

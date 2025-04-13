@@ -11,12 +11,27 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/ipfs/**',
       },
+      // Allow our own domain for the cached image API route
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/api/cached-image/**',
+      },
+      {
+        protocol: 'https',
+        hostname: process.env.VERCEL_URL || 'conciliate-app.vercel.app',
+        port: '',
+        pathname: '/api/cached-image/**',
+      },
     ],
     minimumCacheTTL: 60,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     formats: ['image/webp'],
     dangerouslyAllowSVG: true,
+    // We don't need loader configuration here since we'll
+    // explicitly use our custom loader where needed
   },
   webpack: (config, { isServer }) => {
     // Handle browser-compatibility for Node.js built-ins
