@@ -20,6 +20,7 @@ import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import type { IPAudit } from '@/lib/types'
+import { useAppConfig } from '@/lib/ConfigContext'
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -54,6 +55,7 @@ const AppIP = () => {
   // =====================================================
   const [testTokenCounter, setTestTokenCounter] = useState(1000)
   const { litClient, sessionSigs } = useSession()
+  const config = useAppConfig()
   const ids = useCallback(
     async (id: string) => {
       return fetch('/api/prestore', {
@@ -72,11 +74,10 @@ const AppIP = () => {
           return res.json()
         })
         .then((ids) => {
-          console.log(ids)
           return ids
         }) as Promise<{ tokenId: `0x${string}`; nativeTokenId: string }>
     },
-    [stytchClient?.session?.getTokens]
+    [stytchClient?.session]
   )
   useEffect(() => {
     if (docId) {
@@ -125,20 +126,20 @@ const AppIP = () => {
       const unifiedAccessControlConditions = [
         {
           conditionType: 'evmBasic',
-          contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
+          contractAddress: config.LIT_CONTRACT_ADDRESS,
           standardContractType: '',
           chain: 'filecoinCalibrationTestnet',
           method: '',
           parameters: [':userAddress'],
           returnValueTest: {
             comparator: '=',
-            value: process.env.NEXT_PUBLIC_LIT_ADDRESS,
+            value: config.LIT_ADDRESS,
           },
         },
         { conditionType: 'operator', operator: 'or' },
         {
           conditionType: 'evmBasic',
-          contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
+          contractAddress: config.LIT_CONTRACT_ADDRESS,
           standardContractType: 'ERC1155',
           chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
@@ -150,7 +151,7 @@ const AppIP = () => {
         },
         // {
         //   conditionType: 'evmContract',
-        //   contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
+        //   contractAddress: config.LIT_CONTRACT_ADDRESS,
         //   functionName: 'balanceOf',
         //   functionParams: [':userAddress', nativeTokenId],
         //   functionAbi: {
@@ -268,6 +269,7 @@ const AppIP = () => {
     monthPrice,
     fb,
     stytchClient?.session,
+    config,
     sessionSigs,
     ids,
     ndaConfirmed,

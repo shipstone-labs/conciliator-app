@@ -1,51 +1,106 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
-import { useStytchUser } from '@stytch/nextjs'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { Modal } from '@/components/ui/modal'
+import { useAppConfig } from '@/lib/ConfigContext'
+import { cidAsURL } from '@/lib/internalTypes'
+import { useSession } from '@/hooks/useSession'
+import Markdown from 'react-markdown'
+import Loading from './Loading'
+import { useRouter } from 'next/navigation'
 
 const DetailIP = ({
   docId,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  view = false,
 }: {
   docId: string
+  view?: boolean
 }) => {
-  const router = useRouter()
   const [ndaChecked, setNdaChecked] = useState(false)
+  const isViewLoading = useRef(false)
+  const [viewed, setViewed] = useState<string>()
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
+  const { litClient, delegatedSessionSigs } = useSession()
+  const config = useAppConfig()
 
-  const { user } = useStytchUser()
+  const router = useRouter()
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
-  const isOwner = ideaData?.creator === user?.user_id
-  console.log(audit)
-  console.log(ideaData)
-  console.log(isOwner)
-  // For now, use placeholder data
-  // const ideaData = {
-  //   title: "Advanced AI-Powered Content Generator",
-  //   description:
-  //     "A sophisticated AI system that generates high-quality content tailored to specific industries and audiences. The system leverages cutting-edge machine learning models to understand context, brand voice, and audience preferences to create engaging articles, social media posts, and marketing materials that resonate with target demographics.",
-  //   createdAt: Timestamp.fromDate(new Date()),
-  //   creator: "Demo User",
-  //   category: "Artificial Intelligence",
-  //   tags: ["AI", "Content Creation", "Machine Learning", "Marketing"],
-  // };
 
-  // Function to navigate to the discovery page
-  const goToDiscovery = () => {
-    router.push(`/discovery/${docId}`)
+  useEffect(() => {
+    if (isViewLoading.current) {
+      return
+    }
+    const doFetch = async () => {
+      if (
+        litClient &&
+        ideaData?.canView &&
+        !viewed &&
+        !isViewLoading.current &&
+        view &&
+        ideaData?.encrypted?.cid &&
+        delegatedSessionSigs
+      ) {
+        isViewLoading.current = true
+        const url = cidAsURL(ideaData.encrypted.cid)
+        if (!url) {
+          console.error('Invalid CID URL')
+          return
+        }
+
+        const data = await fetch(url)
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error('Failed to fetch encrypted data')
+            }
+            return res.json()
+          })
+          .then(
+            (data) =>
+              data as {
+                ciphertext: string
+                dataToEncryptHash: string
+                unifiedAccessControlConditions: unknown
+              }
+          )
+        const { ciphertext, dataToEncryptHash } = data
+        const { sessionSigs, capacityDelegationAuthSig } =
+          await delegatedSessionSigs(docId)
+        const request = {
+          accessControlConditions: JSON.parse(ideaData?.encrypted?.acl),
+          // pkpPublicKey: sessionSigs?.pkpPublicKey,
+          ciphertext,
+          dataToEncryptHash,
+          chain: 'filecoinCalibrationTestnet',
+          sessionSigs,
+          capacityDelegationAuthSig,
+        } as unknown as Parameters<typeof litClient.decrypt>[0]
+        const decrypted = await litClient.decrypt(request).catch((error) => {
+          console.error('Error decrypting data:', error)
+          // Too bad, but don't retry.
+          return null
+        })
+        if (decrypted) {
+          const content = new TextDecoder().decode(decrypted.decryptedData)
+          setViewed(content)
+        }
+      }
+    }
+    doFetch()
+  }, [ideaData, view, viewed, litClient, delegatedSessionSigs, docId])
+  const onKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
+    if (e.key === 'Enter') {
+      router.push(`/discovery/${docId}`)
+    }
   }
-
   if (!ideaData) {
     return (
       <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden p-8">
@@ -83,6 +138,24 @@ const DetailIP = ({
           </div>
         </div>
 
+        {view ? (
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
+            <CardHeader className="pb-4 border-b border-white/10">
+              <div className="flex flex-wrap gap-2 justify-center">
+                <span className="px-3 py-1 text-xs font-medium bg-white/10 text-white/60 rounded-full">
+                  Intellectual Property
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-5">
+              {viewed ? (
+                <Markdown>{viewed}</Markdown>
+              ) : (
+                <Loading text="Decrypting Content" />
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
         {/* Main idea card - only show when not loading and no error */}
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
           <CardHeader className="pb-4 border-b border-white/10">
@@ -314,11 +387,11 @@ const DetailIP = ({
         </Card>
 
         {/* Clickable Discovery Mode card */}
-        <div
-          onClick={goToDiscovery}
+        <a
+          href={`/discovery/${docId}`}
           className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
           aria-label="Go to Discovery Mode"
-          onKeyDown={(e) => e.key === 'Enter' && goToDiscovery()}
+          onKeyDown={onKeyDown}
         >
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
             <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
@@ -348,7 +421,43 @@ const DetailIP = ({
               </div>
             </CardContent>
           </Card>
-        </div>
+        </a>
+
+        {ideaData.canView && !view ? (
+          <a
+            href={`/view/${docId}`}
+            className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
+            aria-label="Go to View Mode"
+          >
+            <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+              <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
+                <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
+                  <Image
+                    src="/svg/Black+Yellow.svg"
+                    alt="View Mode Icon"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                    priority
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
+                    View Mode{' '}
+                    <ArrowRight
+                      className="w-4 h-4 inline-block"
+                      aria-hidden="true"
+                    />
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    Since you either own or have purchased the content you can
+                    now view it.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </a>
+        ) : null}
 
         {audit ? (
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
@@ -380,7 +489,7 @@ const DetailIP = ({
                   IPDocV2 Contract
                 </div>
                 <div className="text-white/80 text-sm">
-                  {process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS}
+                  {config.LIT_CONTRACT_ADDRESS as string}
                 </div>
                 <div className="text-white font-bold text-sm">
                   Mint Transaction

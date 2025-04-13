@@ -79,14 +79,6 @@ const nextConfig: NextConfig = {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     }
 
-    // Also create a mapping for any other NEXT_PUBLIC_ variables
-    // that might be present but not explicitly listed above
-    Object.keys(process.env).forEach((key) => {
-      if (key.startsWith('NEXT_PUBLIC_') && !env[`process.env.${key}`]) {
-        env[`process.env.${key}`] = JSON.stringify(process.env[key])
-      }
-    })
-
     // CRITICAL: Do NOT map "process.env" as a whole object - this can break variable replacement
     config.plugins.push(new webpack.DefinePlugin(env))
 

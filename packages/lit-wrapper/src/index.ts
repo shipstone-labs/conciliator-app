@@ -46,6 +46,7 @@ export async function authenticate(
 }> {
   const { userId, appId, accessToken, relayApiKey } = options
 
+  console.log('network', client.config.litNetwork)
   const litRelay = new LitRelay({
     relayUrl: LitRelay.getRelayUrl(client.config.litNetwork),
     relayApiKey,

@@ -2,22 +2,29 @@
 
 import {
   createContext,
+  MouseEvent,
   type PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
 import { AuthModal } from './AuthModal'
 import { useStytch, useStytchUser } from '@stytch/nextjs'
 import Loading from './Loading'
-import type { LitNodeClient } from 'lit-wrapper'
+import {
+  LitAccessControlConditionResource,
+  type LitNodeClient,
+} from 'lit-wrapper'
 import { publicKeyToAddress } from 'viem/utils'
 import {
   getAuth,
   signInWithCustomToken,
   type UserCredential,
 } from 'firebase/auth'
+import { usePathname } from 'next/navigation'
+import { useAppConfig } from '@/lib/ConfigContext'
 
 export type Session = {
   litClient?: LitNodeClient
@@ -27,6 +34,9 @@ export type Session = {
     address: `0x${string}`
     sessionSigs: unknown
   }
+  delegatedSessionSigs?: (
+    docId: string
+  ) => Promise<{ sessionSigs: unknown; capacityDelegationAuthSig: unknown }>
   fbUser?: UserCredential
   isLoggedIn: boolean
   isLoggingOff: boolean
@@ -52,6 +62,7 @@ export default function Authenticated({
     setLoggingOff,
     isLoggedIn: false,
   })
+  const config = useAppConfig()
   const litActive = useRef(false)
   const firebaseActive = useRef(false)
   // Show auth modal if not authenticated and not ignored
@@ -149,9 +160,9 @@ export default function Authenticated({
                 litClient,
                 {
                   userId: user.user_id,
-                  appId: process.env.NEXT_PUBLIC_STYTCH_APP_ID,
+                  appId: config.STYTCH_APP_ID as string,
                   accessToken: stytchClient.session.getTokens()?.session_jwt,
-                  relayApiKey: process.env.NEXT_PUBLIC_LIT_RELAY_API_KEY,
+                  relayApiKey: config.LIT_RELAY_API_KEY as string,
                 }
               )
               // -- setting scope for the auth method
@@ -168,6 +179,8 @@ export default function Authenticated({
               }
               const sessionSigs = await litClient.getPkpSessionSigs({
                 pkpPublicKey: pkps[0].publicKey,
+                litNetwork: litModule.LIT_NETWORK.Datil,
+                chain: 'filecoinCalibrationTestnet',
                 // capabilityAuthSigs: [capacityDelegationAuthSig],
                 authMethods: [authMethod],
                 resourceAbilityRequests: [
@@ -175,13 +188,67 @@ export default function Authenticated({
                     resource: new litModule.LitPKPResource('*'),
                     ability: litModule.LIT_ABILITY.PKPSigning,
                   },
+                  {
+                    resource: new LitAccessControlConditionResource('*'),
+                    ability:
+                      litModule.LIT_ABILITY.AccessControlConditionDecryption,
+                  },
                 ],
                 expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
               })
+              const delegatedSessionSigs = async (docId: string) => {
+                if (!docId) {
+                  throw new Error('docId is required')
+                }
+                const { capacityDelegationAuthSig } = await fetch(
+                  '/api/delegate',
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${stytchClient.session.getTokens()?.session_jwt}`,
+                    },
+                    body: JSON.stringify({
+                      id: docId,
+                      pkp: pkps[0].ethAddress,
+                    }),
+                  }
+                ).then((res) => {
+                  if (!res.ok) {
+                    throw new Error('Failed to fetch token')
+                  }
+                  return res.json()
+                })
+
+                const sessionSigs = await litClient.getPkpSessionSigs({
+                  pkpPublicKey: pkps[0].publicKey,
+                  litNetwork: litModule.LIT_NETWORK.Datil,
+                  chain: 'filecoinCalibrationTestnet',
+                  capabilityAuthSigs: [capacityDelegationAuthSig],
+                  authMethods: [authMethod],
+                  resourceAbilityRequests: [
+                    {
+                      resource: new litModule.LitPKPResource('*'),
+                      ability: litModule.LIT_ABILITY.PKPSigning,
+                    },
+                    {
+                      resource: new LitAccessControlConditionResource('*'),
+                      ability:
+                        litModule.LIT_ABILITY.AccessControlConditionDecryption,
+                    },
+                  ],
+                  expiration: new Date(
+                    Date.now() + 1000 * 60 * 10
+                  ).toISOString(), // 10 minutes
+                  // capacityDelegationAuthSig,
+                })
+                return { sessionSigs, capacityDelegationAuthSig }
+              }
               setSessionSigs((state) =>
                 amendLoggedIn({
                   ...state,
                   litClient,
+                  delegatedSessionSigs,
                   sessionSigs: {
                     authMethod,
                     pkpPublicKey: pkps[0].publicKey,
@@ -208,6 +275,7 @@ export default function Authenticated({
     requireLit,
     requireFirebase,
     amendLoggedIn,
+    config,
     stytchClient,
   ])
 
@@ -215,6 +283,27 @@ export default function Authenticated({
   const handleAuthSuccess = useCallback(() => {
     setShowAuthModal(false)
   }, [])
+
+  const pathname = usePathname()
+  const onClose = useMemo(
+    (event?: MouseEvent<HTMLElement>) => {
+      if (!event) {
+        return () => {
+          setShowAuthModal(false)
+        }
+      }
+      if (pathname === '/') {
+        return () => {
+          setShowAuthModal(false)
+        }
+      }
+      return () => {
+        setShowAuthModal(false)
+        window.location.href = '/'
+      }
+    },
+    [pathname]
+  )
   return (
     <>
       <sessionContext.Provider value={sessionSigs}>
@@ -227,8 +316,8 @@ export default function Authenticated({
 
       {/* Authentication Modal */}
       <AuthModal
+        onClose={onClose}
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
       />
     </>

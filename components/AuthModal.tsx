@@ -12,7 +12,7 @@ import { sessionContext } from './Authenticated'
 
 interface AuthModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose?: () => void
   onSuccess?: () => void
 }
 
@@ -41,7 +41,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setIsLoading(false)
 
     // Call the parent's onClose
-    onClose()
+    onClose?.()
   }, [onClose])
 
   // Handle sending email OTP
@@ -153,7 +153,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   return (
     <Modal
       isOpen={isOpen && !isLoggingOff}
-      onClose={handleClose}
+      onClose={onClose ? handleClose : undefined}
       title="Sign In"
     >
       <div className="mt-4 space-y-6">

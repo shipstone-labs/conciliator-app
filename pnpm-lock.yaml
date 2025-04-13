@@ -122,6 +122,9 @@ importers:
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
+      siwe:
+        specifier: ^2.3.2
+        version: 2.3.2(ethers@5.8.0(utf-8-validate@6.0.5))
       sonner:
         specifier: ^2.0.3
         version: 2.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -13906,6 +13909,14 @@ snapshots:
       '@spruceid/siwe-parser': 2.1.2
       '@stablelib/random': 1.0.2
       ethers: 5.8.0(utf-8-validate@5.0.10)
+      uri-js: 4.4.1
+      valid-url: 1.0.9
+
+  siwe@2.3.2(ethers@5.8.0(utf-8-validate@6.0.5)):
+    dependencies:
+      '@spruceid/siwe-parser': 2.1.2
+      '@stablelib/random': 1.0.2
+      ethers: 5.8.0(utf-8-validate@6.0.5)
       uri-js: 4.4.1
       valid-url: 1.0.9
 

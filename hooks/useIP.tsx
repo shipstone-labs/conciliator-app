@@ -6,6 +6,7 @@ import {
   type IPAudit,
   type IPDoc,
 } from '@/lib/types'
+import { useStytchUser } from '@stytch/nextjs'
 import {
   collection,
   doc,
@@ -17,36 +18,87 @@ import {
   onSnapshot,
   orderBy,
   type OrderByDirection,
+  type Query,
   query,
+  type QueryCompositeFilterConstraint,
   startAfter,
+  type Timestamp,
+  where,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
-export function useIP(tokenId: string) {
+export function useIP(docId: string) {
   const [ideaData, setIdeaData] = useState<IPDoc | undefined>()
+  const { user } = useStytchUser()
   useEffect(() => {
+    if (!user) {
+      setIdeaData(undefined)
+      return
+    }
     const fetchData = async () => {
       const fs = getFirestore()
-      const docRef = await getDoc(doc(fs, 'ip', tokenId))
+      const docRef = await getDoc(doc(fs, 'ip', docId))
+
       if (docRef.exists()) {
-        setIdeaData(castToUIDoc({ ...docRef.data(), id: docRef.id } as IPDoc))
+        const { creator } = docRef.data() as { creator?: string }
+        let hasAccess = creator === user.user_id
+        if (!hasAccess) {
+          const deals = await getDocs(
+            query(
+              query(
+                collection(fs, 'ip', docId, 'deals'),
+                where('to', '==', user.user_id)
+              ),
+              orderBy('createdAt', 'desc')
+            )
+          )
+          hasAccess = deals.docs
+            .map(
+              (doc) =>
+                ({
+                  ...doc.data(),
+                  id: doc.id,
+                }) as { expiresAt?: Timestamp }
+            )
+            .some((deal) => {
+              const { expiresAt } = deal
+              if (expiresAt) {
+                return expiresAt.toDate() > new Date()
+              }
+              return true
+            })
+        }
+        setIdeaData(
+          castToUIDoc({
+            ...docRef.data(),
+            id: docRef.id,
+            canView: hasAccess,
+          } as IPDoc)
+        )
       } else {
         setIdeaData(undefined)
       }
     }
 
     fetchData()
-  }, [tokenId])
+  }, [docId, user])
 
   return ideaData
 }
 
-export function useIPs(
-  _orderBy = 'createdAt',
-  _orderDir: OrderByDirection = 'desc',
-  _limit = 10,
-  _page = 1
-) {
+export function useIPs({
+  orderBy: _orderBy = 'createdAt',
+  orderDirection: _orderDir = 'desc',
+  itemsPerPage: _limit = 16,
+  filter,
+  currentPage: _page = 1,
+}: {
+  orderBy?: string
+  orderDirection?: OrderByDirection
+  itemsPerPage?: number
+  filter?: QueryCompositeFilterConstraint
+  currentPage?: number
+}) {
   const [ideaData, setIdeaData] = useState<{
     data: IPDoc[] | undefined
     pages: number
@@ -57,7 +109,11 @@ export function useIPs(
   useEffect(() => {
     const doIt = async () => {
       const fs = getFirestore()
-      let qry = query(collection(fs, 'ip'), orderBy(_orderBy, _orderDir))
+      let qry: Query = collection(fs, 'ip')
+      if (filter) {
+        qry = query(qry, filter)
+      }
+      qry = query(qry, orderBy(_orderBy, _orderDir))
       const _startAfter = pages[_page]
       if (!_startAfter && _page > 1) {
         console.error('Last page')
@@ -81,7 +137,7 @@ export function useIPs(
       setIdeaData({ data, pages: Object.keys(pages).length })
     }
     doIt()
-  }, [_orderBy, _orderDir, _limit, _page, pages[_page]])
+  }, [_orderBy, _orderDir, _limit, _page, pages[_page], filter])
   return ideaData
 }
 

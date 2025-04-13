@@ -22,12 +22,16 @@ import {
 // import { SignableMessage } from "viem";
 import { privateKeyToAccount } from 'viem/accounts'
 import { Timestamp } from 'firebase-admin/firestore'
+import { getUser } from '../stytch'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    const loginNow = Date.now()
+    await getUser(req)
+    console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)
     const { messages, id } = (await req.json()) as {
       messages: {
         role: 'user' | 'assistant' | 'system'
@@ -36,46 +40,17 @@ export async function POST(req: NextRequest) {
       id: string
     }
 
+    const retrieveNow = Date.now()
     const fs = getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
     const auditTable = fs.collection('audit').doc(id).collection('details')
+    console.log(
+      `retrieve took ${Math.round((Date.now() - retrieveNow) / 1000)}s`
+    )
     const data = doc.data() as IPDocJSON
     if (!data) {
       throw new Error('Document not found')
     }
-    // const wallet = createWalletClient({
-    //   account: privateKeyToAccount(
-    //     (process.env.FILCOIN_PK || "") as `0x${string}`
-    //   ),
-    //   // chain: {
-    //   //   ...filecoinCalibration,
-    //   //   rpcUrls: {
-    //   //     default: { http: ["https://api.calibration.node.glif.io"] },
-    //   //   },
-    //   // },
-    //   chain: filecoinCalibration,
-    //   transport: http(),
-    // });
-    // const data = encodeFunctionData({
-    //   abi,
-    //   functionName: "getDocument",
-    //   args: [tokenId],
-    // });
-    // const { data: results } = await call(wallet, {
-    //   to: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
-    //   data,
-    // });
-    // const content = decodeAbiParameters(
-    //   [{ type: "string" }],
-    //   results as Hex
-    // )[0];
-    // const index = (await readContract(wallet, {
-    //   address: (process.env.FILCOIN_CONTRACT || "0x") as `0x${string}`,
-    //   functionName: "getDocumentMetadata",
-    //   abi,
-    //   args: [tokenId],
-    // })) as { name: string; description: string };
-
     if (messages.length === 0) {
       return new Response(
         JSON.stringify({
@@ -141,6 +116,8 @@ ${data.description}`,
     }
     const consecutiveYesCount = Math.max(...runs)
     if (consecutiveYesCount < 5) {
+      const now = Date.now()
+
       const account = privateKeyToAccount(
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )
@@ -198,51 +175,6 @@ ${data.description}`,
         },
       ])
 
-      console.log(
-        'downSampled',
-        JSON.stringify(
-          {
-            user: account.address,
-            ...downSampled,
-            ciphertext: `${downSampled.ciphertext.slice(0, 100)}...`,
-          },
-          null,
-          2
-        )
-      )
-
-      //       const output = await litClient.executeJs({
-      //         code: `async function run() {
-      //   try {
-      //     const input = await Lit.Actions.decryptAndCombine({
-      //       accessControlConditions,
-      //       ciphertext,
-      //       dataToEncryptHash,
-      //       chain,
-      //     });
-
-      //     Lit.Actions.setResponse({
-      //       response: JSON.stringify({
-      //         input
-      //       }),
-      //     });
-      //   } catch (error) {
-      //     console.error("Error during execution:", error);
-      //     Lit.Actions.setResponse({ response: error.message });
-      //   }
-      // }
-      // run();`,
-      //         // cid: CID,
-      //         sessionSigs,
-      //         jsParams: {
-      //           accessControlConditions: downSampled.unifiedAccessControlConditions,
-      //           ciphertext: downSampled.ciphertext,
-      //           dataToEncryptHash: downSampled.dataToEncryptHash,
-      //           chain: 'filecoin',
-      //         },
-      //       })
-      //       console.log(output)
-
       const _decrypted = await litClient.decrypt({
         accessControlConditions:
           downSampled.unifiedAccessControlConditions as Parameters<
@@ -250,9 +182,10 @@ ${data.description}`,
           >[0]['accessControlConditions'],
         ciphertext: downSampled.ciphertext,
         dataToEncryptHash: downSampled.dataToEncryptHash,
-        chain: 'filecoin',
+        chain: 'filecoinCalibrationTestnet',
         sessionSigs,
       })
+      console.log(`lit took ${Math.round((Date.now() - now) / 1000)}s`)
 
       const content = new TextDecoder().decode(_decrypted.decryptedData)
 
@@ -269,10 +202,14 @@ ${data.description}`,
         }
       )
       request[0].content = _content
+      const chatNow = Date.now()
       const completion = await completionAI.chat.completions.create({
         model: getModel('COMPLETION'), // Use the appropriate model
         messages: request,
       })
+      console.log(
+        `lilypad completion took ${Math.round((Date.now() - chatNow) / 1000)}s`
+      )
       const answerContent = completion.choices
         .flatMap(
           ({ message: { content = '' } = { content: '' } }) =>
@@ -284,6 +221,7 @@ ${data.description}`,
     } else {
       messages.push({ content: 'Stop', role: 'assistant' })
     }
+    const dataNow = Date.now()
     await auditTable.add({
       status: 'Conciliator answered',
       createdAt: Timestamp.fromDate(new Date()),
@@ -293,6 +231,7 @@ ${data.description}`,
         answer: messages.at(-1)?.content,
       },
     })
+    console.log(`audit took ${Math.round((Date.now() - dataNow) / 1000)}s`)
     return new Response(
       JSON.stringify({
         messages,
