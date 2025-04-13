@@ -61,7 +61,7 @@ const DetailIP = ({
         {/* Header with page title and image */}
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center">
-            <Image
+            <img
               src={
                 ideaData.image?.cid
                   ? cidAsURL(ideaData.image.cid) || '/svg/Black+Yellow.svg'
@@ -71,7 +71,6 @@ const DetailIP = ({
               width={160}
               height={160}
               className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all mb-4"
-              priority
             />
             <h1 className="text-3xl font-bold text-primary mb-2">
               {ideaData.name}

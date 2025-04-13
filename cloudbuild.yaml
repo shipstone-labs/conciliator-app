@@ -226,14 +226,13 @@ steps:
           
           # Also post a comment for easier access
           gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)"
-          
           # Mark deployment as successful for the final status check
           touch /workspace/deployment_success
         fi
 # Add a final notification step to handle failures
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyFailure
-    waitFor: ['Build'] # This makes it run after the build step, regardless of build success
+    waitFor: ['Deploy'] # This makes it run after the build step, regardless of build success
     entrypoint: bash
     args:
       - -c
