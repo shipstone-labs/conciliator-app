@@ -78,7 +78,7 @@ const AppIP = () => {
           return ids
         }) as Promise<{ tokenId: `0x${string}`; nativeTokenId: string }>
     },
-    [stytchClient?.session?.getTokens]
+    [stytchClient?.session]
   )
   useEffect(() => {
     if (docId) {

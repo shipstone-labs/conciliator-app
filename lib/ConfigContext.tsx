@@ -4,8 +4,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 // Define the type for our configuration
 export interface AppConfig {
-  [key: string]: any
-  FIREBASE_CONFIG?: Record<string, any>
+  FIREBASE_CONFIG?: Record<string, unknown>
+  [key: string]: string | Record<string, unknown> | undefined
 }
 
 // Create a context for the configuration

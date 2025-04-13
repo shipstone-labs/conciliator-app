@@ -23,7 +23,7 @@ export default function AuthLayout({ children }: PropsWithChildren) {
       return undefined
     }
     const stytchClient = createStytchUIClient(
-      config.STYTCH_PUBLIC_TOKEN || '',
+      (config.STYTCH_PUBLIC_TOKEN as string) || '',
       stytchOptions
     )
     return stytchClient

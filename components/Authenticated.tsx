@@ -159,9 +159,9 @@ export default function Authenticated({
                 litClient,
                 {
                   userId: user.user_id,
-                  appId: config.STYTCH_APP_ID,
+                  appId: config.STYTCH_APP_ID as string,
                   accessToken: stytchClient.session.getTokens()?.session_jwt,
-                  relayApiKey: config.LIT_RELAY_API_KEY,
+                  relayApiKey: config.LIT_RELAY_API_KEY as string,
                 }
               )
               // -- setting scope for the auth method

@@ -21,7 +21,6 @@ import { useRouter } from 'next/navigation'
 const DetailIP = ({
   docId,
   view = false,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 }: {
   docId: string
   view?: boolean
@@ -498,7 +497,7 @@ const DetailIP = ({
                   IPDocV2 Contract
                 </div>
                 <div className="text-white/80 text-sm">
-                  {config.LIT_CONTRACT_ADDRESS}
+                  {config.LIT_CONTRACT_ADDRESS as string}
                 </div>
                 <div className="text-white font-bold text-sm">
                   Mint Transaction

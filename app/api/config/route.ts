@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   try {
     // Get all environment variables that start with NEXT_PUBLIC_
-    const publicEnvVars: Record<string, any> = {}
+    const publicEnvVars: Record<string, string | Record<string, unknown>> = {}
 
     Object.keys(process.env).forEach((key) => {
       if (key.startsWith('NEXT_PUBLIC_')) {
@@ -26,9 +26,10 @@ export async function GET() {
             // Keep as string if parsing fails
           }
         }
-
-        // Add to our response object
-        publicEnvVars[newKey] = value
+        if (value) {
+          // Add to our response object
+          publicEnvVars[newKey] = value
+        }
       }
     })
 
