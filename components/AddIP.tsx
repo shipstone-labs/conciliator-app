@@ -135,43 +135,29 @@ const AppIP = () => {
             value: process.env.NEXT_PUBLIC_LIT_ADDRESS,
           },
         },
-        { conditionType: 'operator', operator: 'or' },
-        {
-          conditionType: 'evmContract',
-          contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
-          functionName: 'balanceOf',
-          functionParams: [':userAddress', nativeTokenId],
-          functionAbi: {
-            inputs: [
-              {
-                internalType: 'address',
-                name: 'account',
-                type: 'address',
-              },
-              {
-                internalType: 'uint256',
-                name: 'id',
-                type: 'uint256',
-              },
-            ],
-            name: 'balanceOf',
-            outputs: [
-              {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-              },
-            ],
-            stateMutability: 'view',
-            type: 'function',
-          },
-          chain: 'filecoin',
-          returnValueTest: {
-            key: '',
-            comparator: '>',
-            value: '0',
-          },
-        },
+        // { conditionType: 'operator', operator: 'or' },
+        // {
+        //   conditionType: 'evmContract',
+        //   contractAddress: process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS,
+        //   functionName: 'balanceOf',
+        //   functionParams: [':userAddress', nativeTokenId],
+        //   functionAbi: {
+        //     type: 'function',
+        //     stateMutability: 'view',
+        //     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        //     name: 'balanceOf',
+        //     inputs: [
+        //       { internalType: 'address', name: 'account', type: 'address' },
+        //       { internalType: 'uint256', name: 'id', type: 'uint256' },
+        //     ],
+        //   },
+        //   chain: 'filecoin',
+        //   returnValueTest: {
+        //     key: '',
+        //     comparator: '>',
+        //     value: '0',
+        //   },
+        // },
       ]
       setLocalStatus('Encrypting your idea')
       const encrypted = await litClient
