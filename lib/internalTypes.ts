@@ -10,6 +10,7 @@ export type IPDocJSON = {
     cid: string
     mint: `0x${string}`
     transfer: `0x${string}`
+    update: `0x${string}`
   }
   // Terms information for the idea
   terms?: {
@@ -33,6 +34,23 @@ export type IPDocJSON = {
     acl: string // JSON in here
     hash: string
   }
+  updatedAt: unknown
+  createdAt: unknown
+}
+
+export type IPAuditJSON = {
+  id: string // firestore doc id
+  status: string
+  creator: string
+  address: `0x${string}`
+  tokenId: `0x${string}`
+  updatedAt: unknown
+  createdAt: unknown
+}
+
+export type IPAuditDetailsJSON = {
+  id: string // firestore doc id
+  status: string
   updatedAt: unknown
   createdAt: unknown
 }

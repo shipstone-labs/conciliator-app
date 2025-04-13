@@ -1,7 +1,22 @@
 import { Timestamp } from 'firebase/firestore'
-import type { IPDocJSON } from './internalTypes'
+import type {
+  IPAuditDetailsJSON,
+  IPAuditJSON,
+  IPDocJSON,
+} from './internalTypes'
 
 export type IPDoc = IPDocJSON & {
+  updatedAt: Timestamp
+  createdAt: Timestamp
+}
+
+export type IPAudit = IPAuditJSON & {
+  updatedAt: Timestamp
+  createdAt: Timestamp
+  details?: IPAuditDetails[]
+}
+
+export type IPAuditDetails = IPAuditDetailsJSON & {
   updatedAt: Timestamp
   createdAt: Timestamp
 }
@@ -28,6 +43,28 @@ export function castToTimestamp(date: unknown): Timestamp {
     )
   }
   return new Timestamp(0, 0)
+}
+
+export function castAuditDetailsToUIDoc(
+  record: IPAuditDetailsJSON & { id: string }
+): IPAuditDetails {
+  return {
+    ...record,
+    updatedAt: castToTimestamp(record.updatedAt),
+    createdAt: castToTimestamp(record.createdAt),
+  }
+}
+
+export function castAuditToUIDoc(
+  record: IPAuditJSON,
+  details?: IPAuditDetails[]
+): IPAudit {
+  return {
+    ...record,
+    details,
+    updatedAt: castToTimestamp(record.updatedAt),
+    createdAt: castToTimestamp(record.createdAt),
+  }
 }
 
 export function castToUIDoc(record: IPDocJSON | IPDoc): IPDoc {
@@ -59,4 +96,19 @@ export function formatDate(_date: Timestamp | Date | string | number): string {
     // do nothing
   }
   return date.toLocaleString('en-US', options)
+}
+
+export function formatNumber(
+  _number: number | string,
+  style: 'currency' | 'decimal' = 'currency',
+  currency = 'USD'
+): string {
+  const number =
+    typeof _number === 'string' ? Number.parseFloat(_number) : _number
+  return new Intl.NumberFormat('en-US', {
+    style,
+    ...(style === 'currency' ? { currency } : {}),
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(number)
 }

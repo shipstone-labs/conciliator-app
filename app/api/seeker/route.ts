@@ -3,16 +3,25 @@ import { completionAI, getModel } from '../utils'
 // Dynamic import for the template file
 import templateFile from './system.hbs'
 import { getUser } from '../stytch'
+import { getFirestore } from '../firebase'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages: _messages, title, description } = await req.json()
+    const { messages: _messages, id } = await req.json()
 
     await getUser(req)
 
+    const fs = await getFirestore()
+
+    const doc = await fs.collection('ip').doc(id).get()
+    const data = doc.data()
+    if (!data) {
+      throw new Error('Document not found')
+    }
+    const { name, description } = data
     const messages: {
       role: 'assistant' | 'user' | 'system'
       content: string
@@ -60,7 +69,7 @@ export async function POST(req: NextRequest) {
       }
     }
     const _data: Record<string, string> = {
-      title,
+      name,
       description,
     }
     const _content = templateText.replace(

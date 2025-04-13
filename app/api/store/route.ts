@@ -60,22 +60,50 @@ export async function POST(req: NextRequest) {
     const {
       to,
       id,
-      metadata: { tokenId } = {},
+      metadata: { tokenId, nativeTokenId } = {},
       encrypted,
       downSampledEncrypted,
       name: _name,
       description,
       ...rest
     } = body
-    console.log('body', { to, id, name: _name, description, ...rest })
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`
     )
-    console.log('account', account.address)
     const w3Client = await createAsAgent(
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
     )
+    const firestore = await getFirestore()
+    const status = firestore.collection('audit').doc(id)
+    const auditTable = firestore
+      .collection('audit')
+      .doc(id)
+      .collection('details')
+    await status.set({
+      status: 'Storing document',
+      creator: user.user.user_id,
+      address: to,
+      tokenId,
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+    })
+    await auditTable.add({
+      status: 'Storing document',
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+    })
+    async function setStatus(message: string, extra?: Record<string, unknown>) {
+      await status.update({
+        status: message,
+      })
+      await auditTable.add({
+        status: message,
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+        ...extra,
+      })
+    }
     const encryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(encrypted))],
       {
@@ -83,6 +111,7 @@ export async function POST(req: NextRequest) {
       }
     )
     const encryptedCid = await w3Client.uploadFile(encryptedBlob)
+    await setStatus('Storing downsampled document in storacha')
     const downSampledEncryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(downSampledEncrypted))],
       {
@@ -92,6 +121,12 @@ export async function POST(req: NextRequest) {
     const downSampledEncryptedCid = await w3Client.uploadFile(
       downSampledEncryptedBlob
     )
+    await setStatus('Generating token image')
+    await auditTable.add({
+      status: 'Generating token image',
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+    })
     const imageCid = await imageAI.images
       .generate({
         model: getModel('IMAGE'),
@@ -113,6 +148,7 @@ export async function POST(req: NextRequest) {
             }
             return res.arrayBuffer()
           })
+          await setStatus('Storing token image')
           const blob = new Blob([buffer])
           return await w3Client.uploadFile(blob)
         }
@@ -120,7 +156,6 @@ export async function POST(req: NextRequest) {
       .catch((error) => {
         console.error('Errornect generating image:', error)
       })
-    const firestore = await getFirestore()
     const now = new Date()
     const data: IPDocJSON = clean({
       ...rest,
@@ -156,18 +191,19 @@ export async function POST(req: NextRequest) {
         hash: downSampledEncrypted.dataToEncryptHash,
       },
     }) as IPDocJSON
-    const doc = await firestore.collection('ip').doc(id)
+    const doc = firestore.collection('ip').doc(id)
     const wallet = createWalletClient({
       account,
       chain: filecoinCalibration,
       transport: http(),
     })
+    await setStatus(`Minting IPDocV8 token ID ${nativeTokenId}`)
     const mint = await wallet
       .writeContract({
         functionName: 'mint',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, tokenId, 1, '0x'],
+        args: [account.address, BigInt(nativeTokenId), 1, '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -175,12 +211,13 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
+    await setStatus(`Transferring token ID ${nativeTokenId} to you ${to}`)
     const transfer = await wallet
       .writeContract({
         functionName: 'safeTransferFrom',
         abi,
         address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, to, tokenId, 1, '0x'],
+        args: [account.address, to, nativeTokenId, 1, '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -188,6 +225,7 @@ export async function POST(req: NextRequest) {
         })
         return hash
       })
+    await setStatus('Storing token metadata')
     const metadata = {
       name: _name,
       description,
@@ -195,6 +233,7 @@ export async function POST(req: NextRequest) {
       properties: {
         properties: {
           ...rest,
+          tokenId,
           encrypted: data.encrypted,
           downSampled: data.downSampled,
           createdAt: now.toISOString(),
@@ -209,17 +248,34 @@ export async function POST(req: NextRequest) {
       }
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
-    const update = {
+    await setStatus('Setting token metadata URI')
+    const update = await wallet
+      .writeContract({
+        functionName: 'setTokenURI',
+        abi,
+        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+        args: [nativeTokenId, cidAsURL(metadataCid.toString())],
+      })
+      .then(async (hash) => {
+        await waitForTransactionReceipt(wallet, {
+          hash,
+        })
+        return hash
+      })
+    await setStatus('Updating database')
+    const updateData = {
       ...data,
       metadata: {
         cid: metadataCid.toString(),
         tokenId,
+        nativeTokenId: `${nativeTokenId}`,
         mint,
         transfer,
+        update,
       },
     }
-    console.log('update', update)
-    await doc.set(update)
+    await setStatus('Finished')
+    await doc.set(updateData)
     return new Response(JSON.stringify({ ...data, id: doc.id }), {
       headers: { 'Content-Type': 'application/json' },
     })

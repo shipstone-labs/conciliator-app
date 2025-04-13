@@ -1,34 +1,34 @@
 'use client'
 
-import { MouseEvent, useState } from 'react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from '@/components/ui/card'
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { useIP } from '@/hooks/useIP'
-import { formatDate } from '@/lib/types'
+import { useIP, useIPAudit } from '@/hooks/useIP'
+import { formatDate, formatNumber } from '@/lib/types'
+import { useStytchUser } from '@stytch/nextjs'
 import { cidAsURL } from '@/lib/internalTypes'
 import { Modal } from '@/components/ui/modal'
 
 const DetailIP = ({
   docId,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onNewIP,
 }: {
   docId: string
-  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
   const router = useRouter()
   const [ndaChecked, setNdaChecked] = useState(false)
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
 
+  const { user } = useStytchUser()
   const ideaData = useIP(docId)
+  const audit = useIPAudit(docId)
+  const isOwner = ideaData?.creator === user?.user_id
+  console.log(audit)
   console.log(ideaData)
+  console.log(isOwner)
   // For now, use placeholder data
   // const ideaData = {
   //   title: "Advanced AI-Powered Content Generator",
@@ -62,14 +62,20 @@ const DetailIP = ({
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center">
             <Image
-              src={ideaData.image?.cid ? (cidAsURL(ideaData.image.cid) || '/svg/Black+Yellow.svg') : '/svg/Black+Yellow.svg'}
+              src={
+                ideaData.image?.cid
+                  ? cidAsURL(ideaData.image.cid) || '/svg/Black+Yellow.svg'
+                  : '/svg/Black+Yellow.svg'
+              }
               alt={ideaData.name || 'Idea Image'}
               width={160}
               height={160}
               className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all mb-4"
               priority
             />
-            <h1 className="text-3xl font-bold text-primary mb-2">{ideaData.name}</h1>
+            <h1 className="text-3xl font-bold text-primary mb-2">
+              {ideaData.name}
+            </h1>
             <p className="text-white/70">
               Review your idea information and proceed to discovery
             </p>
@@ -137,7 +143,13 @@ const DetailIP = ({
                   {/* Business Model */}
                   <div className="flex items-start gap-2">
                     <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
-                      <div className="text-primary" role="img" aria-label="Lock">🔒</div>
+                      <div
+                        className="text-primary"
+                        role="img"
+                        aria-label="Lock"
+                      >
+                        🔒
+                      </div>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">
@@ -154,7 +166,13 @@ const DetailIP = ({
                   {/* Evaluation Period */}
                   <div className="flex items-start gap-2">
                     <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
-                      <div className="text-primary" role="img" aria-label="Timer">⏱️</div>
+                      <div
+                        className="text-primary"
+                        role="img"
+                        aria-label="Timer"
+                      >
+                        ⏱️
+                      </div>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">
@@ -173,65 +191,70 @@ const DetailIP = ({
                   {/* Access Options - Show if pricing information exists */}
                   {ideaData.terms.pricing && (
                     <div className="mt-4">
-                      <h4 className="text-sm font-medium text-white/70 mb-2">Access Options:</h4>
+                      <h4 className="text-sm font-medium text-white/70 mb-2">
+                        Access Options:
+                      </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {/* Day Price */}
-                        <div 
+                        <div
                           className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked 
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50' 
+                            ndaChecked
+                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
                               : 'border-white/10 bg-muted/20 opacity-50'
                           }`}
-                          onClick={() => ndaChecked && setIsAccessModalOpen(true)}
-                          role={ndaChecked ? "button" : ""}
+                          onClick={() =>
+                            ndaChecked && setIsAccessModalOpen(true)
+                          }
+                          role={ndaChecked ? 'button' : ''}
                           tabIndex={ndaChecked ? 0 : -1}
                         >
                           <p className="text-white/70 text-xs">One Day</p>
                           <p className="text-primary font-medium mt-1">
-                            $
-                            {parseFloat(
+                            {formatNumber(
                               ideaData.terms.pricing.dayPrice || '5.00'
-                            ).toFixed(2)}
+                            )}
                           </p>
                         </div>
 
                         {/* Week Price */}
-                        <div 
+                        <div
                           className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked 
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50' 
+                            ndaChecked
+                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
                               : 'border-white/10 bg-muted/20 opacity-50'
                           }`}
-                          onClick={() => ndaChecked && setIsAccessModalOpen(true)}
-                          role={ndaChecked ? "button" : ""}
+                          onClick={() =>
+                            ndaChecked && setIsAccessModalOpen(true)
+                          }
+                          role={ndaChecked ? 'button' : ''}
                           tabIndex={ndaChecked ? 0 : -1}
                         >
                           <p className="text-white/70 text-xs">One Week</p>
                           <p className="text-primary font-medium mt-1">
-                            $
-                            {parseFloat(
+                            {formatNumber(
                               ideaData.terms.pricing.weekPrice || '25.00'
-                            ).toFixed(2)}
+                            )}
                           </p>
                         </div>
 
                         {/* Month Price */}
-                        <div 
+                        <div
                           className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked 
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50' 
+                            ndaChecked
+                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
                               : 'border-white/10 bg-muted/20 opacity-50'
                           }`}
-                          onClick={() => ndaChecked && setIsAccessModalOpen(true)}
-                          role={ndaChecked ? "button" : ""}
+                          onClick={() =>
+                            ndaChecked && setIsAccessModalOpen(true)
+                          }
+                          role={ndaChecked ? 'button' : ''}
                           tabIndex={ndaChecked ? 0 : -1}
                         >
                           <p className="text-white/70 text-xs">One Month</p>
                           <p className="text-primary font-medium mt-1">
-                            $
-                            {parseFloat(
+                            {formatNumber(
                               ideaData.terms.pricing.monthPrice || '90.00'
-                            ).toFixed(2)}
+                            )}
                           </p>
                         </div>
                       </div>
@@ -243,7 +266,13 @@ const DetailIP = ({
                     <div className="mt-4 p-3 border border-white/20 rounded-xl bg-muted/20">
                       <div className="flex items-start gap-2">
                         <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
-                          <div className="text-primary text-xs" role="img" aria-label="Document">📝</div>
+                          <div
+                            className="text-primary text-xs"
+                            role="img"
+                            aria-label="Document"
+                          >
+                            📝
+                          </div>
                         </div>
                         <div>
                           <p className="text-white/90 mb-2">
@@ -257,11 +286,17 @@ const DetailIP = ({
                                 type="checkbox"
                                 id="nda-confirmation"
                                 checked={ndaChecked}
-                                onChange={(e) => setNdaChecked(e.target.checked)}
+                                onChange={(e) =>
+                                  setNdaChecked(e.target.checked)
+                                }
                                 className="mr-2 rounded border-white/20 bg-muted/30 text-primary"
                               />
-                              <label htmlFor="nda-confirmation" className="text-white/80 text-sm">
-                                I have signed the required Non-Disclosure Agreement (NDA).
+                              <label
+                                htmlFor="nda-confirmation"
+                                className="text-white/80 text-sm"
+                              >
+                                I have signed the required Non-Disclosure
+                                Agreement (NDA).
                               </label>
                             </div>
                           )}
@@ -275,15 +310,12 @@ const DetailIP = ({
           </CardContent>
 
           {/* Footer buttons removed */}
-          
         </Card>
 
         {/* Clickable Discovery Mode card */}
-        <div 
+        <div
           onClick={goToDiscovery}
           className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
-          role="button"
-          tabIndex={0}
           aria-label="Go to Discovery Mode"
           onKeyDown={(e) => e.key === 'Enter' && goToDiscovery()}
         >
@@ -301,7 +333,11 @@ const DetailIP = ({
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
-                  Discovery Mode <ArrowRight className="w-4 h-4 inline-block" aria-hidden="true" />
+                  Discovery Mode{' '}
+                  <ArrowRight
+                    className="w-4 h-4 inline-block"
+                    aria-hidden="true"
+                  />
                 </h3>
                 <p className="text-white/80 text-sm">
                   In Discovery mode, you can interact with AI agents to explore
@@ -312,6 +348,64 @@ const DetailIP = ({
             </CardContent>
           </Card>
         </div>
+
+        {audit ? (
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
+            <CardHeader className="pb-4 border-b border-white/10">
+              <CardTitle className="text-2xl font-bold text-primary">
+                Audit Trail
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-5">
+              <div
+                className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+                style={{ gridTemplateColumns: '12em 1fr' }}
+              >
+                <div className="text-white font-bold text-sm">Created On</div>
+                <div className="text-white/80 text-sm">
+                  {formatDate(audit.createdAt)}
+                </div>
+                <div className="text-white font-bold text-sm">Status</div>
+                <div className="text-white/80 text-sm">{audit.status}</div>
+                <div className="text-white font-bold text-sm">Creator</div>
+                <div className="text-white/80 text-sm">
+                  {audit.creator}@{audit.address}
+                </div>
+                <div className="text-white font-bold text-sm">Token ID</div>
+                <div className="text-white/80 text-sm">
+                  {ideaData.metadata?.tokenId}
+                </div>
+                <div className="text-white font-bold text-sm">
+                  IPDocV2 Contract
+                </div>
+                <div className="text-white/80 text-sm">
+                  {process.env.NEXT_PUBLIC_LIT_CONTRACT_ADDRESS}
+                </div>
+                <div className="text-white font-bold text-sm">
+                  Mint Transaction
+                </div>
+                <div className="text-white/80 text-sm">
+                  {ideaData.metadata?.mint || 'Not available'}
+                </div>
+              </div>
+              {audit.details?.map((detail) => (
+                <div
+                  key={detail.id}
+                  className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+                  style={{ gridTemplateColumns: '12em 1fr' }}
+                >
+                  <div className="text-white font-bold text-sm">Created On</div>
+                  <div className="text-white/80 text-sm">
+                    {formatDate(detail.createdAt)}
+                  </div>
+
+                  <div className="text-white font-bold text-sm">Status</div>
+                  <div className="text-white/80 text-sm">{detail.status}</div>
+                </div>
+              )) || null}
+            </CardContent>
+          </Card>
+        ) : null}
 
         {/* Access Option Modal */}
         <Modal
