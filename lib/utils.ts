@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge'
 import { initializeApp } from 'firebase/app'
 export { getAnalytics } from 'firebase/analytics'
 export { getFirestore } from 'firebase/firestore'
+import { getStripePayments } from '@invertase/firestore-stripe-payments'
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -22,6 +23,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig)
+
+export const payments = getStripePayments(app, {
+  customersCollection: 'customers',
+  productsCollection: 'products',
+})
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

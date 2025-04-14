@@ -8,8 +8,10 @@ import {
 import { OpenAI, type ClientOptions } from 'openai'
 import { PinataSDK } from 'pinata-web3'
 import {
+  createNonceManager,
   createPublicClient,
   http,
+  nonceManager,
   type PrivateKeyAccount,
   type SignableMessage,
 } from 'viem'
