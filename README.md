@@ -12,9 +12,32 @@ Hi hackathon people - here's the status of this project:
 
 **Issues:** errors in add IP, add IP/view IP/IP agent all very slow. local agent is super buggy. 
 
-We'll add an official demo test link later today.
+You can test the current version of SafeIdea at https://safeidea.net 
 
-Challenge notes for Filecoin, Storacha and Lilypad were included yesterday with the submission. We'll put updated notes here today.
+## AI Blueprints with Filecoin Challenges
+
+### Filecoin Challenge
+
+**Privacy-Preserving AI**: Tools that prioritize privacy of sensitive data, including examples such as training LLMs on datasets with differential privacy, homomorphic encrypted computation, ZK proofs for model outputs and more. 
+**Decentralized AI Infrastructure**: Platform for decentralized AI computation with Filecoin data storage  
+**Creator Economy**: AI tools for content generation, copyright protection, personalized recommendations.  
+
+**SafeIdea Alignment**  
+    * SafeIdea’s goal is to offer tools to people that want the securely share access to Intellectual Property (IP). We use a downsampling technique to support discovery without risking the IP. The AI only gets to see the downsampled encrypted content during interactions so it cannot leak accurate information.  
+    * SafeIdea’s uses Lilypad for decentralized AI computer to create Agentic search support  
+    * We think that SafeIdea could be a fundamental part of the creator economy, starting with intellectual property 
+
+### Storacha Challenge
+
+Your goal is to have 2 or more AI agents share data between one another. These AI Agents should be built using open source AI frameworks. They should be utilizing Storacha for data storage. (Input, Chain of Thought, Metadata, and output) 
+
+**SafeIdea Alignment:** SafeIdea's local agent uses Storacha to store encrypted downsampled content inserted into the system prompt of a lilypad ai completion. Input Chain of Thought and Metadata are stored with Storacha when the user saves their chat for download. We use Storacha for Token metadata, token image and encrypted content as well as downsampled encrypted content. The encryption uses LIT with token gating using Stytch OTP authenticated LIT PKP wallets which contain balances on a ERC1155 IPDocV8 token running in filecoinCalibration FEVM.  used to manage restricted sessions with external AI agents sent to search for IP. SafeIdea simulates the external agent to demonstrate how the local agent can provide enough information for external agents while keeping core data secret.  
+
+### Lilypad Challenge
+
+Build advanced agent workflows on the Lilypad network that can dynamically select the best AI model (from options like DeepSeek, Llama) for specific subtasks, orchestrate multiple models, and handle complex reasoning, overcoming limitations of single-model agents. 
+
+**SafeIdea Alignment:** SafeIdea's agents are using anura-testnet Lilypad, enabling SafeIdea to deploy different AI models on demand, depending on the type of IP that is offered. (It’s setup but we are currently loading the model from an environment variable for testing)
 
 ## Getting Started
 
