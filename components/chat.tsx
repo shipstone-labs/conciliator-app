@@ -582,10 +582,10 @@ export default function ChatUI({
     >
       <CardHeader>
         <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Discovery Session
+          Agent Sessions
         </CardTitle>
         <CardDescription>
-          {doc.name} - {doc.description}
+          {doc.name}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

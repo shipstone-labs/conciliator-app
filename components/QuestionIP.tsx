@@ -149,7 +149,7 @@ const QuestionIP = ({
       <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden p-8">
         <div className="flex flex-col items-center justify-center py-8">
           <Loading />
-          <p className="text-white/70 mt-4">Loading discovery session...</p>
+          <p className="text-white/70 mt-4">Loading Agent Sessions...</p>
         </div>
       </Card>
     )
@@ -216,7 +216,7 @@ const QuestionIP = ({
           Session Complete
         </CardTitle>
         <CardDescription className="text-white/90 mt-2">
-          Thank you for using the Discovery Session
+          Thank you for using Agent Sessions
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -263,7 +263,7 @@ const QuestionIP = ({
             </div>
           )}
           <p className="text-white/70">
-            Explore your idea through interactive conversation
+            Agent-to-Agent and Agent-to-Human Conversations about your Idea
           </p>
         </div>
 
