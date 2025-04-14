@@ -1,52 +1,20 @@
-# Welcome to the Conciliator Project
+# Welcome to SafeIdea (Formerly Known as Conciliator) Project
 
-Conciliator is an open source project that explores how to best work with AI agents that search for IP. It provides an effective way to enable discovery of intellectual property while protecting the interests of the IP inventors and/or owners. The project focuses on balancing openness with appropriate protections.
+SafeIdea is an open source project designed to support creators and inventors of digital content. While copying is inevitable in the digital realm, we want to provide a framework for makers to benefit from their work.
 
-## Accessibility Focus
-This branch is focused on improving the accessibility of the application for all users.
+Our design encrypts digital IP and enables secure sharing, giving creators control over their content. We're also developing tools to improve content discovery and streamline transactions, making it easier for users to find and access digital creations legitimately.
 
-This is an experimental part of the SafeIdea project that we're working on. Ping us at Cart@shipstone.com to learn more.
+This is a new project, and we're actively seeking community feedback on our approach. We believe there's a significant need for this solution - especially for intellectual property, which is our primary focus. We're building a decentralized ecosystem that respects creator rights while facilitating appropriate sharing and use.
 
-Also, we wanted to demonstrate how different LLMs can talk to eachother. Here's an informative conversation with Google Gemini: https://docs.google.com/document/d/e/2PACX-1vQYlzI-nmG1LpdEigAESJ_njDDtylSxnsx40RXAo7mYkfib57Q1E6yfhNM5erBKr_SqM4uxjDSo42_j/pub
+Here's a [document](https://docs.google.com/document/d/1sihbZLf_Fe7XpKER9ZvnDbRSwZmdB2FG01aRiHBhEa4/edit?usp=sharing)
+that describes what we're doing in a little more detail. If you don't want to read it, you might try the [podcast version](https://drive.google.com/file/d/1AK3WYfvAfL9b75VW3unMNIjBW35LRDLt/view?usp=sharing) made by [notebooklm](https://notebooklm.google.com/).  There's also a slideshow [here](https://shipstone.com/preso).
 
-Unfortunately, this still does not work, although we think that most LLMs will have operator functionality this year so that they can generate any API they need on the fly. "No API is the best API!"
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Thanks for your interest!
 
 ## Getting Started
 
-First, run the development server:
-
-Install [mise](https://mise.jdx.dev/getting-started.html) first or 
-manage node@22.13.1 and pnpm@10.3.0. Later versions will most likely work
-but these are the versions used.
-
-```bash
-mise install
-```
-
-```bash
-pnpm install
-```
-
-```bash
-cp .env.local.example .env.local
-cp hardhat/.env.example hardhat/.env
-# Fill out .env.local and hardhat/.env.example
-```
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-This is currently being deployed on cloudflare and should work in fleek.
+Under Construction
 
 ## Support
 
-If you have questions about the Conciliator Project, please reach out to the team at Cart@shipstone.com.
-
-## Deployment
-
-This project is configured for deployment on Cloudflare Pages with automatic builds and previews for each PR.
+If you have questions about SafeIdea, please ping us at dev@safeidea.ai
