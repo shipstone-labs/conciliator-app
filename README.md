@@ -13,7 +13,47 @@ Thanks for your interest!
 
 ## Getting Started
 
-Under Construction
+Initially make a copy of .env.example to .env and then
+fill in all the secrets in .env
+
+First, run the development server:
+
+Install [mise](https://mise.jdx.dev/getting-started.html) first or 
+manage node@22.13.1 and pnpm@10.3.0. Later versions will most likely work
+but these are the versions used.
+
+```bash
+mise install
+```
+
+```bash
+pnpm install
+```
+
+```bash
+cp .env.local.example .env.local
+cp hardhat/.env.example hardhat/.env
+# Fill out .env.local and hardhat/.env.example
+```
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Support
+
+If you have questions about the Conciliator Project, please reach out to the team at Cart@shipstone.com.
+
+## Deployment
+
+This project is configured for deployment on Cloudflare Pages with automatic builds and previews for each PR.
+Currently we have moved to a cloudbuild.yaml and corresponding Docker build.
+This is due to the fact that the LIT and Storacha libraries are not 100% compatible with runtime = 'edge'.
+So instead this is currently being deployed using runtime = 'nodejs'
+To do the deployment in cloudrun. Setup a google secret and put the .env content in it. Then map the file
+to /env/.env inside of the container instance.
 
 ## Support
 
