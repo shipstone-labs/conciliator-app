@@ -2,6 +2,7 @@ import * as firebase from 'firebase-admin'
 import 'firebase-admin/firestore'
 import 'firebase-admin/auth'
 import 'firebase-admin/storage'
+import 'firebase-admin/database'
 
 import type { SessionsAuthenticateResponse } from 'stytch'
 
@@ -13,6 +14,7 @@ function init() {
     try {
       firebase.initializeApp({
         credential: firebase.credential.cert(sa),
+        databaseURL: process.env.FIREBASE_DB,
       })
     } catch {}
     inited = true
@@ -38,4 +40,9 @@ export function getStorage() {
 export function getBucket() {
   init()
   return firebase.storage().bucket(`${sa.project_id}.firebasestorage.app`)
+}
+
+export function getFirebase() {
+  init()
+  return firebase.database()
 }

@@ -1,9 +1,4 @@
 import {
-  getFirestore,
-  Timestamp,
-  type Transaction,
-} from 'firebase-admin/firestore'
-import {
   type LitNodeClient,
   type LitResourceAbilityRequest,
   type AuthCallbackParams,
@@ -19,6 +14,7 @@ import {
   type SignableMessage,
 } from 'viem'
 import { filecoinCalibration } from 'viem/chains'
+import { getFirebase } from './firebase'
 
 const NAMES = [
   {
@@ -701,48 +697,71 @@ export const genSession = async (
   return sessionSigs
 }
 
-export async function getNonce(address: `0x${string}`) {
+export async function runWithNonce<T>(
+  address: `0x${string}`,
+  call: (nonce: number) => Promise<T>
+): Promise<T> {
   const client = createPublicClient({
     chain: filecoinCalibration,
     transport: http(),
   })
-  const nonce = await client.getTransactionCount({
+  const db = getFirebase()
+  const rpcNonce = await client.getTransactionCount({
     address,
+    blockTag: 'pending',
   })
-  const firestore = getFirestore()
-  const doc = firestore.collection('nonce').doc(address)
-  const docSnap = await doc.get()
-  if (!docSnap.exists) {
-    await doc.set({ nonce, createdAt: Timestamp.fromDate(new Date()) })
-  }
-  let finalNonce = nonce
-  await firestore.runTransaction(async (transaction: Transaction) => {
-    const current = await transaction.get(doc)
-    const { nonce: currentNonce } = current.data() || { nonce }
-    const newNonce = Math.max(nonce, currentNonce)
-    transaction.update(doc, { nonce: newNonce })
-    console.log('nonce', newNonce)
-    finalNonce = newNonce
+  const ref = db.ref(`nonce/${address}`)
+  const snap = await ref.once('value')
+  const _data = snap.val()
+  const { snapshot: finalSnap, committed } = await ref.transaction((__data) => {
+    const { nonce: _currentNonce, pending: _pending } = __data ||
+      _data || { nonce: rpcNonce }
+    let currentNonce = _currentNonce
+    const pending = _pending || {}
+    if (rpcNonce > currentNonce) {
+      // We must have missed one (this is unlikely to happen)
+      currentNonce = rpcNonce
+    }
+    const out = {
+      nonce: currentNonce + 1,
+      pending: { ...pending, [currentNonce]: true },
+      current: currentNonce,
+    }
+    return out
   })
-  return {
-    nonce: async () => {
-      try {
-        await doc.update({ nonce: finalNonce + 1 })
-      } catch (error) {
-        console.error(error)
+  const nonce = finalSnap.val?.()?.current || rpcNonce
+  return (await call(nonce)
+    .then(async () => {
+      await ref.update({
+        [`pending/${nonce}`]: null,
+      })
+    })
+    .catch(async () => {
+      const ref = db.ref(`nonce/${address}`)
+      const snap = await ref.once('value')
+      const _data = snap.val()
+      const { nonce: _newNonce } = _data || {}
+      if (_newNonce === nonce) {
+        await ref
+          .transaction((data) => {
+            const { nonce: currentNonce, pending } = data || _data
+            if (pending[nonce] && currentNonce - 1 === nonce) {
+              const { [nonce]: _ignore, ...rest } = pending
+              return {
+                nonce,
+                pending: rest,
+              }
+            }
+            return data || _data
+          })
+          .catch((error) => {
+            console.error(error)
+            return { snapshot: undefined }
+          })
       }
-      return finalNonce++
-    },
-    revert: async () => {
-      try {
-        await doc.update({ nonce: finalNonce - 1 })
-      } catch (error) {
-        console.error(error)
-      }
-      finalNonce--
-    },
-  }
+    })) as T
 }
+
 export async function getStorachaClient() {}
 
 let litClient: Promise<LitNodeClient> | undefined

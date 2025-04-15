@@ -4,6 +4,7 @@ import {
   // genSession,
   getModel,
   imageAI,
+  runWithNonce,
   // getModel,
   // imageAI,
   // pinata,
@@ -192,33 +193,39 @@ export async function POST(req: NextRequest) {
       transport: http(),
     })
     await setStatus(`Minting IPDocV8 token ID ${nativeTokenId}`)
-    const mint = await wallet
-      .writeContract({
-        functionName: 'mint',
-        abi,
-        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, BigInt(nativeTokenId), 1, '0x'],
-      })
-      .then(async (hash) => {
-        await waitForTransactionReceipt(wallet, {
-          hash,
+    const mint = await runWithNonce(account.address, async (nonce) => {
+      return await wallet
+        .writeContract({
+          functionName: 'mint',
+          abi,
+          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+          args: [account.address, BigInt(nativeTokenId), 1, '0x'],
+          nonce,
         })
-        return hash
-      })
+        .then(async (hash) => {
+          await waitForTransactionReceipt(wallet, {
+            hash,
+          })
+          return hash
+        })
+    })
     await setStatus(`Transferring token ID ${nativeTokenId} to you ${to}`)
-    const transfer = await wallet
-      .writeContract({
-        functionName: 'safeTransferFrom',
-        abi,
-        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [account.address, to, nativeTokenId, 1, '0x'],
-      })
-      .then(async (hash) => {
-        await waitForTransactionReceipt(wallet, {
-          hash,
+    const transfer = await runWithNonce(account.address, async (nonce) => {
+      return await wallet
+        .writeContract({
+          functionName: 'safeTransferFrom',
+          abi,
+          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+          args: [account.address, to, nativeTokenId, 1, '0x'],
+          nonce,
         })
-        return hash
-      })
+        .then(async (hash) => {
+          await waitForTransactionReceipt(wallet, {
+            hash,
+          })
+          return hash
+        })
+    })
     await setStatus(
       `Storing IPDocV8 token metadata for token ID ${nativeTokenId}`
     )
@@ -245,19 +252,22 @@ export async function POST(req: NextRequest) {
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
     await setStatus(`Setting token metadata URI on token ID ${nativeTokenId}`)
-    const update = await wallet
-      .writeContract({
-        functionName: 'setTokenURI',
-        abi,
-        address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-        args: [nativeTokenId, cidAsURL(metadataCid.toString())],
-      })
-      .then(async (hash) => {
-        await waitForTransactionReceipt(wallet, {
-          hash,
+    const update = await runWithNonce(account.address, async (nonce) => {
+      return await wallet
+        .writeContract({
+          functionName: 'setTokenURI',
+          abi,
+          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+          args: [nativeTokenId, cidAsURL(metadataCid.toString())],
+          nonce,
         })
-        return hash
-      })
+        .then(async (hash) => {
+          await waitForTransactionReceipt(wallet, {
+            hash,
+          })
+          return hash
+        })
+    })
     await setStatus('Updating database record with token information')
     const updateData = {
       ...data,
