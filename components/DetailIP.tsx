@@ -132,9 +132,7 @@ const DetailIP = ({
             <h1 className="text-3xl font-bold text-primary mb-2">
               {ideaData.name}
             </h1>
-            <p className="text-white/70">
-              Review your idea information and proceed to discovery
-            </p>
+            {/* Removed instructional text as per cleanup request */}
           </div>
         </div>
 
@@ -414,9 +412,8 @@ const DetailIP = ({
                   />
                 </h3>
                 <p className="text-white/80 text-sm">
-                  With My Agent, you can interact with AI agents to explore
-                  your idea&apos;s potential applications and receive valuable
-                  feedback from simulated stakeholders.
+                  With My Agent, you can see how your AI agent works on your behalf
+                  to best represent your idea on the web.
                 </p>
               </div>
             </CardContent>
@@ -443,7 +440,7 @@ const DetailIP = ({
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
-                    View Mode{' '}
+                    View Encrypted Idea{' '}
                     <ArrowRight
                       className="w-4 h-4 inline-block"
                       aria-hidden="true"
@@ -463,7 +460,7 @@ const DetailIP = ({
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-white/10">
               <CardTitle className="text-2xl font-bold text-primary">
-                Audit Trail
+                Transaction History
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-5">
