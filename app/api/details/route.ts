@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server'
 import { getFirestore } from '../firebase'
 import type { IPDocJSON } from '@/lib/internalTypes'
 import { getUser } from '../stytch'
-import { Timestamp } from 'firebase-admin/firestore'
+import { FieldValue } from 'firebase-admin/firestore'
 
 export const runtime = 'nodejs'
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
           name: `Idea #${tokenId}`,
           description:
             'This is a development placeholder for an idea that was created before database integration.',
-          createdAt: Timestamp.fromDate(new Date()),
+          createdAt: FieldValue.serverTimestamp(),
           creator: 'Current User',
           category: 'Intellectual Property',
           tags: ['Innovation', 'Technology', 'IP'],

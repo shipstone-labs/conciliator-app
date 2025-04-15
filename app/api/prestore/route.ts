@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import {
   abi,
-  getNonce,
+  runWithNonce,
   // genSession,
   // getModel,
   // imageAI,
@@ -40,8 +40,6 @@ export async function POST(req: NextRequest) {
       transport: http(),
     })
 
-    const { nonce, revert } = await getNonce(account.address)
-
     let nativeTokenId: bigint | undefined = (await readContract(wallet, {
       address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
       abi,
@@ -49,38 +47,36 @@ export async function POST(req: NextRequest) {
       args: [tokenId],
     })) as bigint
     if (!nativeTokenId) {
-      nativeTokenId = (await wallet
-        .writeContract({
-          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-          abi,
-          functionName: 'createId',
-          args: [tokenId],
-          nonce: await nonce(),
-        })
-        .then(async (hash) => {
-          const { logs } = await waitForTransactionReceipt(wallet, {
-            hash,
-          })
-          const decoded = parseEventLogs({
-            logs,
+      nativeTokenId = (await runWithNonce(account.address, async (nonce) => {
+        return await wallet
+          .writeContract({
+            address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
             abi,
-            eventName: 'IdCreated',
+            functionName: 'createId',
+            args: [tokenId],
+            nonce,
           })
-          if (!decoded[0]) {
-            // Try again, someone else might have created the ID
-            return 0n
-          }
-          return (
-            (decoded[0] as unknown as { args: unknown })?.args as {
-              tokenId: bigint
+          .then(async (hash) => {
+            const { logs } = await waitForTransactionReceipt(wallet, {
+              hash,
+            })
+            const decoded = parseEventLogs({
+              logs,
+              abi,
+              eventName: 'IdCreated',
+            })
+            if (!decoded[0]) {
+              // Try again, someone else might have created the ID
+              return 0n
             }
-          ).tokenId
-        })
-        .catch(async (error) => {
-          console.error(error)
-          await revert()
-          return 0n
-        })) as bigint
+            return (
+              (decoded[0] as unknown as { args: unknown })?.args as {
+                tokenId: bigint
+              }
+            ).tokenId
+          })
+      })) as bigint
+
       if (!nativeTokenId) {
         nativeTokenId = (await readContract(wallet, {
           address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,

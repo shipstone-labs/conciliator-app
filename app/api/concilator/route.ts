@@ -21,7 +21,7 @@ import {
 } from 'lit-wrapper'
 // import { SignableMessage } from "viem";
 import { privateKeyToAccount } from 'viem/accounts'
-import { Timestamp } from 'firebase-admin/firestore'
+import { FieldValue } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
 const templateText = templateFile.toString()
 
@@ -224,8 +224,8 @@ ${data.description}`,
     const dataNow = Date.now()
     await auditTable.add({
       status: 'Conciliator answered',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
       data: {
         question: messages.at(-2)?.content,
         answer: messages.at(-1)?.content,
