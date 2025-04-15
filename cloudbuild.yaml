@@ -184,13 +184,14 @@ steps:
 
         # Execute the deploy command with dynamic tag
         # Use $$ to escape bash variables in Cloud Build YAML
-        gcloud run services update $_SERVICE_NAME \
+        (gcloud run services update $_SERVICE_NAME \
           --platform=managed \
           --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID \
           --region=$_DEPLOY_REGION \
           --quiet \
-          $$TAG_OPTION
+          $$TAG_OPTION 2>&1) | tee ./.info.log
+        REV=$(sed < ./.info.log -n -e 's#The revision can be reached directly at https://\(.*\)#https://\1#pi')
         if [[ "$$DO_ROLLOUT" == "yes" ]]
         then
           gcloud run services update-traffic $_SERVICE_NAME \
@@ -203,13 +204,13 @@ steps:
         # Get the Cloud Run URL for this revision
         SERVICE_URL=$(gcloud run services describe $_SERVICE_NAME --region=$_DEPLOY_REGION --format='value(status.url)')
         CACHE_TAG=$(cat /workspace/cache_tag.txt)
-        REVISION_URL="$${SERVICE_URL}?tag=$${CACHE_TAG}"
-        echo "Deployment URL: $$REVISION_URL"
         
         # Create GitHub deployment and update status if this is a PR build
         if [[ "$_PR_NUMBER" != "" ]]; then          
           # Deploy happens here (already done above)
-          
+          REVISION_URL="$${REV}"
+          echo "Deployment URL: $$REVISION_URL"
+
           # Build URL for logs
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
           
@@ -228,6 +229,9 @@ steps:
           gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)"
           # Mark deployment as successful for the final status check
           touch /workspace/deployment_success
+        else
+          REVISION_URL="$${SERVICE_URL}"
+          echo "Deployment URL: $$REVISION_URL"
         fi
 # Add a final notification step to handle failures
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
