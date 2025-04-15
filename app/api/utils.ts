@@ -713,7 +713,7 @@ export async function runWithNonce<T>(
   const ref = db.ref(`nonce/${address}`)
   const snap = await ref.once('value')
   const _data = snap.val()
-  const { snapshot: finalSnap, committed } = await ref.transaction((__data) => {
+  const { snapshot: finalSnap } = await ref.transaction((__data) => {
     const { nonce: _currentNonce, pending: _pending } = __data ||
       _data || { nonce: rpcNonce }
     let currentNonce = _currentNonce
@@ -721,6 +721,9 @@ export async function runWithNonce<T>(
     if (rpcNonce > currentNonce) {
       // We must have missed one (this is unlikely to happen)
       currentNonce = rpcNonce
+    }
+    while (pending[currentNonce]) {
+      currentNonce += 1
     }
     const out = {
       nonce: currentNonce + 1,
