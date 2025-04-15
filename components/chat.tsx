@@ -582,7 +582,7 @@ export default function ChatUI({
     >
       <CardHeader>
         <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Discovery Session
+          My Agent
         </CardTitle>
         <CardDescription>
           {doc.name} - {doc.description}
@@ -771,7 +771,7 @@ export default function ChatUI({
       disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed`}
               >
                 {hasStop
-                  ? 'Discovery Finished'
+                  ? 'Agent Finished'
                   : autoCompleting
                     ? 'Stop'
                     : isStopping

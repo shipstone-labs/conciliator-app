@@ -386,11 +386,11 @@ const DetailIP = ({
           {/* Footer buttons removed */}
         </Card>
 
-        {/* Clickable Discovery Mode card */}
+        {/* Clickable My Agent card */}
         <a
           href={`/discovery/${docId}`}
           className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
-          aria-label="Go to Discovery Mode"
+          aria-label="Go to My Agent"
           onKeyDown={onKeyDown}
         >
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
@@ -398,7 +398,7 @@ const DetailIP = ({
               <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
                 <Image
                   src="/svg/Black+Yellow.svg"
-                  alt="Discovery Mode Icon"
+                  alt="My Agent Icon"
                   width={32}
                   height={32}
                   className="rounded-full"
@@ -407,14 +407,14 @@ const DetailIP = ({
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
-                  Discovery Mode{' '}
+                  My Agent{' '}
                   <ArrowRight
                     className="w-4 h-4 inline-block"
                     aria-hidden="true"
                   />
                 </h3>
                 <p className="text-white/80 text-sm">
-                  In Discovery mode, you can interact with AI agents to explore
+                  With My Agent, you can interact with AI agents to explore
                   your idea&apos;s potential applications and receive valuable
                   feedback from simulated stakeholders.
                 </p>

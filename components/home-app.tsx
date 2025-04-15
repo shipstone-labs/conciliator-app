@@ -69,7 +69,7 @@ function HomeApp() {
                   <span className="font-medium text-primary">
                     Monetization opportunities
                   </span>{' '}
-                  - Connects you with ways to monetize your ideas on your terms
+                  - Makes you a local AI agent to help you monetize your idea
                 </li>
               </ul>
             </div>
