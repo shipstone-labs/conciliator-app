@@ -47,9 +47,50 @@ function clean(obj: unknown): unknown {
   return obj
 }
 
+async function cleanupTable() {
+  const fs = getFirestore()
+  const docs = await fs
+    .collection('ip')
+    .where('createdAt._seconds', '!=', null)
+    .get()
+  const batch = fs.batch()
+  let count = 0
+  docs.docs.map((doc) => {
+    let hasUpdate = false
+    const update: Record<string, FieldValue> = {}
+    {
+      const { _seconds, _nanoseconds } = doc.data().createdAt as {
+        _seconds: number
+        _nanoseconds: number
+      }
+      update.createdAt = new Timestamp(_seconds, _nanoseconds)
+      hasUpdate = true
+    }
+    {
+      const { _seconds, _nanoseconds } = doc.data().updatedAt as {
+        _seconds: number
+        _nanoseconds: number
+      }
+      update.updatedAt = new Timestamp(_seconds, _nanoseconds)
+    }
+    if (!hasUpdate) {
+      return
+    }
+    batch.update(doc.ref, update)
+    count++
+  })
+  if (count) {
+    await batch.commit()
+    return true
+  }
+  return false
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getUser(req)
+
+    await cleanupTable()
 
     const body = await req.json()
     const {
@@ -177,8 +218,8 @@ export async function POST(req: NextRequest) {
         acl: JSON.stringify(encrypted.unifiedAccessControlConditions),
         hash: encrypted.dataToEncryptHash,
       },
-      createdAt: Timestamp.fromDate(now),
-      updatedAt: Timestamp.fromDate(now),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
       downSampled: {
         cid: downSampledEncryptedCid.toString(),
         acl: JSON.stringify(
