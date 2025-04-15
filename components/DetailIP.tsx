@@ -394,14 +394,13 @@ const DetailIP = ({
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
             <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
               <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
-                <Image
-                  src="/svg/Black+Yellow.svg"
-                  alt="My Agent Icon"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                  priority
-                />
+                <div
+                  className="text-primary text-2xl"
+                  role="img"
+                  aria-label="My Agent"
+                >
+                  🤖
+                </div>
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
@@ -429,14 +428,13 @@ const DetailIP = ({
             <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
               <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
                 <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
-                  <Image
-                    src="/svg/Black+Yellow.svg"
-                    alt="View Mode Icon"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                    priority
-                  />
+                  <div
+                    className="text-primary text-2xl"
+                    role="img"
+                    aria-label="View Encrypted Idea"
+                  >
+                    🔍
+                  </div>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">

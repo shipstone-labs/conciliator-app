@@ -618,12 +618,13 @@ export default function ChatUI({
                         {message.index || ''}
                       </div>
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
-                        <Image
-                          src="/svg/Black+Yellow.svg"
-                          alt="Conciliator Logo"
-                          width={32}
-                          height={32}
-                        />
+                        <div
+                          className="text-xl"
+                          role="img"
+                          aria-label="My Agent"
+                        >
+                          🤖
+                        </div>
                       </div>
                     </div>
                   )}
@@ -644,12 +645,13 @@ export default function ChatUI({
                   {/* Optional Avatar for Assistant */}
                   {message.role === 'assistant' && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
-                      <Image
-                        src="/svg/Black+Yellow.svg"
-                        alt="Conciliator Logo"
-                        width={32}
-                        height={32}
-                      />
+                      <div
+                        className="text-xl"
+                        role="img"
+                        aria-label="My Agent"
+                      >
+                        🤖
+                      </div>
                     </div>
                   )}
 
