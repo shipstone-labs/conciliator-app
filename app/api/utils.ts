@@ -734,10 +734,11 @@ export async function runWithNonce<T>(
   })
   const nonce = finalSnap.val?.()?.current || rpcNonce
   return (await call(nonce)
-    .then(async () => {
+    .then(async (result) => {
       await ref.update({
         [`pending/${nonce}`]: null,
       })
+      return result
     })
     .catch(async () => {
       const ref = db.ref(`nonce/${address}`)

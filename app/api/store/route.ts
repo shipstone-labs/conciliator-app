@@ -18,7 +18,7 @@ import { getUser } from '../stytch'
 import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
-import { Timestamp } from 'firebase-admin/firestore'
+import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 
 export const runtime = 'nodejs'
 
@@ -80,22 +80,23 @@ export async function POST(req: NextRequest) {
       creator: user.user.user_id,
       address: to,
       tokenId,
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     })
     await auditTable.add({
       status: 'Storing encrypted document in storacha',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     })
     async function setStatus(message: string, extra?: Record<string, unknown>) {
       await status.update({
         status: message,
+        updatedAt: FieldValue.serverTimestamp(),
       })
       await auditTable.add({
         status: message,
-        createdAt: Timestamp.fromDate(new Date()),
-        updatedAt: Timestamp.fromDate(new Date()),
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
         ...extra,
       })
     }
@@ -119,8 +120,8 @@ export async function POST(req: NextRequest) {
     await setStatus('AI generating token image from name and description')
     await auditTable.add({
       status: 'Generating token image',
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     })
     const imageCid = await imageAI.images
       .generate({

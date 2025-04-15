@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server'
 import { getFirestore } from '../firebase'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 // import { SignableMessage } from "viem";
-import { Timestamp } from 'firebase-admin/firestore'
+import { FieldValue, type Timestamp } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
 
 export const runtime = 'nodejs'
@@ -92,8 +92,8 @@ export async function POST(req: NextRequest) {
     const dataNow = Date.now()
     await auditTable.add({
       status: `Document retrieved by ${user.user.user_id}`,
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
       data: {
         userId: user.user.user_id,
       },
