@@ -191,7 +191,7 @@ steps:
           --region=$_DEPLOY_REGION \
           --quiet \
           $$TAG_OPTION 2>&1) | tee ./.info.log
-        REV=$(sed < ./.info.log -n -e 's#The revision can be reached directly at https://(.*)#https://\1#pi')
+        REV=$(sed < ./.info.log -n -e 's#The revision can be reached directly at https://\(.*\)#https://\1#pi')
         if [[ "$$DO_ROLLOUT" == "yes" ]]
         then
           gcloud run services update-traffic $_SERVICE_NAME \
