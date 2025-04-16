@@ -81,6 +81,30 @@ export function formatDate(_date: Timestamp | Date | string | number): string {
     return '- no date -'
   }
   let date = _date
+  if (_date instanceof Timestamp) {
+    date = _date.toDate()
+  } else if (typeof _date === 'string' || typeof _date === 'number') {
+    date = new Date(_date)
+  } else if (_date instanceof Date) {
+    // do nothing
+  } else if (
+    typeof _date === 'object' &&
+    ('_seconds' in _date || 'seconds' in _date)
+  ) {
+    const { seconds, nanoseconds, _seconds, _nanoseconds } = _date as {
+      seconds?: number
+      nanoseconds?: number
+      _seconds?: number
+      _nanoseconds?: number
+    }
+    // Handle Firestore Timestamp object
+    date = new Timestamp(
+      seconds || _seconds || 0,
+      nanoseconds || _nanoseconds || 0
+    ).toDate()
+  } else {
+    return '- no date -'
+  }
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: '2-digit',

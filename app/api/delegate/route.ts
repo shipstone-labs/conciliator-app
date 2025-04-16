@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       (doc.data() as { creator?: string }).creator === user.user.user_id
         ? [{ expiresAt: undefined }]
         : await fs
-            .collection('audit')
+            .collection('ip')
             .doc(id)
             .collection('deals')
             .where('to', '==', user.user.user_id)

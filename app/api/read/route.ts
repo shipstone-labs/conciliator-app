@@ -11,9 +11,7 @@ export const runtime = 'nodejs'
 export async function POST(req: NextRequest) {
   try {
     await initAPIConfig()
-    const loginNow = Date.now()
     const user = await getUser(req)
-    console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)
     const { id } = (await req.json()) as {
       messages: {
         role: 'user' | 'assistant' | 'system'
@@ -22,16 +20,15 @@ export async function POST(req: NextRequest) {
       id: string
     }
 
-    const retrieveNow = Date.now()
     const fs = getFirestore()
-    const auditTable = fs.collection('audit').doc(id).collection('details')
+    const auditTable = fs.collection('ip').doc(id).collection('audit')
     const doc = await fs.collection('ip').doc(id).get()
     const deals =
       doc.exists &&
       (doc.data() as { creator?: string }).creator === user.user.user_id
         ? [{ expiresAt: undefined }]
         : await fs
-            .collection('audit')
+            .collection('ip')
             .doc(id)
             .collection('deals')
             .where('to', '==', user.user.user_id)
@@ -60,9 +57,6 @@ export async function POST(req: NextRequest) {
         }
       )
     }
-    console.log(
-      `retrieve took ${Math.round((Date.now() - retrieveNow) / 1000)}s`
-    )
     const data = doc.data() as IPDocJSON
     if (!data) {
       throw new Error('Document not found')
@@ -87,11 +81,9 @@ export async function POST(req: NextRequest) {
       throw new Error('Access control conditions do not match')
     }
     if (data.downSampled.hash !== encrypted.dataToEncryptHash) {
-      console.log(data.downSampled.hash, encrypted.dataToEncryptHash)
       throw new Error('Hash does not match')
     }
 
-    const dataNow = Date.now()
     await auditTable.add({
       status: `Document retrieved by ${user.user.user_id}`,
       createdAt: FieldValue.serverTimestamp(),
@@ -100,7 +92,6 @@ export async function POST(req: NextRequest) {
         userId: user.user.user_id,
       },
     })
-    console.log(`audit took ${Math.round((Date.now() - dataNow) / 1000)}s`)
     return new Response(
       JSON.stringify({
         ...data,

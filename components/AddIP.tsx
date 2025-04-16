@@ -49,7 +49,7 @@ const AppIP = () => {
   const config = useConfig()
   useEffect(() => {
     if (docId) {
-      const statusDoc = doc(fb, 'audit', docId)
+      const statusDoc = doc(fb, 'ip', docId, 'status', 'status')
       return onSnapshot(statusDoc, (doc) => {
         setStatus((doc.data() as IPAudit) || undefined)
       })
@@ -76,7 +76,7 @@ const AppIP = () => {
       const unifiedAccessControlConditions = [
         {
           conditionType: 'evmBasic',
-          contractAddress: config.LIT_CONTRACT_ADDRESS,
+          contractAddress: config.CONTRACT,
           standardContractType: '',
           chain: 'filecoinCalibrationTestnet',
           method: '',
@@ -89,7 +89,7 @@ const AppIP = () => {
         { conditionType: 'operator', operator: 'or' },
         {
           conditionType: 'evmBasic',
-          contractAddress: config.LIT_CONTRACT_ADDRESS,
+          contractAddress: config.CONTRACT,
           standardContractType: 'ERC1155',
           chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
@@ -101,7 +101,7 @@ const AppIP = () => {
         },
         // {
         //   conditionType: 'evmContract',
-        //   contractAddress: config.LIT_CONTRACT_ADDRESS,
+        //   contractAddress: config.CONTRACT,
         //   functionName: 'balanceOf',
         //   functionParams: [':userAddress', `${tokenId}`],
         //   functionAbi: {
@@ -149,7 +149,6 @@ const AppIP = () => {
           return encryptedContent
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
-      console.log(address)
       const body = {
         id,
         to: address,
