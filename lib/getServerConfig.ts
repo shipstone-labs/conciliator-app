@@ -9,9 +9,13 @@ export const runtime = 'nodejs'
 
 // Add a global variable to track when environment was last reloaded
 declare global {
+  // eslint-disable-next-line no-var
   var __ENV_NEXT_RELOAD: number
+  // eslint-disable-next-line no-var
   var __ENV_PATH: string | undefined
+  // eslint-disable-next-line no-var
   var __ENV_EXISTS: boolean
+  // eslint-disable-next-line no-var
   var __ENV_INITIALIZED: boolean
 }
 

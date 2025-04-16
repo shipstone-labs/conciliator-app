@@ -9,7 +9,6 @@ import NavigationHeader from '@/components/NavigationHeader'
 import { ConfigProvider } from '@/lib/ConfigContext'
 import { getServerConfig } from '@/lib/getServerConfig'
 import { Suspense } from 'react'
-import { Loader2 } from 'lucide-react'
 import Loading from '@/components/Loading'
 
 const inter = Inter({ subsets: ['latin'] })
