@@ -585,7 +585,7 @@ export default function ChatUI({
           My Agent
         </CardTitle>
         <CardDescription>
-          {doc.name} - {doc.description}
+          Each SafeIdea Agent is configured for one Idea so that people and AIs on the web can ask questions about it. In each Idea page you can ask more questions about Ideas you are interested in. Click the Test Your Agent button to see how the SafeIdea Agent responds to questions for another AI.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
