@@ -129,7 +129,7 @@ const CachedImage = React.memo(function CachedImage({
           loader={ipfsImageLoader}
           className={className}
           priority={priority}
-          onLoadingComplete={handleLoadComplete}
+          onLoad={handleLoadComplete}
           onError={handleError}
           {...props}
         />

@@ -10,7 +10,7 @@ import {ERC1155Supply} from "@openzeppelin/contracts/token/ERC1155/extensions/ER
 import {ERC1155URIStorage} from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 
 /// @custom:security-contact andy@shipstone.com
-contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ERC1155Supply, ERC1155URIStorage {
+contract IPDocV10 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ERC1155Supply, ERC1155URIStorage {
     bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -27,6 +27,17 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
     event IDCreated(bytes32 indexed externalId, uint256 indexed tokenId);
     event ExpirationSet(address indexed account, uint256 indexed tokenId, uint256 expirationTime);
     
+    constructor(address defaultAdmin, address pauser, address minter)
+        ERC1155("https://safeidea.net/doc/{id}") ERC1155URIStorage()
+    {
+        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _grantRole(URI_SETTER_ROLE, defaultAdmin);
+        _grantRole(PAUSER_ROLE, pauser);
+        _grantRole(MINTER_ROLE, minter);
+        _grantRole(EXPIRATION_MANAGER_ROLE, minter); // Default to minter also managing expirations
+    }
+
+
     // Create a function to register a bytes32 and get a manageable uint256
     function _createId(bytes32 externalId) internal {
         // Check if this bytes32 ID is already mapped
@@ -62,17 +73,7 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
     function getId(bytes32 externalId) public view returns (uint256) {
         return _tokenIdMap[externalId];
     }
-    
-    constructor(address defaultAdmin, address pauser, address minter)
-        ERC1155("https://safeidea.net/doc/{id}") ERC1155URIStorage()
-    {
-        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-        _grantRole(URI_SETTER_ROLE, defaultAdmin);
-        _grantRole(PAUSER_ROLE, pauser);
-        _grantRole(MINTER_ROLE, minter);
-        _grantRole(EXPIRATION_MANAGER_ROLE, minter); // Default to minter also managing expirations
-    }
-    
+        
     /**
      * @dev Sets an expiration timestamp for a specific token balance held by an account
      * @param account The address holding the tokens
@@ -83,7 +84,7 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
         public 
         onlyRole(EXPIRATION_MANAGER_ROLE) 
     {
-        require(super.balanceOf(account, id) > 0, "IPDocV9: Account has no balance to expire");
+        require(super.balanceOf(account, id) > 0, "IPDocV10: Account has no balance to expire");
         _expirations[account][id] = expirationTime;
         emit ExpirationSet(account, id, expirationTime);
     }
@@ -98,10 +99,10 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
         public
         onlyRole(EXPIRATION_MANAGER_ROLE)
     {
-        require(ids.length == expirationTimes.length, "IPDocV9: ids and expirationTimes length mismatch");
+        require(ids.length == expirationTimes.length, "IPDocV10: ids and expirationTimes length mismatch");
         
         for (uint256 i = 0; i < ids.length; i++) {
-            require(super.balanceOf(account, ids[i]) > 0, "IPDocV9: Account has no balance to expire");
+            require(super.balanceOf(account, ids[i]) > 0, "IPDocV10: Account has no balance to expire");
             _expirations[account][ids[i]] = expirationTimes[i];
             emit ExpirationSet(account, ids[i], expirationTimes[i]);
         }
@@ -166,7 +167,7 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
         override(ERC1155) 
         returns (uint256[] memory) 
     {
-        require(accounts.length == ids.length, "IPDocV9: accounts and ids length mismatch");
+        require(accounts.length == ids.length, "IPDocV10: accounts and ids length mismatch");
 
         uint256[] memory batchBalances = new uint256[](accounts.length);
 
@@ -209,29 +210,33 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
     }
     
     /**
-     * @dev Mint tokens with an optional expiration timestamp
+     * @dev Creates an external ID mapping and mints tokens in a single transaction
      * @param account Address to receive the minted tokens
-     * @param id Token ID to mint
+     * @param externalId The external bytes32 ID to map
      * @param amount Amount of tokens to mint
-     * @param expirationTime Optional Unix timestamp when the balance should expire (0 for no expiration)
      * @param data Additional data to pass to the mint function
+     * @return The created token ID
      */
-    function mintWithExpiration(
-        address account, 
-        uint256 id, 
-        uint256 amount, 
-        uint256 expirationTime,
+    function mintWithExternalId(
+        address account,
+        bytes32 externalId,
+        uint256 amount,
         bytes memory data
     )
         public
         onlyRole(MINTER_ROLE)
+        returns (uint256)
     {
-        _mint(account, id, amount, data);
+        // Create the ID mapping first
+        _createId(externalId);
         
-        if (expirationTime > 0) {
-            _expirations[account][id] = expirationTime;
-            emit ExpirationSet(account, id, expirationTime);
-        }
+        // Get the new token ID
+        uint256 tokenId = _tokenIdMap[externalId];
+        
+        // Mint the tokens
+        _mint(account, tokenId, amount, data);
+        
+        return tokenId;
     }
 
     function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
@@ -242,27 +247,95 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
     }
     
     /**
-     * @dev Mint tokens in batch with optional expiration timestamps
+     * @dev Creates multiple external ID mappings and mints tokens in a single transaction
      * @param to Address to receive the minted tokens
-     * @param ids Token IDs to mint
-     * @param amounts Amounts of tokens to mint
-     * @param expirationTimes Optional Unix timestamps when each balance should expire (0 for no expiration)
+     * @param externalIds Array of external bytes32 IDs to map
+     * @param amounts Array of amounts to mint for each token
      * @param data Additional data to pass to the mint function
+     * @return Array of created token IDs
      */
-    function mintBatchWithExpiration(
-        address to, 
-        uint256[] memory ids, 
-        uint256[] memory amounts, 
+    function mintBatchWithExternalIds(
+        address to,
+        bytes32[] memory externalIds,
+        uint256[] memory amounts,
+        bytes memory data
+    )
+        public
+        onlyRole(MINTER_ROLE)
+        returns (uint256[] memory)
+    {
+        require(externalIds.length == amounts.length, "IPDocV10: externalIds and amounts length mismatch");
+        
+        uint256[] memory tokenIds = new uint256[](externalIds.length);
+        
+        // First create all the ID mappings
+        for (uint256 i = 0; i < externalIds.length; i++) {
+            _createId(externalIds[i]);
+            tokenIds[i] = _tokenIdMap[externalIds[i]];
+        }
+        
+        // Then mint all the tokens
+        _mintBatch(to, tokenIds, amounts, data);
+        
+        return tokenIds;
+    }
+    
+    /**
+     * @dev Transfer tokens with expiration in a single transaction
+     * @param from Address to transfer from
+     * @param to Address to transfer to
+     * @param id Token ID to transfer
+     * @param amount Amount to transfer
+     * @param expirationTime Unix timestamp when the recipient's balance should expire (0 for no expiration)
+     * @param data Additional data to pass to the transfer function
+     */
+    function safeTransferFromWithExpiration(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        uint256 expirationTime,
+        bytes memory data
+    )
+        public
+        onlyRole(MINTER_ROLE)
+    {
+        // First transfer the tokens
+        safeTransferFrom(from, to, id, amount, data);
+        
+        // Then set the expiration if a non-zero value is provided
+        if (expirationTime > 0) {
+            _expirations[to][id] = expirationTime;
+            emit ExpirationSet(to, id, expirationTime);
+        }
+    }
+    
+    /**
+     * @dev Transfer batch of tokens with expiration in a single transaction
+     * @param from Address to transfer from
+     * @param to Address to transfer to
+     * @param ids Array of token IDs to transfer
+     * @param amounts Array of amounts to transfer
+     * @param expirationTimes Array of Unix timestamps when each balance should expire (0 for no expiration)
+     * @param data Additional data to pass to the transfer function
+     */
+    function safeBatchTransferFromWithExpiration(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
         uint256[] memory expirationTimes,
         bytes memory data
     )
         public
         onlyRole(MINTER_ROLE)
     {
-        require(ids.length == expirationTimes.length, "IPDocV9: ids and expirationTimes length mismatch");
+        require(ids.length == expirationTimes.length, "IPDocV10: ids and expirationTimes length mismatch");
         
-        _mintBatch(to, ids, amounts, data);
+        // First transfer the tokens
+        safeBatchTransferFrom(from, to, ids, amounts, data);
         
+        // Then set expirations for all tokens that have a non-zero expiration time
         for (uint256 i = 0; i < ids.length; i++) {
             if (expirationTimes[i] > 0) {
                 _expirations[to][ids[i]] = expirationTimes[i];
@@ -284,7 +357,7 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
     {
         // If it's a transfer between two addresses (not minting or burning), only MINTER_ROLE can do it
         if (from != address(0) && to != address(0)) {
-            require(hasRole(MINTER_ROLE, _msgSender()), "IPDocV9: must have minter role to transfer");
+            require(hasRole(MINTER_ROLE, _msgSender()), "IPDocV10: must have minter role to transfer");
         }
         
         // Check for expired balances when transferring from a non-zero address
@@ -298,7 +371,7 @@ contract IPDocV9 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
                     // If expiration is set (non-zero) and the current time is past the expiration
                     if (expiration != 0 && expiration <= block.timestamp) {
                         // Allow transfers to zero address (burns) of expired tokens
-                        require(to == address(0), "IPDocV9: Cannot transfer expired tokens except to burn");
+                        require(to == address(0), "IPDocV10: Cannot transfer expired tokens except to burn");
                     }
                 }
             }
