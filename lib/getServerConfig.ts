@@ -130,17 +130,27 @@ export async function getServerConfig(
       // Dynamically import node:fs only on the server
       // biome-ignore lint/style/useNodejsImportProtocol: <explanation>
       const fs = await import('fs')
+      // biome-ignore lint/style/useNodejsImportProtocol: <explanation>
+      const path = await import('path')
       global.__ENV_INITIALIZED = true
 
+      let filePath = process.cwd()
+      if (filePath.endsWith('.next/standalone')) {
+        filePath = path.resolve(filePath, '../..')
+      }
+      const localPath = path.resolve(filePath, '.env.local')
       if (!global.__ENV_PATH) {
-        global.__ENV_PATH = fs.existsSync('./.env.local')
-          ? './.env.local'
+        global.__ENV_PATH = fs.existsSync(localPath)
+          ? localPath
           : fs.existsSync('/env/.env')
             ? '/env/.env'
             : undefined
         global.__ENV_EXISTS = !!global.__ENV_PATH
       }
       if (!global.__ENV_EXISTS) {
+        console.error(
+          `Unable to find config at ${localPath} or /env/.env. Exiting.`
+        )
         process.exit(1)
       }
       const stat = fs.statSync(global.__ENV_PATH as string)
