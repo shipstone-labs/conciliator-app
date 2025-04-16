@@ -65,9 +65,7 @@ function HomeApp() {
         {/* Button Section */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
           {
-            !isInitialized ? (
-              <Loading />
-            ) : isInitialized && user ? (
+            !isInitialized ? null : isInitialized && user ? (
               <>
                 <Link
                   href="/add-ip"
