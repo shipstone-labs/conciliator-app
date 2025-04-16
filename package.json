@@ -10,7 +10,7 @@
     "build:plain": "next build",
     "build-wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "biome lint .",
     "lint:biome": "biome lint .",
     "check": "biome check .",
     "format": "biome format --write .",
