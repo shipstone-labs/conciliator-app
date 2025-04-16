@@ -10,9 +10,11 @@ const compat = new FlatCompat({
 })
 
 const eslintConfig = [
+  {
+    ignores: ['**/firebase-functions/**', '**/functions/**', '**/*.config.js'],
+  },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
-    ignores: ['firebase-functions/**'],
     rules: {
       // Allow unused variables that start with an underscore
       '@typescript-eslint/no-unused-vars': [
