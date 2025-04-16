@@ -263,7 +263,7 @@ const QuestionIP = ({
             </div>
           )}
           <p className="text-white/70">
-            Explore your idea through interactive conversation
+            Ask the SafeIdea agent questions about this Idea
           </p>
         </div>
 

@@ -585,7 +585,7 @@ export default function ChatUI({
           My Agent
         </CardTitle>
         <CardDescription>
-          {doc.name} - {doc.description}
+          Each SafeIdea Agent is configured for one Idea so that people and AIs on the web can ask questions about it. In each Idea page you can ask more questions about Ideas you are interested in. Click the Test Your Agent button to see how the SafeIdea Agent responds to questions for another AI.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -619,7 +619,7 @@ export default function ChatUI({
                       </div>
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                         <Image
-                          src="/svg/Black+Yellow.svg"
+                          src="/chatbot.svg"
                           alt="Conciliator Logo"
                           width={32}
                           height={32}
@@ -645,7 +645,7 @@ export default function ChatUI({
                   {message.role === 'assistant' && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                       <Image
-                        src="/svg/Black+Yellow.svg"
+                        src="/chatbot.svg"
                         alt="Conciliator Logo"
                         width={32}
                         height={32}
