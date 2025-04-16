@@ -4,6 +4,8 @@ import {
   hashMessage,
   bytesToHex,
   getAddress,
+  type Transport,
+  type Transaction,
 } from 'viem'
 import { publicKeyToAddress } from 'viem/accounts'
 import { mainnet } from 'viem/chains'
@@ -21,9 +23,13 @@ export class KMSWalletClient {
   private kmsClient: KeyManagementServiceClient
   private kmsKeyPath: string
   public address: `0x${string}`
-  private walletClient: any
+  private walletClient: unknown
 
-  constructor(kmsKeyPath: string, address: `0x${string}`, transport: any) {
+  constructor(
+    kmsKeyPath: string,
+    address: `0x${string}`,
+    transport: Transport
+  ) {
     this.kmsClient = new KeyManagementServiceClient()
     this.kmsKeyPath = kmsKeyPath
     this.address = address
@@ -37,7 +43,9 @@ export class KMSWalletClient {
       },
 
       // Sign a transaction with KMS
-      signTransaction: async ({ transaction }: { transaction: any }) => {
+      signTransaction: async ({
+        transaction,
+      }: { transaction: Transaction }) => {
         return this.signTransaction(transaction)
       },
     }
@@ -137,7 +145,7 @@ export class KMSWalletClient {
   // Static method to create a client from a KMS key
   static async fromKMSKey(
     kmsKeyPath: string,
-    transport: any
+    transport: Transport
   ): Promise<KMSWalletClient> {
     // Get the Ethereum address from the KMS public key
     const address = await getEthereumAddressFromKMS(kmsKeyPath)

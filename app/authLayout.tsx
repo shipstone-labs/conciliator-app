@@ -1,17 +1,11 @@
 'use client'
 
-import { type RawAppConfig, useAppConfig } from '@/lib/ConfigContext'
+import { useAppConfig } from '@/lib/ConfigContext'
 import { getStripePayments } from '@invertase/firestore-stripe-payments'
 import { StytchProvider } from '@stytch/nextjs'
 import { createStytchUIClient } from '@stytch/nextjs/ui'
 import { type FirebaseApp, initializeApp } from 'firebase/app'
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useRef,
-  type PropsWithChildren,
-} from 'react'
+import { createContext, useContext, type PropsWithChildren } from 'react'
 
 // Stytch client configuration
 const stytchOptions = {
@@ -28,7 +22,7 @@ const configContext = createContext<AppConfig>({} as AppConfig)
 
 // Define the type for our configuration
 export interface AppConfig {
-  [key: string]: any
+  [key: string]: unknown
   app: FirebaseApp
   payments: ReturnType<typeof getStripePayments>
   stytchClient: ReturnType<typeof createStytchUIClient>
@@ -52,7 +46,11 @@ export default function AuthLayout({ children }: PropsWithChildren) {
 
   // Don't proceed with initialization if we have a static config
   if (appConfig.ENV === 'static') {
-    throw new Error('Static config detected. Cannot initialize services.')
+    return (
+      <configContext.Provider value={config}>
+        <StytchProvider stytch={config.stytchClient}>{children}</StytchProvider>
+      </configContext.Provider>
+    )
   }
 
   // If we already have an initialized instance, use it
