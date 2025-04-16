@@ -430,11 +430,10 @@ const DetailIP = ({
               <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
                 <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
                   <Image
-                    src="/svg/Black+Yellow.svg"
+                    src="/view.svg"
                     alt="View Mode Icon"
                     width={32}
                     height={32}
-                    className="rounded-full"
                     priority
                   />
                 </div>
