@@ -214,14 +214,14 @@ const DetailIP = ({
                 <div className="space-y-4">
                   {/* Business Model */}
                   <div className="flex items-start gap-2">
-                    <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
-                      <div
-                        className="text-primary"
-                        role="img"
-                        aria-label="Lock"
-                      >
-                        🔒
-                      </div>
+                    <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
+                      <Image
+                        src="/secure.svg"
+                        alt="Business Model Icon"
+                        width={32}
+                        height={32}
+                        priority
+                      />
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">
@@ -237,14 +237,14 @@ const DetailIP = ({
 
                   {/* Evaluation Period */}
                   <div className="flex items-start gap-2">
-                    <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
-                      <div
-                        className="text-primary"
-                        role="img"
-                        aria-label="Timer"
-                      >
-                        ⏱️
-                      </div>
+                    <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
+                      <Image
+                        src="/clock.svg"
+                        alt="Evaluation Period Icon"
+                        width={32}
+                        height={32}
+                        priority
+                      />
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-white/70">
@@ -337,14 +337,14 @@ const DetailIP = ({
                   {ideaData.terms.ndaRequired !== undefined && (
                     <div className="mt-4 p-3 border border-white/20 rounded-xl bg-muted/20">
                       <div className="flex items-start gap-2">
-                        <div className="bg-primary/20 p-1.5 rounded-full flex items-center justify-center">
-                          <div
-                            className="text-primary text-xs"
-                            role="img"
-                            aria-label="Document"
-                          >
-                            📝
-                          </div>
+                        <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
+                          <Image
+                            src="/patent-law.svg"
+                            alt="Document Icon"
+                            width={32}
+                            height={32}
+                            priority
+                          />
                         </div>
                         <div>
                           <p className="text-white/90 mb-2">
