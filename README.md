@@ -8,9 +8,9 @@ Hi hackathon people - here's the status of this project:
 
 **What Works:** add IP, explore IP, discover IP modules work.
 
-**What doesn't:** transact IP module is not deployed. MCP for local agent tbd.
+**What doesn't:** transact IP module is in testing. MCP for local AI agent is on hold until we complete MCP testing - we're doing that here: https://github.com/shipstone-labs/mcp-test - and the associated site is https://mcp.safeidea.net. 
 
-**Issues:** add IP is faster but still slow. view IP is better. my agent response is slow and buggy. 
+**Issues:** add IP is faster but still slow. view IP is better. The agent response is still slow. 
 
 You can test the current version of SafeIdea at https://safeidea.net 
 
