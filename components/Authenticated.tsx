@@ -2,7 +2,7 @@
 
 import {
   createContext,
-  MouseEvent,
+  type MouseEvent,
   type PropsWithChildren,
   useCallback,
   useEffect,
@@ -24,7 +24,7 @@ import {
   type UserCredential,
 } from 'firebase/auth'
 import { usePathname } from 'next/navigation'
-import { useAppConfig } from '@/lib/ConfigContext'
+import { useConfig } from '@/app/authLayout'
 
 export type Session = {
   litClient?: LitNodeClient
@@ -48,6 +48,7 @@ export const sessionContext = createContext<Session>({
   isLoggedIn: false,
   isLoggingOff: false,
 })
+
 export default function Authenticated({
   children,
   requireLit = false,
@@ -62,7 +63,7 @@ export default function Authenticated({
     setLoggingOff,
     isLoggedIn: false,
   })
-  const config = useAppConfig()
+  const config = useConfig()
   const litActive = useRef(false)
   const firebaseActive = useRef(false)
   // Show auth modal if not authenticated and not ignored

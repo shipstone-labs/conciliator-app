@@ -20,7 +20,8 @@ import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import type { IPAudit } from '@/lib/types'
-import { useAppConfig } from '@/lib/ConfigContext'
+import { bytesToHex, padHex } from 'viem'
+import { useConfig } from '@/app/authLayout'
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -45,30 +46,7 @@ const AppIP = () => {
   const [status, setStatus] = useState<IPAudit>()
   const [localStatus, setLocalStatus] = useState('')
   const { litClient, sessionSigs } = useSession()
-  const config = useAppConfig()
-  const ids = useCallback(
-    async (id: string) => {
-      return fetch('/api/prestore', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
-        },
-        body: JSON.stringify({ id }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            console.error('Failed to fetch prestore data')
-            return undefined
-          }
-          return res.json()
-        })
-        .then((ids) => {
-          return ids
-        }) as Promise<{ tokenId: `0x${string}`; nativeTokenId: string }>
-    },
-    [stytchClient?.session]
-  )
+  const config = useConfig()
   useEffect(() => {
     if (docId) {
       const statusDoc = doc(fb, 'audit', docId)
@@ -88,10 +66,12 @@ const AppIP = () => {
       }
       const ref = doc(collection(fb, 'ip'))
       const id = ref.id
-      setLocalStatus('Creating native token ID')
-      const { tokenId, nativeTokenId } = await ids(id)
+      const tokenId = padHex(bytesToHex(new TextEncoder().encode(id)), {
+        size: 32,
+        dir: 'right',
+      })
+      setLocalStatus('Storing your idea')
       setDocId(id)
-      console.log(tokenId, nativeTokenId)
       const { address } = sessionSigs || {}
       const unifiedAccessControlConditions = [
         {
@@ -113,7 +93,7 @@ const AppIP = () => {
           standardContractType: 'ERC1155',
           chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
-          parameters: [':userAddress', nativeTokenId],
+          parameters: [':userAddress', `${tokenId}`],
           returnValueTest: {
             comparator: '>',
             value: '0',
@@ -123,7 +103,7 @@ const AppIP = () => {
         //   conditionType: 'evmContract',
         //   contractAddress: config.LIT_CONTRACT_ADDRESS,
         //   functionName: 'balanceOf',
-        //   functionParams: [':userAddress', nativeTokenId],
+        //   functionParams: [':userAddress', `${tokenId}`],
         //   functionAbi: {
         //     type: 'function',
         //     stateMutability: 'view',
@@ -155,7 +135,7 @@ const AppIP = () => {
           return encryptedContent
         })
       setLocalStatus('Downsampling your idea')
-      const downSampled = await downsample(content)
+      const downSampled = downsample(content)
       setLocalStatus('Encrypting downsampled idea')
       const downSampledEncrypted = await litClient
         .encrypt({
@@ -175,7 +155,6 @@ const AppIP = () => {
         to: address,
         metadata: {
           tokenId,
-          nativeTokenId,
           cid: '',
         },
         name,
@@ -239,7 +218,6 @@ const AppIP = () => {
     stytchClient?.session,
     config,
     sessionSigs,
-    ids,
     ndaConfirmed,
   ])
 

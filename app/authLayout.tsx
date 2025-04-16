@@ -1,9 +1,17 @@
 'use client'
 
-import { useAppConfig } from '@/lib/ConfigContext'
+import { type RawAppConfig, useAppConfig } from '@/lib/ConfigContext'
+import { getStripePayments } from '@invertase/firestore-stripe-payments'
 import { StytchProvider } from '@stytch/nextjs'
 import { createStytchUIClient } from '@stytch/nextjs/ui'
-import { useMemo, type PropsWithChildren } from 'react'
+import { type FirebaseApp, initializeApp } from 'firebase/app'
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  type PropsWithChildren,
+} from 'react'
 
 // Stytch client configuration
 const stytchOptions = {
@@ -16,20 +24,72 @@ const stytchOptions = {
   },
 }
 
+const configContext = createContext<AppConfig>({} as AppConfig)
+
+// Define the type for our configuration
+export interface AppConfig {
+  [key: string]: any
+  app: FirebaseApp
+  payments: ReturnType<typeof getStripePayments>
+  stytchClient: ReturnType<typeof createStytchUIClient>
+}
+
+/**
+ * Hook to fetch and use the application configuration from the /api/config endpoint
+ */
+export function useConfig() {
+  return useContext(configContext)
+}
+
+// Global instance state to prevent reinitializing during React Strict Mode
+let globalInstance: Partial<AppConfig> | undefined
+
 export default function AuthLayout({ children }: PropsWithChildren) {
-  const config = useAppConfig()
-  const stytchClient = useMemo(() => {
-    if (!config.STYTCH_PUBLIC_TOKEN) {
-      return undefined
-    }
+  const appConfig = useAppConfig()
+
+  // Create the enhanced config with initialized services
+  let config: AppConfig = appConfig as unknown as AppConfig
+
+  // Don't proceed with initialization if we have a static config
+  if (appConfig.ENV === 'static') {
+    throw new Error('Static config detected. Cannot initialize services.')
+  }
+
+  // If we already have an initialized instance, use it
+  if (globalInstance) {
+    config = { ...appConfig, ...globalInstance } as AppConfig
+  } else {
+    const { FIREBASE_CONFIG, STYTCH_PUBLIC_TOKEN, ...rest } = appConfig
+
+    // Initialize Firebase
+    const app = initializeApp(FIREBASE_CONFIG)
+
+    // Initialize Stripe Payments
+    const payments = getStripePayments(app, {
+      customersCollection: 'customers',
+      productsCollection: 'products',
+    })
+
+    // Initialize Stytch client with public token
     const stytchClient = createStytchUIClient(
-      (config.STYTCH_PUBLIC_TOKEN as string) || '',
+      (STYTCH_PUBLIC_TOKEN as string) || '',
       stytchOptions
     )
-    return stytchClient
-  }, [config.STYTCH_PUBLIC_TOKEN])
-  if (!stytchClient) {
-    return null
+
+    // Store the instances both in ref and global variable
+    config = { ...rest, app, payments, stytchClient }
+    globalInstance = config
   }
-  return <StytchProvider stytch={stytchClient}>{children}</StytchProvider>
+
+  // Don't render anything if we don't have a valid config
+  if (!config) {
+    throw new Error('Invalid configuration. Cannot render layout.')
+  }
+
+  // Render the config provider and StytchProvider
+  return (
+    <configContext.Provider value={config}>
+      <StytchProvider stytch={config.stytchClient}>{children}</StytchProvider>
+    </configContext.Provider>
+  )
 }

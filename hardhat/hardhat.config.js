@@ -2,14 +2,17 @@ require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
 require("@starboardventures/hardhat-verify");
-
 require('dotenv').config() // Load environment variables from .env
+
+// Import our custom tasks
+require('./scripts/verify')
+require('./scripts/deploy')
 
 module.exports = {
   solidity: '0.8.20', // Specify the Solidity compiler version
   optimize: {
     enabled: true,
-    runs: 200,
+    runs: 1000,
   },
   starboardConfig: {
     baseURL: 'https://fvm-calibration-api.starboard.ventures/api/v1',

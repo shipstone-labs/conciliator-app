@@ -10,12 +10,12 @@ import { formatDate, formatNumber } from '@/lib/types'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { Modal } from '@/components/ui/modal'
-import { useAppConfig } from '@/lib/ConfigContext'
 import { cidAsURL } from '@/lib/internalTypes'
 import { useSession } from '@/hooks/useSession'
 import Markdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
+import { useConfig } from '@/app/authLayout'
 
 const DetailIP = ({
   docId,
@@ -29,8 +29,8 @@ const DetailIP = ({
   const [viewed, setViewed] = useState<string>()
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
   const { litClient, delegatedSessionSigs } = useSession()
-  const config = useAppConfig()
-
+  const config = useConfig()
+  console.log(config)
   const router = useRouter()
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)

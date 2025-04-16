@@ -762,48 +762,6 @@
         "IERC721Receiver"
       ]
     },
-    "/Users/andy/Development/my-conciliate-app/hardhat/contracts/IPDoc.sol": {
-      "lastModificationDate": 1744469075308,
-      "contentHash": "7c155a084850578ec3936e13fb92812b",
-      "sourceName": "contracts/IPDoc.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/AccessControl.sol",
-        "@openzeppelin/contracts/token/ERC1155/ERC1155.sol",
-        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol",
-        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol",
-        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IPDoc"
-      ]
-    },
     "/Users/andy/Development/my-conciliate-app/hardhat/node_modules/@openzeppelin/contracts/access/AccessControl.sol": {
       "lastModificationDate": 1739566708493,
       "contentHash": "4c80b7fdf559a9a348e832a57d072a0b",
@@ -1675,6 +1633,134 @@
       ],
       "artifacts": [
         "IPDocV8"
+      ]
+    },
+    "/Users/andy/Development/my-conciliate-app/hardhat/contracts/IPDocV9.sol": {
+      "lastModificationDate": 1744747989915,
+      "contentHash": "79183c0606b9a38ad076bbfeff90d1e6",
+      "sourceName": "contracts/IPDocV9.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/token/ERC1155/ERC1155.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IPDocV9"
+      ]
+    },
+    "/Users/andy/Development/my-conciliate-app/hardhat/contracts/IPDocV10.sol": {
+      "lastModificationDate": 1744755276874,
+      "contentHash": "4165d00bc3cb02b96755d206c64d5bd3",
+      "sourceName": "contracts/IPDocV10.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/token/ERC1155/ERC1155.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IPDocV10"
+      ]
+    },
+    "/Users/andy/Development/my-conciliate-app/hardhat/contracts/IPDoc.sol": {
+      "lastModificationDate": 1744751040246,
+      "contentHash": "4dbb5bb458eaeb8ba90a498826696169",
+      "sourceName": "contracts/IPDoc.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/token/ERC1155/ERC1155.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol",
+        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IPDocV1"
       ]
     }
   }

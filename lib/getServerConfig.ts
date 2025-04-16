@@ -1,14 +1,27 @@
-import type { AppConfig } from './ConfigContext'
+import type { RawAppConfig } from './ConfigContext'
 import { cookies, headers } from 'next/headers'
+import { statSync } from 'node:fs'
+import { config } from 'dotenv'
 
-let currentConfig: Promise<AppConfig> | undefined
+// Add a global variable to track when environment was last reloaded
+declare global {
+  var __ENV_NEXT_RELOAD: number
+}
+
+// Initialize last reload time if not set
+if (!global.__ENV_NEXT_RELOAD) {
+  global.__ENV_NEXT_RELOAD = Date.now() // Initially do it now
+}
+
+let currentConfig: Promise<RawAppConfig> | undefined
+let configTimestamp = 0
 
 /**
  * Gets the application configuration safely in Next.js environment
  * - For dynamic requests: directly reads from environment variables
  * - For static generation: ensures we only use safe fallbacks
  */
-async function _getServerConfig(): Promise<AppConfig> {
+async function _getServerConfig(): Promise<RawAppConfig> {
   // Check if we're in a dynamic rendering context by attempting to read headers or cookies
   // This will throw an error during static generation, which we can catch
   let isDynamicRequest = false
@@ -25,18 +38,30 @@ async function _getServerConfig(): Promise<AppConfig> {
   // In a dynamic request, we can safely read environment variables
   if (isDynamicRequest) {
     // Get all environment variables that start with NEXT_PUBLIC_
-    const publicEnvVars: AppConfig = {}
+    const publicEnvVars: RawAppConfig = {} as unknown as RawAppConfig
 
     Object.keys(process.env).forEach((key) => {
-      if (key.startsWith('NEXT_PUBLIC_')) {
+      const isFileCoin = key.startsWith('FILCOIN_CONTRACT')
+      if (
+        key.startsWith('NEXT_PUBLIC_') ||
+        isFileCoin ||
+        ['STYTCH_APP_ID', 'FIREBASE_CONFIG'].includes(key)
+      ) {
+        // Only log in development and only occasionally
+        if (process.env.NODE_ENV === 'development' && Math.random() < 0.01) {
+          console.log(`Loaded config key: ${key}`)
+        }
+
         // Remove the NEXT_PUBLIC_ prefix
-        const newKey = key.replace('NEXT_PUBLIC_', '')
+        const newKey = isFileCoin
+          ? key.replace('FILCOIN_', '')
+          : key.replace('NEXT_PUBLIC_', '')
 
         // Get the value
         let value = process.env[key]
 
         // Special handling for FIREBASE_CONFIG - parse as JSON if it's valid
-        if (key === 'NEXT_PUBLIC_FIREBASE_CONFIG' && value) {
+        if (newKey === 'FIREBASE_CONFIG' && value) {
           try {
             value = JSON.parse(value)
           } catch (error) {
@@ -44,13 +69,20 @@ async function _getServerConfig(): Promise<AppConfig> {
             // Keep as string if parsing fails
           }
         }
-
-        // Add to our response object
-        publicEnvVars[newKey] = value
+        if (value) {
+          // Add to our response object
+          publicEnvVars[newKey] = value
+        }
       }
     })
 
-    return publicEnvVars
+    // Return the full config with a flag indicating it's from server
+    return {
+      ...publicEnvVars,
+      ENV: 'server',
+      CONFIG_SOURCE: 'server-side-render',
+      CONFIG_TIMESTAMP: Date.now(),
+    } as unknown as RawAppConfig
   }
 
   // For static generation, return a minimal safe config
@@ -60,20 +92,55 @@ async function _getServerConfig(): Promise<AppConfig> {
     // Include only safe defaults for static generation
     // These should be public values that can be embedded in static HTML
     ENV: 'static',
-  }
+    CONFIG_SOURCE: 'static-generation',
+    CONFIG_TIMESTAMP: Date.now(),
+  } as unknown as RawAppConfig
 }
 
-export async function getServerConfig(): Promise<AppConfig> {
+/**
+ * Gets the server configuration, optionally forcing a reload of environment variables
+ * @param forceReload Whether to force reload environment variables from .env file
+ * @returns Promise resolving to the application configuration
+ */
+export async function getServerConfig(
+  forceReload = false
+): Promise<RawAppConfig> {
+  // Check if env was reloaded elsewhere (by another process/request)
+  if (Date.now() >= global.__ENV_NEXT_RELOAD || forceReload) {
+    try {
+      const path =
+        process.env.NODE_ENV === 'production' ? '/env/.env' : './.env.local'
+      const firstLoad = configTimestamp === 0
+      const stat = statSync(path)
+      if (stat.mtimeMs > configTimestamp) {
+        // Environment file was modified, update the timestamp
+        config({ path, override: true })
+        configTimestamp = stat.mtimeMs
+      }
+      // Environment was reloaded, clear the cache
+      global.__ENV_NEXT_RELOAD = Date.now() + 1000 * 3600
+      currentConfig = undefined
+      console.log(
+        firstLoad
+          ? 'Loaded environment'
+          : 'Detected environment reload, cleared config cache',
+        new Date(configTimestamp)
+      )
+    } catch (error) {
+      console.error('Error checking environment file:', error)
+    }
+  }
+
   // Check if we already have the config cached
   if (currentConfig) {
     return currentConfig
   }
 
   // Get the server config
-  const config = _getServerConfig()
+  const appConfig = _getServerConfig()
 
-  // Cache the config for future requests
-  currentConfig = config
+  // Cache the config for future requests (cache invalidates when server restarts or env reloaded)
+  currentConfig = appConfig
 
-  return await config
+  return await appConfig
 }
