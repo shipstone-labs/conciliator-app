@@ -619,7 +619,7 @@ export default function ChatUI({
                       </div>
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                         <Image
-                          src="/svg/Black+Yellow.svg"
+                          src="/chatbot.svg"
                           alt="Conciliator Logo"
                           width={32}
                           height={32}
@@ -645,7 +645,7 @@ export default function ChatUI({
                   {message.role === 'assistant' && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                       <Image
-                        src="/svg/Black+Yellow.svg"
+                        src="/chatbot.svg"
                         alt="Conciliator Logo"
                         width={32}
                         height={32}
