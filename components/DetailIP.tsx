@@ -454,6 +454,21 @@ const DetailIP = ({
           </a>
         ) : null}
 
+        {ideaData.metadata?.mint && (
+          <div className="flex justify-end mb-4">
+            <Button
+              size="sm"
+              variant="outline"
+              className="px-3 py-1 h-auto text-sm bg-primary/20 hover:bg-primary/30 border-primary/30"
+              onClick={() => {
+                window.open(`https://filfox.info/en/message/${ideaData.metadata?.mint}`, '_blank');
+              }}
+            >
+              Confirm Mint
+            </Button>
+          </div>
+        )}
+        
         {audit ? (
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-white/10">
