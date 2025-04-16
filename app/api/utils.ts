@@ -1470,6 +1470,7 @@ export async function runWithNonce<T>(
   const ref = db.ref(`nonce/${address}`)
   const snap = await ref.once('value')
   const _data = snap.val()
+  const now = Date.now()
   const { snapshot: finalSnap } = await ref.transaction((__data) => {
     const {
       nonce: _currentNonce,
@@ -1482,28 +1483,28 @@ export async function runWithNonce<T>(
     if (
       rpcNoncePending > currentNonce &&
       lastUpdated &&
-      lastUpdated < Date.now() - 1000 * 60 * 5
+      lastUpdated < now - 1000 * 60 * 5
     ) {
       // We must have missed one (this is unlikely to happen)
-      lastUpdated = Date.now()
+      lastUpdated = now
       currentNonce = rpcNonce
     } else if (
       rpcNonce < currentNonce &&
-      (!lastUpdated || lastUpdated < Date.now() - 1000 * 60)
+      (!lastUpdated || lastUpdated < now - 1000 * 60)
     ) {
       // We are behind, so we need to update the nonce
       currentNonce = rpcNonce
-      lastUpdated = Date.now()
+      lastUpdated = now
     }
     while (pending[currentNonce]) {
       currentNonce += 1
-      lastUpdated = Date.now()
+      lastUpdated = now
     }
     const out = {
       nonce: currentNonce + 1,
       pending: { ...pending, [currentNonce]: true },
       current: currentNonce,
-      lastUpdated,
+      lastUpdated: lastUpdated || now,
     }
     return out
   })
