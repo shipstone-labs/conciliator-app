@@ -1,8 +1,11 @@
+import { initAPIConfig } from '@/lib/apiUtils'
 import type { NextRequest } from 'next/server'
 
 export const runtime = 'nodejs'
 
 export async function GET(req: NextRequest) {
+  await initAPIConfig()
+
   const url = `${
     process.env.PINATA_GATEWAY
   }/ipfs/${req.nextUrl.pathname.replace(

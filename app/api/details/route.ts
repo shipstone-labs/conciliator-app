@@ -3,11 +3,14 @@ import { getFirestore } from '../firebase'
 import type { IPDocJSON } from '@/lib/internalTypes'
 import { getUser } from '../stytch'
 import { FieldValue } from 'firebase-admin/firestore'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     // Authenticate user
     try {
       await getUser(req)

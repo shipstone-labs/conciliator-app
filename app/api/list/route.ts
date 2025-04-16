@@ -6,11 +6,14 @@ import type { NextRequest } from 'next/server'
 // import { privateKeyToAccount } from "viem/accounts";
 import { getFirestore } from '../firebase'
 import { getUser } from '../stytch'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     await getUser(req)
 
     // const { start: _start, limit: _limit } = await req.json();

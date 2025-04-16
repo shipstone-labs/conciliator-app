@@ -10,6 +10,7 @@ import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'
 
@@ -94,6 +95,8 @@ async function cleanupTable() {
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     const user = await getUser(req)
 
     await cleanupTable()

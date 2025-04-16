@@ -23,12 +23,15 @@ import {
 import { privateKeyToAccount } from 'viem/accounts'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
+import { initAPIConfig } from '@/lib/apiUtils'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     const loginNow = Date.now()
     await getUser(req)
     console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)
