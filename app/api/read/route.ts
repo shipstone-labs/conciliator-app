@@ -4,11 +4,13 @@ import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 // import { SignableMessage } from "viem";
 import { FieldValue, type Timestamp } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
     const loginNow = Date.now()
     const user = await getUser(req)
     console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)

@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { getFirestore } from '../firebase'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 const apiVersion = '2022-11-15'
 const stripe = new Stripe(process.env.STIPE_RK || '', {
@@ -74,3 +75,5 @@ async function createProduct(name: string, description: string) {
   }
   await firestore.collection('products').add(productRecord)
 }
+
+//   await initAPIConfig()

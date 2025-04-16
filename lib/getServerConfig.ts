@@ -1,18 +1,27 @@
 import type { RawAppConfig } from './ConfigContext'
 import { cookies, headers } from 'next/headers'
-import { statSync } from 'node:fs'
 import { config } from 'dotenv'
+
+// Use a special marker to indicate this is server-only code
+// This prevents Next.js from bundling it for client-side use
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // Add a global variable to track when environment was last reloaded
 declare global {
   var __ENV_NEXT_RELOAD: number
+  var __ENV_PATH: string | undefined
+  var __ENV_EXISTS: boolean
+  var __ENV_INITIALIZED: boolean
 }
 
 // Initialize last reload time if not set
 if (!global.__ENV_NEXT_RELOAD) {
   global.__ENV_NEXT_RELOAD = Date.now() // Initially do it now
+  global.__ENV_INITIALIZED = false // Flag to check if initialized
 }
 
+// Only run the following code on the server
 let currentConfig: Promise<RawAppConfig> | undefined
 let configTimestamp = 0
 
@@ -106,15 +115,34 @@ export async function getServerConfig(
   forceReload = false
 ): Promise<RawAppConfig> {
   // Check if env was reloaded elsewhere (by another process/request)
-  if (Date.now() >= global.__ENV_NEXT_RELOAD || forceReload) {
+  if (
+    typeof window === 'undefined' && // Only run on server
+    (Date.now() >= global.__ENV_NEXT_RELOAD ||
+      forceReload ||
+      !global.__ENV_INITIALIZED) // Check if we need to reload
+  ) {
     try {
-      const path =
-        process.env.NODE_ENV === 'production' ? '/env/.env' : './.env.local'
       const firstLoad = configTimestamp === 0
-      const stat = statSync(path)
+      // Dynamically import node:fs only on the server
+      // biome-ignore lint/style/useNodejsImportProtocol: <explanation>
+      const fs = await import('fs')
+      global.__ENV_INITIALIZED = true
+
+      if (!global.__ENV_PATH) {
+        global.__ENV_PATH = fs.existsSync('./.env.local')
+          ? './.env.local'
+          : fs.existsSync('/env/.env')
+            ? '/env/.env'
+            : undefined
+        global.__ENV_EXISTS = !!global.__ENV_PATH
+      }
+      if (!global.__ENV_EXISTS) {
+        process.exit(1)
+      }
+      const stat = fs.statSync(global.__ENV_PATH as string)
       if (stat.mtimeMs > configTimestamp) {
         // Environment file was modified, update the timestamp
-        config({ path, override: true })
+        config({ path: global.__ENV_PATH as string, override: true })
         configTimestamp = stat.mtimeMs
       }
       // Environment was reloaded, clear the cache

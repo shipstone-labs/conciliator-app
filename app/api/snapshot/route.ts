@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 import type { IPDocJSON } from '@/lib/internalTypes'
 import { getFirestore } from '../firebase'
 import { createAsAgent } from '@/packages/web-storage-wrapper/dist'
+import { initAPIConfig } from '@/lib/apiUtils'
 // import { createWalletClient, http } from "viem";
 // import { privateKeyToAccount } from "viem/accounts";
 // import { filecoinCalibration } from "viem/chains";
@@ -13,6 +14,8 @@ export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     const body = await req.json()
     const { id, messages } = body
     const fs = getFirestore()

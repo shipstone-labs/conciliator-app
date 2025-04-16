@@ -1,21 +1,27 @@
 import { NextResponse } from 'next/server'
 import { getServerConfig } from '@/lib/getServerConfig'
+import { initAPIConfig } from '@/lib/apiUtils'
+
+// Set runtime to nodejs for this API route
+export const runtime = 'nodejs'
 
 /**
  * API endpoint that returns a filtered set of environment variables
  * specifically those prefixed with NEXT_PUBLIC_
- * 
+ *
  * Query parameters:
  * - reload: If set to 'true', forces a reload of environment variables from /env/.env
  */
 export async function GET(request: Request) {
+  await initAPIConfig()
+
   // Check if we need to reload environment variables
-  const url = new URL(request.url);
-  const shouldReload = url.searchParams.get('reload') === 'true';
-  
+  const url = new URL(request.url)
+  const shouldReload = url.searchParams.get('reload') === 'true'
+
   if (shouldReload) {
     // Force reload of environment variables
-    await getServerConfig(true);
+    await getServerConfig(true)
   }
   try {
     // Get all environment variables that start with NEXT_PUBLIC_
@@ -58,15 +64,16 @@ export async function GET(request: Request) {
       {
         config: publicEnvVars,
         timestamp: new Date().toISOString(),
-        source: 'api'
+        source: 'api',
       },
       {
         headers: {
           // In production: Cache for 1 hour, stale-while-revalidate for another hour
           // In development: No caching
-          'Cache-Control': process.env.NODE_ENV === 'production' 
-            ? 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=3600'
-            : 'no-store, max-age=0',
+          'Cache-Control':
+            process.env.NODE_ENV === 'production'
+              ? 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=3600'
+              : 'no-store, max-age=0',
         },
       }
     )

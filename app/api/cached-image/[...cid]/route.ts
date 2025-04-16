@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import 'firebase-admin/storage'
 import { getBucket } from '@/app/api/firebase'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 // Set extremely long cache since IPFS content is immutable (1 year)
 const CACHE_CONTROL =
@@ -15,6 +16,8 @@ export async function GET(
   request: NextRequest,
   { params: _params }: { params: Promise<{ cid: string[] }> }
 ) {
+  await initAPIConfig()
+
   // Handle splat route - join all segments
   const params = await _params
   const cidPath = params.cid.join('/')
