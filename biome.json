@@ -19,6 +19,7 @@
       "package.json",
       "db.json",
       "components/transactions/**",
+      "packages/firebase-functions/lib/**",
       "hardhat"
     ]
   },

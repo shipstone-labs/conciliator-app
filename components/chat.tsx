@@ -70,13 +70,11 @@ export default function ChatUI({
   doc,
   onSend,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onNewIP,
   onSave,
 }: {
   doc: IPDoc
   messages: { role: 'user' | 'assistant' | 'system'; content: string }[]
   onSend: (message: string) => Promise<void>
-  onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void
   onSave?: (
     event: MouseEvent<HTMLButtonElement>
   ) => Promise<{ IpfsHash: string } | undefined>
