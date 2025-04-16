@@ -93,8 +93,6 @@ async function _getServerConfig(): Promise<RawAppConfig> {
     return {
       ...publicEnvVars,
       ENV: 'server',
-      CONFIG_SOURCE: 'server-side-render',
-      CONFIG_TIMESTAMP: Date.now(),
     } as unknown as RawAppConfig
   }
 
@@ -105,8 +103,6 @@ async function _getServerConfig(): Promise<RawAppConfig> {
     // Include only safe defaults for static generation
     // These should be public values that can be embedded in static HTML
     ENV: 'static',
-    CONFIG_SOURCE: 'static-generation',
-    CONFIG_TIMESTAMP: Date.now(),
   } as unknown as RawAppConfig
 }
 
@@ -148,10 +144,12 @@ export async function getServerConfig(
         global.__ENV_EXISTS = !!global.__ENV_PATH
       }
       if (!global.__ENV_EXISTS) {
-        console.error(
-          `Unable to find config at ${localPath} or /env/.env. Exiting.`
-        )
-        process.exit(1)
+        global.__ENV_NEXT_RELOAD = Date.now() + 1000 * 3600
+        currentConfig = Promise.resolve({
+          ENV: 'static',
+        } as unknown as RawAppConfig)
+        console.log('No environment file found, using static config')
+        return currentConfig
       }
       const stat = fs.statSync(global.__ENV_PATH as string)
       if (stat.mtimeMs > configTimestamp) {
