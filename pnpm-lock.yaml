@@ -241,7 +241,7 @@ importers:
         specifier: ^0.12.5
         version: 0.12.5
 
-  firebase-functions:
+  packages/firebase-functions:
     dependencies:
       firebase-admin:
         specifier: ^11.8.0
