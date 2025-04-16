@@ -111,6 +111,8 @@ const nextConfig: NextConfig = {
     'multiformats',
     // Lilypad
     'lilypad-wrapper',
+    // Firebase
+    'firebase-functions',
   ],
   // Configure React runtime
   reactStrictMode: true,
