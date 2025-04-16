@@ -4,48 +4,48 @@
 
 @layer base {
   :root {
-    /* Updated SafeIdea.ai theme */
-    --background: 240 14% 13%; /* #1A1B25 */
-    --foreground: 215 26% 76%; /* #B4BCD0 - softer text */
+    /* Light mode theme for SafeIdea.ai */
+    --background: 0 0% 98%; /* #fafafa */
+    --foreground: 220 10% 20%; /* #2c3240 - readable text */
 
-    --card: 240 14% 13%;
-    --card-foreground: 215 26% 76%;
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 220 10% 20%; 
 
-    --popover: 240 14% 13%;
-    --popover-foreground: 215 26% 76%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 10% 20%;
 
-    --primary: 198 94% 67%; /* #5CC3FA - bright blue */
-    --primary-foreground: 0 0% 0%;
+    --primary: 198 80% 45%; /* #1a91cb - accessible blue */
+    --primary-foreground: 0 0% 100%; /* white text on primary */
 
-    --secondary: 348 100% 78%; /* #FF91A5 - pink accent */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 348 80% 60%; /* #f05a84 - pink accent */
+    --secondary-foreground: 0 0% 100%; /* white text on secondary */
 
-    --muted: 240 14% 25%;
-    --muted-foreground: 210 40% 90%;
+    --muted: 220 10% 94%; /* #f0f1f5 - subtle backgrounds */
+    --muted-foreground: 220 10% 40%; /* #636980 - muted text */
 
-    --accent: 280 38% 78%; /* #CDB4DB - lavender accent */
-    --accent-foreground: 0 0% 0%;
+    --accent: 280 30% 65%; /* #b29bc8 - lighter lavender */
+    --accent-foreground: 0 0% 100%; /* white text on accent */
 
-    /* Updated yellow accent for branding */
-    --brand: 51 100% 50%; /* gold */
-    --brand-foreground: 0 0% 0%;
+    /* Updated gold accent for branding */
+    --brand: 45 90% 45%; /* #d9b11d - accessible gold */
+    --brand-foreground: 0 0% 0%; /* black text on brand/gold */
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 100% / 0.1; /* More subtle white borders */
-    --input: 0 0% 100% / 0.1;
-    --ring: 198 94% 67%;
+    --border: 220 10% 80%; /* #cacdd9 - visible light borders */
+    --input: 220 10% 90%; /* #e1e3ea - light input backgrounds */
+    --ring: 198 80% 45%; /* #1a91cb - same as primary */
 
     --radius: 0.75rem;
 
-    /* Gradient background variables */
-    --gradient-start: 203 47% 36%; /* #2B5B75 */
-    --gradient-end: 240 14% 13%; /* #1A1B25 */
+    /* Gradient background variables - lighter for light mode */
+    --gradient-start: 198 35% 92%; /* #e4f2f8 - light blue gradient start */
+    --gradient-end: 0 0% 98%; /* #fafafa - gradient end matching background */
   }
 
   .dark {
-    /* Already using dark theme by default */
+    /* Dark theme for SafeIdea.ai */
     --background: 240 14% 13%; /* #1A1B25 */
     --foreground: 215 26% 76%; /* #B4BCD0 - softer text */
 
@@ -61,7 +61,7 @@
     --secondary: 348 100% 78%; /* #FF91A5 - pink accent */
     --secondary-foreground: 0 0% 0%;
 
-    --muted: 240 14% 25%;
+    --muted: 240 14% 25%; /* #363652 - subtly lighter than background */
     --muted-foreground: 210 40% 90%;
 
     --accent: 280 38% 78%; /* #CDB4DB - lavender accent */
@@ -71,7 +71,7 @@
     --brand: 51 100% 50%; /* gold */
     --brand-foreground: 0 0% 0%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 100% / 0.1; /* More subtle white borders */

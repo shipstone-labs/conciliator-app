@@ -35,55 +35,29 @@ function HomeApp() {
         <Logo />
 
         {/* Description Section */}
-        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-white/10 mt-8">
+        <Card className="max-w-3xl mx-auto text-center shadow-md mt-8">
           <CardHeader>
-            <CardTitle className="text-2xl text-white">
+            <CardTitle className="text-2xl">
               Welcome to{' '}
               <span className="text-primary font-semibold">SafeIdea.net</span>
             </CardTitle>
-            <CardDescription className="text-lg text-white/90">
+            <CardDescription className="text-lg">
               The alpha version of our IP protection platform
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-lg leading-relaxed text-white/90">
-              We help creators and inventors store, share, and monetize their
-              ideas securely.
+            <p className="text-lg leading-relaxed">
+              SafeIdea is a new decentralized service designed to help creators and inventors securely store, share and benefit from their digital creations.
             </p>
-            <div className="mt-6 text-lg leading-relaxed text-white/90">
-              <p className="mb-3">SafeIdea provides three key benefits:</p>
-              <ul className="space-y-2 list-disc pl-6">
-                <li>
-                  <span className="font-medium text-primary">
-                    Secure storage
-                  </span>{' '}
-                  - Proves that you had a specific idea at a particular time
-                </li>
-                <li>
-                  <span className="font-medium text-primary">
-                    Controlled sharing
-                  </span>{' '}
-                  - Creates records of who accessed your work and when
-                </li>
-                <li>
-                  <span className="font-medium text-primary">
-                    Monetization opportunities
-                  </span>{' '}
-                  - Makes you a local AI agent to help you monetize your idea
-                </li>
-              </ul>
-            </div>
-            <div className="mt-6 text-lg leading-relaxed text-white/90">
+            <div className="mt-6 text-lg leading-relaxed">
               <p>
-                SafeIdea is an open source project, necessary if you want to
-                make sure the developers don&apos;t know about your secrets.
+                This alpha version was launched as part of the <a href="https://www.encode.club/ai-blueprints" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Filecoin AI Blueprints</a> hackathon, and incorporates Storacha and Lilypad to support encrypted digital asset sharing and monetization using agentic collaboration.
               </p>
             </div>
-            <div className="mt-6 text-lg leading-relaxed text-white/90">
-              SafeIdea plans to launch commercially in late 2025. Want early
-              access? Apply now for our beta program. We&apos;re looking for
-              inventors and creators ready to help us protect their intellectual
-              property in the digital age.
+            <div className="mt-6 text-lg leading-relaxed">
+              <p>
+                To get started, log in with our passwordless access, add a new secret document, or learn more about the ideas in our database!
+              </p>
             </div>
           </CardContent>
         </Card>

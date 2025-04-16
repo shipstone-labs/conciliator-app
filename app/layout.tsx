@@ -35,16 +35,16 @@ export default async function RootLayout({
   
   return (
     <TooltipProvider>
-      <html lang="en" className="dark">
+      <html lang="en">
         <body className={inter.className}>
           <div className="flex flex-col min-h-screen">
             {/* Wrap with ConfigProvider to make config available to all components */}
             <ConfigProvider config={serverConfig}>
               <AuthLayout>
-                <header className="fixed top-0 left-0 right-0 z-10 bg-[#2B5B75] border-b border-border/40 h-16 flex items-center px-4">
+                <header className="fixed top-0 left-0 right-0 z-10 bg-gradient-to-r from-primary/90 to-primary/70 border-b border-border h-16 flex items-center px-4 shadow-sm">
                   <NavigationHeader />
                 </header>
-                <main className="flex-grow bg-gradient-to-b from-[#2B5B75] to-background pt-16">
+                <main className="flex-grow bg-gradient-to-b from-gradient-start to-gradient-end pt-16">
                   {children}
                 </main>
               </AuthLayout>

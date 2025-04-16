@@ -9,11 +9,11 @@ export function Footer() {
 
   return (
     <>
-      <footer className="py-6 border-t border-white/10 text-center">
+      <footer className="py-6 border-t text-center">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col items-center md:flex-row md:justify-between">
             <div className="mb-4 md:mb-0">
-              <span className="text-white/60 text-sm">
+              <span className="text-muted-foreground text-sm">
                 © 2025 SafeIdea, LLC. All rights reserved.
               </span>
             </div>
@@ -24,7 +24,7 @@ export function Footer() {
                   console.log('Terms clicked')
                   setIsTermsOpen(true)
                 }}
-                className="text-white/70 hover:text-primary transition-colors text-sm"
+                className="text-muted-foreground hover:text-primary transition-colors text-sm"
               >
                 Terms of Service
               </button>
@@ -34,13 +34,13 @@ export function Footer() {
                   console.log('Privacy clicked')
                   setIsPrivacyOpen(true)
                 }}
-                className="text-white/70 hover:text-primary transition-colors text-sm"
+                className="text-muted-foreground hover:text-primary transition-colors text-sm"
               >
                 Privacy Policy
               </button>
               <a
                 href="mailto:info@safeidea.ai"
-                className="text-white/70 hover:text-primary transition-colors text-sm flex items-center"
+                className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +70,7 @@ export function Footer() {
         onClose={() => setIsTermsOpen(false)}
         title="Terms of Service"
       >
-        <div className="space-y-5 text-white/90">
+        <div className="space-y-5">
           <h3 className="text-lg font-medium text-primary">
             1. Agreement to Terms
           </h3>
@@ -88,7 +88,7 @@ export function Footer() {
             viewing only. This is the grant of a license, not a transfer of
             title, and under this license you may not:
           </p>
-          <ul className="list-disc pl-6 space-y-2 text-white/80">
+          <ul className="list-disc pl-6 space-y-2">
             <li>Modify or copy the materials</li>
             <li>
               Use the materials for any commercial purpose or for any public
@@ -137,7 +137,7 @@ export function Footer() {
         onClose={() => setIsPrivacyOpen(false)}
         title="Privacy Policy"
       >
-        <div className="space-y-5 text-white/90">
+        <div className="space-y-5">
           <h3 className="text-lg font-medium text-primary">
             1. Information We Collect
           </h3>
@@ -155,7 +155,7 @@ export function Footer() {
           <p>
             We use information about you for various purposes, including to:
           </p>
-          <ul className="list-disc pl-6 space-y-2 text-white/80">
+          <ul className="list-disc pl-6 space-y-2">
             <li>Provide, maintain, and improve our services</li>
             <li>
               Provide services you request and to send you related information
