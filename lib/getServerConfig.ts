@@ -45,7 +45,6 @@ async function _getServerConfig(): Promise<RawAppConfig> {
     isDynamicRequest = true
   } catch {
     // We're in static generation mode
-    console.log('Running in static generation mode, using API for config')
   }
 
   // In a dynamic request, we can safely read environment variables
@@ -63,9 +62,6 @@ async function _getServerConfig(): Promise<RawAppConfig> {
         )
       ) {
         // Only log in development and only occasionally
-        if (process.env.NODE_ENV === 'development' && Math.random() < 0.01) {
-          console.log(`Loaded config key: ${key}`)
-        }
 
         // Remove the NEXT_PUBLIC_ prefix
         const newKey = isFileCoin
@@ -124,7 +120,6 @@ export async function getServerConfig(
       !global.__ENV_INITIALIZED) // Check if we need to reload
   ) {
     try {
-      const firstLoad = configTimestamp === 0
       // Dynamically import node:fs only on the server
       // biome-ignore lint/style/useNodejsImportProtocol: <explanation>
       const fs = await import('fs')
@@ -162,12 +157,6 @@ export async function getServerConfig(
       // Environment was reloaded, clear the cache
       global.__ENV_NEXT_RELOAD = Date.now() + 1000 * 3600
       currentConfig = undefined
-      console.log(
-        firstLoad
-          ? 'Loaded environment'
-          : 'Detected environment reload, cleared config cache',
-        new Date(configTimestamp)
-      )
     } catch (error) {
       console.error('Error checking environment file:', error)
     }

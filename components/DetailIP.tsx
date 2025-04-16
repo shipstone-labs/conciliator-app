@@ -16,6 +16,9 @@ import Markdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
+import { filecoinCalibration } from 'viem/chains'
+import { createPublicClient, http } from 'viem'
+import { abi } from '@/app/api/abi'
 
 const DetailIP = ({
   docId,
@@ -30,7 +33,6 @@ const DetailIP = ({
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
   const { litClient, delegatedSessionSigs } = useSession()
   const config = useConfig()
-  console.log(config)
   const router = useRouter()
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
@@ -72,10 +74,66 @@ const DetailIP = ({
               }
           )
         const { ciphertext, dataToEncryptHash } = data
-        const { sessionSigs, capacityDelegationAuthSig } =
+        const { sessionSigs, capacityDelegationAuthSig, address } =
           await delegatedSessionSigs(docId)
+        const client = createPublicClient({
+          chain: filecoinCalibration,
+          transport: http(),
+        })
+        const balance = await client
+          .readContract({
+            address: config.CONTRACT as `0x${string}`,
+            abi,
+            functionName: 'balanceOf',
+            args: [address, BigInt(ideaData.metadata?.tokenId || 0)],
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+        const serverBalance = await client
+          .readContract({
+            address: config.CONTRACT as `0x${string}`,
+            abi,
+            functionName: 'balanceOf',
+            args: [
+              '0xa6985f885c29cff477212ba5b2fb7679f83555b6',
+              BigInt(ideaData.metadata?.tokenId || 0),
+            ],
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+        const otherBalance = await client
+          .readContract({
+            address: config.CONTRACT as `0x${string}`,
+            abi,
+            functionName: 'balanceOf',
+            args: [
+              '0xa8581d93e4532429e90e4f09d15f512e57b6861a',
+              BigInt(
+                '0x00000000000000000000000047574246317053444837774330654c5a5154516f'
+              ),
+            ],
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+        const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
+        console.log({
+          balance,
+          serverBalance,
+          otherBalance,
+          contract: config.CONTRACT,
+          accessControlConditions,
+          ciphertext: ciphertext.slice(0, 100),
+          dataToEncryptHash,
+          address,
+          ideaData,
+          sessionSigs,
+          capacityDelegationAuthSig,
+        })
         const request = {
-          accessControlConditions: JSON.parse(ideaData?.encrypted?.acl),
+          accessControlConditions,
           // pkpPublicKey: sessionSigs?.pkpPublicKey,
           ciphertext,
           dataToEncryptHash,
@@ -95,7 +153,7 @@ const DetailIP = ({
       }
     }
     doFetch()
-  }, [ideaData, view, viewed, litClient, delegatedSessionSigs, docId])
+  }, [ideaData, view, viewed, litClient, delegatedSessionSigs, docId, config])
   const onKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
     if (e.key === 'Enter') {
       router.push(`/discovery/${docId}`)
@@ -411,8 +469,8 @@ const DetailIP = ({
                   />
                 </h3>
                 <p className="text-white/80 text-sm">
-                  With My Agent, you can see how your AI agent works on your behalf
-                  to best represent your idea on the web.
+                  With My Agent, you can see how your AI agent works on your
+                  behalf to best represent your idea on the web.
                 </p>
               </div>
             </CardContent>
@@ -484,7 +542,9 @@ const DetailIP = ({
                   IPDocV2 Contract
                 </div>
                 <div className="text-white/80 text-sm">
-                  {config.LIT_CONTRACT_ADDRESS as string}
+                  {config.CONTRACT_NAME as string}
+                  <br />
+                  {config.CONTRACT as string}
                 </div>
                 <div className="text-white font-bold text-sm">
                   Mint Transaction

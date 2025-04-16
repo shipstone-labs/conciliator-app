@@ -5,7 +5,6 @@ import { Logo } from './Logo'
 import AuthenticatedLayout from '@/app/authLayout'
 import { AuthButton } from './AuthButton'
 import { useStytchUser } from '@stytch/nextjs'
-import Loading from './Loading'
 // LogoffButton import removed
 import {
   Card,
@@ -47,16 +46,30 @@ function HomeApp() {
           </CardHeader>
           <CardContent>
             <p className="text-lg leading-relaxed text-white/90">
-              SafeIdea is a new decentralized service designed to help creators and inventors securely store, share and benefit from their digital creations.
+              SafeIdea is a new decentralized service designed to help creators
+              and inventors securely store, share and benefit from their digital
+              creations.
             </p>
             <div className="mt-6 text-lg leading-relaxed text-white/90">
               <p>
-                This alpha version was launched as part of the <a href="https://www.encode.club/ai-blueprints" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Filecoin AI Blueprints</a> hackathon, and incorporates Storacha and Lilypad to support encrypted digital asset sharing and monetization using agentic collaboration.
+                This alpha version was launched as part of the{' '}
+                <a
+                  href="https://www.encode.club/ai-blueprints"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Filecoin AI Blueprints
+                </a>{' '}
+                hackathon, and incorporates Storacha and Lilypad to support
+                encrypted digital asset sharing and monetization using agentic
+                collaboration.
               </p>
             </div>
             <div className="mt-6 text-lg leading-relaxed text-white/90">
               <p>
-                To get started, log in with our passwordless access, add a new secret document, or learn more about the ideas in our database!
+                To get started, log in with our passwordless access, add a new
+                secret document, or learn more about the ideas in our database!
               </p>
             </div>
           </CardContent>

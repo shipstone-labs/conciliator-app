@@ -41,19 +41,12 @@ export async function GET(
     // Look for files with this base path (regardless of extension)
     const file = bucket.file(basePath)
     // Get the file's metadata to get the correct content type
-    const start = Date.now()
     const [metadata] = await file.getMetadata().catch(() => [null])
 
     // If we found a cached file
     if (metadata) {
-      console.log(
-        `Found cached image in Firebase Storage: ${basePath} ${Date.now() - start}ms`
-      )
       const contentType = metadata.contentType || 'application/octet-stream'
 
-      console.log(
-        `Serving cached image from Firebase Storage: ${basePath} ${contentType}`
-      )
       // Create a readable stream from the file
       const fileStream = file.createReadStream()
 
@@ -93,7 +86,6 @@ export async function GET(
       // Create a file reference in Firebase Storage
       const file = bucket.file(finalStoragePath)
 
-      console.log(`Caching image to Firebase Storage: ${finalStoragePath}`)
       // Create a writable stream to Firebase Storage
       const writeStream = file.createWriteStream({
         metadata: {

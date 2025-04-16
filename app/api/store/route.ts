@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server'
-import { abi, getModel, imageAI, runWithNonce } from '../utils'
+import { getModel, imageAI, runWithNonce } from '../utils'
+import { abi } from '../abi'
 import { bytesToHex, createWalletClient, http, padHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
@@ -21,7 +22,12 @@ function clean(obj: unknown): unknown {
   if (obj && Array.isArray(obj)) {
     return obj.map(clean)
   }
-  if (obj && typeof obj === 'object') {
+  if (
+    obj &&
+    typeof obj === 'object' &&
+    !(obj instanceof FieldValue) &&
+    !(obj instanceof Timestamp)
+  ) {
     const cleanedObj: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined) {
@@ -44,19 +50,34 @@ async function cleanupTable() {
   const batch = fs.batch()
   let count = 0
 
-  const nullContracts = await fs
-    .collection('ip')
-    .where('metadata.contract', '==', null)
-    .get()
-
-  nullContracts.docs.map((doc) => {
-    batch.update(doc.ref, {
-      // HARDCODED during upgrade. Will delete it once we migrated.
-      // This is not secret information.
-      'metadata.contract': '0x79665408484fFf9dC7b0BC6b0d42CB18866b9311',
-      'metadata.version': 'IPDocV8',
-    })
+  const emptyDates = await fs.collection('ip').get()
+  emptyDates.docs.map((doc) => {
+    let hasUpdate = false
+    const update: Record<string, FieldValue | string> = {}
+    if (!doc.data().createdAt) {
+      update.createdAt = FieldValue.serverTimestamp()
+      console.log(`add missing createdAt ${doc.ref.path} (setting to now)`)
+      hasUpdate = true
+    }
+    if (!doc.data().updatedAt) {
+      update.updatedAt = FieldValue.serverTimestamp()
+      console.log(`add missing createdAt ${doc.ref.path} (setting to now)`)
+      hasUpdate = true
+    }
+    if (!doc.data().metadata.contract) {
+      update['metadata.contract.name'] =
+        '0x79665408484fFf9dC7b0BC6b0d42CB18866b9311'
+      update['metadata.contract.version'] = 'IPDocV8'
+      console.log(`add missing contract ${doc.ref.path} (setting to IPDocV8)`)
+      hasUpdate = true
+    }
+    if (!hasUpdate) {
+      return
+    }
+    batch.update(doc.ref, update)
+    count++
   })
+
   const invalidDates = await fs
     .collection('ip')
     .where('createdAt._seconds', '!=', null)
@@ -71,6 +92,9 @@ async function cleanupTable() {
         _nanoseconds: number
       }
       update.createdAt = new Timestamp(_seconds, _nanoseconds)
+      console.log(
+        `repair createdAt ${doc.ref.path} ${(update.createdAt as Timestamp).toDate().toISOString()}`
+      )
       hasUpdate = true
     }
     {
@@ -79,6 +103,10 @@ async function cleanupTable() {
         _nanoseconds: number
       }
       update.updatedAt = new Timestamp(_seconds, _nanoseconds)
+      console.log(
+        `repair updatedAt ${doc.ref.path} ${(update.updatedAt as Timestamp).toDate().toISOString()}`
+      )
+      hasUpdate = true
     }
     if (!hasUpdate) {
       return
@@ -143,11 +171,12 @@ export async function POST(req: NextRequest) {
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
     )
-    const status = firestore.collection('audit').doc(id)
-    const auditTable = firestore
-      .collection('audit')
+    const status = firestore
+      .collection('ip')
       .doc(id)
-      .collection('details')
+      .collection('status')
+      .doc('status')
+    const auditTable = firestore.collection('id').doc(id).collection('audit')
     await status.set({
       status: 'Storing encrypted document in storacha',
       creator: user.user.user_id,
@@ -291,6 +320,8 @@ export async function POST(req: NextRequest) {
         properties: {
           ...rest,
           tokenId: `${tokenId}`,
+          contract_name: process.env.FILCOIN_CONTRACT_NAME || 'Unknown',
+          contract_address: process.env.FILCOIN_CONTRACT || '0x',
           encrypted: data.encrypted,
           downSampled: data.downSampled,
           createdAt: now.toISOString(),
@@ -330,10 +361,13 @@ export async function POST(req: NextRequest) {
         tokenId: `${tokenId}`,
         mint,
         update,
+        contract: {
+          name: process.env.FILCOIN_CONTRACT_NAME || 'Unknown',
+          address: process.env.FILCOIN_CONTRACT || '0x',
+        },
       },
     }
     await setStatus('Finished')
-    console.log(JSON.stringify(updateData, null, 2))
     await doc.set(updateData)
     return new Response(JSON.stringify({ ...data, id: doc.id }), {
       headers: { 'Content-Type': 'application/json' },

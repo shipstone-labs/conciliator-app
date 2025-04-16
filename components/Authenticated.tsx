@@ -34,9 +34,11 @@ export type Session = {
     address: `0x${string}`
     sessionSigs: unknown
   }
-  delegatedSessionSigs?: (
-    docId: string
-  ) => Promise<{ sessionSigs: unknown; capacityDelegationAuthSig: unknown }>
+  delegatedSessionSigs?: (docId: string) => Promise<{
+    sessionSigs: unknown
+    capacityDelegationAuthSig: unknown
+    address: `0x${string}`
+  }>
   fbUser?: UserCredential
   isLoggedIn: boolean
   isLoggingOff: boolean
@@ -178,25 +180,58 @@ export default function Authenticated({
                 await provider.mintPKPThroughRelayer(authMethod, options)
                 pkps = await provider.fetchPKPsThroughRelayer(authMethod)
               }
-              const sessionSigs = await litClient.getPkpSessionSigs({
-                pkpPublicKey: pkps[0].publicKey,
-                litNetwork: litModule.LIT_NETWORK.Datil,
-                chain: 'filecoinCalibrationTestnet',
-                // capabilityAuthSigs: [capacityDelegationAuthSig],
-                authMethods: [authMethod],
-                resourceAbilityRequests: [
-                  {
-                    resource: new litModule.LitPKPResource('*'),
-                    ability: litModule.LIT_ABILITY.PKPSigning,
-                  },
-                  {
-                    resource: new LitAccessControlConditionResource('*'),
-                    ability:
-                      litModule.LIT_ABILITY.AccessControlConditionDecryption,
-                  },
-                ],
-                expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
-              })
+              const pkp = pkps[0]
+              const sessionSigs = await litClient
+                .getPkpSessionSigs({
+                  pkpPublicKey: pkp.publicKey,
+                  litNetwork: litModule.LIT_NETWORK.Datil,
+                  chain: 'filecoinCalibrationTestnet',
+                  // capabilityAuthSigs: [capacityDelegationAuthSig],
+                  authMethods: [authMethod],
+                  resourceAbilityRequests: [
+                    {
+                      resource: new litModule.LitPKPResource('*'),
+                      ability: litModule.LIT_ABILITY.PKPSigning,
+                    },
+                    {
+                      resource: new LitAccessControlConditionResource('*'),
+                      ability:
+                        litModule.LIT_ABILITY.AccessControlConditionDecryption,
+                    },
+                  ],
+                  expiration: new Date(
+                    Date.now() + 1000 * 60 * 10
+                  ).toISOString(), // 10 minutes
+                })
+                .catch((error: unknown) => {
+                  console.error(error)
+                  litClient.removePKPSessionSigs({
+                    pkpPublicKey: pkp.publicKey,
+                    authMethods: [authMethod],
+                  })
+                  return litClient.getPkpSessionSigs({
+                    pkpPublicKey: pkp.publicKey,
+                    litNetwork: litModule.LIT_NETWORK.Datil,
+                    chain: 'filecoinCalibrationTestnet',
+                    // capabilityAuthSigs: [capacityDelegationAuthSig],
+                    authMethods: [authMethod],
+                    resourceAbilityRequests: [
+                      {
+                        resource: new litModule.LitPKPResource('*'),
+                        ability: litModule.LIT_ABILITY.PKPSigning,
+                      },
+                      {
+                        resource: new LitAccessControlConditionResource('*'),
+                        ability:
+                          litModule.LIT_ABILITY
+                            .AccessControlConditionDecryption,
+                      },
+                    ],
+                    expiration: new Date(
+                      Date.now() + 1000 * 60 * 10
+                    ).toISOString(), // 10 minutes
+                  })
+                })
               const delegatedSessionSigs = async (docId: string) => {
                 if (!docId) {
                   throw new Error('docId is required')
@@ -221,29 +256,65 @@ export default function Authenticated({
                   return res.json()
                 })
 
-                const sessionSigs = await litClient.getPkpSessionSigs({
-                  pkpPublicKey: pkps[0].publicKey,
-                  litNetwork: litModule.LIT_NETWORK.Datil,
-                  chain: 'filecoinCalibrationTestnet',
-                  capabilityAuthSigs: [capacityDelegationAuthSig],
-                  authMethods: [authMethod],
-                  resourceAbilityRequests: [
-                    {
-                      resource: new litModule.LitPKPResource('*'),
-                      ability: litModule.LIT_ABILITY.PKPSigning,
-                    },
-                    {
-                      resource: new LitAccessControlConditionResource('*'),
-                      ability:
-                        litModule.LIT_ABILITY.AccessControlConditionDecryption,
-                    },
-                  ],
-                  expiration: new Date(
-                    Date.now() + 1000 * 60 * 10
-                  ).toISOString(), // 10 minutes
-                  // capacityDelegationAuthSig,
-                })
-                return { sessionSigs, capacityDelegationAuthSig }
+                const sessionSigs = await litClient
+                  .getPkpSessionSigs({
+                    pkpPublicKey: pkp.publicKey,
+                    litNetwork: litModule.LIT_NETWORK.Datil,
+                    chain: 'filecoinCalibrationTestnet',
+                    capabilityAuthSigs: [capacityDelegationAuthSig],
+                    authMethods: [authMethod],
+                    resourceAbilityRequests: [
+                      {
+                        resource: new litModule.LitPKPResource('*'),
+                        ability: litModule.LIT_ABILITY.PKPSigning,
+                      },
+                      {
+                        resource: new LitAccessControlConditionResource('*'),
+                        ability:
+                          litModule.LIT_ABILITY
+                            .AccessControlConditionDecryption,
+                      },
+                    ],
+                    expiration: new Date(
+                      Date.now() + 1000 * 60 * 10
+                    ).toISOString(), // 10 minutes
+                    // capacityDelegationAuthSig,
+                  })
+                  .catch((error: unknown) => {
+                    console.error(error)
+                    litClient.removePKPSessionSigs({
+                      pkpPublicKey: pkp.publicKey,
+                      authMethods: [authMethod],
+                    })
+                    return litClient.getPkpSessionSigs({
+                      pkpPublicKey: pkp.publicKey,
+                      litNetwork: litModule.LIT_NETWORK.Datil,
+                      chain: 'filecoinCalibrationTestnet',
+                      capabilityAuthSigs: [capacityDelegationAuthSig],
+                      authMethods: [authMethod],
+                      resourceAbilityRequests: [
+                        {
+                          resource: new litModule.LitPKPResource('*'),
+                          ability: litModule.LIT_ABILITY.PKPSigning,
+                        },
+                        {
+                          resource: new LitAccessControlConditionResource('*'),
+                          ability:
+                            litModule.LIT_ABILITY
+                              .AccessControlConditionDecryption,
+                        },
+                      ],
+                      expiration: new Date(
+                        Date.now() + 1000 * 60 * 10
+                      ).toISOString(), // 10 minutes
+                      // capacityDelegationAuthSig,
+                    })
+                  })
+                return {
+                  sessionSigs,
+                  capacityDelegationAuthSig,
+                  address: pkp.ethAddress as `0x${string}`,
+                }
               }
               setSessionSigs((state) =>
                 amendLoggedIn({
@@ -252,7 +323,7 @@ export default function Authenticated({
                   delegatedSessionSigs,
                   sessionSigs: {
                     authMethod,
-                    pkpPublicKey: pkps[0].publicKey,
+                    pkpPublicKey: pkp.publicKey,
                     address: publicKeyToAddress(
                       pkps[0].publicKey as `0x${string}`
                     ),

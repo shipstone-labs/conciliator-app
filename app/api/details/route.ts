@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
       const ideaData: IPDocJSON | undefined = ideaDoc.data() as
         | IPDocJSON
         | undefined
-      console.log(`Retrieved idea data for tokenId: ${tokenId}`)
 
       // Format the response with defined fallbacks for any missing fields
       return new Response(

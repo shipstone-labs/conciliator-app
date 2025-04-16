@@ -45,14 +45,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
 COPY . .
 
-ARG NEXT_PUBLIC_STYTCH_PROJECT_ENV
-ARG NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN
-ARG NEXT_PUBLIC_STYTCH_APP_ID
-ARG NEXT_PUBLIC_LIT_RELAY_API_KEY
-ARG NEXT_PUBLIC_LIT_CONTRACT_ADDRESS
-ARG NEXT_PUBLIC_LIT_ADDRESS
-ARG NEXT_PUBLIC_FIREBASE_CONFIG={"project_id":"some-hack"}
-
 ENV STYTCH_APP_ID=build-value
 ENV STYTCH_APP_SECRET=something
 ENV STYTCH_ENV=test
@@ -62,7 +54,7 @@ ENV STYTCH_ENV=test
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN corepack enable pnpm && pnpm run build:plain
+RUN corepack enable pnpm && pnpm run lint && pnpm run build:plain
 
 # Production image, copy all the files and run next
 FROM base AS runner
