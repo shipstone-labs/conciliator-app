@@ -58,7 +58,9 @@ async function _getServerConfig(): Promise<RawAppConfig> {
       if (
         key.startsWith('NEXT_PUBLIC_') ||
         isFileCoin ||
-        ['STYTCH_APP_ID', 'FIREBASE_CONFIG'].includes(key)
+        ['STYTCH_APP_ID', 'FIREBASE_CONFIG', 'STYTCH_PUBLIC_TOKEN'].includes(
+          key
+        )
       ) {
         // Only log in development and only occasionally
         if (process.env.NODE_ENV === 'development' && Math.random() < 0.01) {
