@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
-import { getModel, imageAI, runWithNonce } from '../utils'
+import { getModel, imageAI, replaceDummyNonce, runWithNonce } from '../utils'
 import { abi } from '../abi'
-import { bytesToHex, createWalletClient, http, padHex } from 'viem'
+import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
 import { waitForTransactionReceipt } from 'viem/actions'
@@ -135,18 +135,13 @@ export async function POST(req: NextRequest) {
       id,
       encrypted,
       downSampledEncrypted,
+      metadata: { tokenId },
       name: _name,
       description,
       ...rest
     } = body
     const firestore = getFirestore()
     const checkDoc = await firestore.collection('id').doc(id).get()
-    const tokenId = BigInt(
-      padHex(bytesToHex(new TextEncoder().encode(id)), {
-        size: 32,
-        dir: 'left',
-      })
-    )
     if (checkDoc.exists) {
       if (
         (checkDoc.data()?.creator &&
@@ -271,6 +266,7 @@ export async function POST(req: NextRequest) {
       creator: user.user.user_id,
       metadata: {
         cid: '',
+        tokenId,
         contract: process.env.FILCOIN_CONTRACT || '0x',
         version: process.env.FILCOIN_CONTRACT_NAME || 'Unknown',
       },
@@ -291,9 +287,9 @@ export async function POST(req: NextRequest) {
     }) as IPDocJSON
     const doc = firestore.collection('ip').doc(id)
     await setStatus(
-      `Minting ${process.env.FILCOIN_CONTRACT_NAME || 'Unknown'} token for you ${to}`
+      `Minting ${process.env.FILCOIN_CONTRACT_NAME || 'Unknown'} token ID ${tokenId} for you ${to}`
     )
-    const mint = (await runWithNonce(account.address, async (nonce) => {
+    const mint = (await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({
           functionName: 'mint',
@@ -319,7 +315,7 @@ export async function POST(req: NextRequest) {
       properties: {
         properties: {
           ...rest,
-          tokenId: `${tokenId}`,
+          tokenId,
           contract_name: process.env.FILCOIN_CONTRACT_NAME || 'Unknown',
           contract_address: process.env.FILCOIN_CONTRACT || '0x',
           encrypted: data.encrypted,
@@ -337,7 +333,7 @@ export async function POST(req: NextRequest) {
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
     await setStatus(`Setting token metadata URI on token ID ${tokenId}`)
-    const update = await runWithNonce(account.address, async (nonce) => {
+    const update = await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({
           functionName: 'setTokenURI',
@@ -358,7 +354,7 @@ export async function POST(req: NextRequest) {
       ...data,
       metadata: {
         cid: metadataCid.toString(),
-        tokenId: `${tokenId}`,
+        tokenId,
         mint,
         update,
         contract: {

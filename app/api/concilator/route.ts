@@ -113,8 +113,6 @@ ${data.description}`,
     }
     const consecutiveYesCount = Math.max(...runs)
     if (consecutiveYesCount < 5) {
-      const now = Date.now()
-
       const account = privateKeyToAccount(
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )

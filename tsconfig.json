@@ -30,5 +30,12 @@
     ".next/types/**/*.ts",
     "custom.d.ts"
   ],
-  "exclude": ["node_modules", "packages/firebase-functions", "firebase-functions", "**/functions/**", "packages/firebase-functions/**", "**/lib/**"]
+  "exclude": [
+    "node_modules",
+    "packages/firebase-functions",
+    "firebase-functions",
+    "**/functions/**",
+    "packages/firebase-functions/**",
+    "**/lib/**"
+  ]
 }
