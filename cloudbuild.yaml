@@ -56,7 +56,7 @@ steps:
           # Post build URL to the PR
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$_AR_PROJECT_ID"
           
-          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "🔄 Build started: [View logs]($$BUILD_URL)\n<!-- build-error-report -->"
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "## 🔄 Build started: [View logs]($$BUILD_URL)\n<!-- build-error-report -->"
         fi
 
   # Set up cache tag based on branch/PR
@@ -269,7 +269,7 @@ steps:
           fi
           
           # Also post a comment for easier access
-          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)\n<!-- build-error-report -->"
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "## ✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)\n<!-- build-error-report -->"
           # Mark deployment as successful for the final status check
           touch /workspace/deployment_success
         else
