@@ -353,23 +353,39 @@ const DetailIP = ({
                               : 'NDA Not Required: This idea can be accessed without a signed NDA.'}
                           </p>
                           {ideaData.terms.ndaRequired && (
-                            <div className="flex items-center mt-2">
-                              <input
-                                type="checkbox"
-                                id="nda-confirmation"
-                                checked={ndaChecked}
-                                onChange={(e) =>
-                                  setNdaChecked(e.target.checked)
-                                }
-                                className="mr-2 rounded border-white/20 bg-muted/30 text-primary"
-                              />
-                              <label
-                                htmlFor="nda-confirmation"
-                                className="text-white/80 text-sm"
-                              >
-                                I have signed the required Non-Disclosure
-                                Agreement (NDA).
-                              </label>
+                            <div className="space-y-2 mt-2">
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id="nda-confirmation"
+                                  checked={ndaChecked}
+                                  onChange={(e) =>
+                                    setNdaChecked(e.target.checked)
+                                  }
+                                  className="mr-2 rounded border-white/20 bg-muted/30 text-primary"
+                                />
+                                <label
+                                  htmlFor="nda-confirmation"
+                                  className="text-white/80 text-sm"
+                                >
+                                  I have signed the required Non-Disclosure
+                                  Agreement (NDA).
+                                </label>
+                              </div>
+                              
+                              {/* NDA Download Button */}
+                              {ideaData.ndaCid && (
+                                <div className="ml-5 mt-2">
+                                  <Button
+                                    onClick={() => window.open(`/api/nda-download/${docId}`, '_blank')}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border border-white/20 text-white/90 hover:bg-muted/40 rounded-xl transition-all h-9"
+                                  >
+                                    Download NDA
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>

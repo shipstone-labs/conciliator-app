@@ -746,6 +746,20 @@ const AppIP = () => {
                       with purchaser
                     </label>
                   </div>
+                  
+                  {ndaConfirmed && (
+                    <div className="mt-4 border border-white/20 rounded-xl p-4 bg-muted/30">
+                      <h4 className="text-sm font-medium text-white/90 mb-3">
+                        Standard NDA Template
+                      </h4>
+                      <p className="text-sm text-white/70 mb-3">
+                        The system will use a standard NDA template that purchasers will need to sign before access.
+                      </p>
+                      <p className="text-sm text-white/70">
+                        This NDA will be associated with your idea and available for download.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Price is now automatically set based on the evaluation period */}
