@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
-const fs = require('node:fs')
+import * as fs from 'node:fs'
+// You'll need to install: npm install strip-ansi
+import stripAnsi from 'strip-ansi'
 
 // Get input and output file paths from command line arguments
 if (process.argv.length < 3) {
@@ -71,7 +73,7 @@ function processLog(logContent, outputFile) {
   let mdOutput = '# Build Errors\n\n'
 
   buildSections.forEach((section) => {
-    mdOutput += `## ${section.title}\n\n\`\`\`sh\n${section.content}\n\`\`\`\n\n`
+    mdOutput += `## ${section.title}\n\n\`\`\`console\n${section.content}\n\`\`\`\n\n`
   })
 
   if (outputFile) {
@@ -152,5 +154,7 @@ function extractSection(lines, startPredicate, endPredicate) {
 
 function cleanLine(line) {
   // Remove build ID and timestamp pattern (#xx xxx.xxx)
-  return line.replace(/^#\d+\s+(\d+\.\d+\s+)?/, '')
+  const noPrefix = line.replace(/^#\d+\s(\d+\.\d+\s)?/, '')
+  // Strip ANSI color codes
+  return stripAnsi(noPrefix)
 }

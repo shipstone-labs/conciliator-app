@@ -289,22 +289,6 @@ steps:
           cat /workspace/raw_error.md
           exit 0
         fi
-  - name: 'python:3.11'
-    id: PostProcessErrors
-    waitFor: ['ProcessErrors']
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        if [ -f /workspace/failed ]; then
-          echo "Converting colors"
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install termcolor2md
-          termcolor2md < /workspace/raw_error.md > /workspace/processed_error.md
-          cat /workspace/processed_error.md
-          exit 0
-        fi
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyFailure
@@ -329,7 +313,7 @@ steps:
             echo "<!-- build-error-report -->" >> /workspace/error.md
             echo "" >> /workspace/error.md
             echo "" >> /workspace/error.md
-            cat /workspace/processed_error.md >> /workspace/error.md
+            cat /workspace/raw_error.md >> /workspace/error.md
             gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body-file /workspace/error.md
             
             # Create deployment status if a deployment was created

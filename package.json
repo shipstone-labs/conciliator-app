@@ -59,6 +59,7 @@
     "remark-gfm": "^4.0.1",
     "siwe": "^2.3.2",
     "sonner": "^2.0.3",
+    "strip-ansi": "^7.1.0",
     "stripe": "11.15.0",
     "stytch": "^12.14.0",
     "tailwind-merge": "^3.1.0",
