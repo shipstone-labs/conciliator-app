@@ -150,8 +150,6 @@ steps:
       - -c
       - |
         if [ -f /workspace/failed ]; then
-          node ./extract-build-errors.js /workspace/raw_error.log > /workspace/raw_error.md
-          cat /workspace/raw_error.md
           echo "Build failed, skipping deploy"
           exit 0
         fi
@@ -243,9 +241,22 @@ steps:
           echo "Deployment URL: $$REVISION_URL"
         fi
 # Add a final notification step to handle failures
+  - name: 'node'
+    id: ProcessErrors
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if [ -f /workspace/failed ]; then
+          node ./extract-build-errors.js /workspace/raw_error.log > /workspace/raw_error.md
+          cat /workspace/raw_error.md
+          echo "Build failed, skipping deploy"
+          exit 0
+        fi
+    waitFor: ['Deploy']
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyFailure
-    waitFor: ['Deploy'] # This makes it run after the build step, regardless of build success
+    waitFor: ['ProcessErrors'] # This makes it run after the build step, regardless of build success
     entrypoint: bash
     args:
       - -c
