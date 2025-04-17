@@ -284,7 +284,7 @@ steps:
       - |
         if [ -f /workspace/failed ]; then
           echo "Extracting errors"
-          node ./extract-build-errors.js \
+          node ./extract-build-errors.mjs \
             /workspace/raw_error.log > /workspace/raw_error.md
           cat /workspace/raw_error.md
           exit 0
