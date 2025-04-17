@@ -45,7 +45,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   }, [onClose])
 
   // Handle sending email OTP
-  const handleSendEmailOTP = async () => {
+  const handleSendEmailOTP = useCallback(async () => {
     if (!email || !email.includes('@')) {
       setError('Please enter a valid email address')
       return
@@ -68,10 +68,10 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [email, stytch])
 
   // Handle sending SMS OTP
-  const handleSendSmsOTP = async () => {
+  const handleSendSmsOTP = useCallback(async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       setError('Please enter a valid phone number')
       return
@@ -98,7 +98,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [phoneNumber, stytch])
 
   const handleEnter = useCallback((callback: () => void) => {
     return (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,7 +120,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setError(null)
 
     try {
-      await stytch.otps.authenticate(code, methodId, {
+      await stytch?.otps.authenticate(code, methodId, {
         session_duration_minutes: 60,
       })
 
@@ -140,7 +140,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     } finally {
       setIsLoading(false)
     }
-  }, [code, methodId, onSuccess, stytch.otps, handleClose])
+  }, [code, methodId, onSuccess, stytch, handleClose])
 
   // Reset form to try a different method
   const handleBack = useCallback(() => {
@@ -150,6 +150,9 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setError(null)
   }, [])
 
+  if (!stytch) {
+    return null // static render
+  }
   return (
     <Modal
       isOpen={isOpen && !isLoggingOff}

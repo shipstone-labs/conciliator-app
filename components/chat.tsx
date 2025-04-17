@@ -70,13 +70,11 @@ export default function ChatUI({
   doc,
   onSend,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onNewIP,
   onSave,
 }: {
   doc: IPDoc
   messages: { role: 'user' | 'assistant' | 'system'; content: string }[]
   onSend: (message: string) => Promise<void>
-  onNewIP?: (event: MouseEvent<HTMLButtonElement>) => void
   onSave?: (
     event: MouseEvent<HTMLButtonElement>
   ) => Promise<{ IpfsHash: string } | undefined>
@@ -582,10 +580,10 @@ export default function ChatUI({
     >
       <CardHeader>
         <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          My Agent
+          Discovery Session
         </CardTitle>
         <CardDescription>
-          Each SafeIdea Agent is configured for one Idea so that people and AIs on the web can ask questions about it. In each Idea page you can ask more questions about Ideas you are interested in. Click the Test Your Agent button to see how the SafeIdea Agent responds to questions for another AI.
+          {doc.name} - {doc.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -619,7 +617,7 @@ export default function ChatUI({
                       </div>
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                         <Image
-                          src="/chatbot.svg"
+                          src="/svg/Black+Yellow.svg"
                           alt="Conciliator Logo"
                           width={32}
                           height={32}
@@ -645,7 +643,7 @@ export default function ChatUI({
                   {message.role === 'assistant' && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
                       <Image
-                        src="/chatbot.svg"
+                        src="/svg/Black+Yellow.svg"
                         alt="Conciliator Logo"
                         width={32}
                         height={32}
@@ -771,7 +769,7 @@ export default function ChatUI({
       disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed`}
               >
                 {hasStop
-                  ? 'Agent Finished'
+                  ? 'Discovery Finished'
                   : autoCompleting
                     ? 'Stop'
                     : isStopping

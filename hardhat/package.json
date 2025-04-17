@@ -2,6 +2,7 @@
   "name": "hardhat",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,6 +16,7 @@
     "@openzeppelin/contracts": "^5.2.0",
     "@starboardventures/hardhat-verify": "^1.0.1",
     "dotenv": "^16.4.7",
-    "hardhat": "^2.22.18"
+    "hardhat": "^2.22.18",
+    "node-fetch": "^2.7.0"
   }
 }

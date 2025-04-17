@@ -20,7 +20,7 @@ import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import type { IPAudit } from '@/lib/types'
-import { useAppConfig } from '@/lib/ConfigContext'
+import { useConfig } from '@/app/authLayout'
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -55,33 +55,10 @@ const AppIP = () => {
   // =====================================================
   const [testTokenCounter, setTestTokenCounter] = useState(1000)
   const { litClient, sessionSigs } = useSession()
-  const config = useAppConfig()
-  const ids = useCallback(
-    async (id: string) => {
-      return fetch('/api/prestore', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
-        },
-        body: JSON.stringify({ id }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            console.error('Failed to fetch prestore data')
-            return undefined
-          }
-          return res.json()
-        })
-        .then((ids) => {
-          return ids
-        }) as Promise<{ tokenId: `0x${string}`; nativeTokenId: string }>
-    },
-    [stytchClient?.session]
-  )
+  const config = useConfig()
   useEffect(() => {
     if (docId) {
-      const statusDoc = doc(fb, 'audit', docId)
+      const statusDoc = doc(fb, 'ip', docId, 'status', 'status')
       return onSnapshot(statusDoc, (doc) => {
         setStatus((doc.data() as IPAudit) || undefined)
       })
@@ -118,15 +95,26 @@ const AppIP = () => {
       }
       const ref = doc(collection(fb, 'ip'))
       const id = ref.id
-      setLocalStatus('Creating native token ID')
-      const { tokenId, nativeTokenId } = await ids(id)
+      const { tokenId } = await fetch('/api/prestore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${stytchClient?.session?.getTokens()?.session_jwt}`,
+        },
+        body: JSON.stringify({ id }),
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to get token ID')
+        }
+        return res.json()
+      })
+      setLocalStatus('Storing your idea')
       setDocId(id)
-      console.log(tokenId, nativeTokenId)
       const { address } = sessionSigs || {}
       const unifiedAccessControlConditions = [
         {
           conditionType: 'evmBasic',
-          contractAddress: config.LIT_CONTRACT_ADDRESS,
+          contractAddress: config.CONTRACT,
           standardContractType: '',
           chain: 'filecoinCalibrationTestnet',
           method: '',
@@ -139,11 +127,11 @@ const AppIP = () => {
         { conditionType: 'operator', operator: 'or' },
         {
           conditionType: 'evmBasic',
-          contractAddress: config.LIT_CONTRACT_ADDRESS,
+          contractAddress: config.CONTRACT,
           standardContractType: 'ERC1155',
           chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
-          parameters: [':userAddress', nativeTokenId],
+          parameters: [':userAddress', `${tokenId}`],
           returnValueTest: {
             comparator: '>',
             value: '0',
@@ -151,9 +139,9 @@ const AppIP = () => {
         },
         // {
         //   conditionType: 'evmContract',
-        //   contractAddress: config.LIT_CONTRACT_ADDRESS,
+        //   contractAddress: config.CONTRACT,
         //   functionName: 'balanceOf',
-        //   functionParams: [':userAddress', nativeTokenId],
+        //   functionParams: [':userAddress', tokenId],
         //   functionAbi: {
         //     type: 'function',
         //     stateMutability: 'view',
@@ -185,7 +173,7 @@ const AppIP = () => {
           return encryptedContent
         })
       setLocalStatus('Downsampling your idea')
-      const downSampled = await downsample(content)
+      const downSampled = downsample(content)
       setLocalStatus('Encrypting downsampled idea')
       const downSampledEncrypted = await litClient
         .encrypt({
@@ -199,13 +187,11 @@ const AppIP = () => {
           return encryptedContent
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
-      console.log(address)
       const body = {
         id,
         to: address,
         metadata: {
           tokenId,
-          nativeTokenId,
           cid: '',
         },
         name,
@@ -271,7 +257,6 @@ const AppIP = () => {
     stytchClient?.session,
     config,
     sessionSigs,
-    ids,
     ndaConfirmed,
   ])
 

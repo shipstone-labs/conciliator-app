@@ -4,12 +4,15 @@ import { completionAI, getModel } from '../utils'
 import templateFile from './system.hbs'
 import { getUser } from '../stytch'
 import { getFirestore } from '../firebase'
+import { initAPIConfig } from '@/lib/apiUtils'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     const { messages: _messages, id } = await req.json()
 
     await getUser(req)

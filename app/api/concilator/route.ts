@@ -23,15 +23,16 @@ import {
 import { privateKeyToAccount } from 'viem/accounts'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
+import { initAPIConfig } from '@/lib/apiUtils'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
-    const loginNow = Date.now()
+    await initAPIConfig()
+
     await getUser(req)
-    console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)
     const { messages, id } = (await req.json()) as {
       messages: {
         role: 'user' | 'assistant' | 'system'
@@ -40,13 +41,9 @@ export async function POST(req: NextRequest) {
       id: string
     }
 
-    const retrieveNow = Date.now()
     const fs = getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
-    const auditTable = fs.collection('audit').doc(id).collection('details')
-    console.log(
-      `retrieve took ${Math.round((Date.now() - retrieveNow) / 1000)}s`
-    )
+    const auditTable = fs.collection('ip').doc(id).collection('audit')
     const data = doc.data() as IPDocJSON
     if (!data) {
       throw new Error('Document not found')
@@ -116,8 +113,6 @@ ${data.description}`,
     }
     const consecutiveYesCount = Math.max(...runs)
     if (consecutiveYesCount < 5) {
-      const now = Date.now()
-
       const account = privateKeyToAccount(
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )
@@ -142,7 +137,6 @@ ${data.description}`,
         throw new Error('Access control conditions do not match')
       }
       if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
-        console.log(data.downSampled.hash, downSampled.dataToEncryptHash)
         throw new Error('Hash does not match')
       }
       const accsInput =
@@ -185,7 +179,6 @@ ${data.description}`,
         chain: 'filecoinCalibrationTestnet',
         sessionSigs,
       })
-      console.log(`lit took ${Math.round((Date.now() - now) / 1000)}s`)
 
       const content = new TextDecoder().decode(_decrypted.decryptedData)
 
@@ -202,26 +195,20 @@ ${data.description}`,
         }
       )
       request[0].content = _content
-      const chatNow = Date.now()
       const completion = await completionAI.chat.completions.create({
         model: getModel('COMPLETION'), // Use the appropriate model
         messages: request,
       })
-      console.log(
-        `lilypad completion took ${Math.round((Date.now() - chatNow) / 1000)}s`
-      )
       const answerContent = completion.choices
         .flatMap(
           ({ message: { content = '' } = { content: '' } }) =>
             content?.split('\n') || ''
         )
         .join('\n')
-      // console.log('conciliator', consecutiveYesCount, yesItems, answerContent)
       messages.push({ content: answerContent, role: 'assistant' })
     } else {
       messages.push({ content: 'Stop', role: 'assistant' })
     }
-    const dataNow = Date.now()
     await auditTable.add({
       status: 'Conciliator answered',
       createdAt: FieldValue.serverTimestamp(),
@@ -231,7 +218,6 @@ ${data.description}`,
         answer: messages.at(-1)?.content,
       },
     })
-    console.log(`audit took ${Math.round((Date.now() - dataNow) / 1000)}s`)
     return new Response(
       JSON.stringify({
         messages,

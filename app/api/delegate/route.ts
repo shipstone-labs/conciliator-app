@@ -12,11 +12,14 @@ import {
   http,
   type SignableMessage,
 } from 'viem'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     const loginNow = Date.now()
     const user = await getUser(req)
     console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)
@@ -31,7 +34,7 @@ export async function POST(req: NextRequest) {
       (doc.data() as { creator?: string }).creator === user.user.user_id
         ? [{ expiresAt: undefined }]
         : await fs
-            .collection('audit')
+            .collection('ip')
             .doc(id)
             .collection('deals')
             .where('to', '==', user.user.user_id)

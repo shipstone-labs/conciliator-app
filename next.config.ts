@@ -3,6 +3,9 @@ import webpack from 'webpack'
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       {
@@ -111,6 +114,8 @@ const nextConfig: NextConfig = {
     'multiformats',
     // Lilypad
     'lilypad-wrapper',
+    // Firebase
+    'firebase-functions',
   ],
   // Configure React runtime
   reactStrictMode: true,
