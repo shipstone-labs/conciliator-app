@@ -34,7 +34,7 @@ steps:
                     }
                   }
                 }
-              }' -F owner="$(gh repo view --json owner -q .owner.login)" -F repo="$(gh repo view --json name -q .name)" -F pr_number="$pr_number" |
+              }' -F owner="$_GITHUB_OWNER" -F repo="$_GITHUB_REPO" -F pr_number="$pr_number" |
             jq -r --arg pattern "$pattern" '.data.repository.pullRequest.comments.nodes[] | select(.body | contains($pattern)) | .id'
           }
 
@@ -47,10 +47,9 @@ steps:
           EOF
 
           # Get PR number
-          pr_number=123  # Replace with actual PR number or variable
 
           # Get IDs of comments containing your tag
-          comment_ids=$(get_matching_comments $pr_number "<!-- build-error-report -->")
+          comment_ids=$(get_matching_comments $_PR_NUMBER "<!-- build-error-report -->")
 
           # Delete matching comments
           for id in $comment_ids; do
@@ -61,7 +60,7 @@ steps:
                 }
               }' -F id="$id"
           done
-          
+
           # Post build URL to the PR
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
           
