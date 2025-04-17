@@ -24,9 +24,11 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { LRUCache } from 'next/dist/server/lib/lru-cache'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
+const downsampledContent = new LRUCache<string>(100)
 
 export async function POST(req: NextRequest) {
   try {

@@ -282,3 +282,17 @@ export async function getLit() {
   })()
   return await litClient
 }
+
+export function getContractInfo() {
+  const contract_name =
+    process.env.FILCOIN_CONTRACT_VERIFIED ||
+    process.env.FILCOIN_CONTRACT_NAME ||
+    'IPDocV8'
+  const contract_dynamic = `FILCOIN_CONTRACT_${contract_name.toUpperCase()}`
+  const contract: `0x${string}` = (
+    process.env.FILCOIN_CONTRACT_VERIFIED
+      ? process.env[contract_dynamic]
+      : process.env.FILCOIN_CONTRACT
+  ) as `0x${string}`
+  return { contract, contract_name }
+}

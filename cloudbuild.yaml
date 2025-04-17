@@ -89,7 +89,7 @@ steps:
         docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
 
         export DOCKER_BUILDKIT=1
-        if ! docker build \
+        if ! (docker build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
           --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
@@ -100,8 +100,9 @@ steps:
           --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
           --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
-          .
+          . 2>&1) | tee ./.info.log
         then
+          awk -f ./extract-error.awk ./.info.log > /workspace/error.log
           echo "Build failed"
           touch /workspace/failed
           exit 0
@@ -253,7 +254,10 @@ steps:
             
             # Build URL and notify failure
             BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
-            gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "❌ Build failed: [View logs]($$BUILD_URL)"
+            echo "## ❌ Build failed: [View logs]($$BUILD_URL)\n```sh" > /workspace/error.md
+            cat /workspace/error.log >> /workspace/error.md
+            echo "```" >> /workspace/error.md
+            gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body-file /workspace/error.md
             
             # Create deployment status if a deployment was created
             if [[ -f /workspace/deployment_id ]]; then

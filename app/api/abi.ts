@@ -42,6 +42,33 @@ export const abi = [
     type: 'error',
   },
   {
+    inputs: [],
+    name: 'ECDSAInvalidSignature',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'length',
+        type: 'uint256',
+      },
+    ],
+    name: 'ECDSAInvalidSignatureLength',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 's',
+        type: 'bytes32',
+      },
+    ],
+    name: 'ECDSAInvalidSignatureS',
+    type: 'error',
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -208,18 +235,24 @@ export const abi = [
     inputs: [
       {
         indexed: true,
-        internalType: 'bytes32',
-        name: 'externalId',
-        type: 'bytes32',
-      },
-      {
-        indexed: true,
         internalType: 'uint256',
         name: 'tokenId',
         type: 'uint256',
       },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'previousOwner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
     ],
-    name: 'IDCreated',
+    name: 'OwnershipTransferred',
     type: 'event',
   },
   {
@@ -578,32 +611,6 @@ export const abi = [
   {
     inputs: [
       {
-        internalType: 'bytes32',
-        name: 'externalId',
-        type: 'bytes32',
-      },
-    ],
-    name: 'createId',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bytes32[]',
-        name: 'externalIds',
-        type: 'bytes32[]',
-      },
-    ],
-    name: 'createIds',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
         internalType: 'uint256',
         name: 'id',
         type: 'uint256',
@@ -634,44 +641,6 @@ export const abi = [
       },
     ],
     name: 'getExpiration',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'getExternalId',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'externalId',
-        type: 'bytes32',
-      },
-    ],
-    name: 'getId',
     outputs: [
       {
         internalType: 'uint256',
@@ -827,71 +796,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'amounts',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
-    ],
-    name: 'mintBatch',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'bytes32[]',
-        name: 'externalIds',
-        type: 'bytes32[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'amounts',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
-    ],
-    name: 'mintBatchWithExternalIds',
-    outputs: [
-      {
-        internalType: 'uint256[]',
-        name: '',
-        type: 'uint256[]',
-      },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'bytes32',
-        name: 'externalId',
-        type: 'bytes32',
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
       },
       {
         internalType: 'uint256',
@@ -899,20 +806,62 @@ export const abi = [
         type: 'uint256',
       },
       {
+        internalType: 'uint256',
+        name: 'expirationTime',
+        type: 'uint256',
+      },
+      {
         internalType: 'bytes',
         name: 'data',
         type: 'bytes',
       },
+      {
+        internalType: 'bytes',
+        name: 'signature',
+        type: 'bytes',
+      },
     ],
-    name: 'mintWithExternalId',
-    outputs: [
+    name: 'mintWithSignature',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
       {
         internalType: 'uint256',
-        name: '',
+        name: 'tokenId',
         type: 'uint256',
       },
     ],
-    stateMutability: 'nonpayable',
+    name: 'originalOwnerOf',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'ownerOf',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -1017,44 +966,6 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'amounts',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'expirationTimes',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
-    ],
-    name: 'safeBatchTransferFromWithExpiration',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
         internalType: 'uint256',
         name: 'id',
         type: 'uint256',
@@ -1071,44 +982,6 @@ export const abi = [
       },
     ],
     name: 'safeTransferFrom',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'amount',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'expirationTime',
-        type: 'uint256',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
-    ],
-    name: 'safeTransferFromWithExpiration',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1140,29 +1013,6 @@ export const abi = [
       },
     ],
     name: 'setBaseURI',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'expirationTimes',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'setBatchExpiration',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1270,6 +1120,24 @@ export const abi = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {

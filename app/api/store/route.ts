@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { getModel, imageAI, runWithNonce } from '../utils'
+import { getContractInfo, getModel, imageAI, runWithNonce } from '../utils'
 import { abi } from '../abi'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -154,6 +154,10 @@ export async function POST(req: NextRequest) {
         })
       }
     }
+    const { contract, contract_name } = getContractInfo()
+    if (!contract) {
+      throw new Error('FILCOIN_CONTRACT not set')
+    }
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`
     )
@@ -267,8 +271,7 @@ export async function POST(req: NextRequest) {
       metadata: {
         cid: '',
         tokenId,
-        contract: process.env.FILCOIN_CONTRACT || '0x',
-        version: process.env.FILCOIN_CONTRACT_NAME || 'Unknown',
+        contract: { address: contract, name: contract_name },
       },
       encrypted: {
         cid: encryptedCid.toString(),
@@ -287,14 +290,14 @@ export async function POST(req: NextRequest) {
     }) as IPDocJSON
     const doc = firestore.collection('ip').doc(id)
     await setStatus(
-      `Minting ${process.env.FILCOIN_CONTRACT_NAME || 'Unknown'} token ID ${tokenId} for you ${to}`
+      `Minting ${contract_name} token ID ${tokenId} for you ${to}`
     )
     const mint = (await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({
           functionName: 'mint',
           abi,
-          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+          address: contract,
           args: [to, tokenId, 1, '0x'],
           nonce,
         })
@@ -306,7 +309,7 @@ export async function POST(req: NextRequest) {
         })
     })) as `0x${string}`
     await setStatus(
-      `Storing ${process.env.FILCOIN_CONTRACT_NAME || 'Unknown'} token metadata for token ID ${tokenId}`
+      `Storing ${contract_name} token metadata for token ID ${tokenId}`
     )
     const metadata = {
       name: _name,
@@ -316,8 +319,8 @@ export async function POST(req: NextRequest) {
         properties: {
           ...rest,
           tokenId,
-          contract_name: process.env.FILCOIN_CONTRACT_NAME || 'Unknown',
-          contract_address: process.env.FILCOIN_CONTRACT || '0x',
+          contract_name,
+          contract,
           encrypted: data.encrypted,
           downSampled: data.downSampled,
           createdAt: now.toISOString(),
@@ -338,7 +341,7 @@ export async function POST(req: NextRequest) {
         .writeContract({
           functionName: 'setTokenURI',
           abi,
-          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
+          address: contract,
           args: [tokenId, cidAsURL(metadataCid.toString())],
           nonce,
         })
@@ -358,8 +361,8 @@ export async function POST(req: NextRequest) {
         mint,
         update,
         contract: {
-          name: process.env.FILCOIN_CONTRACT_NAME || 'Unknown',
-          address: process.env.FILCOIN_CONTRACT || '0x',
+          name: contract_name,
+          address: contract,
         },
       },
     }

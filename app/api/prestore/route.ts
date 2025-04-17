@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { getUser } from '../stytch'
 import { getFirebase } from '../firebase'
 import { ServerValue } from 'firebase-admin/database'
+import { getContractInfo } from '../utils'
 
 export const runtime = 'nodejs'
 
@@ -11,7 +12,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { id } = body
     const fb = getFirebase()
-    const ref = fb.ref(`tokenIds/${process.env.FILCOIN_CONTRACT}/sequence`)
+    const { contract } = getContractInfo()
+    const ref = fb.ref(`tokenIds/${contract}/sequence`)
     const now = Date.now()
     const { snapshot } = await ref.transaction((currentValue) => {
       if (currentValue === null) {
@@ -27,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (!tokenId) {
       throw new Error('Token ID not found')
     }
-    fb.ref(`tokenIds/${process.env.FILCOIN_CONTRACT}/tokenIds/${tokenId}`).set({
+    fb.ref(`tokenIds/${contract}/tokenIds/${tokenId}`).set({
       created: ServerValue.TIMESTAMP,
       userId: user.user.user_id,
       docId: id,

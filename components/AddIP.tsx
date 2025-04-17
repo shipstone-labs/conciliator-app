@@ -81,7 +81,7 @@ const AppIP = () => {
       setLocalStatus('Storing your idea')
       setDocId(id)
       const { address } = sessionSigs || {}
-      const unifiedAccessControlConditions = [
+      const downSampledUnifiedAccessControlConditions = [
         {
           conditionType: 'evmBasic',
           contractAddress: config.CONTRACT,
@@ -107,34 +107,27 @@ const AppIP = () => {
             value: '0',
           },
         },
-        // {
-        //   conditionType: 'evmContract',
-        //   contractAddress: config.CONTRACT,
-        //   functionName: 'balanceOf',
-        //   functionParams: [':userAddress', tokenId],
-        //   functionAbi: {
-        //     type: 'function',
-        //     stateMutability: 'view',
-        //     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        //     name: 'balanceOf',
-        //     inputs: [
-        //       { internalType: 'address', name: 'account', type: 'address' },
-        //       { internalType: 'uint256', name: 'id', type: 'uint256' },
-        //     ],
-        //   },
-        //   chain: 'filecoin',
-        //   returnValueTest: {
-        //     key: '',
-        //     comparator: '>',
-        //     value: '0',
-        //   },
-        // },
+      ]
+      const documentUnifiedAccessControlConditions = [
+        {
+          conditionType: 'evmBasic',
+          contractAddress: config.CONTRACT,
+          standardContractType: 'ERC1155',
+          chain: 'filecoinCalibrationTestnet',
+          method: 'balanceOf',
+          parameters: [':userAddress', `${tokenId}`],
+          returnValueTest: {
+            comparator: '>',
+            value: '0',
+          },
+        },
       ]
       setLocalStatus('Encrypting your idea')
       const encrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(content),
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            documentUnifiedAccessControlConditions,
         })
         .then(async (encryptedContent: EncryptResponse) => {
           if (!encryptedContent) {
@@ -148,7 +141,8 @@ const AppIP = () => {
       const downSampledEncrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(downSampled),
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            downSampledUnifiedAccessControlConditions,
         })
         .then(async (encryptedContent: EncryptResponse) => {
           if (!encryptedContent) {
@@ -168,11 +162,13 @@ const AppIP = () => {
         description,
         encrypted: {
           ...encrypted,
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            documentUnifiedAccessControlConditions,
         },
         downSampledEncrypted: {
           ...downSampledEncrypted,
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            downSampledUnifiedAccessControlConditions,
         },
         category: businessModel || 'Intellectual Property',
         tags: ['IP', evaluationPeriod],
