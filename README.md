@@ -8,11 +8,50 @@ Hi hackathon people - here's the status of this project:
 
 **What Works:** add IP, explore IP, discover IP modules work.
 
-**What doesn't:** transact IP module is in testing. MCP for local AI agent is on hold until we complete MCP testing - we're doing that here: https://github.com/shipstone-labs/mcp-test - and the associated site is https://mcp.safeidea.net. 
+**What doesn't:** transact IP module is in testing. MCP for local AI agent is available in testing on the `feature/mcp-testing` branch.
 
 **Issues:** add IP is faster but still slow. view IP is better. The agent response is still slow. 
 
 You can test the current version of SafeIdea at https://safeidea.net 
+
+## 🔍 MCP Integration (New)
+
+The app now includes Claude MCP (Machine Conversation Proxy) integration that allows Claude to search and retrieve information about intellectual property documents through a specialized endpoint.
+
+### Using the MCP Search Tool
+
+To search for IP documents using Claude, include this tool definition:
+
+```
+<tool_definitions>
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "search_ip_documents",
+      "description": "Search for intellectual property documents in the SafeIdea database",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query to find relevant IP documents"
+          }
+        },
+        "required": ["query"]
+      },
+      "endpoint": "https://your-conciliator-app-url.com/api/mcp/search",
+      "method": "POST"
+    }
+  }
+]
+</tool_definitions>
+```
+
+Example query:
+```
+I'm looking for documents related to blockchain technology. Can you search the database and tell me what's available?
+```
 
 ## AI Blueprints with Filecoin Challenges
 
@@ -23,8 +62,8 @@ You can test the current version of SafeIdea at https://safeidea.net
 **Creator Economy**: AI tools for content generation, copyright protection, personalized recommendations.  
 
 **SafeIdea Alignment**  
-    * SafeIdea’s goal is to offer tools to people that want the securely share access to Intellectual Property (IP). We use a downsampling technique to support discovery without risking the IP. The AI only gets to see the downsampled encrypted content during interactions so it cannot leak accurate information.  
-    * SafeIdea’s uses Lilypad for decentralized AI computer to create Agentic search support  
+    * SafeIdea's goal is to offer tools to people that want the securely share access to Intellectual Property (IP). We use a downsampling technique to support discovery without risking the IP. The AI only gets to see the downsampled encrypted content during interactions so it cannot leak accurate information.  
+    * SafeIdea's uses Lilypad for decentralized AI computer to create Agentic search support  
     * We think that SafeIdea could be a fundamental part of the creator economy, starting with intellectual property 
 
 ### Storacha Challenge
@@ -37,7 +76,7 @@ Your goal is to have 2 or more AI agents share data between one another. These A
 
 Build advanced agent workflows on the Lilypad network that can dynamically select the best AI model (from options like DeepSeek, Llama) for specific subtasks, orchestrate multiple models, and handle complex reasoning, overcoming limitations of single-model agents. 
 
-**SafeIdea Alignment:** SafeIdea's agents are using anura-testnet Lilypad, enabling SafeIdea to deploy different AI models on demand, depending on the type of IP that is offered. (It’s setup but we are currently loading the model from an environment variable for testing)
+**SafeIdea Alignment:** SafeIdea's agents are using anura-testnet Lilypad, enabling SafeIdea to deploy different AI models on demand, depending on the type of IP that is offered. (It's setup but we are currently loading the model from an environment variable for testing)
 
 ## Getting Started
 
@@ -200,6 +239,7 @@ SafeIdea follows a Next.js application structure:
 
 - **`/app`**: Next.js 13 App Router pages and API routes
   - `/api`: Backend API endpoints for IPFS storage, authentication, and data retrieval
+  - `/api/mcp/search`: MCP search endpoint for Claude integration
   - `/details/[id]`: Idea details view
   - `/discovery/[id]`: Interactive Q&A interface for exploring ideas
   - `/add-ip`: Form to add new intellectual property
@@ -227,6 +267,7 @@ SafeIdea follows a Next.js application structure:
 - **IP Discovery**: AI-driven Q&A interface for exploring IP details
 - **IPFS Integration**: Decentralized storage for IP content and metadata
 - **Blockchain Integration**: NFT creation for IP ownership verification
+- **MCP Integration**: Claude MCP search capabilities for IP discovery
 
 ## Commands
 
