@@ -104,6 +104,7 @@ steps:
           . 2>&1) | tee ./.info.log
         then
           node ./extract-build-errors.js ./.info.log /workspace/raw_error.md
+          cat /workspace/raw_error.md
           echo "Build failed"
           touch /workspace/failed
           exit 0
@@ -255,7 +256,9 @@ steps:
             
             # Build URL and notify failure
             BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
-            echo "## ❌ Build failed: [View logs]($$BUILD_URL)\n\n" > /workspace/error.md
+            echo "## ❌ Build failed: [View logs]($$BUILD_URL)" > /workspace/error.md
+            echo "" >> /workspace/error.md
+            echo "" >> /workspace/error.md
             cat /workspace/raw_error.md >> /workspace/error.md
 
             gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body-file /workspace/error.md

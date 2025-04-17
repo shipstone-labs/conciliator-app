@@ -36,10 +36,7 @@ function processLog(logContent, outputFile) {
   // Find build section
   const buildSection = extractSection(
     lines,
-    (line) =>
-      line.includes(
-        'RUN corepack enable pnpm && pnpm run lint && pnpm run build:plain'
-      ),
+    (line) => line.includes('next build'),
     (line) => line.includes('END')
   )
 
