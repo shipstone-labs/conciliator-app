@@ -93,7 +93,7 @@ const DetailIP = ({
             address: config.CONTRACT as `0x${string}`,
             abi,
             functionName: 'balanceOf',
-            args: [address, BigInt(ideaData.metadata?.tokenId || 0)],
+            args: [address, ideaData.metadata?.tokenId || '0x'],
           })
           .catch((error) => {
             console.error(error)

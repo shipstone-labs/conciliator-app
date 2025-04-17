@@ -10,11 +10,14 @@ import { PinataSDK } from 'pinata-web3'
 import {
   createPublicClient,
   http,
+  type WalletClient,
   type PrivateKeyAccount,
   type SignableMessage,
+  zeroAddress,
 } from 'viem'
 import { filecoinCalibration } from 'viem/chains'
 import { getFirebase } from './firebase'
+import { estimateFeesPerGas, waitForTransactionReceipt } from 'viem/actions'
 
 const NAMES = [
   {
@@ -148,8 +151,48 @@ export const genSession = async (
   return sessionSigs
 }
 
+export async function replaceDummyNonce(
+  wallet: WalletClient,
+  address: string,
+  nonce: number
+) {
+  if (!wallet.account) {
+    throw new Error('Wallet account is not set')
+  }
+  const db = getFirebase()
+  const trans = {
+    account: wallet.account,
+    from: address,
+    to: zeroAddress,
+    value: 0n,
+    nonce,
+    chain: wallet.chain,
+    maxFeePerGas: 2n,
+  }
+  const ref = db.ref(`nonce/${address}`)
+  const { maxFeePerGas, maxPriorityFeePerGas } = await estimateFeesPerGas(
+    wallet,
+    trans
+  )
+  await wallet
+    .sendTransaction({
+      ...trans,
+      maxFeePerGas: maxFeePerGas + 2n,
+      maxPriorityFeePerGas: maxPriorityFeePerGas + 2n,
+    })
+    .then(async (hash) => {
+      await waitForTransactionReceipt(wallet, {
+        hash,
+      })
+      await ref.update({
+        [`pending/${nonce}`]: null,
+      })
+      return hash
+    })
+}
+
 export async function runWithNonce<T>(
-  address: `0x${string}`,
+  wallet: WalletClient,
   call: (nonce: number) => Promise<T>
 ): Promise<T> {
   const client = createPublicClient({
@@ -157,6 +200,8 @@ export async function runWithNonce<T>(
     transport: http(),
   })
   const db = getFirebase()
+  const addresses = await wallet.getAddresses()
+  const address = addresses[0]
   const rpcNoncePending = await client.getTransactionCount({
     address,
     blockTag: 'pending',
@@ -215,28 +260,8 @@ export async function runWithNonce<T>(
       return result
     })
     .catch(async (error) => {
-      const ref = db.ref(`nonce/${address}`)
-      const snap = await ref.once('value')
-      const _data = snap.val()
-      const { nonce: _newNonce } = _data || {}
-      if (_newNonce === nonce) {
-        await ref
-          .transaction((data) => {
-            const { nonce: currentNonce, pending } = data || _data
-            if (pending[nonce] && currentNonce - 1 === nonce) {
-              const { [nonce]: _ignore, ...rest } = pending
-              return {
-                nonce,
-                pending: rest,
-              }
-            }
-            return data || _data
-          })
-          .catch((error) => {
-            console.error(error)
-            return { snapshot: undefined }
-          })
-      }
+      await replaceDummyNonce(wallet, address, nonce)
+
       return Promise.reject(error)
     })) as T
 }

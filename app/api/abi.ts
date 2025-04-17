@@ -189,9 +189,9 @@ export const abi = [
       },
       {
         indexed: true,
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: 'tokenId',
-        type: 'bytes32',
+        type: 'uint256',
       },
       {
         indexed: false,
@@ -201,6 +201,25 @@ export const abi = [
       },
     ],
     name: 'ExpirationSet',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'bytes32',
+        name: 'externalId',
+        type: 'bytes32',
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'IDCreated',
     type: 'event',
   },
   {
@@ -559,6 +578,32 @@ export const abi = [
   {
     inputs: [
       {
+        internalType: 'bytes32',
+        name: 'externalId',
+        type: 'bytes32',
+      },
+    ],
+    name: 'createId',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32[]',
+        name: 'externalIds',
+        type: 'bytes32[]',
+      },
+    ],
+    name: 'createIds',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'uint256',
         name: 'id',
         type: 'uint256',
@@ -583,12 +628,50 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: 'id',
-        type: 'bytes32',
+        type: 'uint256',
       },
     ],
     name: 'getExpiration',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'getExternalId',
+    outputs: [
+      {
+        internalType: 'bytes32',
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'externalId',
+        type: 'bytes32',
+      },
+    ],
+    name: 'getId',
     outputs: [
       {
         internalType: 'uint256',
@@ -692,9 +775,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: 'id',
-        type: 'bytes32',
+        type: 'uint256',
       },
     ],
     name: 'isExpired',
@@ -716,9 +799,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: 'id',
-        type: 'bytes32',
+        type: 'uint256',
       },
       {
         internalType: 'uint256',
@@ -744,9 +827,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32[]',
+        internalType: 'uint256[]',
         name: 'ids',
-        type: 'bytes32[]',
+        type: 'uint256[]',
       },
       {
         internalType: 'uint256[]',
@@ -761,6 +844,74 @@ export const abi = [
     ],
     name: 'mintBatch',
     outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes32[]',
+        name: 'externalIds',
+        type: 'bytes32[]',
+      },
+      {
+        internalType: 'uint256[]',
+        name: 'amounts',
+        type: 'uint256[]',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    name: 'mintBatchWithExternalIds',
+    outputs: [
+      {
+        internalType: 'uint256[]',
+        name: '',
+        type: 'uint256[]',
+      },
+    ],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'externalId',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    name: 'mintWithExternalId',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
     stateMutability: 'nonpayable',
     type: 'function',
   },
@@ -866,9 +1017,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32[]',
+        internalType: 'uint256[]',
         name: 'ids',
-        type: 'bytes32[]',
+        type: 'uint256[]',
       },
       {
         internalType: 'uint256[]',
@@ -937,9 +1088,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: 'id',
-        type: 'bytes32',
+        type: 'uint256',
       },
       {
         internalType: 'uint256',
@@ -1001,9 +1152,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32[]',
+        internalType: 'uint256[]',
         name: 'ids',
-        type: 'bytes32[]',
+        type: 'uint256[]',
       },
       {
         internalType: 'uint256[]',
@@ -1024,9 +1175,9 @@ export const abi = [
         type: 'address',
       },
       {
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: 'id',
-        type: 'bytes32',
+        type: 'uint256',
       },
       {
         internalType: 'uint256',

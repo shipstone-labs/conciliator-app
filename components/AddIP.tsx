@@ -20,7 +20,6 @@ import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import type { IPAudit } from '@/lib/types'
-import { bytesToHex, padHex } from 'viem'
 import { useConfig } from '@/app/authLayout'
 
 const AppIP = () => {
@@ -66,9 +65,18 @@ const AppIP = () => {
       }
       const ref = doc(collection(fb, 'ip'))
       const id = ref.id
-      const tokenId = padHex(bytesToHex(new TextEncoder().encode(id)), {
-        size: 32,
-        dir: 'right',
+      const { tokenId } = await fetch('/api/prestore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${stytchClient?.session?.getTokens()?.session_jwt}`,
+        },
+        body: JSON.stringify({ id }),
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to get token ID')
+        }
+        return res.json()
       })
       setLocalStatus('Storing your idea')
       setDocId(id)
@@ -103,7 +111,7 @@ const AppIP = () => {
         //   conditionType: 'evmContract',
         //   contractAddress: config.CONTRACT,
         //   functionName: 'balanceOf',
-        //   functionParams: [':userAddress', `${tokenId}`],
+        //   functionParams: [':userAddress', tokenId],
         //   functionAbi: {
         //     type: 'function',
         //     stateMutability: 'view',
