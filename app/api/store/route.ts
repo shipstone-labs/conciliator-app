@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { getModel, imageAI, replaceDummyNonce, runWithNonce } from '../utils'
+import { getModel, imageAI, runWithNonce } from '../utils'
 import { abi } from '../abi'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
