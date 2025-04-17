@@ -276,28 +276,34 @@ steps:
           REVISION_URL="$${SERVICE_URL}"
           echo "Deployment URL: $$REVISION_URL"
         fi
-# Add a final notification step to handle failures
   - name: 'node'
     id: ProcessErrors
     entrypoint: bash
     args:
       - -c
       - |
-        apt-get update -y && apt-get install -y python3 python3-pip
-        python3 -m venv venv
-        source venv/bin/activate
-        pip install termcolor2md
         if [ -f /workspace/failed ]; then
           node ./extract-build-errors.js \
-            /workspace/raw_error.log | \
-            termcolor2md > /workspace/raw_error.md
+            /workspace/raw_error.log > /workspace/raw_error.md
           echo "Build failed, skipping deploy"
           exit 0
         fi
-    waitFor: ['Deploy']
+  - name: 'python:3.11'
+    id: PostProcessErrors
+    waitFor: ['ProcessErrors']
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if [ -f /workspace/failed ]; then
+          termcolor2md < /workspace/raw_error.md > /workspace/processed_error.md
+          echo "Build failed, skipping deploy"
+          exit 0
+        fi
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyFailure
-    waitFor: ['ProcessErrors'] # This makes it run after the build step, regardless of build success
+    waitFor: ['PostProcessErrors'] # This makes it run after the build step, regardless of build success
     entrypoint: bash
     args:
       - -c
@@ -318,7 +324,7 @@ steps:
             echo "<!-- build-error-report -->" >> /workspace/error.md
             echo "" >> /workspace/error.md
             echo "" >> /workspace/error.md
-            cat /workspace/raw_error.md >> /workspace/error.md
+            cat /workspace/processed_error.md >> /workspace/error.md
             gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body-file /workspace/error.md
             
             # Create deployment status if a deployment was created
