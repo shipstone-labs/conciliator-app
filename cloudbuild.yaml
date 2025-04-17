@@ -292,7 +292,7 @@ steps:
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: NotifyFailure
-    waitFor: ['PostProcessErrors'] # This makes it run after the build step, regardless of build success
+    waitFor: ['ProcessErrors'] # This makes it run after the build step, regardless of build success
     entrypoint: bash
     args:
       - -c
