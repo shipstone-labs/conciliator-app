@@ -121,6 +121,20 @@ const DetailIP = ({
   }
   return (
     <div className="w-full py-8">
+      {/* Test button at the very top of the page, outside other containers */}
+      <div className="fixed top-4 right-4 z-50">
+        <Button
+          size="sm"
+          variant="outline"
+          className="px-3 py-1 h-auto text-sm font-bold bg-red-500 hover:bg-red-600 border-red-500 text-white"
+          onClick={() => {
+            alert('TEST BUTTON CLICKED')
+          }}
+        >
+          TEST BUTTON
+        </Button>
+      </div>
+
       <div className="max-w-4xl mx-auto space-y-8 px-4">
         {/* Header with page title and image */}
         <div className="text-center mb-8">
