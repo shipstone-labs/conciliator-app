@@ -283,9 +283,10 @@ steps:
       - -c
       - |
         if [ -f /workspace/failed ]; then
+          echo "Extracting errors"
           node ./extract-build-errors.js \
             /workspace/raw_error.log > /workspace/raw_error.md
-          echo "Build failed, skipping deploy"
+          cat /workspace/raw_error.md
           exit 0
         fi
   - name: 'python:3.11'
@@ -296,8 +297,12 @@ steps:
       - -c
       - |
         if [ -f /workspace/failed ]; then
+          echo "Converting colors"
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install termcolor2md
           termcolor2md < /workspace/raw_error.md > /workspace/processed_error.md
-          echo "Build failed, skipping deploy"
+          cat /workspace/processed_error.md
           exit 0
         fi
 
