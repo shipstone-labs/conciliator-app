@@ -280,9 +280,12 @@ steps:
     args:
       - -c
       - |
-        apt-get update -y && apt-get install -y ansi2md
+        apt-get update -y && apt-get install -y ansi2html
         if [ -f /workspace/failed ]; then
-          node ./extract-build-errors.js /workspace/raw_error.log | ansi2md > /workspace/raw_error.md
+          node ./extract-build-errors.js \
+            /workspace/raw_error.log | \
+            ansi2html | \
+            html2text > /workspace/raw_error.md
           echo "Build failed, skipping deploy"
           exit 0
         fi
