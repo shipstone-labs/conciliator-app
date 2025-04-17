@@ -39,15 +39,19 @@ steps:
           }
           # Get IDs of comments containing your tag
           comment_ids=$(get_matching_comments "$_PR_NUMBER" "<!-- build-error-report -->")
-
+          echo "Found comment IDs: $comment_ids"
           # Delete matching comments
           for id in $comment_ids; do
-            gh api graphql -f query='
+            echo "Deleting comment with ID: $id"
+            if ! gh api graphql -f query='
               mutation($id:ID!) {
                 deleteIssueComment(input:{id:$id}) {
                   clientMutationId
                 }
               }' -F id="$id"
+            then
+              echo "Failed to delete comment with ID: $id"
+            fi
           done
 
           # Post build URL to the PR
@@ -280,12 +284,12 @@ steps:
     args:
       - -c
       - |
-        apt-get update -y && apt-get install -y ansi2html
+        apt-get update -y && apt-get install -y python3 python3-pip
+        pip3 install termcolor2md
         if [ -f /workspace/failed ]; then
           node ./extract-build-errors.js \
             /workspace/raw_error.log | \
-            ansi2html | \
-            html2text > /workspace/raw_error.md
+            termcolor2md > /workspace/raw_error.md
           echo "Build failed, skipping deploy"
           exit 0
         fi
