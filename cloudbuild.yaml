@@ -284,11 +284,13 @@ steps:
       - -c
       - |
         apt-get update -y && apt-get install -y python3 python3-pip
-        pip3 install --user termcolor2md
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install termcolor2md
         if [ -f /workspace/failed ]; then
           node ./extract-build-errors.js \
             /workspace/raw_error.log | \
-            ~/.local/bin/termcolor2md > /workspace/raw_error.md
+            termcolor2md > /workspace/raw_error.md
           echo "Build failed, skipping deploy"
           exit 0
         fi
