@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     // Authenticate the request (optional - remove if you want to make the search public)
     try {
       await getUser(req)
-    } catch (error) {
+    } catch (_error) {
       // Allow search without authentication
       console.log('Non-authenticated MCP search request')
     }
