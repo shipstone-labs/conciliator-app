@@ -89,6 +89,7 @@ steps:
         docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
 
         export DOCKER_BUILDKIT=1
+        set -o pipefail
         if ! (docker build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
