@@ -15,7 +15,12 @@ steps:
           
           # Post build URL to the PR
           BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
-          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "🔄 Build started: [View logs]($$BUILD_URL)"
+          comment_ids=$(gh pr comment list $_PR_NUMBER --json id,body --jq '.[] | select(.body | contains("<!-- build-error-report -->")) | .id')
+          # Delete each matching comment
+          for id in $comment_ids; do
+            gh pr comment delete $id
+          done
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "<!-- build-error-report -->🔄 Build started: [View logs]($$BUILD_URL)"
         fi
 
   # Set up cache tag based on branch/PR
@@ -103,7 +108,7 @@ steps:
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           . 2>&1) | tee ./.info.log
         then
-          node ./extract-build-errors.js ./.info.log /workspace/raw_error.md
+          node ./extract-build-errors.js ./.info.log > /workspace/raw_error.md
           cat /workspace/raw_error.md
           echo "Build failed"
           touch /workspace/failed
@@ -229,7 +234,7 @@ steps:
           fi
           
           # Also post a comment for easier access
-          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)"
+          gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body "<!-- build-error-report -->✅ Deployment successful: [View app]($$REVISION_URL) | [View logs]($$BUILD_URL)"
           # Mark deployment as successful for the final status check
           touch /workspace/deployment_success
         else
@@ -257,10 +262,10 @@ steps:
             # Build URL and notify failure
             BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
             echo "## ❌ Build failed: [View logs]($$BUILD_URL)" > /workspace/error.md
+            echo "<!-- build-error-report -->" >> /workspace/error.md
             echo "" >> /workspace/error.md
             echo "" >> /workspace/error.md
             cat /workspace/raw_error.md >> /workspace/error.md
-
             gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body-file /workspace/error.md
             
             # Create deployment status if a deployment was created
