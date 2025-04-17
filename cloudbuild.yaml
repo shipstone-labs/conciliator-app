@@ -120,30 +120,7 @@ steps:
         fi
 
   # Build with cache
-  - name: 'gcr.io/cloud-builders/pack'
-    id: Build
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
-
-        # Pull the cache image if it exists (won't fail if it doesn't)
-        docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
-
-        export DOCKER_BUILDKIT=1
-        set -o pipefail
-        if ! (pack build \
-          --builder=gcr.io/buildpacks/builder \
-          $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA 2>&1) | tee ./.info.log
-        then
-          cp ./.info.log /workspace/raw_error.log
-          echo "Build failed"
-          touch /workspace/failed
-          exit 0
-        fi
-        
-  # - name: 'gcr.io/cloud-builders/docker'
+  # - name: 'gcr.io/cloud-builders/pack'
   #   id: Build
   #   entrypoint: bash
   #   args:
@@ -156,24 +133,47 @@ steps:
 
   #       export DOCKER_BUILDKIT=1
   #       set -o pipefail
-  #       if ! (docker build \
-  #         --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
-  #         --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
-  #         --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
-  #         --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
-  #         --build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID \
-  #         --build-arg=NEXT_PUBLIC_LIT_RELAY_API_KEY=$_NEXT_PUBLIC_LIT_RELAY_API_KEY \
-  #         --build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS \
-  #         --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
-  #         --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
-  #         --build-arg BUILDKIT_INLINE_CACHE=1 \
-  #         . 2>&1) | tee ./.info.log
+  #       if ! (pack build \
+  #         --builder=gcr.io/buildpacks/builder \
+  #         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA 2>&1) | tee ./.info.log
   #       then
   #         cp ./.info.log /workspace/raw_error.log
   #         echo "Build failed"
   #         touch /workspace/failed
   #         exit 0
   #       fi
+        
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Build
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
+
+        # Pull the cache image if it exists (won't fail if it doesn't)
+        docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
+
+        export DOCKER_BUILDKIT=1
+        set -o pipefail
+        if ! (docker build \
+          --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
+          --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
+          --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
+          --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
+          --build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID \
+          --build-arg=NEXT_PUBLIC_LIT_RELAY_API_KEY=$_NEXT_PUBLIC_LIT_RELAY_API_KEY \
+          --build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS \
+          --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
+          --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          . 2>&1) | tee ./.info.log
+        then
+          cp ./.info.log /workspace/raw_error.log
+          echo "Build failed"
+          touch /workspace/failed
+          exit 0
+        fi
 
   # Push with commit SHA
   - name: 'gcr.io/cloud-builders/docker'
