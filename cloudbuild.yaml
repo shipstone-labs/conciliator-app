@@ -103,7 +103,21 @@ steps:
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           . 2>&1) | tee ./.info.log
         then
-          awk -f ./extract-error.awk ./.info.log > /workspace/error.log
+          awk -f ./extract-package-error.awk ./.info.log > /workspace/npm-error.log
+          echo ""
+          if [ -s /workspace/npm-error.log ]; then
+            echo "### wrappers" > /workspace/raw_error.md
+            echo "```sh" >> /workspace/raw_error.md
+            cat /workspace/npm-error.log >> /workspace/raw_error.md
+            echo "```" >> /workspace/raw_error.md
+          fi
+          awk -f ./extract-error.awk ./.info.log > /workspace/nextjs-error.log
+          if [ -s /workspace/nextjs-error.log ]; then
+            echo "### nextjs" >> /workspace/raw_error.md
+            echo "```sh" >> /workspace/raw_error.md
+            cat /workspace/error.log >> /workspace/raw_error.md
+            echo "```" >> /workspace/raw_error.md
+          fi
           echo "Build failed"
           touch /workspace/failed
           exit 0
@@ -256,8 +270,8 @@ steps:
             # Build URL and notify failure
             BUILD_URL="https://console.cloud.google.com/cloud-build/builds/$$BUILD_ID?project=$$PROJECT_ID"
             echo "## ❌ Build failed: [View logs]($$BUILD_URL)\n```sh" > /workspace/error.md
-            cat /workspace/error.log >> /workspace/error.md
-            echo "```" >> /workspace/error.md
+            cat /workspace/raw_error.md >> /workspace/error.md
+
             gh pr comment $_PR_NUMBER --repo "$_GITHUB_OWNER/$_GITHUB_REPO" --body-file /workspace/error.md
             
             # Create deployment status if a deployment was created
