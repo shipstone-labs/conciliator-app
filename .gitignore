@@ -44,3 +44,4 @@ next-env.d.ts
 # claude assistant files
 CLAUDE.md
 .dev.vars
+/conciliator-*.json
