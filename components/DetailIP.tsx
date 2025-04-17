@@ -461,7 +461,7 @@ const DetailIP = ({
               variant="outline"
               className="px-3 py-1 h-auto text-sm bg-primary/20 hover:bg-primary/30 border-primary/30"
               onClick={() => {
-                window.open(`https://calibration.filfox.info/en/address/${ideaData.metadata?.mint}`, '_blank');
+                window.open(`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`, '_blank');
               }}
             >
               Confirm Mint
