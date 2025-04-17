@@ -103,21 +103,7 @@ steps:
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           . 2>&1) | tee ./.info.log
         then
-          awk -f ./extract-package-error.awk ./.info.log > /workspace/npm-error.log
-          echo ""
-          if [ -s /workspace/npm-error.log ]; then
-            echo "### wrappers" > /workspace/raw_error.md
-            echo "```sh" >> /workspace/raw_error.md
-            cat /workspace/npm-error.log >> /workspace/raw_error.md
-            echo "```" >> /workspace/raw_error.md
-          fi
-          awk -f ./extract-error.awk ./.info.log > /workspace/nextjs-error.log
-          if [ -s /workspace/nextjs-error.log ]; then
-            echo "### nextjs" >> /workspace/raw_error.md
-            echo "```sh" >> /workspace/raw_error.md
-            cat /workspace/error.log >> /workspace/raw_error.md
-            echo "```" >> /workspace/raw_error.md
-          fi
+          node ./extract-build-errors.js ./.info.log /workspace/raw_error.md
           echo "Build failed"
           touch /workspace/failed
           exit 0
