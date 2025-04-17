@@ -5,6 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Program",
+      "program": "${workspaceFolder}/extract-build-errors.js",
+      "request": "launch",
+      "args": ["${workspaceFolder}/test.log"],
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    },
+    {
       "name": "Launch verify",
       "request": "launch",
       "runtimeArgs": ["hardhat", "run", "scripts/verify2.js"],

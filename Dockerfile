@@ -54,7 +54,7 @@ ENV STYTCH_ENV=test
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN corepack enable pnpm && pnpm run lint && pnpm run build:plain
+RUN corepack enable pnpm &&  npx @biomejs/biome@^1.9.4 lint . && pnpm run build:plain
 
 # Production image, copy all the files and run next
 FROM base AS runner

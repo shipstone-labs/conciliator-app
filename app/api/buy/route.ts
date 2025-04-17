@@ -3,6 +3,7 @@ import { getFirestore } from '../firebase'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getUser } from '../stytch'
+import { getLit } from '../utils'
 
 // const apiVersion = '2022-11-15'
 // const stripe = new Stripe(process.env.STIPE_RK || '', {
@@ -86,6 +87,10 @@ export async function POST(req: NextRequest) {
   console.log(user)
   const fb = getFirestore()
   console.log(fb)
+  const lit = await getLit()
+  lit.pkpSign({
+    pkp,
+  })
   return NextResponse.json(
     { success: true, message: 'ok' },
     {
