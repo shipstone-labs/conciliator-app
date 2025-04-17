@@ -8,7 +8,7 @@ steps:
       - |
         if [[ "$_PR_NUMBER" != "" ]]; then
           # Install GitHub CLI if needed
-          apt-get update -y && apt-get install -y gh
+          apt-get update -y && apt-get install -y gh jq
           
           # Authenticate with GitHub using service account token
           gcloud secrets versions access latest --secret=github-token | gh auth login --with-token
@@ -280,9 +280,9 @@ steps:
     args:
       - -c
       - |
+        apt-get update -y && apt-get install -y ansi2md
         if [ -f /workspace/failed ]; then
-          node ./extract-build-errors.js /workspace/raw_error.log > /workspace/raw_error.md
-          cat /workspace/raw_error.md
+          node ./extract-build-errors.js /workspace/raw_error.log | ansi2md > /workspace/raw_error.md
           echo "Build failed, skipping deploy"
           exit 0
         fi
