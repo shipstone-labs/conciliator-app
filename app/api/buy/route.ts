@@ -87,10 +87,10 @@ export async function POST(req: NextRequest) {
   console.log(user)
   const fb = getFirestore()
   console.log(fb)
-  const lit = await getLit()
-  lit.pkpSign({
-    pkp,
-  })
+  // const lit = await getLit()
+  // lit.pkpSign({
+  //   pkp,
+  // })
   return NextResponse.json(
     { success: true, message: 'ok' },
     {

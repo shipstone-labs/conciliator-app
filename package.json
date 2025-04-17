@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "biome lint .",
     "lint:biome": "biome lint .",
-    "check": "biome check .",
+    "check": "biome check . && tsc --noEmit",
     "format": "biome format --write .",
     "prepages:build": "pnpm run build-wrappers",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
