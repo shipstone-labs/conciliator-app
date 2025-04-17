@@ -37,17 +37,6 @@ steps:
               }' -F owner="$_GITHUB_OWNER" -F repo="$_GITHUB_REPO" -F pr_number="$pr_number" | \
             jq -r --arg pattern "$pattern" '.data.repository.pullRequest.comments.nodes[] | select(.body | contains($pattern)) | .id'
           }
-
-          # Create your new comment
-          cat > comment.txt << 'EOF'
-          <!-- build-error-report -->
-          ## Build Error Report
-
-          Error details here...
-          EOF
-
-          # Get PR number
-
           # Get IDs of comments containing your tag
           comment_ids=$(get_matching_comments "$_PR_NUMBER" "<!-- build-error-report -->")
 
