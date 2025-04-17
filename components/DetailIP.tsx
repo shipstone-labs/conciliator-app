@@ -35,6 +35,14 @@ const DetailIP = ({
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
 
+  // Debug logging to check mint data
+  useEffect(() => {
+    console.log("DetailIP component version: 1.1")
+    if (ideaData) {
+      console.log("Idea metadata:", ideaData.metadata)
+    }
+  }, [ideaData])
+
   useEffect(() => {
     if (isViewLoading.current) {
       return
@@ -454,6 +462,24 @@ const DetailIP = ({
           </a>
         ) : null}
 
+        {/* Always display button, change text based on data availability */}
+        <div className="flex justify-end mb-4">
+          <Button
+            size="sm"
+            variant="outline"
+            className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+            onClick={() => {
+              if (ideaData.metadata?.mint) {
+                window.open(`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`, '_blank')
+              } else {
+                alert('No mint transaction available')
+              }
+            }}
+          >
+            {ideaData.metadata?.mint ? '✓ Confirm Mint' : '⚠ Transaction Unavailable'}
+          </Button>
+        </div>
+        
         {audit ? (
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-white/10">
