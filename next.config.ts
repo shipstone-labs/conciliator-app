@@ -6,21 +6,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    instrumentationHook: true,
-    serverComponentsExternalPackages: [
-      '@grpc/grpc-js',
-      '@opentelemetry/sdk-node',
-      '@opentelemetry/exporter-trace-otlp-proto',
-      '@opentelemetry/exporter-trace-otlp-http',
-      '@opentelemetry/sdk-trace-node',
-      '@opentelemetry/instrumentation-http',
-      '@opentelemetry/instrumentation-express',
-      '@opentelemetry/instrumentation-grpc',
-      '@opentelemetry/resources',
-      '@opentelemetry/instrumentation',
-    ],
-  },
   // Disable minification for debugging
   // Disable file compression for debugging
   compress: false,
@@ -164,18 +149,21 @@ const nextConfig: NextConfig = {
     'firebase-functions',
 
     // OpenTelemetry server-side packages
+    '@grpc/grpc-js',
     '@opentelemetry/sdk-node',
     '@opentelemetry/exporter-trace-otlp-proto',
     '@opentelemetry/exporter-trace-otlp-http',
     '@opentelemetry/sdk-trace-node',
     '@opentelemetry/sdk-trace-base',
     '@opentelemetry/instrumentation-http',
+    '@opentelemetry/instrumentation-grpc',
     '@opentelemetry/instrumentation-express',
     '@opentelemetry/resources',
     '@opentelemetry/core',
     '@opentelemetry/instrumentation',
     '@opentelemetry/api',
     '@opentelemetry/semantic-conventions',
+
     // Node.js built-ins that cause dependency issues
     'stream',
     'node:stream',
