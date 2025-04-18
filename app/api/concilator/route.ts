@@ -17,7 +17,7 @@ import {
 // import { privateKeyToAccount } from "viem/accounts";
 // Dynamic import for the template file
 import templateFile from './system.hbs'
-import { getBucket, getFirestore } from '../firebase'
+import { getFirestore } from '../firebase'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import {
   LIT_ABILITY,
