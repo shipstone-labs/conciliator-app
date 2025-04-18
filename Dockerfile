@@ -43,8 +43,6 @@ ENV GOOGLE_CLOUD_PROJECT=""
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-RUN npm add dotenv
-
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Automatically leverage output traces to reduce image size
