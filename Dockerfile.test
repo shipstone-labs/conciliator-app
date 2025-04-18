@@ -1,0 +1,4 @@
+FROM rust:slim
+RUN cargo install du-dust
+COPY . /tmp/build/
+CMD ["sh", "/tmp/build/test-script.sh"]
