@@ -61,8 +61,17 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED=1
+# Disable Next.js telemetry
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Configure OpenTelemetry for Google Cloud Trace
+# ENV OTEL_SERVICE_NAME="conciliate-app"
+# ENV OTEL_TRACES_EXPORTER="otlp"
+# ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+ENV OTEL_NODE_RESOURCE_DETECTORS="gcp"
+ENV OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=""
+ENV NEXT_PUBLIC_SERVICE_NAME="conciliate-app"
+ENV GOOGLE_CLOUD_PROJECT=""
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

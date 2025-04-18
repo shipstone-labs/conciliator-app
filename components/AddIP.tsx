@@ -64,6 +64,8 @@ const AppIP = () => {
     setError(null)
     setIsLoading(true)
     setLocalStatus('Encrypting your idea')
+
+    // Normal production flow
     try {
       if (!litClient) {
         throw new Error('Lit client is not initialized')
@@ -216,6 +218,7 @@ const AppIP = () => {
     } finally {
       setIsLoading(false)
     }
+    // ⚠️ Remove testTokenCounter when removing test mode
   }, [
     content,
     description,
@@ -259,6 +262,7 @@ const AppIP = () => {
       const reader = new FileReader()
       reader.onload = (event) => {
         const fileContent = event.target?.result as string
+
         setContent(fileContent)
         setIsModalOpen(false)
       }
