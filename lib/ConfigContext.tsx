@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useMemo } from 'react'
 
+// Try husky
+
 // Define the type for our configuration
 export interface RawAppConfig {
   FIREBASE_CONFIG: Record<string, unknown>
