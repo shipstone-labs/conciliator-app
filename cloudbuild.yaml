@@ -297,7 +297,8 @@ steps:
       - |
         if [ -f /workspace/failed ]; then
           echo "Extracting errors"
-          npm install strip-ansi
+          corepack enable pnpm
+          pnpm install
           node ./extract-build-errors.mjs \
             /workspace/raw_error.log > /workspace/raw_error.md
           cat /workspace/raw_error.md
