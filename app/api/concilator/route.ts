@@ -29,9 +29,12 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { LRUCache } from 'next/dist/server/lib/lru-cache'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
+
+const contentCache = new LRUCache<Promise<string>>(100)
 
 export async function POST(req: NextRequest) {
   try {
@@ -122,68 +125,65 @@ ${data.description}`,
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )
       const litClient = await getLit()
-      const bucket = getBucket()
-      const filePath = `downsampled/${id}/${data.downSampled.cid}.md`
-      const file = bucket.file(filePath)
-      const [exists] = await file.exists()
-      let content = ''
-      if (!exists) {
-        const url = cidAsURL(data.downSampled.cid)
-        const downSampled: {
-          ciphertext: string
-          dataToEncryptHash: string
-          unifiedAccessControlConditions: unknown
-        } = url
-          ? await fetch(url).then((res) => {
-              if (!res.ok) {
-                throw new Error('Failed to fetch encrypted data')
-              }
-              return res.json()
-            })
-          : undefined
-        if (
-          data.downSampled.acl !==
-          JSON.stringify(downSampled.unifiedAccessControlConditions)
-        ) {
-          throw new Error('Access control conditions do not match')
+      let contentPromise = contentCache.get(data.downSampled.cid)
+      if (!contentPromise) {
+        const getContent = async () => {
+          const url = cidAsURL()
+          const downSampled: {
+            ciphertext: string
+            dataToEncryptHash: string
+            unifiedAccessControlConditions: unknown
+          } = url
+            ? await fetch(url).then((res) => {
+                if (!res.ok) {
+                  throw new Error('Failed to fetch encrypted data')
+                }
+                return res.json()
+              })
+            : undefined
+          if (
+            data.downSampled.acl !==
+            JSON.stringify(downSampled.unifiedAccessControlConditions)
+          ) {
+            throw new Error('Access control conditions do not match')
+          }
+          if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
+            throw new Error('Hash does not match')
+          }
+          const accsInput =
+            await LitAccessControlConditionResource.generateResourceString(
+              JSON.parse(data.downSampled.acl),
+              data.downSampled.hash
+            )
+
+          const sessionSigs = await genSession(account, litClient, [
+            {
+              resource: new LitActionResource('*'),
+              ability: LIT_ABILITY.LitActionExecution,
+            },
+            {
+              resource: new LitAccessControlConditionResource(accsInput),
+              ability: LIT_ABILITY.AccessControlConditionDecryption,
+            },
+          ])
+
+          const _decrypted = await litClient.decrypt({
+            accessControlConditions:
+              downSampled.unifiedAccessControlConditions as Parameters<
+                typeof litClient.decrypt
+              >[0]['accessControlConditions'],
+            ciphertext: downSampled.ciphertext,
+            dataToEncryptHash: downSampled.dataToEncryptHash,
+            chain: 'filecoinCalibrationTestnet',
+            sessionSigs,
+          })
+
+          return new TextDecoder().decode(_decrypted.decryptedData)
         }
-        if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
-          throw new Error('Hash does not match')
-        }
-        const accsInput =
-          await LitAccessControlConditionResource.generateResourceString(
-            JSON.parse(data.downSampled.acl),
-            data.downSampled.hash
-          )
-
-        const sessionSigs = await genSession(account, litClient, [
-          {
-            resource: new LitActionResource('*'),
-            ability: LIT_ABILITY.LitActionExecution,
-          },
-          {
-            resource: new LitAccessControlConditionResource(accsInput),
-            ability: LIT_ABILITY.AccessControlConditionDecryption,
-          },
-        ])
-
-        const _decrypted = await litClient.decrypt({
-          accessControlConditions:
-            downSampled.unifiedAccessControlConditions as Parameters<
-              typeof litClient.decrypt
-            >[0]['accessControlConditions'],
-          ciphertext: downSampled.ciphertext,
-          dataToEncryptHash: downSampled.dataToEncryptHash,
-          chain: 'filecoinCalibrationTestnet',
-          sessionSigs,
-        })
-
-        content = new TextDecoder().decode(_decrypted.decryptedData)
-        await file.save(content, { contentType: 'text/markdown' })
-      } else {
-        const [fileContent] = await file.download()
-        content = fileContent.toString()
+        contentPromise = getContent()
+        contentCache.set(data.downSampled.cid, contentPromise)
       }
+      const content = await contentPromise
       const _data: Record<string, string> = {
         title: data.name,
         description: data.description,

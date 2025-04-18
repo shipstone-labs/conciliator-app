@@ -16,9 +16,6 @@ import Markdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
-import { filecoinCalibration } from 'viem/chains'
-import { createPublicClient, http } from 'viem'
-import { abi } from '@/app/api/abi'
 
 const DetailIP = ({
   docId,
@@ -74,50 +71,8 @@ const DetailIP = ({
               }
           )
         const { ciphertext, dataToEncryptHash } = data
-        const { sessionSigs, capacityDelegationAuthSig, address } =
+        const { sessionSigs, capacityDelegationAuthSig } =
           await delegatedSessionSigs(docId)
-        const client = createPublicClient({
-          chain: filecoinCalibration,
-          transport: http(),
-        })
-        const balance = await client
-          .readContract({
-            address: config.CONTRACT as `0x${string}`,
-            abi,
-            functionName: 'balanceOf',
-            args: [address, ideaData.metadata?.tokenId || '0x'],
-          })
-          .catch((error) => {
-            console.error(error)
-          })
-        const serverBalance = await client
-          .readContract({
-            address: config.CONTRACT as `0x${string}`,
-            abi,
-            functionName: 'balanceOf',
-            args: [
-              '0xa6985f885c29cff477212ba5b2fb7679f83555b6',
-              BigInt(ideaData.metadata?.tokenId || 0),
-            ],
-          })
-          .catch((error) => {
-            console.error(error)
-          })
-        const otherBalance = await client
-          .readContract({
-            address: config.CONTRACT as `0x${string}`,
-            abi,
-            functionName: 'balanceOf',
-            args: [
-              '0xa8581d93e4532429e90e4f09d15f512e57b6861a',
-              BigInt(
-                '0x00000000000000000000000047574246317053444837774330654c5a5154516f'
-              ),
-            ],
-          })
-          .catch((error) => {
-            console.error(error)
-          })
         const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
         const request = {
           accessControlConditions,
@@ -140,7 +95,7 @@ const DetailIP = ({
       }
     }
     doFetch()
-  }, [ideaData, view, viewed, litClient, delegatedSessionSigs, docId, config])
+  }, [ideaData, view, viewed, litClient, delegatedSessionSigs, docId])
   const onKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
     if (e.key === 'Enter') {
       router.push(`/discovery/${docId}`)
