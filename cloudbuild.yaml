@@ -131,10 +131,10 @@ steps:
         echo "Calculating dependency hash..."
         DEP_HASH=$(find . -type f \( -name "package.json" -o -name "pnpm-lock.yaml" -o -name "pnpm-workspace.yaml" \) -not -path "*/node_modules/*" |
         sort | xargs cat | sha256sum | cut -d ' ' -f 1 | cut -c 1-12)
-        echo "Dependency hash: ${DEP_HASH}"
+        echo "Dependency hash: $${DEP_HASH}"
 
         # Image tag based on hash
-        IMAGE_TAG="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliate-app-deps:${DEP_HASH}"
+        IMAGE_TAG="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliate-app-deps:$${DEP_HASH}"
 
         # Check if the image with this hash already exists
         echo "Checking if dependency image already exists..."
