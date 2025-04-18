@@ -142,11 +142,17 @@ steps:
           echo "🔨 Building dependency container $${IMAGE_TAG}..."
 
           # Build the dependency container
-          docker build \
+          if ! (docker build \
             -t "$${IMAGE_TAG}" \
             -f Dockerfile.dependencies \
             --build-arg NODE_ENV=production \
-            .
+            . 2>&1) | tee ./.info.log
+          then
+            cp ./.info.log /workspace/raw_error.log
+            echo "Build failed"
+            touch /workspace/failed
+            exit 0
+          fi
 
           # Push the container
           echo "📤 Pushing dependency container $${IMAGE_TAG}..."
