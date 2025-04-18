@@ -16,6 +16,7 @@ import Loading from './Loading'
 import {
   LitAccessControlConditionResource,
   type LitNodeClient,
+  type AuthMethod,
 } from 'lit-wrapper'
 import { publicKeyToAddress } from 'viem/utils'
 import {
@@ -29,7 +30,7 @@ import { useConfig } from '@/app/authLayout'
 export type Session = {
   litClient?: LitNodeClient
   sessionSigs?: {
-    authMethod: string
+    authMethod: AuthMethod
     pkpPublicKey: string
     address: `0x${string}`
     sessionSigs: unknown
@@ -164,7 +165,8 @@ export default function Authenticated({
                 {
                   userId: user.user_id,
                   appId: config.STYTCH_APP_ID as string,
-                  accessToken: stytchClient.session.getTokens()?.session_jwt,
+                  accessToken:
+                    stytchClient.session.getTokens()?.session_jwt || '',
                   relayApiKey: config.LIT_RELAY_API_KEY as string,
                 }
               )
@@ -184,7 +186,6 @@ export default function Authenticated({
               const sessionSigs = await litClient
                 .getPkpSessionSigs({
                   pkpPublicKey: pkp.publicKey,
-                  litNetwork: litModule.LIT_NETWORK.Datil,
                   chain: 'filecoinCalibrationTestnet',
                   // capabilityAuthSigs: [capacityDelegationAuthSig],
                   authMethods: [authMethod],
@@ -205,13 +206,13 @@ export default function Authenticated({
                 })
                 .catch((error: unknown) => {
                   console.error(error)
-                  litClient.removePKPSessionSigs({
-                    pkpPublicKey: pkp.publicKey,
-                    authMethods: [authMethod],
-                  })
+                  // litClient.removePKPSessionSigs({
+                  //   pkpPublicKey: pkp.publicKey,
+                  //   authMethods: [authMethod],
+                  // })
                   return litClient.getPkpSessionSigs({
                     pkpPublicKey: pkp.publicKey,
-                    litNetwork: litModule.LIT_NETWORK.Datil,
+                    // litNetwork: litModule.LIT_NETWORK.Datil,
                     chain: 'filecoinCalibrationTestnet',
                     // capabilityAuthSigs: [capacityDelegationAuthSig],
                     authMethods: [authMethod],
@@ -259,7 +260,7 @@ export default function Authenticated({
                 const sessionSigs = await litClient
                   .getPkpSessionSigs({
                     pkpPublicKey: pkp.publicKey,
-                    litNetwork: litModule.LIT_NETWORK.Datil,
+                    // litNetwork: litModule.LIT_NETWORK.Datil,
                     chain: 'filecoinCalibrationTestnet',
                     capabilityAuthSigs: [capacityDelegationAuthSig],
                     authMethods: [authMethod],
@@ -282,13 +283,13 @@ export default function Authenticated({
                   })
                   .catch((error: unknown) => {
                     console.error(error)
-                    litClient.removePKPSessionSigs({
-                      pkpPublicKey: pkp.publicKey,
-                      authMethods: [authMethod],
-                    })
+                    // litClient.removePKPSessionSigs({
+                    //   pkpPublicKey: pkp.publicKey,
+                    //   authMethods: [authMethod],
+                    // })
                     return litClient.getPkpSessionSigs({
                       pkpPublicKey: pkp.publicKey,
-                      litNetwork: litModule.LIT_NETWORK.Datil,
+                      // litNetwork: litModule.LIT_NETWORK.Datil,
                       chain: 'filecoinCalibrationTestnet',
                       capabilityAuthSigs: [capacityDelegationAuthSig],
                       authMethods: [authMethod],

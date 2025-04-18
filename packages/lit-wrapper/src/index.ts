@@ -95,6 +95,7 @@ export {
   LIT_NETWORK,
   LIT_ABILITY,
   type LitNodeClient,
+  type AuthMethod,
   type AuthCallbackParams,
   LitAccessControlConditionResource,
   type LitResourceAbilityRequest,
