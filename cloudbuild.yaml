@@ -83,7 +83,7 @@ steps:
         fi
         
         # Save to a file that can be accessed by other steps
-        echo "$$CACHE_TAG" > /workspace/cache_tag.txt
+        echo -n "$$CACHE_TAG" > /workspace/cache_tag.txt
         echo "Using cache tag: $$CACHE_TAG"
         
         if [[ "$_PR_NUMBER" != "" ]]; then
@@ -129,7 +129,7 @@ steps:
         # Create a hash of all dependency-related files
         # Explicitly exclude node_modules directories
         echo "Calculating dependency hash..."
-        DEP_HASH=$(find . -type f \( -name "package.json" -o -name "pnpm-lock.yaml" -o -name "pnpm-workspace.yaml" \) -not -path "*/node_modules/*" |
+        DEP_HASH=$(find . -type f \( -name "package.json" -o -name "pnpm-lock.yaml" -o name "Dockerfile.dependencies" -o -name "pnpm-workspace.yaml" \) -not -path "*/node_modules/*" |
         sort | xargs cat | sha256sum | cut -d ' ' -f 1 | cut -c 1-12)
         echo "Dependency hash: $${DEP_HASH}"
 
@@ -162,12 +162,13 @@ steps:
           echo "$${IMAGE_TAG}" > .dependency-container
 
           echo "✅ Dependency container built and pushed successfully!"
-          CACHE_TAG=$$(cat /workspace/cache_tag.txt)
-
-          # Pull the cache image if it exists (won't fail if it doesn't)
-          docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
+        else
+          echo "✅ Dependency container already built and up to date!"
         fi
 
+        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
+        # Pull the cache image if it exists (won't fail if it doesn't)
+        docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
         export DOCKER_BUILDKIT=1
         NAME=${_SERVICE_NAME}
         if [[ "$_PR_NUMBER" != "" ]]; then
@@ -176,6 +177,7 @@ steps:
           NAME="$${NAME}:latest"
         fi
         NAME="$${NAME}:${COMMIT_SHA}"
+        echo "Building image with tag: $${NAME}"
         set -o pipefail
         if ! (docker build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
