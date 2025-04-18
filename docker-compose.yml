@@ -1,0 +1,56 @@
+services:
+  # Zipkin for trace visualization
+  zipkin-all-in-one:
+    image: openzipkin/zipkin:latest
+    container_name: tracing-zipkin-all-in-one
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+      # Increase memory if needed
+      - JAVA_OPTS=-Xms512m -Xmx512m -XX:+ExitOnOutOfMemoryError
+    networks:
+      - tracing-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9411/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # OpenTelemetry Collector
+  tracing-collector:
+    image: otel/opentelemetry-collector-contrib:0.53.0
+    container_name: tracing-collector
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "9464:9464"   # Metrics endpoint
+      - "8889:8889"   # Prometheus exporter
+    depends_on:
+      - zipkin-all-in-one
+    networks:
+      - tracing-network
+    environment:
+      - OTEL_SERVICE_NAME=otel-collector
+      - OTEL_RESOURCE_ATTRIBUTES=service.version=0.1.0,deployment.environment=local
+
+  # Jaeger as an alternative UI (optional)
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger-all-in-one
+    ports:
+      - "16686:16686"   # UI
+      - "14250:14250"   # Model used by jaeger
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=9411
+    networks:
+      - tracing-network
+    depends_on:
+      - zipkin-all-in-one
+
+networks:
+  tracing-network:
+    driver: bridge

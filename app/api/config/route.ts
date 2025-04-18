@@ -1,6 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { getServerConfig } from '@/lib/getServerConfig'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { withTracing } from '@/lib/apiWithTracing'
+import { logger } from '@/lib/tracing'
 
 // Set runtime to nodejs for this API route
 export const runtime = 'nodejs'
@@ -12,7 +14,7 @@ export const runtime = 'nodejs'
  * Query parameters:
  * - reload: If set to 'true', forces a reload of environment variables from /env/.env
  */
-export async function GET(request: Request) {
+export const GET = withTracing(async (request: NextRequest) => {
   await initAPIConfig()
 
   // Check if we need to reload environment variables
@@ -24,6 +26,8 @@ export async function GET(request: Request) {
     await getServerConfig(true)
   }
   try {
+    logger.info('Processing config API request', { shouldReload })
+
     // Get all environment variables that start with NEXT_PUBLIC_
     const publicEnvVars: Record<string, string | Record<string, unknown>> = {}
 
@@ -84,10 +88,10 @@ export async function GET(request: Request) {
       }
     )
   } catch (error) {
-    console.error('Config API error:', error)
+    logger.error('Config API error:', error)
     return NextResponse.json(
       { error: 'Failed to retrieve configuration' },
       { status: 500 }
     )
   }
-}
+})
