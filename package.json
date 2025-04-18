@@ -146,12 +146,12 @@
   "packageManager": "pnpm@10.7.1",
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "biome lint --log-level=info",
-      "biome check --log-level=info",
-      "tsc --noEmit --pretty"
+      "biome lint --no-errors-on-unmatched",
+      "biome check --no-errors-on-unmatched",
+      "bash -c 'tsc --noEmit --jsx preserve'"
     ],
-    "*.{json}": [
-      "biome check --log-level=info"
+    "*.json": [
+      "biome check --no-errors-on-unmatched"
     ]
   }
 }

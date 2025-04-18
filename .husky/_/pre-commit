@@ -1,2 +1,6 @@
 #!/usr/bin/env sh
 . "$(dirname "$0")/h"
+
+# Just exit with an error to prove this is running
+echo "HOOK IS RUNNING" >&2
+exit 1
