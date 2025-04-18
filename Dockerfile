@@ -24,7 +24,7 @@ RUN corepack enable pnpm && \
   pnpm run build:plain
 
 # Production image, copy all the files and run next
-FROM builder AS runner
+FROM node:22-alpine
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -40,9 +40,12 @@ ENV OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=""
 ENV NEXT_PUBLIC_SERVICE_NAME="conciliate-app"
 ENV GOOGLE_CLOUD_PROJECT=""
 
+RUN apk add --no-cache libc6-compat
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules.prod ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Automatically leverage output traces to reduce image size
