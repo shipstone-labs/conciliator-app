@@ -14,6 +14,9 @@ import {
 } from '@opentelemetry/resources'
 // Import the GCP trace exporter
 import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
+// We need to do a try/catch import for the gRPC instrumentation
+// to handle cases where the module can't be loaded
+let GrpcInstrumentation: any
 
 export const runtime = 'nodejs'
 
@@ -43,6 +46,17 @@ export async function initServerTracing() {
   isInitialized = true
 
   console.log('OpenTelemetry: Initializing server instrumentation')
+  
+  // Try to dynamically import the gRPC instrumentation
+  try {
+    // We use dynamic import to ensure this only happens on the server side
+    const grpcModule = await import('@opentelemetry/instrumentation-grpc')
+    GrpcInstrumentation = grpcModule.GrpcInstrumentation
+    console.log('OpenTelemetry: Successfully loaded gRPC instrumentation')
+  } catch (error) {
+    console.warn('OpenTelemetry: gRPC instrumentation could not be loaded', error)
+    // We'll continue without gRPC instrumentation
+  }
 
   // Use a more specific service name that will stand out in the Jaeger UI
   const tracingServiceName =
@@ -94,24 +108,32 @@ export async function initServerTracing() {
     // Create a combined resource from all attributes
     const combinedResource = resourceFromAttributes(allAttributes)
 
+    // Create the instrumentations array
+    const instrumentations = [
+      new HttpInstrumentation({
+        ignoreIncomingRequestHook: (request) => {
+          // Check if the path starts with '/_next/static'
+          const url = request.url || ''
+          return (
+            url.startsWith('/_next/static') ||
+            url.startsWith('/__nextjs-original-stack-frames')
+          )
+        },
+      }),
+      new ExpressInstrumentation(),
+    ];
+    
+    // Add gRPC instrumentation if available
+    if (GrpcInstrumentation) {
+      instrumentations.push(new GrpcInstrumentation());
+      console.log('OpenTelemetry: Added gRPC instrumentation');
+    }
+    
     // Create a new SDK instance
     sdk = new NodeSDK({
       resource: combinedResource,
       spanProcessor: new SimpleSpanProcessor(exporter),
-      instrumentations: [
-        new HttpInstrumentation({
-          ignoreIncomingRequestHook: (request) => {
-            // Check if the path starts with '/_next/static'
-            const url = request.url || ''
-            return (
-              url.startsWith('/_next/static') ||
-              url.startsWith('/__nextjs-original-stack-frames')
-            )
-          },
-        }),
-        new ExpressInstrumentation(),
-        // Note: gRPC instrumentation has been removed to avoid Node.js module dependencies issues
-      ],
+      instrumentations,
     })
 
     // Initialize the SDK
