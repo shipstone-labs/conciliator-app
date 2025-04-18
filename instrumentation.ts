@@ -1,3 +1,4 @@
+export const runtime = 'nodejs'
 // Simple instrumentation module for Next.js
 // Next.js automatically loads this file in server environments
 
@@ -15,10 +16,14 @@ export async function register() {
   }
 
   try {
-    // Use a regular dynamic import
-    // Next.js should handle this correctly in server environments
-    const { initServerTracing } = await import('./lib/server-tracing')
-    await initServerTracing()
+    // We need to ensure we're not importing any browser-incompatible code here
+    // Dynamically import the server-side tracing module - making sure it's not bundled for the browser
+    if (process.env.NEXT_RUNTIME === 'nodejs') {
+      const { initServerTracing } = await import('./lib/server-tracing')
+      await initServerTracing()
+    } else {
+      console.log('OpenTelemetry: Not initializing with non-nodejs runtime')
+    }
   } catch (err) {
     console.error(
       'OpenTelemetry: Failed to initialize server instrumentation:',
