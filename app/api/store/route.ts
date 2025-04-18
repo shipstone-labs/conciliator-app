@@ -110,6 +110,39 @@ export async function POST(req: NextRequest) {
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
     )
+    
+    // If NDA is required, generate and store a standard NDA
+    let ndaCid = null
+    if (body.terms?.ndaRequired) {
+      await setStatus('Generating standard NDA for idea')
+      
+      // This is a placeholder for the actual NDA PDF generation
+      // In a real implementation, you would use a proper PDF library
+      const ndaText = `
+NON-DISCLOSURE AGREEMENT
+
+This NDA concerns Idea: ${_name}
+
+The undersigned recipient agrees to maintain the confidentiality 
+of all information disclosed through the intellectual property 
+evaluation process.
+
+Idea Description: ${description}
+
+Date: ${new Date().toLocaleDateString()}
+      `
+      
+      // Create a simple PDF-like buffer (this is just a placeholder)
+      const ndaBuffer = Buffer.from(ndaText)
+      
+      // Upload the NDA to IPFS
+      const ndaBlob = new Blob([ndaBuffer], { type: 'application/pdf' })
+      const ndaCidObj = await w3Client.uploadFile(ndaBlob)
+      ndaCid = ndaCidObj.toString()
+      
+      await setStatus('Standard NDA generated and stored')
+    }
+    
     const firestore = getFirestore()
     const status = firestore.collection('audit').doc(id)
     const auditTable = firestore
@@ -213,6 +246,8 @@ export async function POST(req: NextRequest) {
         tokenId,
         cid: '',
       },
+      // Include the NDA CID if we generated one
+      ...(ndaCid ? { ndaCid } : {}),
       encrypted: {
         cid: encryptedCid.toString(),
         acl: JSON.stringify(encrypted.unifiedAccessControlConditions),

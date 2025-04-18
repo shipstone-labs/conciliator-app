@@ -23,6 +23,8 @@ export type IPDocJSON = {
     }
     ndaRequired: boolean
   }
+  // NDA information
+  ndaCid?: string // CID of the NDA document on IPFS
   image?: { cid: string; width: number; height: number; mimeType: string }
   encrypted: {
     cid: string
