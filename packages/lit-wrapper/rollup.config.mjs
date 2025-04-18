@@ -42,6 +42,14 @@ export default {
     virtual({
       '@walletconnect/modal': 'export default {}',
       process: 'export default {}',
+      // Stub out punycode to prevent deprecation warnings
+      punycode: `
+        export function decode(string) { return string; }
+        export function encode(string) { return string; }
+        export function toASCII(domain) { return domain; }
+        export function toUnicode(domain) { return domain; }
+        export default { decode, encode, toASCII, toUnicode };
+      `,
       // Add any other modules to stub here as needed
     }),
     // Explicitly resolve from this package's node_modules
@@ -75,6 +83,10 @@ export default {
     if (warning.code === 'CIRCULAR_DEPENDENCY') return
     // Suppress this is undefined warnings (common in browser code)
     if (warning.code === 'THIS_IS_UNDEFINED') return
+    // Suppress deprecation warnings
+    if (warning.message && 
+        (warning.message.includes('deprecated') || 
+         warning.message.includes('punycode'))) return
     warn(warning)
   },
   // We don't want ANY externals - everything should be bundled

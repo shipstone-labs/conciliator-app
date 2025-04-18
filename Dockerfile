@@ -20,6 +20,7 @@ ENV STYTCH_ENV=test
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DISABLE_ANALYZER=1
+ENV NODE_NO_WARNINGS=1
 
 RUN corepack enable pnpm && \
   npx @biomejs/biome@^1.9.4 lint . && \

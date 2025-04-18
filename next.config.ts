@@ -59,6 +59,7 @@ const nextConfig: NextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
+        punycode: false,
         fs: false,
         path: false,
         crypto: false, // resolve(__dirname, "node_modules/crypto-browserify"),
