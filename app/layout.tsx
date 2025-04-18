@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { appConfig } from './config.mjs'
+
+export const runtime = 'nodejs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Footer } from '@/components/Footer'
 import AuthLayout from './authLayout'

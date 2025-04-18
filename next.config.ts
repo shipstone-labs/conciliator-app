@@ -6,6 +6,21 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    instrumentationHook: true,
+    serverComponentsExternalPackages: [
+      '@grpc/grpc-js',
+      '@opentelemetry/sdk-node',
+      '@opentelemetry/exporter-trace-otlp-proto',
+      '@opentelemetry/exporter-trace-otlp-http',
+      '@opentelemetry/sdk-trace-node',
+      '@opentelemetry/instrumentation-http',
+      '@opentelemetry/instrumentation-express',
+      '@opentelemetry/instrumentation-grpc',
+      '@opentelemetry/resources',
+      '@opentelemetry/instrumentation',
+    ],
+  },
   // Disable minification for debugging
   // Disable file compression for debugging
   compress: false,

@@ -15,6 +15,8 @@ import {
 // Import the GCP trace exporter
 import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
 
+export const runtime = 'nodejs'
+
 // Define attribute keys (standard, not deprecated)
 const ATTR_SERVICE_NAME = 'service.name'
 const ATTR_SERVICE_VERSION = 'service.version'

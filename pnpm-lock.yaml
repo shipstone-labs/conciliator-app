@@ -14,9 +14,6 @@ importers:
 
   .:
     dependencies:
-      '@biomejs/biome':
-        specifier: ^1.9.4
-        version: 1.9.4
       '@google-cloud/kms':
         specifier: ^5.0.1
         version: 5.0.1
@@ -137,9 +134,6 @@ importers:
       ethers:
         specifier: '5'
         version: 5.8.0(utf-8-validate@6.0.5)
-      events-browserify:
-        specifier: ^0.0.1
-        version: 0.0.1
       firebase:
         specifier: ^11.6.0
         version: 11.6.0
@@ -222,6 +216,9 @@ importers:
         specifier: ^5.98.0
         version: 5.98.0(esbuild@0.25.2)
     devDependencies:
+      '@biomejs/biome':
+        specifier: ^1.9.4
+        version: 1.9.4
       '@eslint/eslintrc':
         specifier: ^3.3.1
         version: 3.3.1
@@ -267,6 +264,9 @@ importers:
       eslint-config-next:
         specifier: 15.1.7
         version: 15.1.7(eslint@9.23.0(jiti@2.4.2))(typescript@5.8.2)
+      events-browserify:
+        specifier: ^0.0.1
+        version: 0.0.1
       postcss:
         specifier: ^8.5.3
         version: 8.5.3

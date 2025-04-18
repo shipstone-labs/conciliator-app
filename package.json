@@ -22,7 +22,6 @@
     "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08"
   },
   "dependencies": {
-    "@biomejs/biome": "^1.9.4",
     "@google-cloud/kms": "^5.0.1",
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.4.1",
     "@invertase/firestore-stripe-payments": "^0.0.7",
@@ -63,7 +62,6 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
     "ethers": "5",
-    "events-browserify": "^0.0.1",
     "firebase": "^11.6.0",
     "firebase-admin": "^13.2.0",
     "input-otp": "^1.4.2",
@@ -93,6 +91,7 @@
     "webpack": "^5.98.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@eslint/eslintrc": "^3.3.1",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-json": "^6.1.0",
@@ -108,6 +107,7 @@
     "esbuild": "^0.25.2",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.1.7",
+    "events-browserify": "^0.0.1",
     "postcss": "^8.5.3",
     "process": "^0.11.10",
     "raw-loader": "^4.0.2",
