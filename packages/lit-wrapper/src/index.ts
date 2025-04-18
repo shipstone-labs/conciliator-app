@@ -6,6 +6,7 @@ import {
   PROVIDER_TYPE,
   LIT_ABILITY,
 } from '@lit-protocol/constants'
+import type { AuthCallbackParams } from '@lit-protocol/types'
 import { LitNodeClient } from '@lit-protocol/lit-node-client'
 import {
   LitAccessControlConditionResource,
@@ -94,6 +95,7 @@ export {
   LIT_NETWORK,
   LIT_ABILITY,
   type LitNodeClient,
+  type AuthCallbackParams,
   LitAccessControlConditionResource,
   type LitResourceAbilityRequest,
   newSessionCapabilityObject,
