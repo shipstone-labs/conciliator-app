@@ -18,10 +18,12 @@ ENV STYTCH_ENV=test
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
+ENV NEXT_TELEMETRY_DISABLED=1
+
 RUN corepack enable pnpm && \
   npx @biomejs/biome@^1.9.4 lint . && \
   npx @biomejs/biome@^1.9.4 check . && \
-  NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:plain
+  NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:plain --no-lint
 
 # Production image, copy all the files and run next
 FROM node:22-alpine
