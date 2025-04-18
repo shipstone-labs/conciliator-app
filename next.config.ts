@@ -36,7 +36,24 @@ const nextConfig: NextConfig = {
     // We don't need loader configuration here since we'll
     // explicitly use our custom loader where needed
   },
-  webpack: (config, { isServer }) => {
+  // Add detailed build analysis
+  experimental: {
+    webpackBuildWorker: true,
+  },
+  webpack: (config, { isServer, dev }) => {
+    // Add build analyzer plugin
+    if (!dev && !process.env.DISABLE_ANALYZER) {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          reportFilename: isServer
+            ? '../analyze/server.html'
+            : '../.next/analyze/client.html',
+          openAnalyzer: false,
+        })
+      )
+    }
     // Handle browser-compatibility for Node.js built-ins
     // Provide empty implementations for Node.js built-ins
     if (!isServer) {

@@ -3,6 +3,8 @@ import { getServerConfig } from '@/lib/getServerConfig'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { withTracing } from '@/lib/apiWithTracing'
 import { logger } from '@/lib/tracing'
+import { getContractInfo } from '../utils'
+import { keccak256, toBytes } from 'viem'
 
 // Set runtime to nodejs for this API route
 export const runtime = 'nodejs'
@@ -14,66 +16,67 @@ export const runtime = 'nodejs'
  * Query parameters:
  * - reload: If set to 'true', forces a reload of environment variables from /env/.env
  */
+
+// OPTIONS handler for the client to check if config has changed
+export const OPTIONS = withTracing(async (_request: NextRequest) => {
+  // Get cached hash or generate a new one
+  await initAPIConfig()
+  const config = await getServerConfig()
+
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      ETag: `"${config.HASH}"`,
+      'Last-Modified': (config.TIMESTAMP as string) || new Date().toUTCString(),
+      'Cache-Control': 'max-age=0, must-revalidate',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'If-None-Match, If-Modified-Since',
+    },
+  })
+})
+
 export const GET = withTracing(async (request: NextRequest) => {
   await initAPIConfig()
 
-  // Check if we need to reload environment variables
-  const url = new URL(request.url)
-  const shouldReload = url.searchParams.get('reload') === 'true'
-
-  if (shouldReload) {
-    // Force reload of environment variables
-    await getServerConfig(true)
-  }
   try {
-    logger.info('Processing config API request', { shouldReload })
+    // Check for conditional requests
+    const ifNoneMatch = request.headers.get('If-None-Match')
+    const ifModifiedSince = request.headers.get('If-Modified-Since')
 
-    // Get all environment variables that start with NEXT_PUBLIC_
-    const publicEnvVars: Record<string, string | Record<string, unknown>> = {}
+    // Generate or get cached config
+    const config = await getServerConfig()
 
-    // Add a marker to indicate this came from the API
-    publicEnvVars.ENV = 'server'
-    publicEnvVars.API_LOADED = 'true'
-    publicEnvVars.API_TIMESTAMP = Date.now().toString()
+    // Check if we can return 304 Not Modified
+    if (ifNoneMatch && ifNoneMatch === `"${config.HASH}"`) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: {
+          ETag: `"${config.HASH}"`,
+          'Last-Modified':
+            (config.TIMESTAMP as string) || new Date().toUTCString(),
+        },
+      })
+    }
 
-    Object.keys(process.env).forEach((key) => {
-      const isFileCoin = key.startsWith('FILCOIN_CONTRACT')
-      if (
-        key.startsWith('NEXT_PUBLIC_') ||
-        isFileCoin ||
-        ['STYTCH_APP_ID', 'FIREBASE_CONFIG', 'STYTCH_PUBLIC_TOKEN'].includes(
-          key
-        )
-      ) {
-        // Remove the NEXT_PUBLIC_ prefix
-        const newKey = isFileCoin
-          ? key.replace('FILCOIN_', '')
-          : key.replace('NEXT_PUBLIC_', '')
-
-        // Get the value
-        let value = process.env[key]
-
-        // Special handling for FIREBASE_CONFIG - parse as JSON if it's valid
-        if (newKey === 'FIREBASE_CONFIG' && value) {
-          try {
-            value = JSON.parse(value)
-          } catch (error) {
-            console.error(`Failed to parse FIREBASE_CONFIG as JSON: ${error}`)
-            // Keep as string if parsing fails
-          }
-        }
-        if (value) {
-          // Add to our response object
-          publicEnvVars[newKey] = value
-        }
-      }
-    })
+    // Handle If-Modified-Since
+    if (
+      ifModifiedSince &&
+      new Date(ifModifiedSince) >= new Date(config.TIMESTAMP as string)
+    ) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: {
+          ETag: `"${config.HASH}"`,
+          'Last-Modified':
+            (config.TIMESTAMP as string) || new Date().toUTCString(),
+        },
+      })
+    }
 
     // Return the config as JSON with caching for 1 hour (3600 seconds)
     return NextResponse.json(
       {
-        config: publicEnvVars,
-        timestamp: new Date().toISOString(),
+        config,
         source: 'api',
       },
       {
@@ -84,6 +87,9 @@ export const GET = withTracing(async (request: NextRequest) => {
             process.env.NODE_ENV === 'production'
               ? 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=3600'
               : 'no-store, max-age=0',
+          ETag: `"${config.HASH}"`,
+          'Last-Modified':
+            (config.TIMESTAMP as string) || new Date().toUTCString(),
         },
       }
     )

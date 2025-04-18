@@ -19,6 +19,8 @@ export async function register() {
     // We need to ensure we're not importing any browser-incompatible code here
     // Dynamically import the server-side tracing module - making sure it's not bundled for the browser
     if (process.env.NEXT_RUNTIME === 'nodejs') {
+      const { initAPIConfig } = await import('./lib/apiUtils')
+      await initAPIConfig()
       const { initServerTracing } = await import('./lib/server-tracing')
       await initServerTracing()
     } else {
