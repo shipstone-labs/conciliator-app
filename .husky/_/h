@@ -1,12 +1,7 @@
 #!/usr/bin/env sh
-echo "H SCRIPT IS RUNNING" >&2
-
 [ "$HUSKY" = "2" ] && set -x
 n=$(basename "$0")
 s=$(dirname "$(dirname "$0")")/$n
-
-echo "Basename: $n" >&2
-echo "Script path: $s" >&2
 
 [ ! -f "$s" ] && exit 0
 
@@ -19,11 +14,9 @@ i="${XDG_CONFIG_HOME:-$HOME/.config}/husky/init.sh"
 [ "${HUSKY-}" = "0" ] && exit 0
 
 export PATH="node_modules/.bin:$PATH"
-echo "About to execute: $s" >&2
 sh -e "$s" "$@"
 c=$?
 
-echo "Script exit code: $c" >&2
 [ $c != 0 ] && echo "husky - $n script failed (code $c)" >&2
 [ $c = 127 ] && echo "husky - command not found in PATH=$PATH" >&2
 exit $c
