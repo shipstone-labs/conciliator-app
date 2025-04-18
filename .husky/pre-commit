@@ -1,6 +1,16 @@
-#!/bin/sh
-. "$(dirname "$0")/_/h"
+#!/usr/bin/env sh
 
-echo "🔍 Running pre-commit checks..."
+echo "🔍 Running lint-staged checks on staged files..."
+
+# Run lint-staged with color output
+export FORCE_COLOR=1
 pnpm lint-staged
-echo "✅ Pre-commit checks passed!"
+
+result=$?
+if [ $result -ne 0 ]; then
+  echo "❌ Pre-commit checks failed! Please fix the issues above."
+  exit $result
+fi
+
+echo "✅ All checks passed!"
+exit 0
