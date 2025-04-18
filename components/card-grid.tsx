@@ -96,6 +96,8 @@ function CardGrid({ filter, itemsPerPage = 16 }: CardGridProps) {
                 alt={item.name}
                 width={imageWidth}
                 height={imageWidth}
+                // Add priority to images that are likely to be above the fold (first 4 items)
+                priority={index < 4}
                 className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all"
               />
             </CardContent>

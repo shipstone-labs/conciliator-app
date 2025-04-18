@@ -21,7 +21,6 @@ export function Footer() {
               <button
                 type="button"
                 onClick={() => {
-                  console.log('Terms clicked')
                   setIsTermsOpen(true)
                 }}
                 className="text-white/70 hover:text-primary transition-colors text-sm"
@@ -31,7 +30,6 @@ export function Footer() {
               <button
                 type="button"
                 onClick={() => {
-                  console.log('Privacy clicked')
                   setIsPrivacyOpen(true)
                 }}
                 className="text-white/70 hover:text-primary transition-colors text-sm"

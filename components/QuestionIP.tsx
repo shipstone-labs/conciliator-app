@@ -1,6 +1,6 @@
 'use client'
 
-import { type MouseEvent, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Card,
   CardContent,
@@ -27,10 +27,8 @@ const AppStates = {
 
 const QuestionIP = ({
   docId,
-  onNewIP,
 }: {
   docId: string
-  onNewIP: (event: MouseEvent<HTMLButtonElement>) => void
 }) => {
   const router = useRouter()
   const ideaData = useIP(docId) // Get idea data for context
@@ -171,7 +169,6 @@ const QuestionIP = ({
       <Chat
         messages={messages}
         onSend={handleAskQuestion}
-        onNewIP={onNewIP}
         onSave={handleSave}
         doc={ipDoc}
         isLoading={isLoading}

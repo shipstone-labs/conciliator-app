@@ -20,7 +20,7 @@ import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import type { IPAudit } from '@/lib/types'
-import { useAppConfig } from '@/lib/ConfigContext'
+import { useConfig } from '@/app/authLayout'
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -45,33 +45,10 @@ const AppIP = () => {
   const [status, setStatus] = useState<IPAudit>()
   const [localStatus, setLocalStatus] = useState('')
   const { litClient, sessionSigs } = useSession()
-  const config = useAppConfig()
-  const ids = useCallback(
-    async (id: string) => {
-      return fetch('/api/prestore', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${stytchClient?.session?.getTokens?.()?.session_jwt}`,
-        },
-        body: JSON.stringify({ id }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            console.error('Failed to fetch prestore data')
-            return undefined
-          }
-          return res.json()
-        })
-        .then((ids) => {
-          return ids
-        }) as Promise<{ tokenId: `0x${string}`; nativeTokenId: string }>
-    },
-    [stytchClient?.session]
-  )
+  const config = useConfig()
   useEffect(() => {
     if (docId) {
-      const statusDoc = doc(fb, 'audit', docId)
+      const statusDoc = doc(fb, 'ip', docId, 'status', 'status')
       return onSnapshot(statusDoc, (doc) => {
         setStatus((doc.data() as IPAudit) || undefined)
       })
@@ -88,15 +65,26 @@ const AppIP = () => {
       }
       const ref = doc(collection(fb, 'ip'))
       const id = ref.id
-      setLocalStatus('Creating native token ID')
-      const { tokenId, nativeTokenId } = await ids(id)
+      const { tokenId } = await fetch('/api/prestore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${stytchClient?.session?.getTokens()?.session_jwt}`,
+        },
+        body: JSON.stringify({ id }),
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to get token ID')
+        }
+        return res.json()
+      })
+      setLocalStatus('Storing your idea')
       setDocId(id)
-      console.log(tokenId, nativeTokenId)
       const { address } = sessionSigs || {}
-      const unifiedAccessControlConditions = [
+      const downSampledUnifiedAccessControlConditions = [
         {
           conditionType: 'evmBasic',
-          contractAddress: config.LIT_CONTRACT_ADDRESS,
+          contractAddress: config.CONTRACT,
           standardContractType: '',
           chain: 'filecoinCalibrationTestnet',
           method: '',
@@ -109,44 +97,37 @@ const AppIP = () => {
         { conditionType: 'operator', operator: 'or' },
         {
           conditionType: 'evmBasic',
-          contractAddress: config.LIT_CONTRACT_ADDRESS,
+          contractAddress: config.CONTRACT,
           standardContractType: 'ERC1155',
           chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
-          parameters: [':userAddress', nativeTokenId],
+          parameters: [':userAddress', `${tokenId}`],
           returnValueTest: {
             comparator: '>',
             value: '0',
           },
         },
-        // {
-        //   conditionType: 'evmContract',
-        //   contractAddress: config.LIT_CONTRACT_ADDRESS,
-        //   functionName: 'balanceOf',
-        //   functionParams: [':userAddress', nativeTokenId],
-        //   functionAbi: {
-        //     type: 'function',
-        //     stateMutability: 'view',
-        //     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        //     name: 'balanceOf',
-        //     inputs: [
-        //       { internalType: 'address', name: 'account', type: 'address' },
-        //       { internalType: 'uint256', name: 'id', type: 'uint256' },
-        //     ],
-        //   },
-        //   chain: 'filecoin',
-        //   returnValueTest: {
-        //     key: '',
-        //     comparator: '>',
-        //     value: '0',
-        //   },
-        // },
+      ]
+      const documentUnifiedAccessControlConditions = [
+        {
+          conditionType: 'evmBasic',
+          contractAddress: config.CONTRACT,
+          standardContractType: 'ERC1155',
+          chain: 'filecoinCalibrationTestnet',
+          method: 'balanceOf',
+          parameters: [':userAddress', `${tokenId}`],
+          returnValueTest: {
+            comparator: '>',
+            value: '0',
+          },
+        },
       ]
       setLocalStatus('Encrypting your idea')
       const encrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(content),
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            documentUnifiedAccessControlConditions,
         })
         .then(async (encryptedContent: EncryptResponse) => {
           if (!encryptedContent) {
@@ -155,12 +136,13 @@ const AppIP = () => {
           return encryptedContent
         })
       setLocalStatus('Downsampling your idea')
-      const downSampled = await downsample(content)
+      const downSampled = downsample(content)
       setLocalStatus('Encrypting downsampled idea')
       const downSampledEncrypted = await litClient
         .encrypt({
           dataToEncrypt: new TextEncoder().encode(downSampled),
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            downSampledUnifiedAccessControlConditions,
         })
         .then(async (encryptedContent: EncryptResponse) => {
           if (!encryptedContent) {
@@ -169,24 +151,24 @@ const AppIP = () => {
           return encryptedContent
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
-      console.log(address)
       const body = {
         id,
         to: address,
         metadata: {
           tokenId,
-          nativeTokenId,
           cid: '',
         },
         name,
         description,
         encrypted: {
           ...encrypted,
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            documentUnifiedAccessControlConditions,
         },
         downSampledEncrypted: {
           ...downSampledEncrypted,
-          unifiedAccessControlConditions,
+          unifiedAccessControlConditions:
+            downSampledUnifiedAccessControlConditions,
         },
         category: businessModel || 'Intellectual Property',
         tags: ['IP', evaluationPeriod],
@@ -239,7 +221,6 @@ const AppIP = () => {
     stytchClient?.session,
     config,
     sessionSigs,
-    ids,
     ndaConfirmed,
   ])
 
@@ -283,22 +264,6 @@ const AppIP = () => {
   return (
     <div className="w-full py-8">
       <div className="max-w-6xl mx-auto space-y-8 px-4">
-        {/* Logo removed from non-home pages - now using global header logo
-        <Link
-          href="/"
-          className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
-        >
-          <img
-            src="/svg/Black+Yellow.svg"
-            alt="Home"
-            width={26}
-            height={26}
-            className="transform scale-125"
-          />
-        </Link>
-        */}
-
-        {/* Logout button removed - now in hamburger menu */}
         <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">

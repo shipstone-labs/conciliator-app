@@ -10,12 +10,12 @@ import { formatDate, formatNumber } from '@/lib/types'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { Modal } from '@/components/ui/modal'
-import { useAppConfig } from '@/lib/ConfigContext'
 import { cidAsURL } from '@/lib/internalTypes'
 import { useSession } from '@/hooks/useSession'
 import Markdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
+import { useConfig } from '@/app/authLayout'
 
 const DetailIP = ({
   docId,
@@ -29,19 +29,10 @@ const DetailIP = ({
   const [viewed, setViewed] = useState<string>()
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
   const { litClient, delegatedSessionSigs } = useSession()
-  const config = useAppConfig()
-
+  const config = useConfig()
   const router = useRouter()
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
-
-  // Debug logging to check mint data
-  useEffect(() => {
-    console.log("DetailIP component version: 1.1")
-    if (ideaData) {
-      console.log("Idea metadata:", ideaData.metadata)
-    }
-  }, [ideaData])
 
   useEffect(() => {
     if (isViewLoading.current) {
@@ -82,8 +73,9 @@ const DetailIP = ({
         const { ciphertext, dataToEncryptHash } = data
         const { sessionSigs, capacityDelegationAuthSig } =
           await delegatedSessionSigs(docId)
+        const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
         const request = {
-          accessControlConditions: JSON.parse(ideaData?.encrypted?.acl),
+          accessControlConditions,
           // pkpPublicKey: sessionSigs?.pkpPublicKey,
           ciphertext,
           dataToEncryptHash,
@@ -419,8 +411,8 @@ const DetailIP = ({
                   />
                 </h3>
                 <p className="text-white/80 text-sm">
-                  With My Agent, you can see how your AI agent works on your behalf
-                  to best represent your idea on the web.
+                  With My Agent, you can see how your AI agent works on your
+                  behalf to best represent your idea on the web.
                 </p>
               </div>
             </CardContent>
@@ -470,16 +462,21 @@ const DetailIP = ({
             className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
             onClick={() => {
               if (ideaData.metadata?.mint) {
-                window.open(`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`, '_blank')
+                window.open(
+                  `https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`,
+                  '_blank'
+                )
               } else {
                 alert('No mint transaction available')
               }
             }}
           >
-            {ideaData.metadata?.mint ? '✓ Confirm Mint' : '⚠ Transaction Unavailable'}
+            {ideaData.metadata?.mint
+              ? '✓ Confirm Mint'
+              : '⚠ Transaction Unavailable'}
           </Button>
         </div>
-        
+
         {audit ? (
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-white/10">
@@ -510,7 +507,9 @@ const DetailIP = ({
                   IPDocV2 Contract
                 </div>
                 <div className="text-white/80 text-sm">
-                  {config.LIT_CONTRACT_ADDRESS as string}
+                  {config.CONTRACT_NAME as string}
+                  <br />
+                  {config.CONTRACT as string}
                 </div>
                 <div className="text-white font-bold text-sm">
                   Mint Transaction

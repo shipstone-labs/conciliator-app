@@ -1,5 +1,10 @@
 import type { NextRequest } from 'next/server'
-import { completionAI, genSession, getLit, /* abi, */ getModel } from '../utils'
+import {
+  getCompletionAI,
+  genSession,
+  getLit,
+  /* abi, */ getModel,
+} from '../utils'
 // import { call, readContract } from "viem/actions";
 // import { filecoinCalibration } from "viem/chains";
 // import {
@@ -23,15 +28,19 @@ import {
 import { privateKeyToAccount } from 'viem/accounts'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
+import { initAPIConfig } from '@/lib/apiUtils'
+import { LRUCache } from 'next/dist/server/lib/lru-cache'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
+const contentCache = new LRUCache<Promise<string>>(100)
+
 export async function POST(req: NextRequest) {
   try {
-    const loginNow = Date.now()
+    await initAPIConfig()
+
     await getUser(req)
-    console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)
     const { messages, id } = (await req.json()) as {
       messages: {
         role: 'user' | 'assistant' | 'system'
@@ -40,13 +49,9 @@ export async function POST(req: NextRequest) {
       id: string
     }
 
-    const retrieveNow = Date.now()
     const fs = getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
-    const auditTable = fs.collection('audit').doc(id).collection('details')
-    console.log(
-      `retrieve took ${Math.round((Date.now() - retrieveNow) / 1000)}s`
-    )
+    const auditTable = fs.collection('ip').doc(id).collection('audit')
     const data = doc.data() as IPDocJSON
     if (!data) {
       throw new Error('Document not found')
@@ -116,79 +121,69 @@ ${data.description}`,
     }
     const consecutiveYesCount = Math.max(...runs)
     if (consecutiveYesCount < 5) {
-      const now = Date.now()
-
       const account = privateKeyToAccount(
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )
       const litClient = await getLit()
-      const url = cidAsURL(data.downSampled.cid)
-      const downSampled: {
-        ciphertext: string
-        dataToEncryptHash: string
-        unifiedAccessControlConditions: unknown
-      } = url
-        ? await fetch(url).then((res) => {
-            if (!res.ok) {
-              throw new Error('Failed to fetch encrypted data')
-            }
-            return res.json()
+      let contentPromise = contentCache.get(data.downSampled.cid)
+      if (!contentPromise) {
+        const getContent = async () => {
+          const url = cidAsURL()
+          const downSampled: {
+            ciphertext: string
+            dataToEncryptHash: string
+            unifiedAccessControlConditions: unknown
+          } = url
+            ? await fetch(url).then((res) => {
+                if (!res.ok) {
+                  throw new Error('Failed to fetch encrypted data')
+                }
+                return res.json()
+              })
+            : undefined
+          if (
+            data.downSampled.acl !==
+            JSON.stringify(downSampled.unifiedAccessControlConditions)
+          ) {
+            throw new Error('Access control conditions do not match')
+          }
+          if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
+            throw new Error('Hash does not match')
+          }
+          const accsInput =
+            await LitAccessControlConditionResource.generateResourceString(
+              JSON.parse(data.downSampled.acl),
+              data.downSampled.hash
+            )
+
+          const sessionSigs = await genSession(account, litClient, [
+            {
+              resource: new LitActionResource('*'),
+              ability: LIT_ABILITY.LitActionExecution,
+            },
+            {
+              resource: new LitAccessControlConditionResource(accsInput),
+              ability: LIT_ABILITY.AccessControlConditionDecryption,
+            },
+          ])
+
+          const _decrypted = await litClient.decrypt({
+            accessControlConditions:
+              downSampled.unifiedAccessControlConditions as Parameters<
+                typeof litClient.decrypt
+              >[0]['accessControlConditions'],
+            ciphertext: downSampled.ciphertext,
+            dataToEncryptHash: downSampled.dataToEncryptHash,
+            chain: 'filecoinCalibrationTestnet',
+            sessionSigs,
           })
-        : undefined
-      if (
-        data.downSampled.acl !==
-        JSON.stringify(downSampled.unifiedAccessControlConditions)
-      ) {
-        throw new Error('Access control conditions do not match')
+
+          return new TextDecoder().decode(_decrypted.decryptedData)
+        }
+        contentPromise = getContent()
+        contentCache.set(data.downSampled.cid, contentPromise)
       }
-      if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
-        console.log(data.downSampled.hash, downSampled.dataToEncryptHash)
-        throw new Error('Hash does not match')
-      }
-      const accsInput =
-        await LitAccessControlConditionResource.generateResourceString(
-          JSON.parse(data.downSampled.acl),
-          data.downSampled.hash
-        )
-
-      // const { capacityDelegationAuthSig } =
-      //   await litClient.createCapacityDelegationAuthSig({
-      //     dAppOwnerWallet: {
-      //       signMessage: (message: SignableMessage) =>
-      //         account.signMessage({ message }),
-      //       getAddress: async () => account.address,
-      //     },
-      //     capacityTokenId: 162391,
-      //     delegateeAddresses: [account.address],
-      //     uses: "1",
-      //     expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
-      //   });
-
-      const sessionSigs = await genSession(account, litClient, [
-        {
-          resource: new LitActionResource('*'),
-          ability: LIT_ABILITY.LitActionExecution,
-        },
-        {
-          resource: new LitAccessControlConditionResource(accsInput),
-          ability: LIT_ABILITY.AccessControlConditionDecryption,
-        },
-      ])
-
-      const _decrypted = await litClient.decrypt({
-        accessControlConditions:
-          downSampled.unifiedAccessControlConditions as Parameters<
-            typeof litClient.decrypt
-          >[0]['accessControlConditions'],
-        ciphertext: downSampled.ciphertext,
-        dataToEncryptHash: downSampled.dataToEncryptHash,
-        chain: 'filecoinCalibrationTestnet',
-        sessionSigs,
-      })
-      console.log(`lit took ${Math.round((Date.now() - now) / 1000)}s`)
-
-      const content = new TextDecoder().decode(_decrypted.decryptedData)
-
+      const content = await contentPromise
       const _data: Record<string, string> = {
         title: data.name,
         description: data.description,
@@ -202,26 +197,21 @@ ${data.description}`,
         }
       )
       request[0].content = _content
-      const chatNow = Date.now()
-      const completion = await completionAI.chat.completions.create({
+      const completion = await getCompletionAI().chat.completions.create({
         model: getModel('COMPLETION'), // Use the appropriate model
         messages: request,
       })
-      console.log(
-        `lilypad completion took ${Math.round((Date.now() - chatNow) / 1000)}s`
-      )
       const answerContent = completion.choices
         .flatMap(
           ({ message: { content = '' } = { content: '' } }) =>
             content?.split('\n') || ''
         )
         .join('\n')
-      // console.log('conciliator', consecutiveYesCount, yesItems, answerContent)
+      console.log('conciliator', answerContent)
       messages.push({ content: answerContent, role: 'assistant' })
     } else {
       messages.push({ content: 'Stop', role: 'assistant' })
     }
-    const dataNow = Date.now()
     await auditTable.add({
       status: 'Conciliator answered',
       createdAt: FieldValue.serverTimestamp(),
@@ -231,7 +221,6 @@ ${data.description}`,
         answer: messages.at(-1)?.content,
       },
     })
-    console.log(`audit took ${Math.round((Date.now() - dataNow) / 1000)}s`)
     return new Response(
       JSON.stringify({
         messages,

@@ -1,14 +1,6 @@
 import type { NextRequest } from 'next/server'
-import {
-  abi,
-  // genSession,
-  getModel,
-  imageAI,
-  runWithNonce,
-  // getModel,
-  // imageAI,
-  // pinata,
-} from '../utils'
+import { getContractInfo, getModel, getImageAI, runWithNonce } from '../utils'
+import { abi } from '../abi'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
@@ -19,6 +11,7 @@ import { getFirestore } from '../firebase'
 import { fetch } from 'undici'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'
 
@@ -29,7 +22,12 @@ function clean(obj: unknown): unknown {
   if (obj && Array.isArray(obj)) {
     return obj.map(clean)
   }
-  if (obj && typeof obj === 'object') {
+  if (
+    obj &&
+    typeof obj === 'object' &&
+    !(obj instanceof FieldValue) &&
+    !(obj instanceof Timestamp)
+  ) {
     const cleanedObj: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined) {
@@ -49,13 +47,43 @@ function clean(obj: unknown): unknown {
 
 async function cleanupTable() {
   const fs = getFirestore()
-  const docs = await fs
+  const batch = fs.batch()
+  let count = 0
+
+  const emptyDates = await fs.collection('ip').get()
+  emptyDates.docs.map((doc) => {
+    let hasUpdate = false
+    const update: Record<string, FieldValue | string> = {}
+    if (!doc.data().createdAt) {
+      update.createdAt = FieldValue.serverTimestamp()
+      console.log(`add missing createdAt ${doc.ref.path} (setting to now)`)
+      hasUpdate = true
+    }
+    if (!doc.data().updatedAt) {
+      update.updatedAt = FieldValue.serverTimestamp()
+      console.log(`add missing createdAt ${doc.ref.path} (setting to now)`)
+      hasUpdate = true
+    }
+    if (!doc.data().metadata.contract) {
+      update['metadata.contract.name'] =
+        '0x79665408484fFf9dC7b0BC6b0d42CB18866b9311'
+      update['metadata.contract.version'] = 'IPDocV8'
+      console.log(`add missing contract ${doc.ref.path} (setting to IPDocV8)`)
+      hasUpdate = true
+    }
+    if (!hasUpdate) {
+      return
+    }
+    batch.update(doc.ref, update)
+    count++
+  })
+
+  const invalidDates = await fs
     .collection('ip')
     .where('createdAt._seconds', '!=', null)
     .get()
-  const batch = fs.batch()
-  let count = 0
-  docs.docs.map((doc) => {
+
+  invalidDates.docs.map((doc) => {
     let hasUpdate = false
     const update: Record<string, FieldValue> = {}
     {
@@ -64,6 +92,9 @@ async function cleanupTable() {
         _nanoseconds: number
       }
       update.createdAt = new Timestamp(_seconds, _nanoseconds)
+      console.log(
+        `repair createdAt ${doc.ref.path} ${(update.createdAt as Timestamp).toDate().toISOString()}`
+      )
       hasUpdate = true
     }
     {
@@ -72,6 +103,10 @@ async function cleanupTable() {
         _nanoseconds: number
       }
       update.updatedAt = new Timestamp(_seconds, _nanoseconds)
+      console.log(
+        `repair updatedAt ${doc.ref.path} ${(update.updatedAt as Timestamp).toDate().toISOString()}`
+      )
+      hasUpdate = true
     }
     if (!hasUpdate) {
       return
@@ -88,6 +123,8 @@ async function cleanupTable() {
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     const user = await getUser(req)
 
     await cleanupTable()
@@ -96,31 +133,53 @@ export async function POST(req: NextRequest) {
     const {
       to,
       id,
-      metadata: { tokenId, nativeTokenId } = {},
       encrypted,
       downSampledEncrypted,
+      metadata: { tokenId },
       name: _name,
       description,
       ...rest
     } = body
+    const firestore = getFirestore()
+    const checkDoc = await firestore.collection('id').doc(id).get()
+    if (checkDoc.exists) {
+      if (
+        (checkDoc.data()?.creator &&
+          checkDoc.data()?.creator !== user.user.user_id) ||
+        checkDoc.data()?.metadata?.tokenId != null
+      ) {
+        return new Response(JSON.stringify({ error: 'ID already exists' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+    }
+    const { contract, contract_name } = getContractInfo()
+    if (!contract) {
+      throw new Error('FILCOIN_CONTRACT not set')
+    }
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`
     )
+    const wallet = createWalletClient({
+      account,
+      chain: filecoinCalibration,
+      transport: http(),
+    })
     const w3Client = await createAsAgent(
       process.env.STORACHA_AGENT_KEY || '',
       process.env.STORACHA_AGENT_PROOF || ''
     )
-    const firestore = getFirestore()
-    const status = firestore.collection('audit').doc(id)
-    const auditTable = firestore
-      .collection('audit')
+    const status = firestore
+      .collection('ip')
       .doc(id)
-      .collection('details')
+      .collection('status')
+      .doc('status')
+    const auditTable = firestore.collection('id').doc(id).collection('audit')
     await status.set({
       status: 'Storing encrypted document in storacha',
       creator: user.user.user_id,
       address: to,
-      tokenId,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })
@@ -164,8 +223,8 @@ export async function POST(req: NextRequest) {
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })
-    const imageCid = await imageAI.images
-      .generate({
+    const imageCid = await getImageAI()
+      .images.generate({
         model: getModel('IMAGE'),
         prompt: `Generate and image which accurately represents a supposed document
     with the title \`${_name}\` and the descriptions \`${description}\`. If there are any word flagged as inappropriate,
@@ -210,8 +269,9 @@ export async function POST(req: NextRequest) {
         : {}),
       creator: user.user.user_id,
       metadata: {
-        tokenId,
         cid: '',
+        tokenId,
+        contract: { address: contract, name: contract_name },
       },
       encrypted: {
         cid: encryptedCid.toString(),
@@ -229,19 +289,16 @@ export async function POST(req: NextRequest) {
       },
     }) as IPDocJSON
     const doc = firestore.collection('ip').doc(id)
-    const wallet = createWalletClient({
-      account,
-      chain: filecoinCalibration,
-      transport: http(),
-    })
-    await setStatus(`Minting IPDocV8 token ID ${nativeTokenId}`)
-    const mint = await runWithNonce(account.address, async (nonce) => {
+    await setStatus(
+      `Minting ${contract_name} token ID ${tokenId} for you ${to}`
+    )
+    const mint = (await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({
           functionName: 'mint',
           abi,
-          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-          args: [account.address, BigInt(nativeTokenId), 1, '0x'],
+          address: contract,
+          args: [to, tokenId, 1, '0x'],
           nonce,
         })
         .then(async (hash) => {
@@ -250,26 +307,9 @@ export async function POST(req: NextRequest) {
           })
           return hash
         })
-    })
-    await setStatus(`Transferring token ID ${nativeTokenId} to you ${to}`)
-    const transfer = await runWithNonce(account.address, async (nonce) => {
-      return await wallet
-        .writeContract({
-          functionName: 'safeTransferFrom',
-          abi,
-          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-          args: [account.address, to, nativeTokenId, 1, '0x'],
-          nonce,
-        })
-        .then(async (hash) => {
-          await waitForTransactionReceipt(wallet, {
-            hash,
-          })
-          return hash
-        })
-    })
+    })) as `0x${string}`
     await setStatus(
-      `Storing IPDocV8 token metadata for token ID ${nativeTokenId}`
+      `Storing ${contract_name} token metadata for token ID ${tokenId}`
     )
     const metadata = {
       name: _name,
@@ -279,6 +319,8 @@ export async function POST(req: NextRequest) {
         properties: {
           ...rest,
           tokenId,
+          contract_name,
+          contract,
           encrypted: data.encrypted,
           downSampled: data.downSampled,
           createdAt: now.toISOString(),
@@ -293,14 +335,14 @@ export async function POST(req: NextRequest) {
       }
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
-    await setStatus(`Setting token metadata URI on token ID ${nativeTokenId}`)
-    const update = await runWithNonce(account.address, async (nonce) => {
+    await setStatus(`Setting token metadata URI on token ID ${tokenId}`)
+    const update = await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({
           functionName: 'setTokenURI',
           abi,
-          address: (process.env.FILCOIN_CONTRACT || '0x') as `0x${string}`,
-          args: [nativeTokenId, cidAsURL(metadataCid.toString())],
+          address: contract,
+          args: [tokenId, cidAsURL(metadataCid.toString())],
           nonce,
         })
         .then(async (hash) => {
@@ -316,10 +358,12 @@ export async function POST(req: NextRequest) {
       metadata: {
         cid: metadataCid.toString(),
         tokenId,
-        nativeTokenId: `${nativeTokenId}`,
         mint,
-        transfer,
         update,
+        contract: {
+          name: contract_name,
+          address: contract,
+        },
       },
     }
     await setStatus('Finished')

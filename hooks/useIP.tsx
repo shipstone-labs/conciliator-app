@@ -26,6 +26,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
+import { bytesToString, numberToBytes } from 'viem'
 
 export function useIP(docId: string) {
   const [ideaData, setIdeaData] = useState<IPDoc | undefined>()
@@ -37,8 +38,11 @@ export function useIP(docId: string) {
     }
     const fetchData = async () => {
       const fs = getFirestore()
-      const docRef = await getDoc(doc(fs, 'ip', docId))
-
+      const actualDocId =
+        docId.startsWith('0x') || /^\d+$/.test(docId)
+          ? bytesToString(numberToBytes(BigInt(docId)))
+          : docId
+      const docRef = await getDoc(doc(fs, 'ip', actualDocId))
       if (docRef.exists()) {
         const { creator } = docRef.data() as { creator?: string }
         let hasAccess = creator === user.user_id
@@ -68,13 +72,12 @@ export function useIP(docId: string) {
               return true
             })
         }
-        setIdeaData(
-          castToUIDoc({
-            ...docRef.data(),
-            id: docRef.id,
-            canView: hasAccess,
-          } as IPDoc)
-        )
+        const casted = castToUIDoc({
+          ...docRef.data(),
+          id: docRef.id,
+          canView: hasAccess,
+        } as IPDoc)
+        setIdeaData(casted)
       } else {
         setIdeaData(undefined)
       }
@@ -149,7 +152,7 @@ export function useIPAudit(tokenId: string) {
       const fs = getFirestore()
       snapshot = onSnapshot(
         query(
-          collection(fs, 'audit', tokenId, 'details'),
+          collection(fs, 'ip', tokenId, 'audit'),
           orderBy('createdAt', 'desc')
         ),
         (doc) => {
@@ -164,7 +167,7 @@ export function useIPAudit(tokenId: string) {
           })
         }
       )
-      const docRef = await getDoc(doc(fs, 'audit', tokenId))
+      const docRef = await getDoc(doc(fs, 'id', tokenId, 'status', 'status'))
       if (docRef.exists()) {
         setIdeaData((prev) => {
           return { ...prev, ...castAuditToUIDoc(docRef.data() as IPAudit) }

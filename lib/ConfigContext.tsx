@@ -1,65 +1,69 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 // Define the type for our configuration
-export interface AppConfig {
-  FIREBASE_CONFIG?: Record<string, unknown>
+export interface RawAppConfig {
+  FIREBASE_CONFIG: Record<string, unknown>
   [key: string]: string | Record<string, unknown> | undefined
 }
 
-// Create a context for the configuration
-interface ConfigContextType {
-  config: AppConfig
-  isLoading: boolean
-  error: Error | null
+const ConfigContext = createContext<RawAppConfig | undefined>(undefined)
+let configPromise: Promise<void> | undefined
+let configRef: RawAppConfig | undefined
+
+function getConfig(initialConfig: RawAppConfig) {
+  // On the server, always use the provided config
+  if (typeof window === 'undefined') {
+    return initialConfig
+  }
+
+  // Already have a cached config
+  if (configRef) {
+    return configRef
+  }
+
+  // If we have a server-provided config with ENV='server'
+  // This means we received proper server config during hydration
+  if (initialConfig && initialConfig.ENV === 'server') {
+    configRef = initialConfig
+    return initialConfig
+  }
+
+  // Already fetching config
+  if (configPromise) {
+    throw configPromise
+  }
+
+  // Need to fetch config from API
+  configPromise = fetch('/api/config')
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch config: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      configRef = data.config
+      configPromise = undefined
+      return configRef
+    })
+    .catch((error) => {
+      configPromise = undefined
+      throw error
+    }) as Promise<void>
 }
-
-const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
-
 // Provider component that makes the config available to client components
 export function ConfigProvider({
   config: initialConfig,
   children,
 }: {
-  config: AppConfig
+  config: RawAppConfig
   children: React.ReactNode
 }) {
-  const [config, setConfig] = useState<AppConfig>(initialConfig)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [error, setError] = useState<Error | null>(null)
-
-  // If we received a static config (from static generation), fetch the actual config
-  useEffect(() => {
-    // Only fetch if we're in a browser and we have a static config
-    if (typeof window !== 'undefined' && initialConfig.ENV === 'static') {
-      const fetchConfig = async () => {
-        try {
-          setIsLoading(true)
-          const response = await fetch('/api/config')
-
-          if (!response.ok) {
-            throw new Error(`Failed to fetch config: ${response.status}`)
-          }
-
-          const data = await response.json()
-          setConfig(data.config)
-        } catch (err) {
-          console.error('Error fetching config:', err)
-          setError(err instanceof Error ? err : new Error(String(err)))
-        } finally {
-          setIsLoading(false)
-        }
-      }
-
-      fetchConfig()
-    }
-  }, [initialConfig])
-
+  const config = useMemo(() => getConfig(initialConfig), [initialConfig])
   return (
-    <ConfigContext.Provider value={{ config, isLoading, error }}>
-      {children}
-    </ConfigContext.Provider>
+    <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
   )
 }
 
@@ -69,17 +73,6 @@ export function useAppConfig() {
 
   if (context === undefined) {
     throw new Error('useAppConfig must be used within a ConfigProvider')
-  }
-
-  return context.config
-}
-
-// Hook to get full config state including loading state
-export function useConfigState() {
-  const context = useContext(ConfigContext)
-
-  if (context === undefined) {
-    throw new Error('useConfigState must be used within a ConfigProvider')
   }
 
   return context

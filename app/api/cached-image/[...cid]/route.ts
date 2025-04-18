@@ -1,11 +1,23 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import 'firebase-admin/storage'
 import { getBucket } from '@/app/api/firebase'
+import { initAPIConfig } from '@/lib/apiUtils'
+
+// Set extremely long cache since IPFS content is immutable (1 year)
+const CACHE_CONTROL =
+  'public, max-age=31536000, immutable, stale-while-revalidate=31536000'
+
+// Define cache options for the route handler
+export const dynamic = 'force-dynamic' // Allow dynamic handling for first request
+export const revalidate = false // Don't revalidate automatically
+export const fetchCache = 'force-cache' // Use cache when possible
 
 export async function GET(
   request: NextRequest,
   { params: _params }: { params: Promise<{ cid: string[] }> }
 ) {
+  await initAPIConfig()
+
   // Handle splat route - join all segments
   const params = await _params
   const cidPath = params.cid.join('/')
@@ -42,7 +54,7 @@ export async function GET(
       return new NextResponse(fileStream as unknown as ReadableStream, {
         headers: {
           'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Cache-Control': CACHE_CONTROL,
         },
       })
     }
@@ -78,7 +90,7 @@ export async function GET(
       const writeStream = file.createWriteStream({
         metadata: {
           contentType: contentType,
-          cacheControl: 'public, max-age=31536000, immutable',
+          cacheControl: CACHE_CONTROL,
           metadata: {
             originalCid: cidPath,
             width: width,
@@ -123,7 +135,7 @@ export async function GET(
       return new NextResponse(clientStream, {
         headers: {
           'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Cache-Control': CACHE_CONTROL,
         },
       })
     } finally {

@@ -3,11 +3,14 @@ import { getFirestore } from '../firebase'
 import type { IPDocJSON } from '@/lib/internalTypes'
 import { getUser } from '../stytch'
 import { FieldValue } from 'firebase-admin/firestore'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
+    await initAPIConfig()
+
     // Authenticate user
     try {
       await getUser(req)
@@ -65,7 +68,6 @@ export async function POST(req: NextRequest) {
       const ideaData: IPDocJSON | undefined = ideaDoc.data() as
         | IPDocJSON
         | undefined
-      console.log(`Retrieved idea data for tokenId: ${tokenId}`)
 
       // Format the response with defined fallbacks for any missing fields
       return new Response(
