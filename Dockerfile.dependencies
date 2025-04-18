@@ -36,7 +36,6 @@ COPY packages ./packages
 RUN pnpm build-wrappers
 
 RUN cp -r node_modules node_modules.dev
-RUN pnpm i --prod --prefer-offline --no-audit --no-fund
 RUN pnpm prune --prod
 RUN cp -r node_modules node_modules.prod
 RUN mv node_modules.dev node_modules
