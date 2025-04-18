@@ -134,7 +134,7 @@ steps:
         echo "Dependency hash: $${DEP_HASH}"
 
         # Image tag based on hash
-        IMAGE_TAG="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliate-app-deps:$${DEP_HASH}"
+        IMAGE_TAG="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliate-app/dependencies-cache:$${DEP_HASH}"
 
         # Check if the image with this hash already exists
         echo "Checking if dependency image already exists..."
