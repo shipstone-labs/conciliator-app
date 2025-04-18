@@ -43,10 +43,6 @@ export async function POST(req: NextRequest) {
       const ideaDoc = await ideaRef.get()
 
       if (!ideaDoc.exists) {
-        console.log(
-          `Idea not found for tokenId: ${tokenId}, using fallback data`
-        )
-
         // Fallback for development/testing
         // For tokens that were created before we implemented Firestore storage
         const mockIdeaData = {
