@@ -157,9 +157,9 @@ steps:
         export DOCKER_BUILDKIT=1
         NAME=${_SERVICE_NAME}
         if [[ "$_PR_NUMBER" != "" ]]; then
-          NAME="${NAME}:pr-$_PR_NUMBER"
+          NAME="$${NAME}:pr-$_PR_NUMBER"
         else
-          NAME="${NAME}:latest"
+          NAME="$${NAME}:latest"
         fi
         NAME="${NAME}:${COMMIT_SHA}"
         set -o pipefail
@@ -173,7 +173,7 @@ steps:
           --build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS \
           --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
           --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
-          --build-arg=NEXT_PUBLIC_SERVICE_NAME=${NAME} \
+          --build-arg=NEXT_PUBLIC_SERVICE_NAME=$${NAME} \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           . 2>&1) | tee ./.info.log
         then
