@@ -77,7 +77,6 @@ export function useIP(docId: string) {
           id: docRef.id,
           canView: hasAccess,
         } as IPDoc)
-        console.log('doc', casted, actualDocId, docRef.data())
         setIdeaData(casted)
       } else {
         setIdeaData(undefined)

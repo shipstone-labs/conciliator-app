@@ -20,9 +20,7 @@ export async function POST(req: NextRequest) {
   try {
     await initAPIConfig()
 
-    const loginNow = Date.now()
     const user = await getUser(req)
-    console.log(`login took ${Math.round((Date.now() - loginNow) / 1000)}s`)
     const { id, pkp } = (await req.json()) as {
       id: string
       pkp: `0x${string}`

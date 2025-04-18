@@ -98,13 +98,11 @@ export default function ChatUI({
 
     if (newState) {
       // Starting auto-discovery
-      console.log('🟢 Starting auto-discovery')
       setAutoCompleting(true)
       isAutoDiscoveryActive.current = true
       // Note: The useEffect will trigger the first cycle
     } else {
       // Stopping auto-discovery
-      console.log('🔴 Stopping auto-discovery')
       setAutoCompleting(false)
       isAutoDiscoveryActive.current = false
 
@@ -142,16 +140,12 @@ export default function ChatUI({
   const runDiscoveryCycle = useCallback(async () => {
     // Don't start if component unmounted, stopped, or already running
     if (!isMounted.current || !isAutoDiscoveryActive.current || hasStop) {
-      console.log(
-        '⛔ Auto-discovery not active or component unmounted, not starting cycle'
-      )
       return
     }
 
     // CRITICAL: Strict enforcement of only one cycle running at a time
     // This ensures the ping-pong pattern
     if (cycleRunning.current) {
-      console.log('🚫 Already running a cycle, not starting another')
       return
     }
 
@@ -160,11 +154,8 @@ export default function ChatUI({
     setCycleInProgress(true)
 
     try {
-      console.log('🔍 Starting seeker')
-
       // Check if auto-complete was turned off - use our ref
       if (!isAutoDiscoveryActive.current) {
-        console.log('❌ Auto-complete turned off, aborting')
         // Make sure to reset flags when aborting
         cycleRunning.current = false
         setCycleInProgress(false)
@@ -175,9 +166,6 @@ export default function ChatUI({
       // Now show user question skeleton - only right before the actual API call
       setLoading('user')
 
-      // 2. Call seeker API to generate question
-      console.log('📤 Calling seeker API')
-
       // Create an abort controller for canceling the fetch if needed
       const abortController = new AbortController()
       const signal = abortController.signal
@@ -186,9 +174,6 @@ export default function ChatUI({
       // Let any started API call complete for consistency
       const checkInterval = setInterval(() => {
         if (!isAutoDiscoveryActive.current) {
-          console.log(
-            'Auto-discovery turned off, but letting API call complete'
-          )
           clearInterval(checkInterval)
         }
       }, 200)
@@ -209,10 +194,7 @@ export default function ChatUI({
 
         // Clear the checking interval since we don't need it anymore
         clearInterval(checkInterval)
-      } catch (error) {
-        // Simple error logging for API failures
-        console.log('❌ API fetch failed:', error)
-
+      } catch {
         // Always clear the interval
         clearInterval(checkInterval)
 
@@ -229,7 +211,6 @@ export default function ChatUI({
 
       // Handle seeker API errors - CRITICAL: stop the entire process on API errors
       if (!seekerResponse.ok) {
-        console.log('❌ Seeker API error - stopping auto-discovery')
         // Force stop auto-discovery completely on API error
         isAutoDiscoveryActive.current = false
         setAutoCompleting(false)
@@ -245,7 +226,6 @@ export default function ChatUI({
 
       // Check if auto-discovery was turned off
       if (!isAutoDiscoveryActive.current) {
-        console.log('❌ Auto-discovery turned off')
         cycleRunning.current = false
         setCycleInProgress(false)
         setLoading('none')
@@ -261,7 +241,6 @@ export default function ChatUI({
         !seekerData.messages?.length ||
         !isAutoDiscoveryActive.current
       ) {
-        console.log('❌ Invalid seeker response or auto-complete turned off')
         // Reset stopping state if we're aborting
         if (isStopping) {
           setIsStopping(false)
@@ -276,7 +255,6 @@ export default function ChatUI({
       const question =
         seekerData.messages[seekerData.messages.length - 1]?.content
       if (!question || !isAutoDiscoveryActive.current) {
-        console.log('❌ Empty question or auto-complete turned off')
         // Reset stopping state if we're aborting
         if (isStopping) {
           setIsStopping(false)
@@ -288,11 +266,8 @@ export default function ChatUI({
         return
       }
 
-      console.log('✅ Got question from seeker')
-
       // Check if auto-discovery is still active before proceeding to next step
       if (!isAutoDiscoveryActive.current) {
-        console.log('Auto-discovery turned off, not proceeding to conciliator')
         cycleRunning.current = false
         setCycleInProgress(false)
         setLoading('none')
@@ -302,15 +277,9 @@ export default function ChatUI({
       // Only now switch to assistant skeleton - immediately before the API call
       setLoading('assistant')
 
-      // 4. Call conciliator API with the generated question
-      console.log('📤 Calling conciliator API')
       try {
         await onSend(question)
-      } catch (conciliatorError) {
-        console.log(
-          '❌ Conciliator API error - stopping auto-discovery',
-          conciliatorError
-        )
+      } catch {
         // Force stop auto-discovery completely on API error
         isAutoDiscoveryActive.current = false
         setAutoCompleting(false)
@@ -328,8 +297,6 @@ export default function ChatUI({
         setLoading('none')
       }
 
-      console.log('✅ Got response from conciliator')
-
       // 5. Reset loading state
       setLoading('none')
 
@@ -339,22 +306,14 @@ export default function ChatUI({
 
       // Let's check if we should continue with auto-discovery
       if (!isMounted.current || !isAutoDiscoveryActive.current) {
-        console.log(
-          '⏹ Auto-discovery was turned off or component unmounted - not continuing'
-        )
         return
       }
 
       // If we haven't reached a STOP, schedule next cycle
       if (!hasStop) {
-        console.log('🔄 Scheduling next cycle')
-
         // IMPORTANT: Make sure we're not already running a cycle
         // This is critical to maintain the ping-pong pattern
         if (cycleRunning.current) {
-          console.log(
-            '⚠️ Warning: Cycle is still marked as running, not scheduling next cycle'
-          )
           // Reset the flag to prevent deadlock
           cycleRunning.current = false
           return
@@ -373,16 +332,9 @@ export default function ChatUI({
             !hasStop &&
             !cycleRunning.current
           ) {
-            console.log('🔄 Starting next cycle')
             runDiscoveryCycle()
-          } else {
-            console.log(
-              '⏹ Next cycle canceled - component unmounted, discovery inactive, or cycle already running'
-            )
           }
         }, 300)
-      } else {
-        console.log('⏹ Discovery finished with STOP - not continuing')
       }
     } catch (error) {
       console.error('Error in discovery cycle:', error)
@@ -409,7 +361,6 @@ export default function ChatUI({
 
       // Immediately cancel any auto-discovery in progress
       if (isAutoDiscoveryActive.current) {
-        console.log('🛑 Component unmounting - canceling auto-discovery')
         isAutoDiscoveryActive.current = false
         cycleRunning.current = false
       }
@@ -428,8 +379,6 @@ export default function ChatUI({
 
     // Start the cycle if needed - with strict safety checks for the ping-pong pattern
     if (autoCompleting && !hasStop && !cycleRunning.current) {
-      // Double-check we're not already running something
-      console.log('🔄 Auto-discovery turned on - starting first cycle')
       // We're intentionally NOT setting cycleRunning.current here
       // runDiscoveryCycle will set it at the beginning to ensure atomicity
       runDiscoveryCycle()
@@ -443,7 +392,6 @@ export default function ChatUI({
     try {
       // Don't allow manual messages during auto-discovery
       if (autoCompleting) {
-        console.log('Cannot send message while auto-discovery is in progress')
         return
       }
 
@@ -481,7 +429,6 @@ export default function ChatUI({
 
       // Don't allow saving during auto-discovery
       if (autoCompleting) {
-        console.log('Cannot save while auto-discovery is in progress')
         return
       }
 

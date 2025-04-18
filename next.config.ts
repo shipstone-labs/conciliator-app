@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Disable minification for debugging
+  swcMinify: false,
+  // Disable file compression for debugging
+  compress: false,
+  // Add source maps for debugging
+  productionBrowserSourceMaps: true,
   images: {
     remotePatterns: [
       {

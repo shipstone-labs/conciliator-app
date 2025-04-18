@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 // Define the type for our configuration
 export interface RawAppConfig {
@@ -9,7 +9,50 @@ export interface RawAppConfig {
 }
 
 const ConfigContext = createContext<RawAppConfig | undefined>(undefined)
+let configPromise: Promise<void> | undefined
+let configRef: RawAppConfig | undefined
 
+function getConfig(initialConfig: RawAppConfig) {
+  // On the server, always use the provided config
+  if (typeof window === 'undefined') {
+    return initialConfig
+  }
+
+  // Already have a cached config
+  if (configRef) {
+    return configRef
+  }
+
+  // If we have a server-provided config with ENV='server'
+  // This means we received proper server config during hydration
+  if (initialConfig && initialConfig.ENV === 'server') {
+    configRef = initialConfig
+    return initialConfig
+  }
+
+  // Already fetching config
+  if (configPromise) {
+    throw configPromise
+  }
+
+  // Need to fetch config from API
+  configPromise = fetch('/api/config')
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch config: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      configRef = data.config
+      configPromise = undefined
+      return configRef
+    })
+    .catch((error) => {
+      configPromise = undefined
+      throw error
+    }) as Promise<void>
+}
 // Provider component that makes the config available to client components
 export function ConfigProvider({
   config: initialConfig,
@@ -18,24 +61,7 @@ export function ConfigProvider({
   config: RawAppConfig
   children: React.ReactNode
 }) {
-  const [config, setConfig] = useState<RawAppConfig>(initialConfig)
-
-  if (typeof window !== 'undefined' && initialConfig.ENV === 'static') {
-    throw fetch('/api/config')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch config: ${response.status}`)
-        }
-
-        return response.json()
-      })
-      .then((data) => {
-        setConfig({
-          ...data.config,
-          CONFIG_SOURCE: 'client-api-fetch',
-        })
-      })
-  }
+  const config = useMemo(() => getConfig(initialConfig), [initialConfig])
   return (
     <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
   )

@@ -1,5 +1,10 @@
 import type { NextRequest } from 'next/server'
-import { completionAI, genSession, getLit, /* abi, */ getModel } from '../utils'
+import {
+  getCompletionAI,
+  genSession,
+  getLit,
+  /* abi, */ getModel,
+} from '../utils'
 // import { call, readContract } from "viem/actions";
 // import { filecoinCalibration } from "viem/chains";
 // import {
@@ -12,7 +17,7 @@ import { completionAI, genSession, getLit, /* abi, */ getModel } from '../utils'
 // import { privateKeyToAccount } from "viem/accounts";
 // Dynamic import for the template file
 import templateFile from './system.hbs'
-import { getFirestore } from '../firebase'
+import { getBucket, getFirestore } from '../firebase'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import {
   LIT_ABILITY,
@@ -117,71 +122,68 @@ ${data.description}`,
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )
       const litClient = await getLit()
-      const url = cidAsURL(data.downSampled.cid)
-      const downSampled: {
-        ciphertext: string
-        dataToEncryptHash: string
-        unifiedAccessControlConditions: unknown
-      } = url
-        ? await fetch(url).then((res) => {
-            if (!res.ok) {
-              throw new Error('Failed to fetch encrypted data')
-            }
-            return res.json()
-          })
-        : undefined
-      if (
-        data.downSampled.acl !==
-        JSON.stringify(downSampled.unifiedAccessControlConditions)
-      ) {
-        throw new Error('Access control conditions do not match')
+      const bucket = getBucket()
+      const filePath = `downsampled/${id}/${data.downSampled.cid}.md`
+      const file = bucket.file(filePath)
+      const [exists] = await file.exists()
+      let content = ''
+      if (!exists) {
+        const url = cidAsURL(data.downSampled.cid)
+        const downSampled: {
+          ciphertext: string
+          dataToEncryptHash: string
+          unifiedAccessControlConditions: unknown
+        } = url
+          ? await fetch(url).then((res) => {
+              if (!res.ok) {
+                throw new Error('Failed to fetch encrypted data')
+              }
+              return res.json()
+            })
+          : undefined
+        if (
+          data.downSampled.acl !==
+          JSON.stringify(downSampled.unifiedAccessControlConditions)
+        ) {
+          throw new Error('Access control conditions do not match')
+        }
+        if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
+          throw new Error('Hash does not match')
+        }
+        const accsInput =
+          await LitAccessControlConditionResource.generateResourceString(
+            JSON.parse(data.downSampled.acl),
+            data.downSampled.hash
+          )
+
+        const sessionSigs = await genSession(account, litClient, [
+          {
+            resource: new LitActionResource('*'),
+            ability: LIT_ABILITY.LitActionExecution,
+          },
+          {
+            resource: new LitAccessControlConditionResource(accsInput),
+            ability: LIT_ABILITY.AccessControlConditionDecryption,
+          },
+        ])
+
+        const _decrypted = await litClient.decrypt({
+          accessControlConditions:
+            downSampled.unifiedAccessControlConditions as Parameters<
+              typeof litClient.decrypt
+            >[0]['accessControlConditions'],
+          ciphertext: downSampled.ciphertext,
+          dataToEncryptHash: downSampled.dataToEncryptHash,
+          chain: 'filecoinCalibrationTestnet',
+          sessionSigs,
+        })
+
+        content = new TextDecoder().decode(_decrypted.decryptedData)
+        await file.save(content, { contentType: 'text/markdown' })
+      } else {
+        const [fileContent] = await file.download()
+        content = fileContent.toString()
       }
-      if (data.downSampled.hash !== downSampled.dataToEncryptHash) {
-        throw new Error('Hash does not match')
-      }
-      const accsInput =
-        await LitAccessControlConditionResource.generateResourceString(
-          JSON.parse(data.downSampled.acl),
-          data.downSampled.hash
-        )
-
-      // const { capacityDelegationAuthSig } =
-      //   await litClient.createCapacityDelegationAuthSig({
-      //     dAppOwnerWallet: {
-      //       signMessage: (message: SignableMessage) =>
-      //         account.signMessage({ message }),
-      //       getAddress: async () => account.address,
-      //     },
-      //     capacityTokenId: 162391,
-      //     delegateeAddresses: [account.address],
-      //     uses: "1",
-      //     expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 minutes
-      //   });
-
-      const sessionSigs = await genSession(account, litClient, [
-        {
-          resource: new LitActionResource('*'),
-          ability: LIT_ABILITY.LitActionExecution,
-        },
-        {
-          resource: new LitAccessControlConditionResource(accsInput),
-          ability: LIT_ABILITY.AccessControlConditionDecryption,
-        },
-      ])
-
-      const _decrypted = await litClient.decrypt({
-        accessControlConditions:
-          downSampled.unifiedAccessControlConditions as Parameters<
-            typeof litClient.decrypt
-          >[0]['accessControlConditions'],
-        ciphertext: downSampled.ciphertext,
-        dataToEncryptHash: downSampled.dataToEncryptHash,
-        chain: 'filecoinCalibrationTestnet',
-        sessionSigs,
-      })
-
-      const content = new TextDecoder().decode(_decrypted.decryptedData)
-
       const _data: Record<string, string> = {
         title: data.name,
         description: data.description,
@@ -195,7 +197,7 @@ ${data.description}`,
         }
       )
       request[0].content = _content
-      const completion = await completionAI.chat.completions.create({
+      const completion = await getCompletionAI().chat.completions.create({
         model: getModel('COMPLETION'), // Use the appropriate model
         messages: request,
       })
@@ -205,6 +207,7 @@ ${data.description}`,
             content?.split('\n') || ''
         )
         .join('\n')
+      console.log('conciliator', answerContent)
       messages.push({ content: answerContent, role: 'assistant' })
     } else {
       messages.push({ content: 'Stop', role: 'assistant' })

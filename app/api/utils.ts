@@ -5,7 +5,7 @@ import {
   createLitClient,
   LIT_NETWORK,
 } from 'lit-wrapper'
-import { OpenAI, type ClientOptions } from 'openai'
+import { OpenAI } from 'openai'
 import { PinataSDK } from 'pinata-web3'
 import {
   createPublicClient,
@@ -18,6 +18,7 @@ import {
 import { filecoinCalibration } from 'viem/chains'
 import { getFirebase } from './firebase'
 import { estimateFeesPerGas, waitForTransactionReceipt } from 'viem/actions'
+import { initAPIConfig } from '@/lib/apiUtils'
 
 const NAMES = [
   {
@@ -71,11 +72,25 @@ function readConfig(name: string) {
   return output
 }
 
-const imageConfiguration: ClientOptions = readConfig('IMAGE')
-export const imageAI = new OpenAI(imageConfiguration)
+let _imageAI: OpenAI | undefined
+export function getImageAI() {
+  initAPIConfig()
+  if (_imageAI) {
+    return _imageAI
+  }
+  _imageAI = new OpenAI(readConfig('IMAGE'))
+  return _imageAI
+}
 
-const completionConfiguration: ClientOptions = readConfig('COMPLETION')
-export const completionAI = new OpenAI(completionConfiguration)
+let _completionAI: OpenAI | undefined
+export function getCompletionAI() {
+  initAPIConfig()
+  if (_completionAI) {
+    return _completionAI
+  }
+  _completionAI = new OpenAI(readConfig('COMPLETION'))
+  return _completionAI
+}
 
 export const indexName = 'ip-embeddings'
 

@@ -37,14 +37,6 @@ const DetailIP = ({
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
 
-  // Debug logging to check mint data
-  useEffect(() => {
-    console.log("DetailIP component version: 1.1")
-    if (ideaData) {
-      console.log("Idea metadata:", ideaData.metadata)
-    }
-  }, [ideaData])
-
   useEffect(() => {
     if (isViewLoading.current) {
       return
@@ -127,19 +119,6 @@ const DetailIP = ({
             console.error(error)
           })
         const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
-        console.log({
-          balance,
-          serverBalance,
-          otherBalance,
-          contract: config.CONTRACT,
-          accessControlConditions,
-          ciphertext: ciphertext.slice(0, 100),
-          dataToEncryptHash,
-          address,
-          ideaData,
-          sessionSigs,
-          capacityDelegationAuthSig,
-        })
         const request = {
           accessControlConditions,
           // pkpPublicKey: sessionSigs?.pkpPublicKey,
@@ -528,16 +507,21 @@ const DetailIP = ({
             className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
             onClick={() => {
               if (ideaData.metadata?.mint) {
-                window.open(`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`, '_blank')
+                window.open(
+                  `https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`,
+                  '_blank'
+                )
               } else {
                 alert('No mint transaction available')
               }
             }}
           >
-            {ideaData.metadata?.mint ? '✓ Confirm Mint' : '⚠ Transaction Unavailable'}
+            {ideaData.metadata?.mint
+              ? '✓ Confirm Mint'
+              : '⚠ Transaction Unavailable'}
           </Button>
         </div>
-        
+
         {audit ? (
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-white/10">

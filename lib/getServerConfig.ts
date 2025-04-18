@@ -101,6 +101,7 @@ async function _getServerConfig(): Promise<RawAppConfig> {
     // Include only safe defaults for static generation
     // These should be public values that can be embedded in static HTML
     ENV: 'static',
+    STYTCH_APP_ID: 'sample',
   } as unknown as RawAppConfig
 }
 
@@ -127,11 +128,20 @@ export async function getServerConfig(
       const path = await import('path')
       global.__ENV_INITIALIZED = true
 
-      let filePath = process.cwd()
-      if (filePath.endsWith('.next/standalone')) {
-        filePath = path.resolve(filePath, '../..')
+      const filePath = process.cwd()
+      let localPath: string = path.resolve(filePath, '.env.runtime')
+      let where = filePath
+      localPath = path.resolve(where, '.env.runtime')
+      for (let i = 0; i < 3; i++) {
+        if (fs.existsSync(localPath)) {
+          break
+        }
+        where = path.dirname(where)
+        if (where === '/' || where === '') {
+          break
+        }
+        localPath = path.resolve(where, '.env.runtime')
       }
-      const localPath = path.resolve(filePath, '.env.local')
       if (!global.__ENV_PATH) {
         global.__ENV_PATH = fs.existsSync(localPath)
           ? localPath
@@ -144,8 +154,8 @@ export async function getServerConfig(
         global.__ENV_NEXT_RELOAD = Date.now() + 1000 * 3600
         currentConfig = Promise.resolve({
           ENV: 'static',
+          STYTCH_APP_ID: 'sample',
         } as unknown as RawAppConfig)
-        console.log('No environment file found, using static config')
         return currentConfig
       }
       const stat = fs.statSync(global.__ENV_PATH as string)

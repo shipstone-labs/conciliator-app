@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { getContractInfo, getModel, imageAI, runWithNonce } from '../utils'
+import { getContractInfo, getModel, getImageAI, runWithNonce } from '../utils'
 import { abi } from '../abi'
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -223,8 +223,8 @@ export async function POST(req: NextRequest) {
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })
-    const imageCid = await imageAI.images
-      .generate({
+    const imageCid = await getImageAI()
+      .images.generate({
         model: getModel('IMAGE'),
         prompt: `Generate and image which accurately represents a supposed document
     with the title \`${_name}\` and the descriptions \`${description}\`. If there are any word flagged as inappropriate,

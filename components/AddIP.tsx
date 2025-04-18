@@ -264,22 +264,6 @@ const AppIP = () => {
   return (
     <div className="w-full py-8">
       <div className="max-w-6xl mx-auto space-y-8 px-4">
-        {/* Logo removed from non-home pages - now using global header logo
-        <Link
-          href="/"
-          className="fixed top-6 left-6 bg-[#1A1B25] w-12 h-12 flex items-center justify-center rounded-full shadow-xl hover:bg-[#1A1B25]/90 transition-all z-50 overflow-hidden border border-[#FFD700]"
-        >
-          <img
-            src="/svg/Black+Yellow.svg"
-            alt="Home"
-            width={26}
-            height={26}
-            className="transform scale-125"
-          />
-        </Link>
-        */}
-
-        {/* Logout button removed - now in hamburger menu */}
         <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">

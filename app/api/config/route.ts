@@ -27,14 +27,20 @@ export async function GET(request: Request) {
     // Get all environment variables that start with NEXT_PUBLIC_
     const publicEnvVars: Record<string, string | Record<string, unknown>> = {}
 
+    // Add a marker to indicate this came from the API
+    publicEnvVars.ENV = 'server'
+    publicEnvVars.API_LOADED = 'true'
+    publicEnvVars.API_TIMESTAMP = Date.now().toString()
+
     Object.keys(process.env).forEach((key) => {
       const isFileCoin = key.startsWith('FILCOIN_CONTRACT')
       if (
         key.startsWith('NEXT_PUBLIC_') ||
         isFileCoin ||
-        ['STYTCH_APP_ID', 'FIREBASE_CONFIG'].includes(key)
+        ['STYTCH_APP_ID', 'FIREBASE_CONFIG', 'STYTCH_PUBLIC_TOKEN'].includes(
+          key
+        )
       ) {
-        console.log(`Key: ${key}, Value: ${process.env[key]}`)
         // Remove the NEXT_PUBLIC_ prefix
         const newKey = isFileCoin
           ? key.replace('FILCOIN_', '')

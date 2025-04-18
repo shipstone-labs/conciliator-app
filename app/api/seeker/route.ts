@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { completionAI, getModel } from '../utils'
+import { getCompletionAI, getModel } from '../utils'
 // Dynamic import for the template file
 import templateFile from './system.hbs'
 import { getUser } from '../stytch'
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         return _data[name.trim()] || ''
       }
     )
-    const completion = await completionAI.chat.completions.create({
+    const completion = await getCompletionAI().chat.completions.create({
       model: getModel('COMPLETION'), // Use the appropriate model
       messages: [
         {

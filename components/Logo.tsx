@@ -7,12 +7,6 @@ interface LogoProps {
 }
 
 export const Logo: FC<LogoProps> = ({ showText = true }) => {
-  // Log Logo component render
-  console.log(
-    `[HYDRATION][${typeof window === 'undefined' ? 'SERVER' : 'CLIENT'}] Logo component rendering`,
-    { showText }
-  )
-
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto mb-10">
       {/* Logo Image */}

@@ -11,6 +11,9 @@ import { getServerConfig } from '@/lib/getServerConfig'
 import { Suspense } from 'react'
 import Loading from '@/components/Loading'
 
+// Force dynamic rendering for this layout
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const viewport: Viewport = {
