@@ -21,7 +21,7 @@ ENV STYTCH_ENV=test
 RUN corepack enable pnpm && \
   npx @biomejs/biome@^1.9.4 lint . && \
   npx @biomejs/biome@^1.9.4 check . && \
-  pnpm run build:plain
+  NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:plain
 
 # Production image, copy all the files and run next
 FROM node:22-alpine
