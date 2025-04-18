@@ -3,8 +3,6 @@ import { getServerConfig } from '@/lib/getServerConfig'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { withTracing } from '@/lib/apiWithTracing'
 import { logger } from '@/lib/tracing'
-import { getContractInfo } from '../utils'
-import { keccak256, toBytes } from 'viem'
 
 // Set runtime to nodejs for this API route
 export const runtime = 'nodejs'
