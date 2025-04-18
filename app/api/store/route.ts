@@ -12,6 +12,7 @@ import { fetch } from 'undici'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { decode, encode } from 'cbor'
 
 export const runtime = 'nodejs'
 
@@ -200,6 +201,13 @@ export async function POST(req: NextRequest) {
         ...extra,
       })
     }
+    const encryptedBlobContent = encode(
+      encrypted.dataToEncryptHash,
+      encrypted.unifiedAccessControlConditions,
+      Buffer.from(encrypted.ciphertext, 'base64')
+    )
+    const decoded = decode(encryptedBlobContent)
+    console.log(encrypted, decoded)
     const encryptedBlob = new Blob(
       [new TextEncoder().encode(JSON.stringify(encrypted))],
       {
