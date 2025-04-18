@@ -46,7 +46,7 @@ export async function initServerTracing() {
   isInitialized = true
 
   console.log('OpenTelemetry: Initializing server instrumentation')
-  
+
   // Try to dynamically import the gRPC instrumentation
   try {
     // We use dynamic import to ensure this only happens on the server side
@@ -54,7 +54,10 @@ export async function initServerTracing() {
     GrpcInstrumentation = grpcModule.GrpcInstrumentation
     console.log('OpenTelemetry: Successfully loaded gRPC instrumentation')
   } catch (error) {
-    console.warn('OpenTelemetry: gRPC instrumentation could not be loaded', error)
+    console.warn(
+      'OpenTelemetry: gRPC instrumentation could not be loaded',
+      error
+    )
     // We'll continue without gRPC instrumentation
   }
 
@@ -121,14 +124,14 @@ export async function initServerTracing() {
         },
       }),
       new ExpressInstrumentation(),
-    ];
-    
+    ]
+
     // Add gRPC instrumentation if available
     if (GrpcInstrumentation) {
-      instrumentations.push(new GrpcInstrumentation());
-      console.log('OpenTelemetry: Added gRPC instrumentation');
+      instrumentations.push(new GrpcInstrumentation())
+      console.log('OpenTelemetry: Added gRPC instrumentation')
     }
-    
+
     // Create a new SDK instance
     sdk = new NodeSDK({
       resource: combinedResource,
