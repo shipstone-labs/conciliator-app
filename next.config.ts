@@ -59,7 +59,8 @@ const nextConfig: NextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        punycode: false,
+        punycode: require.resolve('./lib/shims/punycode.js'),
+        depd: require.resolve('./lib/shims/depd.js'),
         fs: false,
         path: false,
         crypto: false, // resolve(__dirname, "node_modules/crypto-browserify"),
@@ -80,6 +81,9 @@ const nextConfig: NextConfig = {
         crypto: false,
         'node:stream': false,
         'node:buffer': false,
+        'node:punycode': require.resolve('./lib/shims/punycode.js'),
+        punycode: require.resolve('./lib/shims/punycode.js'),
+        depd: require.resolve('./lib/shims/depd.js'),
         '@walletconnect/types': false,
         '@walletconnect/web3-provider': false,
         '@walletconnect/core': false,
@@ -103,6 +107,9 @@ const nextConfig: NextConfig = {
         util: 'node:util',
         net: 'node:net',
         tls: 'node:tls',
+        'node:punycode': require.resolve('./lib/shims/punycode.js'),
+        punycode: require.resolve('./lib/shims/punycode.js'),
+        depd: require.resolve('./lib/shims/depd.js'),
       }
 
       // Tell webpack not to bundle these modules for server builds
