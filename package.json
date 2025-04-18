@@ -15,11 +15,13 @@
     "start": "cross-env ENV NODE_NO_WARNINGS=1 next start",
     "lint": "biome lint .",
     "lint:biome": "biome lint .",
-    "check": "biome check . && tsc --noEmit",
+    "check": "biome check . ; BIOME_CODE=$? ; tsc --noEmit ; TSC_CODE=$? ; (exit $(( BIOME_CODE || TSC_CODE )))",
     "format": "biome format --write .",
     "prepages:build": "pnpm run build-wrappers",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
-    "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08"
+    "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08",
+    "prepare": "husky",
+    "lint-staged": "lint-staged"
   },
   "dependencies": {
     "@google-cloud/kms": "^5.0.1",
@@ -70,6 +72,7 @@
     "husky": "^9.1.7",
     "input-otp": "^1.4.2",
     "lilypad-wrapper": "workspace:*",
+    "lint-staged": "^15.5.1",
     "lit-wrapper": "workspace:*",
     "lucide-react": "^0.475.0",
     "next": "15.1.7",
@@ -140,5 +143,15 @@
     "@walletconnect/types": "2.9.2",
     "@noble/ed25519": "2.1.0"
   },
-  "packageManager": "pnpm@10.7.1"
+  "packageManager": "pnpm@10.7.1",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "biome lint",
+      "biome check",
+      "tsc --noEmit"
+    ],
+    "*.{json}": [
+      "biome check"
+    ]
+  }
 }

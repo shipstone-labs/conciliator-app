@@ -45,3 +45,4 @@ next-env.d.ts
 CLAUDE.md
 .dev.vars
 /conciliator-*.json
+!/.husky
