@@ -319,7 +319,7 @@ steps:
       - |
         if [ -f /workspace/failed ]; then
           echo "Extracting errors"
-          npm install -g strip-ansi
+          npm install strip-ansi
           node ./extract-build-errors.mjs \
             /workspace/raw_error.log > /workspace/raw_error.md
           cat /workspace/raw_error.md

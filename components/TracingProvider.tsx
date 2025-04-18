@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { useEffect, ReactNode } from 'react';
-import { initBrowserTracing } from '@/lib/browser-tracing';
+import { useEffect, type ReactNode } from 'react'
+import { initBrowserTracing } from '@/lib/browser-tracing'
 
 export function TracingProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Initialize browser tracing on client-side only
     if (typeof window !== 'undefined') {
-      initBrowserTracing();
+      initBrowserTracing()
     }
-  }, []);
+  }, [])
 
-  return <>{children}</>;
+  return <>{children}</>
 }

@@ -52,17 +52,22 @@ export function initBrowserTracing() {
     const provider = new WebTracerProvider({
       resource: customResource,
     })
-    
+
     // Create and configure span processor - the method is different in v2.x
     const batchProcessor = new BatchSpanProcessor(exporter)
-    
+
     // We need to get the internal tracer provider for v2.0.0
     // Using type assertion to suppress TypeScript errors
-    const tracerProvider = provider as any;
-    if (tracerProvider._tracerProvider && typeof tracerProvider._tracerProvider.addSpanProcessor === 'function') {
-      tracerProvider._tracerProvider.addSpanProcessor(batchProcessor);
+    const tracerProvider = provider as any
+    if (
+      tracerProvider._tracerProvider &&
+      typeof tracerProvider._tracerProvider.addSpanProcessor === 'function'
+    ) {
+      tracerProvider._tracerProvider.addSpanProcessor(batchProcessor)
     } else {
-      console.warn('Could not add span processor - incompatible OpenTelemetry SDK version');
+      console.warn(
+        'Could not add span processor - incompatible OpenTelemetry SDK version'
+      )
     }
 
     // Set global propagator
@@ -91,10 +96,14 @@ export function initBrowserTracing() {
 
     isInitialized = true
     console.log('Browser tracing initialized')
-    console.log('Trace attributes:', Object.fromEntries(
-      Object.entries(customResource.attributes)
-        .filter(([key]) => key.startsWith('service.') || key.startsWith('deployment.'))
-    ))
+    console.log(
+      'Trace attributes:',
+      Object.fromEntries(
+        Object.entries(customResource.attributes).filter(
+          ([key]) => key.startsWith('service.') || key.startsWith('deployment.')
+        )
+      )
+    )
   } catch (e) {
     console.error('Failed to initialize browser tracing:', e)
   }
@@ -106,7 +115,7 @@ export const browserTracer = trace.getTracer('conciliate-app-frontend')
 // Helper to create client-side spans
 export function createClientSpan(
   name: string,
-  fn: () => void,
+  fn?: () => void,
   attributes = {}
 ) {
   return browserTracer.startActiveSpan(name, (span) => {
@@ -117,7 +126,7 @@ export function createClientSpan(
       })
 
       // Execute the function
-      const result = fn()
+      const result = fn?.()
       span.end()
       return result
     } catch (error) {
@@ -135,14 +144,14 @@ export function useTracing() {
   }
 
   return {
-    traceFunction: (name: string, fn: () => void, attributes = {}) => {
+    traceFunction: (name: string, fn?: () => void, attributes = {}) => {
       return createClientSpan(name, fn, attributes)
     },
     tracePromise: async <T>(
       name: string,
-      fn: () => Promise<T>,
+      fn?: () => Promise<T | undefined> | undefined,
       attributes = {}
-    ): Promise<T> => {
+    ): Promise<T | undefined> => {
       return browserTracer.startActiveSpan(name, async (span) => {
         try {
           // Add attributes
@@ -151,7 +160,7 @@ export function useTracing() {
           })
 
           // Execute the function
-          const result = await fn()
+          const result = await fn?.()
           span.end()
           return result
         } catch (error) {
