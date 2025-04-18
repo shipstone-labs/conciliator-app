@@ -78,5 +78,23 @@ export default {
     warn(warning)
   },
   // We don't want ANY externals - everything should be bundled
-  external: [],
+  external: [
+    '@lit-protocol/accs-schemas',
+    '@lit-protocol/auth-helpers',
+    '@lit-protocol/constants',
+    '@lit-protocol/contracts',
+    // '@lit-protocol/contracts-sdk',
+    '@lit-protocol/crypto',
+    // '@lit-protocol/lit-auth-client',
+    '@lit-protocol/lit-node-client',
+    '@lit-protocol/types',
+    // '@simplewebauthn/browser',
+    'blakejs',
+    'browser-headers',
+    'cross-fetch',
+    'js-sha256',
+    // 'multiformats',
+    // 'uint8arrays',
+    'utf-8-validate',
+  ],
 }

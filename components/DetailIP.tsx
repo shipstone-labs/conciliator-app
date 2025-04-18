@@ -16,6 +16,7 @@ import Markdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
+import * as cbor from 'cbor-web'
 
 const DetailIP = ({
   docId,
@@ -55,25 +56,72 @@ const DetailIP = ({
           return
         }
 
-        const data = await fetch(url)
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error('Failed to fetch encrypted data')
-            }
-            return res.json()
-          })
-          .then(
-            (data) =>
-              data as {
-                ciphertext: string
-                dataToEncryptHash: string
-                unifiedAccessControlConditions: unknown
+        const arrayData = url
+          ? await fetch(url).then((res) => {
+              if (!res.ok) {
+                throw new Error('Failed to fetch encrypted data')
               }
-          )
+              return res.arrayBuffer()
+            })
+          : undefined
+
+        let data: {
+          dataToEncryptHash: string
+          unifiedAccessControlConditions: unknown[]
+          ciphertext: string
+        }
+        try {
+          if (!arrayData) {
+            throw new Error('No data')
+          }
+          const content = await cbor.decodeAll(new Uint8Array(arrayData))
+          const [tag, network] = content
+          if (!tag) {
+            throw new Error('No tag')
+          }
+          if (tag !== 'LIT-ENCRYPTED') {
+            throw new Error('Invalid tag')
+          }
+          if (content.length !== 8 && content.length !== 7) {
+            throw new Error('Invalid content length')
+          }
+          if (
+            content.length === 8 &&
+            network !== 'filecoinCalibrationTestnet'
+          ) {
+            throw new Error('Invalid network')
+          }
+          const [
+            dataToEncryptHash,
+            unifiedAccessControlConditions,
+            _ciphertext,
+          ] = content.slice(-3)
+          data = {
+            dataToEncryptHash,
+            unifiedAccessControlConditions,
+            ciphertext: _ciphertext.toString('base64'),
+          }
+        } catch {
+          data = JSON.parse(
+            new TextDecoder().decode(arrayData || new Uint8Array())
+          ) as {
+            dataToEncryptHash: string
+            unifiedAccessControlConditions: unknown[]
+            ciphertext: string
+          }
+        }
+
         const { ciphertext, dataToEncryptHash } = data
         const { sessionSigs, capacityDelegationAuthSig } =
           await delegatedSessionSigs(docId)
         const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
+        console.log({
+          sessionSigs,
+          capacityDelegationAuthSig,
+          accessControlConditions,
+          data,
+          ciphertext: data.ciphertext.slice(0, 100),
+        })
         const request = {
           accessControlConditions,
           // pkpPublicKey: sessionSigs?.pkpPublicKey,

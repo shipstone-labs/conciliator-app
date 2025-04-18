@@ -21,10 +21,14 @@ async function build() {
 
     const file = resolve('./dist/index.js')
     const content = readFileSync(file, 'utf-8')
-    writeFileSync(
-      file,
-      content.replace(/console.log\('JWT body: ', parsedBody\);\n/g, '')
+    const newContent = content.replace(
+      /console.log\('JWT body: ', parsedBody\);\n/g,
+      ''
     )
+    if (newContent === content) {
+      throw new Error('No changes made to the file')
+    }
+    writeFileSync(file, newContent)
 
     console.log('✅ web-storage-wrapper built successfully!')
   } catch (error) {

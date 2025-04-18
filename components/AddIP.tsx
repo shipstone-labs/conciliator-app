@@ -49,7 +49,7 @@ const AppIP = () => {
   const [docId, setDocId] = useState('')
   const [status, setStatus] = useState<IPAudit>()
   const [localStatus, setLocalStatus] = useState('')
-  const { litClient, sessionSigs } = useSession()
+  const { litClient, fbPromise, litPromise, sessionSigs } = useSession()
   const config = useConfig()
   useEffect(() => {
     if (docId) {
@@ -67,6 +67,8 @@ const AppIP = () => {
 
     // Normal production flow
     try {
+      await litPromise
+      await fbPromise
       if (!litClient) {
         throw new Error('Lit client is not initialized')
       }
@@ -224,6 +226,8 @@ const AppIP = () => {
     description,
     name,
     litClient,
+    fbPromise,
+    litPromise,
     businessModel,
     isDayEnabled,
     isWeekEnabled,
