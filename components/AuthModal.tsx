@@ -21,7 +21,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const stytch = useStytch()
   const { isLoggingOff } = useContext(sessionContext)
   const { traceComponent, traceAction } = useClientTracing()
-  
+
   // Trace component lifecycle
   traceComponent('AuthModal', { isOpen: String(isOpen) })
   // Authentication states
@@ -51,62 +51,74 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   // Handle sending email OTP
   const handleSendEmailOTP = useCallback(async () => {
-    return traceAction('SendEmailOTP', async () => {
-      if (!email || !email.includes('@')) {
-        setError('Please enter a valid email address')
-        return
-      }
+    return traceAction(
+      'SendEmailOTP',
+      async () => {
+        if (!email || !email.includes('@')) {
+          setError('Please enter a valid email address')
+          return
+        }
 
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const response = await stytch.otps.email.loginOrCreate(email, {
-          expiration_minutes: 10,
-        })
-
-        setMethodId(response.method_id)
-        setShowCodeInput(true)
+        setIsLoading(true)
         setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to send email OTP')
-        console.error('Error sending email OTP:', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }, { email })
+
+        try {
+          const response = await stytch.otps.email.loginOrCreate(email, {
+            expiration_minutes: 10,
+          })
+
+          setMethodId(response.method_id)
+          setShowCodeInput(true)
+          setError(null)
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : 'Failed to send email OTP'
+          )
+          console.error('Error sending email OTP:', err)
+        } finally {
+          setIsLoading(false)
+        }
+      },
+      { email }
+    )
   }, [email, stytch, traceAction])
 
   // Handle sending SMS OTP
   const handleSendSmsOTP = useCallback(async () => {
-    return traceAction('SendSmsOTP', async () => {
-      if (!phoneNumber || phoneNumber.length < 10) {
-        setError('Please enter a valid phone number')
-        return
-      }
+    return traceAction(
+      'SendSmsOTP',
+      async () => {
+        if (!phoneNumber || phoneNumber.length < 10) {
+          setError('Please enter a valid phone number')
+          return
+        }
 
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const formattedPhone = phoneNumber.startsWith('+')
-          ? phoneNumber
-          : `+1${phoneNumber.replace(/[^0-9]/g, '')}`
-
-        const response = await stytch.otps.sms.loginOrCreate(formattedPhone, {
-          expiration_minutes: 10,
-        })
-
-        setMethodId(response.method_id)
-        setShowCodeInput(true)
+        setIsLoading(true)
         setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to send SMS OTP')
-        console.error('Error sending SMS OTP:', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }, { phoneNumber })
+
+        try {
+          const formattedPhone = phoneNumber.startsWith('+')
+            ? phoneNumber
+            : `+1${phoneNumber.replace(/[^0-9]/g, '')}`
+
+          const response = await stytch.otps.sms.loginOrCreate(formattedPhone, {
+            expiration_minutes: 10,
+          })
+
+          setMethodId(response.method_id)
+          setShowCodeInput(true)
+          setError(null)
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : 'Failed to send SMS OTP'
+          )
+          console.error('Error sending SMS OTP:', err)
+        } finally {
+          setIsLoading(false)
+        }
+      },
+      { phoneNumber }
+    )
   }, [phoneNumber, stytch, traceAction])
 
   const handleEnter = useCallback((callback: () => void) => {
@@ -120,38 +132,52 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   // Handle verifying OTP code
   const handleVerifyOTP = useCallback(async () => {
-    return traceAction('VerifyOTP', async () => {
-      if (!code || !methodId) {
-        setError('Please enter the verification code')
-        return
-      }
-
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        await stytch?.otps.authenticate(code, methodId, {
-          session_duration_minutes: 60,
-        })
-
-        // Authentication successful
-        setError(null)
-
-        // Call onSuccess if provided
-        if (onSuccess) {
-          onSuccess()
+    return traceAction(
+      'VerifyOTP',
+      async () => {
+        if (!code || !methodId) {
+          setError('Please enter the verification code')
+          return
         }
 
-        // Close the modal
-        handleClose()
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Invalid verification code')
-        console.error('Error verifying OTP:', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }, { methodId, codeLength: code.length, rememberDevice })
-  }, [code, methodId, onSuccess, stytch, handleClose, traceAction, rememberDevice])
+        setIsLoading(true)
+        setError(null)
+
+        try {
+          await stytch?.otps.authenticate(code, methodId, {
+            session_duration_minutes: 60,
+          })
+
+          // Authentication successful
+          setError(null)
+
+          // Call onSuccess if provided
+          if (onSuccess) {
+            onSuccess()
+          }
+
+          // Close the modal
+          handleClose()
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : 'Invalid verification code'
+          )
+          console.error('Error verifying OTP:', err)
+        } finally {
+          setIsLoading(false)
+        }
+      },
+      { methodId, codeLength: code.length, rememberDevice }
+    )
+  }, [
+    code,
+    methodId,
+    onSuccess,
+    stytch,
+    handleClose,
+    traceAction,
+    rememberDevice,
+  ])
 
   // Reset form to try a different method
   const handleBack = useCallback(() => {
