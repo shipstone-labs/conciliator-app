@@ -34,7 +34,9 @@ const AppIP = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [businessModel, setBusinessModel] = useState('Protected Evaluation')
-  const [evaluationPeriod, setEvaluationPeriod] = useState('one-day')
+  const [isDayEnabled, setIsDayEnabled] = useState(false)
+  const [isWeekEnabled, setIsWeekEnabled] = useState(false)
+  const [isMonthEnabled, setIsMonthEnabled] = useState(false)
   const [dayPrice, setDayPrice] = useState('0')
   const [weekPrice, setWeekPrice] = useState('0')
   const [monthPrice, setMonthPrice] = useState('0')
@@ -174,15 +176,19 @@ const AppIP = () => {
             downSampledUnifiedAccessControlConditions,
         },
         category: businessModel || 'Intellectual Property',
-        tags: ['IP', evaluationPeriod],
+        tags: ['IP', 'custom-pricing'],
         // Include all terms information
         terms: {
           businessModel,
-          evaluationPeriod,
+          enabledPeriods: {
+            day: isDayEnabled,
+            week: isWeekEnabled,
+            month: isMonthEnabled,
+          },
           pricing: {
-            dayPrice,
-            weekPrice,
-            monthPrice,
+            dayPrice: isDayEnabled ? dayPrice : '0',
+            weekPrice: isWeekEnabled ? weekPrice : '0',
+            monthPrice: isMonthEnabled ? monthPrice : '0',
           },
           ndaRequired: ndaConfirmed,
         },
@@ -216,7 +222,9 @@ const AppIP = () => {
     name,
     litClient,
     businessModel,
-    evaluationPeriod,
+    isDayEnabled,
+    isWeekEnabled,
+    isMonthEnabled,
     dayPrice,
     weekPrice,
     monthPrice,
@@ -529,20 +537,18 @@ const AppIP = () => {
                     <div className="space-y-3">
                       <div
                         className={`flex items-center space-x-2 p-3 border ${
-                          evaluationPeriod === 'one-day'
+                          isDayEnabled
                             ? 'border-primary/50'
                             : 'border-white/20'
                         } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod('one-day')}
+                        onClick={() => setIsDayEnabled(!isDayEnabled)}
                       >
                         <input
-                          type="radio"
+                          type="checkbox"
                           id="one-day"
-                          name="evaluation-period"
-                          value="one-day"
-                          checked={evaluationPeriod === 'one-day'}
-                          onChange={() => setEvaluationPeriod('one-day')}
-                          className="text-primary rounded-full"
+                          checked={isDayEnabled}
+                          onChange={() => setIsDayEnabled(!isDayEnabled)}
+                          className="text-primary rounded"
                         />
                         <label
                           htmlFor="one-day"
@@ -554,11 +560,18 @@ const AppIP = () => {
                           <span className="text-white/70 mr-2">$</span>
                           <button
                             type="button"
-                            className="py-1 px-3 rounded bg-muted/40 border border-white/20 text-white"
+                            className={`py-1 px-3 rounded ${
+                              isDayEnabled 
+                                ? 'bg-muted/40 border border-white/20 text-white'
+                                : 'bg-muted/20 border border-white/10 text-white/50 cursor-not-allowed'
+                            }`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setIsDayPriceModalOpen(true);
+                              if (isDayEnabled) {
+                                setIsDayPriceModalOpen(true);
+                              }
                             }}
+                            disabled={!isDayEnabled}
                           >
                             {dayPrice}
                           </button>
@@ -567,20 +580,18 @@ const AppIP = () => {
 
                       <div
                         className={`flex items-center space-x-2 p-3 border ${
-                          evaluationPeriod === 'one-week'
+                          isWeekEnabled
                             ? 'border-primary/50'
                             : 'border-white/20'
                         } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod('one-week')}
+                        onClick={() => setIsWeekEnabled(!isWeekEnabled)}
                       >
                         <input
-                          type="radio"
+                          type="checkbox"
                           id="one-week"
-                          name="evaluation-period"
-                          value="one-week"
-                          checked={evaluationPeriod === 'one-week'}
-                          onChange={() => setEvaluationPeriod('one-week')}
-                          className="text-primary rounded-full"
+                          checked={isWeekEnabled}
+                          onChange={() => setIsWeekEnabled(!isWeekEnabled)}
+                          className="text-primary rounded"
                         />
                         <label
                           htmlFor="one-week"
@@ -592,11 +603,18 @@ const AppIP = () => {
                           <span className="text-white/70 mr-2">$</span>
                           <button
                             type="button"
-                            className="py-1 px-3 rounded bg-muted/40 border border-white/20 text-white"
+                            className={`py-1 px-3 rounded ${
+                              isWeekEnabled 
+                                ? 'bg-muted/40 border border-white/20 text-white'
+                                : 'bg-muted/20 border border-white/10 text-white/50 cursor-not-allowed'
+                            }`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setIsWeekPriceModalOpen(true);
+                              if (isWeekEnabled) {
+                                setIsWeekPriceModalOpen(true);
+                              }
                             }}
+                            disabled={!isWeekEnabled}
                           >
                             {weekPrice}
                           </button>
@@ -605,20 +623,18 @@ const AppIP = () => {
 
                       <div
                         className={`flex items-center space-x-2 p-3 border ${
-                          evaluationPeriod === 'one-month'
+                          isMonthEnabled
                             ? 'border-primary/50'
                             : 'border-white/20'
                         } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod('one-month')}
+                        onClick={() => setIsMonthEnabled(!isMonthEnabled)}
                       >
                         <input
-                          type="radio"
+                          type="checkbox"
                           id="one-month"
-                          name="evaluation-period"
-                          value="one-month"
-                          checked={evaluationPeriod === 'one-month'}
-                          onChange={() => setEvaluationPeriod('one-month')}
-                          className="text-primary rounded-full"
+                          checked={isMonthEnabled}
+                          onChange={() => setIsMonthEnabled(!isMonthEnabled)}
+                          className="text-primary rounded"
                         />
                         <label
                           htmlFor="one-month"
@@ -630,11 +646,18 @@ const AppIP = () => {
                           <span className="text-white/70 mr-2">$</span>
                           <button
                             type="button"
-                            className="py-1 px-3 rounded bg-muted/40 border border-white/20 text-white"
+                            className={`py-1 px-3 rounded ${
+                              isMonthEnabled 
+                                ? 'bg-muted/40 border border-white/20 text-white'
+                                : 'bg-muted/20 border border-white/10 text-white/50 cursor-not-allowed'
+                            }`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setIsMonthPriceModalOpen(true);
+                              if (isMonthEnabled) {
+                                setIsMonthPriceModalOpen(true);
+                              }
                             }}
+                            disabled={!isMonthEnabled}
                           >
                             {monthPrice}
                           </button>
@@ -682,6 +705,13 @@ const AppIP = () => {
                         alert('Please confirm you have a signed NDA in place')
                         return
                       }
+                      
+                      // Check if at least one duration is selected
+                      if (!isDayEnabled && !isWeekEnabled && !isMonthEnabled) {
+                        alert('Please select at least one evaluation period')
+                        return
+                      }
+                      
                       // Save terms logic would go here
                       setTermsAccepted(true)
                       setIsTermsModalOpen(false)
