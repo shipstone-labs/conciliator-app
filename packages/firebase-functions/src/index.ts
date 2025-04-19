@@ -11,6 +11,9 @@
 // import * as logger from "firebase-functions/logger";
 import { onCustomEventPublished } from 'firebase-functions/v2/eventarc'
 
+// Export secrets functions
+export { loadSecrets } from './secrets'
+
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 
