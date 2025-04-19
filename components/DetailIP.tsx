@@ -60,11 +60,29 @@ const DetailIP = ({
 
   const buy = useCallback(
     async (
-      options: Record<string, unknown> & { metadata: Record<string, unknown> }
+      options: Record<string, unknown> & {
+        metadata: Record<string, unknown>
+        duration?: 'day' | 'week' | 'month' | 'year'
+      }
     ) => {
       await litPromise
       if (!litClient) {
         throw new Error('No litClient')
+      }
+      let duration = 0
+      switch (options.duration) {
+        case 'day':
+          duration = 24 * 3600 * 1000 // 1 day
+          break
+        case 'week':
+          duration = 7 * 24 * 3600 * 1000 // 7 days
+          break
+        case 'year':
+          duration = 365 * 24 * 3600 * 1000 // 1 year
+          break
+        case 'month':
+          duration = 30 * 24 * 3600 * 1000 // 30 days
+          break
       }
       const {
         metadata: {
@@ -87,7 +105,9 @@ const DetailIP = ({
       if (!sessionSigs || !originalSessionSigs?.pkpPublicKey) {
         throw new Error('No sessionSigs')
       }
-      console.log({ hash, message, sessionSigs })
+      if (!ideaData?.metadata?.contract) {
+        throw new Error('No contract address')
+      }
       const wallet = new PKPEthersWallet({
         litNodeClient: litClient,
         pkpPubKey: originalSessionSigs?.pkpPublicKey,
@@ -115,11 +135,14 @@ const DetailIP = ({
           ...options,
           metadata: {
             ...options.metadata,
+            owner: user?.user_id,
             tokenId,
             to,
-            contractAddress,
+            contract: ideaData?.metadata?.contract,
             docId,
             signature: signature,
+            duration,
+            expiration: Date.now() + duration,
           },
         }
       )
