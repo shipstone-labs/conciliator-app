@@ -35,11 +35,14 @@ const AppIP = () => {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [businessModel, setBusinessModel] = useState('Protected Evaluation')
   const [evaluationPeriod, setEvaluationPeriod] = useState('one-day')
-  const [dayPrice, setDayPrice] = useState('5.00')
-  const [weekPrice, setWeekPrice] = useState('25.00')
-  const [monthPrice, setMonthPrice] = useState('90.00')
+  const [dayPrice, setDayPrice] = useState('0')
+  const [weekPrice, setWeekPrice] = useState('0')
+  const [monthPrice, setMonthPrice] = useState('0')
   const [ndaConfirmed, setNdaConfirmed] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [isDayPriceModalOpen, setIsDayPriceModalOpen] = useState(false)
+  const [isWeekPriceModalOpen, setIsWeekPriceModalOpen] = useState(false)
+  const [isMonthPriceModalOpen, setIsMonthPriceModalOpen] = useState(false)
   const stytchClient = useStytch()
   const [docId, setDocId] = useState('')
   const [status, setStatus] = useState<IPAudit>()
@@ -549,15 +552,16 @@ const AppIP = () => {
                         </label>
                         <div className="flex items-center">
                           <span className="text-white/70 mr-2">$</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={dayPrice}
-                            onChange={(e) => setDayPrice(e.target.value)}
-                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <button
+                            type="button"
+                            className="py-1 px-3 rounded bg-muted/40 border border-white/20 text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsDayPriceModalOpen(true);
+                            }}
+                          >
+                            {dayPrice}
+                          </button>
                         </div>
                       </div>
 
@@ -586,15 +590,16 @@ const AppIP = () => {
                         </label>
                         <div className="flex items-center">
                           <span className="text-white/70 mr-2">$</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={weekPrice}
-                            onChange={(e) => setWeekPrice(e.target.value)}
-                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <button
+                            type="button"
+                            className="py-1 px-3 rounded bg-muted/40 border border-white/20 text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsWeekPriceModalOpen(true);
+                            }}
+                          >
+                            {weekPrice}
+                          </button>
                         </div>
                       </div>
 
@@ -623,15 +628,16 @@ const AppIP = () => {
                         </label>
                         <div className="flex items-center">
                           <span className="text-white/70 mr-2">$</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={monthPrice}
-                            onChange={(e) => setMonthPrice(e.target.value)}
-                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <button
+                            type="button"
+                            className="py-1 px-3 rounded bg-muted/40 border border-white/20 text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsMonthPriceModalOpen(true);
+                            }}
+                          >
+                            {monthPrice}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -697,6 +703,168 @@ const AppIP = () => {
               accept=".txt,.md,.markdown,text/plain,text/markdown"
               className="hidden"
             />
+
+            {/* Day Price Modal */}
+            <Modal
+              isOpen={isDayPriceModalOpen}
+              onClose={() => setIsDayPriceModalOpen(false)}
+              title="Select Daily Price"
+            >
+              <div className="space-y-4">
+                <p className="text-white/90">
+                  Select a price for one day access:
+                </p>
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDayPrice('0');
+                      setIsDayPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $0
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDayPrice('50');
+                      setIsDayPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $50
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDayPrice('100');
+                      setIsDayPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $100
+                  </button>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsDayPriceModalOpen(false)}
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+
+            {/* Week Price Modal */}
+            <Modal
+              isOpen={isWeekPriceModalOpen}
+              onClose={() => setIsWeekPriceModalOpen(false)}
+              title="Select Weekly Price"
+            >
+              <div className="space-y-4">
+                <p className="text-white/90">
+                  Select a price for one week access:
+                </p>
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWeekPrice('0');
+                      setIsWeekPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $0
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWeekPrice('50');
+                      setIsWeekPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $50
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWeekPrice('200');
+                      setIsWeekPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $200
+                  </button>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsWeekPriceModalOpen(false)}
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+
+            {/* Month Price Modal */}
+            <Modal
+              isOpen={isMonthPriceModalOpen}
+              onClose={() => setIsMonthPriceModalOpen(false)}
+              title="Select Monthly Price"
+            >
+              <div className="space-y-4">
+                <p className="text-white/90">
+                  Select a price for one month access:
+                </p>
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMonthPrice('0');
+                      setIsMonthPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $0
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMonthPrice('200');
+                      setIsMonthPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $200
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMonthPrice('800');
+                      setIsMonthPriceModalOpen(false);
+                    }}
+                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
+                  >
+                    $800
+                  </button>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsMonthPriceModalOpen(false)}
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </Modal>
           </CardContent>
         </Card>
       </div>
