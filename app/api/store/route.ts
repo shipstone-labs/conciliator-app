@@ -292,6 +292,7 @@ export async function POST(req: NextRequest) {
         : {}),
       creator: user.user.user_id,
       metadata: {
+        from: to,
         cid: '',
         tokenId,
         contract: { address: contract, name: contract_name },
