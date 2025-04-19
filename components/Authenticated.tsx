@@ -18,6 +18,8 @@ import {
   LitAccessControlConditionResource,
   type LitNodeClient,
   type AuthMethod,
+  type SessionSigsMap,
+  type AuthSig,
 } from 'lit-wrapper'
 import { publicKeyToAddress } from 'viem/utils'
 import {
@@ -27,6 +29,7 @@ import {
 } from 'firebase/auth'
 import { usePathname } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
+import type { Address } from 'viem'
 
 export type Session = {
   litClient?: LitNodeClient
@@ -34,13 +37,13 @@ export type Session = {
   sessionSigs?: {
     authMethod: AuthMethod
     pkpPublicKey: string
-    address: `0x${string}`
-    sessionSigs: unknown
+    address: Address
+    sessionSigs: SessionSigsMap
   }
   delegatedSessionSigs?: (docId: string) => Promise<{
-    sessionSigs: unknown
-    capacityDelegationAuthSig: unknown
-    address: `0x${string}`
+    sessionSigs: SessionSigsMap
+    capacityDelegationAuthSig: AuthSig
+    address: Address
   }>
   fbUser?: UserCredential
   fbPromise?: Promise<void>

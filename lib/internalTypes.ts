@@ -11,6 +11,10 @@ export type IPDocJSON = {
     mint: `0x${string}`
     transfer: `0x${string}`
     update: `0x${string}`
+    contract?: {
+      address?: `0x${string}`
+      name?: string
+    }
   }
   // Terms information for the idea
   terms?: {
