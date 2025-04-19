@@ -30,6 +30,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getUser } from '../stytch'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { LRUCache } from 'next/dist/server/lib/lru-cache'
+import { decodeAll } from 'cbor'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
@@ -129,18 +130,49 @@ ${data.description}`,
       if (!contentPromise) {
         const getContent = async () => {
           const url = cidAsURL()
-          const downSampled: {
-            ciphertext: string
-            dataToEncryptHash: string
-            unifiedAccessControlConditions: unknown
-          } = url
+          const downSampledArray = url
             ? await fetch(url).then((res) => {
                 if (!res.ok) {
                   throw new Error('Failed to fetch encrypted data')
                 }
-                return res.json()
+                return res.arrayBuffer()
               })
             : undefined
+          let downSampled: {
+            dataToEncryptHash: string
+            unifiedAccessControlConditions: unknown[]
+            ciphertext: string
+          }
+          try {
+            if (!downSampledArray) {
+              throw new Error('No data')
+            }
+            const [
+              tag,
+              ,
+              ,
+              ,
+              dataToEncryptHash,
+              unifiedAccessControlConditions,
+              _ciphertext,
+            ] = await decodeAll(downSampledArray)
+            if (tag !== 'LIT-ENCRYPTED') {
+              throw new Error('Invalid tag')
+            }
+            downSampled = {
+              dataToEncryptHash,
+              unifiedAccessControlConditions,
+              ciphertext: _ciphertext.toString('base64'),
+            }
+          } catch {
+            downSampled = JSON.parse(
+              new TextDecoder().decode(downSampledArray || new Uint8Array())
+            ) as {
+              dataToEncryptHash: string
+              unifiedAccessControlConditions: unknown[]
+              ciphertext: string
+            }
+          }
           if (
             data.downSampled.acl !==
             JSON.stringify(downSampled.unifiedAccessControlConditions)

@@ -11,7 +11,13 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: ['**/firebase-functions/**', '**/functions/**', '**/*.config.js'],
+    ignores: [
+      '**/firebase-functions/**',
+      '**/functions/**',
+      '**/*.config.js',
+      'node_modules.prod/**',
+      'node_modules/**',
+    ],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {

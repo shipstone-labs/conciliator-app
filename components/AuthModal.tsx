@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Modal } from '@/components/ui/modal'
 import { sessionContext } from './Authenticated'
+import { useClientTracing } from '@/hooks/useClientTracing'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -19,6 +20,10 @@ interface AuthModalProps {
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const stytch = useStytch()
   const { isLoggingOff } = useContext(sessionContext)
+  const { traceComponent, traceAction } = useClientTracing()
+
+  // Trace component lifecycle
+  traceComponent('AuthModal', { isOpen: String(isOpen) })
   // Authentication states
   const [methodId, setMethodId] = useState<string | null>(null)
   const [email, setEmail] = useState('')
@@ -46,59 +51,75 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   // Handle sending email OTP
   const handleSendEmailOTP = useCallback(async () => {
-    if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address')
-      return
-    }
+    return traceAction(
+      'SendEmailOTP',
+      async () => {
+        if (!email || !email.includes('@')) {
+          setError('Please enter a valid email address')
+          return
+        }
 
-    setIsLoading(true)
-    setError(null)
+        setIsLoading(true)
+        setError(null)
 
-    try {
-      const response = await stytch.otps.email.loginOrCreate(email, {
-        expiration_minutes: 10,
-      })
+        try {
+          const response = await stytch.otps.email.loginOrCreate(email, {
+            expiration_minutes: 10,
+          })
 
-      setMethodId(response.method_id)
-      setShowCodeInput(true)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send email OTP')
-      console.error('Error sending email OTP:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [email, stytch])
+          setMethodId(response.method_id)
+          setShowCodeInput(true)
+          setError(null)
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : 'Failed to send email OTP'
+          )
+          console.error('Error sending email OTP:', err)
+        } finally {
+          setIsLoading(false)
+        }
+      },
+      { email }
+    )
+  }, [email, stytch, traceAction])
 
   // Handle sending SMS OTP
   const handleSendSmsOTP = useCallback(async () => {
-    if (!phoneNumber || phoneNumber.length < 10) {
-      setError('Please enter a valid phone number')
-      return
-    }
+    return traceAction(
+      'SendSmsOTP',
+      async () => {
+        if (!phoneNumber || phoneNumber.length < 10) {
+          setError('Please enter a valid phone number')
+          return
+        }
 
-    setIsLoading(true)
-    setError(null)
+        setIsLoading(true)
+        setError(null)
 
-    try {
-      const formattedPhone = phoneNumber.startsWith('+')
-        ? phoneNumber
-        : `+1${phoneNumber.replace(/[^0-9]/g, '')}`
+        try {
+          const formattedPhone = phoneNumber.startsWith('+')
+            ? phoneNumber
+            : `+1${phoneNumber.replace(/[^0-9]/g, '')}`
 
-      const response = await stytch.otps.sms.loginOrCreate(formattedPhone, {
-        expiration_minutes: 10,
-      })
+          const response = await stytch.otps.sms.loginOrCreate(formattedPhone, {
+            expiration_minutes: 10,
+          })
 
-      setMethodId(response.method_id)
-      setShowCodeInput(true)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send SMS OTP')
-      console.error('Error sending SMS OTP:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [phoneNumber, stytch])
+          setMethodId(response.method_id)
+          setShowCodeInput(true)
+          setError(null)
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : 'Failed to send SMS OTP'
+          )
+          console.error('Error sending SMS OTP:', err)
+        } finally {
+          setIsLoading(false)
+        }
+      },
+      { phoneNumber }
+    )
+  }, [phoneNumber, stytch, traceAction])
 
   const handleEnter = useCallback((callback: () => void) => {
     return (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -111,36 +132,52 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   // Handle verifying OTP code
   const handleVerifyOTP = useCallback(async () => {
-    if (!code || !methodId) {
-      setError('Please enter the verification code')
-      return
-    }
+    return traceAction(
+      'VerifyOTP',
+      async () => {
+        if (!code || !methodId) {
+          setError('Please enter the verification code')
+          return
+        }
 
-    setIsLoading(true)
-    setError(null)
+        setIsLoading(true)
+        setError(null)
 
-    try {
-      await stytch?.otps.authenticate(code, methodId, {
-        session_duration_minutes: 60,
-      })
+        try {
+          await stytch?.otps.authenticate(code, methodId, {
+            session_duration_minutes: 60,
+          })
 
-      // Authentication successful
-      setError(null)
+          // Authentication successful
+          setError(null)
 
-      // Call onSuccess if provided
-      if (onSuccess) {
-        onSuccess()
-      }
+          // Call onSuccess if provided
+          if (onSuccess) {
+            onSuccess()
+          }
 
-      // Close the modal
-      handleClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid verification code')
-      console.error('Error verifying OTP:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [code, methodId, onSuccess, stytch, handleClose])
+          // Close the modal
+          handleClose()
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : 'Invalid verification code'
+          )
+          console.error('Error verifying OTP:', err)
+        } finally {
+          setIsLoading(false)
+        }
+      },
+      { methodId, codeLength: code.length, rememberDevice }
+    )
+  }, [
+    code,
+    methodId,
+    onSuccess,
+    stytch,
+    handleClose,
+    traceAction,
+    rememberDevice,
+  ])
 
   // Reset form to try a different method
   const handleBack = useCallback(() => {

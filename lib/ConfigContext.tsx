@@ -5,6 +5,7 @@ import { createContext, useContext, useMemo } from 'react'
 // Define the type for our configuration
 export interface RawAppConfig {
   FIREBASE_CONFIG: Record<string, unknown>
+  HASH?: string // Add hash field for caching
   [key: string]: string | Record<string, unknown> | undefined
 }
 
@@ -35,16 +36,31 @@ function getConfig(initialConfig: RawAppConfig) {
     throw configPromise
   }
 
-  // Need to fetch config from API
-  configPromise = fetch('/api/config')
+  // Need to fetch config from API with proper caching
+  const headers: HeadersInit = {}
+  if (initialConfig?.HASH) {
+    headers['If-None-Match'] = `"${initialConfig.HASH}"`
+  }
+
+  configPromise = fetch('/api/config', { headers })
     .then((response) => {
+      // If 304 Not Modified, keep using current config
+      if (response.status === 304) {
+        configPromise = undefined
+        return configRef
+      }
+
       if (!response.ok) {
         throw new Error(`Failed to fetch config: ${response.status}`)
       }
       return response.json()
     })
     .then((data) => {
-      configRef = data.config
+      if (data) {
+        configRef = data.config as RawAppConfig
+        // Store the hash for future conditional requests
+        configRef.HASH = data.hash
+      }
       configPromise = undefined
       return configRef
     })

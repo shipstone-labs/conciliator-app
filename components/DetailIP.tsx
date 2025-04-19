@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -16,6 +16,17 @@ import Markdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
+import * as cbor from 'cbor-web'
+import { useStytchUser } from '@stytch/nextjs'
+import {
+  addDoc,
+  collection,
+  type DocumentSnapshot,
+  getFirestore,
+  onSnapshot,
+} from 'firebase/firestore'
+import { type Address, encodePacked, hexToBytes, zeroAddress } from 'viem'
+import { PKPEthersWallet } from '@/packages/lit-wrapper/dist'
 
 const DetailIP = ({
   docId,
@@ -28,12 +39,121 @@ const DetailIP = ({
   const isViewLoading = useRef(false)
   const [viewed, setViewed] = useState<string>()
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
-  const { litClient, delegatedSessionSigs } = useSession()
+  const {
+    litClient,
+    litPromise,
+    delegatedSessionSigs,
+    sessionSigs: originalSessionSigs,
+  } = useSession()
   const config = useConfig()
   const router = useRouter()
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
+  const { user } = useStytchUser()
 
+  const buy = useCallback(
+    async (
+      options: Record<string, unknown> & {
+        metadata: Record<string, unknown>
+        duration?: 'day' | 'week' | 'month' | 'year'
+      }
+    ) => {
+      await litPromise
+      if (!litClient) {
+        throw new Error('No litClient')
+      }
+      const db = getFirestore()
+      let duration = 0
+      switch (options.duration) {
+        case 'day':
+          duration = 24 * 3600 * 1000 // 1 day
+          break
+        case 'week':
+          duration = 7 * 24 * 3600 * 1000 // 7 days
+          break
+        case 'year':
+          duration = 365 * 24 * 3600 * 1000 // 1 year
+          break
+        case 'month':
+          duration = 30 * 24 * 3600 * 1000 // 30 days
+          break
+      }
+      const {
+        metadata: {
+          tokenId,
+          contract: { address: contractAddress } = {},
+        } = {},
+      } = ideaData || {}
+      const to = (originalSessionSigs?.address || zeroAddress) as Address
+      const params = [
+        to,
+        BigInt(tokenId || '0'),
+        1n,
+        contractAddress || zeroAddress,
+      ] as [Address, bigint, bigint, Address]
+      const message = hexToBytes(
+        encodePacked(['address', 'uint256', 'uint256', 'address'], params)
+      )
+      const { sessionSigs } = (await delegatedSessionSigs?.(docId)) || {}
+      if (!sessionSigs || !originalSessionSigs?.pkpPublicKey) {
+        throw new Error('No sessionSigs')
+      }
+      if (!ideaData?.metadata?.contract) {
+        throw new Error('No contract address')
+      }
+      const wallet = new PKPEthersWallet({
+        litNodeClient: litClient,
+        pkpPubKey: originalSessionSigs?.pkpPublicKey,
+        controllerSessionSigs: sessionSigs,
+      })
+      const signature = (await wallet.signMessage(message)) as `0x${string}`
+      if (!signature) {
+        throw new Error('No signature')
+      }
+      const docRef = await addDoc(
+        collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
+        {
+          mode: 'payment',
+          success_url: window.location.origin,
+          cancel_url: window.location.origin,
+          price: 'price_1RFR4HG0LHBErqJoU0ctS4oA',
+          ...options,
+          metadata: {
+            ...options.metadata,
+            owner: user?.user_id,
+            tokenId,
+            to,
+            contract: ideaData?.metadata?.contract,
+            docId,
+            signature: signature,
+            duration,
+            expiration: Date.now() + duration,
+          },
+        }
+      )
+      onSnapshot(docRef, async (doc: DocumentSnapshot) => {
+        const { error, url } = doc.data() || {}
+        if (error) {
+          // Show an error to your customer and
+          // inspect your Cloud Function logs in the Firebase console.
+          alert(`An error occured: ${error.message}`)
+        }
+        if (url) {
+          // We have a Stripe Checkout URL, let's redirect.
+          window.location.assign(url)
+        }
+      })
+    },
+    [
+      user?.user_id,
+      docId,
+      ideaData,
+      litClient,
+      originalSessionSigs,
+      litPromise,
+      delegatedSessionSigs,
+    ]
+  )
   useEffect(() => {
     if (isViewLoading.current) {
       return
@@ -55,25 +175,72 @@ const DetailIP = ({
           return
         }
 
-        const data = await fetch(url)
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error('Failed to fetch encrypted data')
-            }
-            return res.json()
-          })
-          .then(
-            (data) =>
-              data as {
-                ciphertext: string
-                dataToEncryptHash: string
-                unifiedAccessControlConditions: unknown
+        const arrayData = url
+          ? await fetch(url).then((res) => {
+              if (!res.ok) {
+                throw new Error('Failed to fetch encrypted data')
               }
-          )
+              return res.arrayBuffer()
+            })
+          : undefined
+
+        let data: {
+          dataToEncryptHash: string
+          unifiedAccessControlConditions: unknown[]
+          ciphertext: string
+        }
+        try {
+          if (!arrayData) {
+            throw new Error('No data')
+          }
+          const content = await cbor.decodeAll(new Uint8Array(arrayData))
+          const [tag, network] = content
+          if (!tag) {
+            throw new Error('No tag')
+          }
+          if (tag !== 'LIT-ENCRYPTED') {
+            throw new Error('Invalid tag')
+          }
+          if (content.length !== 8 && content.length !== 7) {
+            throw new Error('Invalid content length')
+          }
+          if (
+            content.length === 8 &&
+            network !== 'filecoinCalibrationTestnet'
+          ) {
+            throw new Error('Invalid network')
+          }
+          const [
+            dataToEncryptHash,
+            unifiedAccessControlConditions,
+            _ciphertext,
+          ] = content.slice(-3)
+          data = {
+            dataToEncryptHash,
+            unifiedAccessControlConditions,
+            ciphertext: _ciphertext.toString('base64'),
+          }
+        } catch {
+          data = JSON.parse(
+            new TextDecoder().decode(arrayData || new Uint8Array())
+          ) as {
+            dataToEncryptHash: string
+            unifiedAccessControlConditions: unknown[]
+            ciphertext: string
+          }
+        }
+
         const { ciphertext, dataToEncryptHash } = data
         const { sessionSigs, capacityDelegationAuthSig } =
           await delegatedSessionSigs(docId)
         const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
+        console.log({
+          sessionSigs,
+          capacityDelegationAuthSig,
+          accessControlConditions,
+          data,
+          ciphertext: data.ciphertext.slice(0, 100),
+        })
         const request = {
           accessControlConditions,
           // pkpPublicKey: sessionSigs?.pkpPublicKey,
@@ -548,6 +715,23 @@ const DetailIP = ({
               Click on the Access Option you wish to acquire.
             </p>
             <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                onClick={() =>
+                  buy({
+                    line_item: [
+                      {
+                        amount: 500,
+                        currency: 'usd',
+                        name: 'some name',
+                        description: 'some description',
+                      },
+                    ],
+                    metadata: { docId },
+                  })
+                }
+              >
+                BUY
+              </Button>
               <Button
                 onClick={() => setIsAccessModalOpen(false)}
                 className="bg-primary hover:bg-primary/80 text-black font-medium px-5 py-2 rounded-xl"

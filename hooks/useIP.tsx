@@ -27,8 +27,13 @@ import {
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { bytesToString, numberToBytes } from 'viem'
+import { useSession } from './useSession'
 
 export function useIP(docId: string) {
+  const { fbPromise, fbUser } = useSession()
+  if (!fbUser && fbPromise) {
+    throw fbPromise
+  }
   const [ideaData, setIdeaData] = useState<IPDoc | undefined>()
   const { user } = useStytchUser()
   useEffect(() => {
@@ -102,6 +107,10 @@ export function useIPs({
   filter?: QueryCompositeFilterConstraint
   currentPage?: number
 }) {
+  const { fbPromise, fbUser } = useSession()
+  if (!fbUser && fbPromise) {
+    throw fbPromise
+  }
   const [ideaData, setIdeaData] = useState<{
     data: IPDoc[] | undefined
     pages: number
@@ -145,6 +154,10 @@ export function useIPs({
 }
 
 export function useIPAudit(tokenId: string) {
+  const { fbPromise, fbUser } = useSession()
+  if (!fbUser && fbPromise) {
+    throw fbPromise
+  }
   const [ideaData, setIdeaData] = useState<IPAudit | undefined>()
   useEffect(() => {
     let snapshot: () => void = () => {}

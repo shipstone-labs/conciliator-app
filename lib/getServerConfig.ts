@@ -1,6 +1,8 @@
 import type { RawAppConfig } from './ConfigContext'
 import { cookies, headers } from 'next/headers'
 import { config } from 'dotenv'
+import { keccak256, toBytes } from 'viem'
+import { getContractInfo } from '@/app/api/utils'
 
 // Use a special marker to indicate this is server-only code
 // This prevents Next.js from bundling it for client-side use
@@ -29,12 +31,63 @@ if (!global.__ENV_NEXT_RELOAD) {
 let currentConfig: Promise<RawAppConfig> | undefined
 let configTimestamp = 0
 
+async function reformatEnvironment(): Promise<RawAppConfig> {
+  // Get all environment variables that start with NEXT_PUBLIC_
+  const publicEnvVars: RawAppConfig = {} as RawAppConfig
+
+  // Add a marker to indicate this came from the API
+  publicEnvVars.ENV = 'server'
+  publicEnvVars.API_LOADED = 'true'
+  publicEnvVars.API_TIMESTAMP = Date.now().toString()
+
+  Object.keys(process.env).forEach((key) => {
+    const isFileCoin = key.startsWith('FILCOIN_CONTRACT')
+    if (
+      key.startsWith('NEXT_PUBLIC_') ||
+      isFileCoin ||
+      ['STYTCH_APP_ID', 'FIREBASE_CONFIG', 'STYTCH_PUBLIC_TOKEN'].includes(key)
+    ) {
+      // Remove the NEXT_PUBLIC_ prefix
+      const newKey = isFileCoin
+        ? key.replace('FILCOIN_', '')
+        : key.replace('NEXT_PUBLIC_', '')
+
+      // Get the value
+      let value = process.env[key]
+
+      // Special handling for FIREBASE_CONFIG - parse as JSON if it's valid
+      if (newKey === 'FIREBASE_CONFIG' && value) {
+        try {
+          value = JSON.parse(value)
+        } catch (error) {
+          console.error(`Failed to parse FIREBASE_CONFIG as JSON: ${error}`)
+          // Keep as string if parsing fails
+        }
+      }
+      if (value) {
+        // Add to our response object
+        publicEnvVars[newKey] = value
+      }
+    }
+  })
+
+  const { contract, contract_name } = getContractInfo()
+  publicEnvVars.CONTRACT = contract
+  publicEnvVars.CONTRACT_NAME = contract_name
+  publicEnvVars.TIMESTAMP = new Date().toUTCString()
+
+  const { HASH: _ignore, ...rest } = publicEnvVars
+  const configString = JSON.stringify(rest)
+  publicEnvVars.HASH = keccak256(toBytes(configString)).slice(2) // Remove 0x prefix
+  return publicEnvVars
+}
+
 /**
  * Gets the application configuration safely in Next.js environment
  * - For dynamic requests: directly reads from environment variables
  * - For static generation: ensures we only use safe fallbacks
  */
-async function _getServerConfig(): Promise<RawAppConfig> {
+async function optionallyReturnDynamicConfig(): Promise<RawAppConfig> {
   // Check if we're in a dynamic rendering context by attempting to read headers or cookies
   // This will throw an error during static generation, which we can catch
   let isDynamicRequest = false
@@ -50,48 +103,7 @@ async function _getServerConfig(): Promise<RawAppConfig> {
   // In a dynamic request, we can safely read environment variables
   if (isDynamicRequest) {
     // Get all environment variables that start with NEXT_PUBLIC_
-    const publicEnvVars: RawAppConfig = {} as unknown as RawAppConfig
-
-    Object.keys(process.env).forEach((key) => {
-      const isFileCoin = key.startsWith('FILCOIN_CONTRACT')
-      if (
-        key.startsWith('NEXT_PUBLIC_') ||
-        isFileCoin ||
-        ['STYTCH_APP_ID', 'FIREBASE_CONFIG', 'STYTCH_PUBLIC_TOKEN'].includes(
-          key
-        )
-      ) {
-        // Only log in development and only occasionally
-
-        // Remove the NEXT_PUBLIC_ prefix
-        const newKey = isFileCoin
-          ? key.replace('FILCOIN_', '')
-          : key.replace('NEXT_PUBLIC_', '')
-
-        // Get the value
-        let value = process.env[key]
-
-        // Special handling for FIREBASE_CONFIG - parse as JSON if it's valid
-        if (newKey === 'FIREBASE_CONFIG' && value) {
-          try {
-            value = JSON.parse(value)
-          } catch (error) {
-            console.error(`Failed to parse FIREBASE_CONFIG as JSON: ${error}`)
-            // Keep as string if parsing fails
-          }
-        }
-        if (value) {
-          // Add to our response object
-          publicEnvVars[newKey] = value
-        }
-      }
-    })
-
-    // Return the full config with a flag indicating it's from server
-    return {
-      ...publicEnvVars,
-      ENV: 'server',
-    } as unknown as RawAppConfig
+    return await reformatEnvironment()
   }
 
   // For static generation, return a minimal safe config
@@ -178,7 +190,7 @@ export async function getServerConfig(
   }
 
   // Get the server config
-  const appConfig = _getServerConfig()
+  const appConfig = optionallyReturnDynamicConfig()
 
   // Cache the config for future requests (cache invalidates when server restarts or env reloaded)
   currentConfig = appConfig
