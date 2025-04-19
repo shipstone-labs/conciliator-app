@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -17,6 +17,23 @@ import Loading from './Loading'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
 import * as cbor from 'cbor-web'
+import { useStytchUser } from '@stytch/nextjs'
+import {
+  addDoc,
+  collection,
+  type DocumentSnapshot,
+  getFirestore,
+  onSnapshot,
+} from 'firebase/firestore'
+import {
+  type Address,
+  encodePacked,
+  hexToBytes,
+  keccak256,
+  recoverAddress,
+  zeroAddress,
+} from 'viem'
+import { PKPEthersWallet } from '@/packages/lit-wrapper/dist'
 
 const DetailIP = ({
   docId,
@@ -29,12 +46,98 @@ const DetailIP = ({
   const isViewLoading = useRef(false)
   const [viewed, setViewed] = useState<string>()
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
-  const { litClient, delegatedSessionSigs } = useSession()
+  const {
+    litClient,
+    litPromise,
+    delegatedSessionSigs,
+    sessionSigs: originalSessionSigs,
+  } = useSession()
   const config = useConfig()
   const router = useRouter()
   const ideaData = useIP(docId)
   const audit = useIPAudit(docId)
+  const { user } = useStytchUser()
 
+  const buy = useCallback(
+    async (
+      options: Record<string, unknown> & { metadata: Record<string, unknown> }
+    ) => {
+      await litPromise
+      if (!litClient) {
+        throw new Error('No litClient')
+      }
+      const {
+        metadata: {
+          tokenId,
+          contract: { address: contractAddress } = {},
+        } = {},
+      } = ideaData || {}
+      const to = (originalSessionSigs?.address || zeroAddress) as Address
+      const params = [
+        to,
+        BigInt(tokenId || '0'),
+        1n,
+        contractAddress || zeroAddress,
+      ] as [Address, bigint, bigint, Address]
+      const message = hexToBytes(
+        encodePacked(['address', 'uint256', 'uint256', 'address'], params)
+      )
+      const hash = keccak256(message)
+      const { sessionSigs } = (await delegatedSessionSigs?.(docId)) || {}
+      if (!sessionSigs || !originalSessionSigs?.pkpPublicKey) {
+        throw new Error('No sessionSigs')
+      }
+      console.log({ hash, message, sessionSigs })
+      const wallet = new PKPEthersWallet({
+        litNodeClient: litClient,
+        pkpPubKey: originalSessionSigs?.pkpPublicKey,
+        controllerSessionSigs: sessionSigs,
+      })
+      const signature = (await wallet.signMessage(message)) as `0x${string}`
+      if (!signature) {
+        throw new Error('No signature')
+      }
+      const db = getFirestore()
+      console.log(signature)
+      await recoverAddress({
+        hash,
+        signature,
+      }).then((address) => {
+        console.log('Recovered address:', signature, address, to)
+      })
+      const docRef = await addDoc(
+        collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
+        {
+          mode: 'payment',
+          success_url: window.location.origin,
+          cancel_url: window.location.origin,
+          price: 'price_1RFR4HG0LHBErqJoU0ctS4oA',
+          ...options,
+          metadata: {
+            ...options.metadata,
+            tokenId,
+            to,
+            contractAddress,
+            docId,
+            signature: signature,
+          },
+        }
+      )
+      console.log(docRef.id, docRef.path)
+      onSnapshot(docRef, async (doc: DocumentSnapshot) => {
+        console.log(doc.id, docRef.path, doc.data())
+      })
+    },
+    [
+      user?.user_id,
+      docId,
+      ideaData,
+      litClient,
+      originalSessionSigs,
+      litPromise,
+      delegatedSessionSigs,
+    ]
+  )
   useEffect(() => {
     if (isViewLoading.current) {
       return
@@ -596,6 +699,23 @@ const DetailIP = ({
               Click on the Access Option you wish to acquire.
             </p>
             <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                onClick={() =>
+                  buy({
+                    line_item: [
+                      {
+                        amount: 500,
+                        currency: 'usd',
+                        name: 'some name',
+                        description: 'some description',
+                      },
+                    ],
+                    metadata: { docId },
+                  })
+                }
+              >
+                BUY
+              </Button>
               <Button
                 onClick={() => setIsAccessModalOpen(false)}
                 className="bg-primary hover:bg-primary/80 text-black font-medium px-5 py-2 rounded-xl"

@@ -51,13 +51,39 @@ export default {
         export default { decode, encode, toASCII, toUnicode };
       `,
       depd: `
-        export function deprecate(fn, msg) {
-          return function() {
-            console.warn(msg);
-            return fn.apply(this, arguments);
-          };
+        // Complete replacement for depd
+        export default () => {
+          // Return a function that creates deprecation warnings
+          const deprecate = () => {
+            return () => {
+              // No-op function
+              return
+            }
+          }
+
+          // Add properties to match the real depd API
+          deprecate.function = (fn) => {
+            return fn
+          }
+
+          deprecate.property = (obj) => {
+            return obj
+          }
+
+          deprecate.class = (fn) => {
+            return fn
+          }
+
+          // Support for calling directly
+          const callable = () => {
+            return deprecate()
+          }
+
+          // Copy all properties to the callable
+          Object.assign(callable, deprecate)
+
+          return callable
         }
-        export default deprecate;
       `,
       // Add any other modules to stub here as needed
     }),
