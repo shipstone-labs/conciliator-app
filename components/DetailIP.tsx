@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -9,7 +9,6 @@ import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
-import { Modal } from '@/components/ui/modal'
 import { cidAsURL } from '@/lib/internalTypes'
 import { useSession } from '@/hooks/useSession'
 import Markdown from 'react-markdown'
@@ -27,6 +26,7 @@ import {
 } from 'firebase/firestore'
 import { type Address, encodePacked, hexToBytes, zeroAddress } from 'viem'
 import { PKPEthersWallet } from '@/packages/lit-wrapper/dist'
+import { type Price, type Product, useProducts } from '@/hooks/useProducts'
 
 const DetailIP = ({
   docId,
@@ -38,7 +38,7 @@ const DetailIP = ({
   const [ndaChecked, setNdaChecked] = useState(false)
   const isViewLoading = useRef(false)
   const [viewed, setViewed] = useState<string>()
-  const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
+  const products = useProducts()
   const {
     litClient,
     litPromise,
@@ -48,6 +48,32 @@ const DetailIP = ({
   const config = useConfig()
   const router = useRouter()
   const ideaData = useIP(docId)
+  const prices = useMemo(() => {
+    const {
+      terms: { pricing } = {},
+    } = ideaData || {}
+    const orders = ['day', 'week', 'month']
+    const prices = []
+    for (const product of Object.values(products)) {
+      if (product) {
+        const order = orders.indexOf(product.metadata?.duration)
+        if (order === -1) {
+          continue
+        }
+        let price = product.prices?.[pricing?.[product.id] || '']
+        if (!price) {
+          const sortedPrices = Object.values(product.prices).sort(
+            (a, b) => a.unit_amount - b.unit_amount
+          )
+          price = sortedPrices[0]
+        }
+        if (price) {
+          prices.push({ ...product, price, order })
+        }
+      }
+    }
+    return prices.sort((a, b) => a.order - b.order)
+  }, [products, ideaData])
   const audit = useIPAudit(docId)
   const { user } = useStytchUser()
 
@@ -55,7 +81,7 @@ const DetailIP = ({
     async (
       options: Record<string, unknown> & {
         metadata: Record<string, unknown>
-        duration?: 'day' | 'week' | 'month' | 'year'
+        price: Price
       }
     ) => {
       await litPromise
@@ -110,20 +136,22 @@ const DetailIP = ({
       if (!signature) {
         throw new Error('No signature')
       }
+      const { contract, ...docMetadata } = options.metadata
       const docRef = await addDoc(
         collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
         {
           mode: 'payment',
-          success_url: window.location.origin,
-          cancel_url: window.location.origin,
-          price: 'price_1RFR4HG0LHBErqJoU0ctS4oA',
+          success_url: window.location.href,
+          cancel_url: window.location.href,
           ...options,
+          price: options.price.id,
           metadata: {
-            ...options.metadata,
+            ...docMetadata,
             owner: user?.user_id,
             tokenId,
             to,
-            contract: ideaData?.metadata?.contract,
+            contract_name: ideaData?.metadata?.contract?.name || '',
+            contract_address: ideaData?.metadata?.contract?.address || '',
             docId,
             signature: signature,
             duration,
@@ -428,77 +456,52 @@ const DetailIP = ({
                   </div>
 
                   {/* Access Options - Show if pricing information exists */}
-                  {ideaData.terms.pricing && (
-                    <div className="mt-4">
-                      <h4 className="text-sm font-medium text-white/70 mb-2">
-                        Access Options:
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        {/* Day Price */}
-                        <div
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-white/70 mb-2">
+                      Access Options:
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {prices?.map((item: Product & { price: Price }) => (
+                        <button
+                          key={item.id}
+                          type="button"
                           className={`p-3 border rounded-xl transition-all ${
                             ndaChecked
                               ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
                               : 'border-white/10 bg-muted/20 opacity-50'
                           }`}
+                          disabled={!ndaChecked}
                           onClick={() =>
-                            ndaChecked && setIsAccessModalOpen(true)
+                            ndaChecked &&
+                            buy({
+                              metadata: {
+                                ...ideaData.metadata,
+                                contract_address:
+                                  ideaData.metadata?.contract?.address || '',
+                                contract_name:
+                                  ideaData.metadata?.contract?.name || '',
+                                duration: item.metadata?.duration,
+                              },
+                              price: item.price,
+                            })
                           }
                           role={ndaChecked ? 'button' : ''}
                           tabIndex={ndaChecked ? 0 : -1}
                         >
                           <p className="text-white/70 text-xs">One Day</p>
                           <p className="text-primary font-medium mt-1">
-                            {formatNumber(
-                              ideaData.terms.pricing.dayPrice || '5.00'
-                            )}
+                            {item.price != null && item.price?.id !== ''
+                              ? formatNumber(
+                                  item.price.unit_amount / 100,
+                                  'currency',
+                                  item.price.currency
+                                )
+                              : 'Not available'}
                           </p>
-                        </div>
-
-                        {/* Week Price */}
-                        <div
-                          className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
-                              : 'border-white/10 bg-muted/20 opacity-50'
-                          }`}
-                          onClick={() =>
-                            ndaChecked && setIsAccessModalOpen(true)
-                          }
-                          role={ndaChecked ? 'button' : ''}
-                          tabIndex={ndaChecked ? 0 : -1}
-                        >
-                          <p className="text-white/70 text-xs">One Week</p>
-                          <p className="text-primary font-medium mt-1">
-                            {formatNumber(
-                              ideaData.terms.pricing.weekPrice || '25.00'
-                            )}
-                          </p>
-                        </div>
-
-                        {/* Month Price */}
-                        <div
-                          className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
-                              : 'border-white/10 bg-muted/20 opacity-50'
-                          }`}
-                          onClick={() =>
-                            ndaChecked && setIsAccessModalOpen(true)
-                          }
-                          role={ndaChecked ? 'button' : ''}
-                          tabIndex={ndaChecked ? 0 : -1}
-                        >
-                          <p className="text-white/70 text-xs">One Month</p>
-                          <p className="text-primary font-medium mt-1">
-                            {formatNumber(
-                              ideaData.terms.pricing.monthPrice || '90.00'
-                            )}
-                          </p>
-                        </div>
-                      </div>
+                        </button>
+                      )) || null}
                     </div>
-                  )}
+                  </div>
 
                   {/* NDA Information */}
                   {ideaData.terms.ndaRequired !== undefined && (
@@ -703,44 +706,6 @@ const DetailIP = ({
             </CardContent>
           </Card>
         ) : null}
-
-        {/* Access Option Modal */}
-        <Modal
-          isOpen={isAccessModalOpen}
-          onClose={() => setIsAccessModalOpen(false)}
-          title="Select Access Option"
-        >
-          <div className="space-y-4">
-            <p className="text-white/90">
-              Click on the Access Option you wish to acquire.
-            </p>
-            <div className="flex justify-end space-x-3 mt-6">
-              <Button
-                onClick={() =>
-                  buy({
-                    line_item: [
-                      {
-                        amount: 500,
-                        currency: 'usd',
-                        name: 'some name',
-                        description: 'some description',
-                      },
-                    ],
-                    metadata: { docId },
-                  })
-                }
-              >
-                BUY
-              </Button>
-              <Button
-                onClick={() => setIsAccessModalOpen(false)}
-                className="bg-primary hover:bg-primary/80 text-black font-medium px-5 py-2 rounded-xl"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        </Modal>
       </div>
     </div>
   )

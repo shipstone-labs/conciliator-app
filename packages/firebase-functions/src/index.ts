@@ -21,13 +21,12 @@ import {
   type WalletClient,
   zeroAddress,
 } from 'viem'
-import { writeContract } from 'viem/_types/actions/wallet/writeContract'
 import { abi } from './abi'
-import { waitForTransactionReceipt } from 'viem/_types/actions/public/waitForTransactionReceipt'
+import { estimateFeesPerGas, waitForTransactionReceipt } from 'viem/actions'
 import { deleteApp, initializeApp } from 'firebase-admin/app'
 import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { getDatabase } from 'firebase-admin/database'
-import { estimateFeesPerGas } from 'viem/_types/actions/public/estimateFeesPerGas'
+import Stripe from 'stripe'
 
 // Export secrets functions
 export { loadSecrets } from './secrets'
@@ -171,19 +170,21 @@ async function transferToken(
     transport: http(),
   })
   return await runWithNonce(wallet, app, async (nonce: number) => {
-    return await writeContract(wallet, {
-      address: contract,
-      nonce,
-      abi,
-      functionName: 'mintWithSignature',
-      args: [to, tokenId, 1, Math.round(expiration / 1000), signature],
-    }).then(async (hash) => {
-      await waitForTransactionReceipt(wallet, {
-        hash,
+    return await wallet
+      .writeContract({
+        address: contract,
+        nonce,
+        abi,
+        functionName: 'mintWithSignature',
+        args: [to, tokenId, 1, Math.round(expiration / 1000), signature],
       })
-      console.info('Transaction hash', { hash, to, tokenId, expiration })
-      return hash
-    })
+      .then(async (hash) => {
+        await waitForTransactionReceipt(wallet, {
+          hash,
+        })
+        console.info('Transaction hash', { hash, to, tokenId, expiration })
+        return hash
+      })
   })
 }
 
@@ -192,24 +193,59 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
   async (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
-    const { FIREBASE_SA } = await loadSecrets(['FIREBASE_SA'])
+    const { FIREBASE_SA, STIPE_RK } = await loadSecrets([
+      'FIREBASE_SA',
+      'STRIPE_PK',
+    ])
     const config = JSON.parse(FIREBASE_SA)
     const app = initializeApp(config, 'checkout')
     const {
       data: {
-        object: { metadata },
+        object: { id, metadata },
       },
     } = e
+    const apiVersion = '2022-11-15'
+    const stripe = new Stripe(STIPE_RK || '', {
+      apiVersion,
+      // Register extension as a Stripe plugin
+      // https://stripe.com/docs/building-plugins#setappinfo
+      appInfo: {
+        name: 'Firebase Invertase firestore-stripe-payments',
+        version: '0.3.5',
+      },
+    })
+    const lines = await stripe.checkout.sessions.listLineItems(id)
+    const {
+      data: [{ price } = {}] = [],
+    } = lines
+    if (!price) {
+      throw new Error('No price found')
+    }
+    const {
+      metadata: { duration: _duration } = {},
+    } = price
+    const durations:
+      | Record<'day' | 'week' | 'month', number>
+      | { [key: string]: number } = {
+      day: 60 * 60 * 24,
+      week: 60 * 60 * 24 * 7,
+      month: 60 * 60 * 24 * 30,
+    }
+    if (!_duration || !(_duration in durations)) {
+      throw new Error('No or invalid duration found')
+    }
+    const duration = _duration as 'day' | 'week' | 'month'
+    const expiration = durations[duration] + Math.round(Date.now() / 1000)
     const {
       contract: { name, address } = {},
       docId,
       signature,
       to,
       tokenId,
-      expiration,
+      expiration: _expiration,
       owner,
     } = metadata
-    await transferToken(app, address, tokenId, to, signature).then(
+    await transferToken(app, address, tokenId, to, signature, _expiration).then(
       async (hash) => {
         const db = getFirestore(app)
         const now = new Date()
