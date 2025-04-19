@@ -17,10 +17,7 @@
         "firebase-debug.*.log",
         "*.local"
       ],
-      "predeploy": ["pnpm --prefix functions run build"]
+      "predeploy": ["pnpm --filter functions run build"]
     }
-  ],
-  "extensions": {
-    "firestore-stripe-payments": "invertase/firestore-stripe-payments@0.3.10"
-  }
+  ]
 }
