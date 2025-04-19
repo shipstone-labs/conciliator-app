@@ -149,6 +149,16 @@ const DetailIP = ({
       console.log(docRef.id, docRef.path)
       onSnapshot(docRef, async (doc: DocumentSnapshot) => {
         console.log(doc.id, docRef.path, doc.data())
+        const { error, url } = doc.data() || {}
+        if (error) {
+          // Show an error to your customer and
+          // inspect your Cloud Function logs in the Firebase console.
+          alert(`An error occured: ${error.message}`)
+        }
+        if (url) {
+          // We have a Stripe Checkout URL, let's redirect.
+          window.location.assign(url)
+        }
       })
     },
     [
