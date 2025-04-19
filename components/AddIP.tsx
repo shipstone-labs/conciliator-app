@@ -48,11 +48,11 @@ const SortedProducts = ({
   const sortedProducts = useMemo(
     () =>
       Object.values(products)
-        .filter((product) => order.indexOf(product.metadata?.duration) !== -1)
         .map((product) => ({
           ...product,
           order: order.indexOf(product.metadata?.duration),
         }))
+        .filter((product) => product.order !== -1)
         .sort((a, b) => {
           return a.order - b.order
         }),

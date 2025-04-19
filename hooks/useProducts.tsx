@@ -55,7 +55,6 @@ export function useProducts(): Record<string, Product> {
         if (shutdown.has(['product', productId])) {
           return
         }
-        console.log('priceDoc', priceDoc.ref.path, priceDoc.data())
         setProducts((prev) => ({
           ...prev,
           [productId]: {
@@ -79,7 +78,6 @@ export function useProducts(): Record<string, Product> {
           if (!data?.active) {
             return
           }
-          console.log('productDoc', productSnap.ref.path, productSnap.data())
           setProducts((prev) => ({
             ...prev,
             [productSnap.id]: {
@@ -102,6 +100,5 @@ export function useProducts(): Record<string, Product> {
       }
     }
   }, [])
-  console.log('products', products)
   return products
 }
