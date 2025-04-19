@@ -25,14 +25,7 @@ import {
   getFirestore,
   onSnapshot,
 } from 'firebase/firestore'
-import {
-  type Address,
-  encodePacked,
-  hexToBytes,
-  keccak256,
-  recoverAddress,
-  zeroAddress,
-} from 'viem'
+import { type Address, encodePacked, hexToBytes, zeroAddress } from 'viem'
 import { PKPEthersWallet } from '@/packages/lit-wrapper/dist'
 
 const DetailIP = ({
@@ -69,6 +62,7 @@ const DetailIP = ({
       if (!litClient) {
         throw new Error('No litClient')
       }
+      const db = getFirestore()
       let duration = 0
       switch (options.duration) {
         case 'day':
@@ -100,7 +94,6 @@ const DetailIP = ({
       const message = hexToBytes(
         encodePacked(['address', 'uint256', 'uint256', 'address'], params)
       )
-      const hash = keccak256(message)
       const { sessionSigs } = (await delegatedSessionSigs?.(docId)) || {}
       if (!sessionSigs || !originalSessionSigs?.pkpPublicKey) {
         throw new Error('No sessionSigs')
@@ -117,14 +110,6 @@ const DetailIP = ({
       if (!signature) {
         throw new Error('No signature')
       }
-      const db = getFirestore()
-      console.log(signature)
-      await recoverAddress({
-        hash,
-        signature,
-      }).then((address) => {
-        console.log('Recovered address:', signature, address, to)
-      })
       const docRef = await addDoc(
         collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
         {
@@ -146,9 +131,7 @@ const DetailIP = ({
           },
         }
       )
-      console.log(docRef.id, docRef.path)
       onSnapshot(docRef, async (doc: DocumentSnapshot) => {
-        console.log(doc.id, docRef.path, doc.data())
         const { error, url } = doc.data() || {}
         if (error) {
           // Show an error to your customer and

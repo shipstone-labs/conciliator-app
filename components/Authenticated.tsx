@@ -52,11 +52,14 @@ export type Session = {
   setLoggingOff: (loggingOff: boolean) => void
 }
 
-export const sessionContext = createContext<Session>({
+// Create a singleton instance to persist state across route changes
+let globalSession: Session = {
   setLoggingOff: () => {},
   isLoggedIn: false,
   isLoggingOff: false,
-})
+}
+
+export const sessionContext = createContext<Session>(globalSession)
 
 export default function Authenticated({
   children,
@@ -65,16 +68,15 @@ export default function Authenticated({
 }: PropsWithChildren<{ requireLit?: boolean; requireFirebase?: boolean }>) {
   const { user, isInitialized } = useStytchUser()
   const stytchClient = useStytch()
-  const [isLoggingOff, setLoggingOff] = useState(false)
+  const isLoggingOff = globalSession.isLoggingOff
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [sessionSigs, setSessionSigs] = useState<Session>({
-    isLoggingOff,
-    setLoggingOff,
-    isLoggedIn: false,
-  })
+  const [sessionSigs, setSessionSigs] = useState<Session>(() => globalSession)
   const config = useConfig()
-  const litActive = useRef<Promise<void> | undefined>(undefined)
-  const firebaseActive = useRef<Promise<void> | undefined>(undefined)
+  const litActive = useRef<Promise<void> | undefined>(globalSession.litPromise)
+  const firebaseActive = useRef<Promise<void> | undefined>(
+    globalSession.fbPromise
+  )
+
   // Show auth modal if not authenticated and not ignored
   const amendLoggedIn = useCallback(
     (state: Session) => {
@@ -86,7 +88,10 @@ export default function Authenticated({
       } else if (requireFirebase && !state.fbUser) {
         isLoggedIn = false
       }
-      return { ...state, isLoggedIn }
+      const updatedState = { ...state, isLoggedIn }
+      // Update global session reference
+      globalSession = updatedState
+      return updatedState
     },
     [requireLit, requireFirebase, user]
   )
@@ -406,6 +411,14 @@ export default function Authenticated({
     },
     [pathname]
   )
+
+  // When logout is triggered, update global session state
+  useEffect(() => {
+    if (isLoggingOff !== globalSession.isLoggingOff) {
+      globalSession.isLoggingOff = isLoggingOff
+    }
+  }, [isLoggingOff])
+
   return (
     <>
       <sessionContext.Provider value={sessionSigs}>

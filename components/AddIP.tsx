@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useRef, useEffect } from 'react'
+import { useCallback, useState, useRef, useEffect, useMemo } from 'react'
 import {
   Card,
   CardContent,
@@ -19,8 +19,99 @@ import type { EncryptResponse } from 'lit-wrapper'
 import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
-import type { IPAudit } from '@/lib/types'
+import { formatNumber, type IPAudit } from '@/lib/types'
 import { useConfig } from '@/app/authLayout'
+import { type Price, type Product, useProducts } from '@/hooks/useProducts'
+import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select'
+
+const getSortedPrices = (prices: Record<string, Price>) => {
+  const sorted = Object.values(prices).sort((a, b) => {
+    if (a.unit_amount === b.unit_amount) {
+      return a.id.localeCompare(b.id)
+    }
+    return a.unit_amount - b.unit_amount
+  })
+  const first = { id: '', active: false, product: sorted[0].product } as Price
+  return [first, ...sorted]
+}
+
+const SortedProducts = ({
+  products,
+  value,
+  onSelect,
+}: {
+  products: Record<string, Product>
+  value: Price[] | undefined
+  onSelect: (select: Price[]) => void
+}) => {
+  const order = ['day', 'week', 'month']
+  const sortedProducts = useMemo(
+    () =>
+      Object.values(products)
+        .filter((product) => order.indexOf(product.metadata?.duration) !== -1)
+        .map((product) => ({
+          ...product,
+          order: order.indexOf(product.metadata?.duration),
+        }))
+        .sort((a, b) => {
+          return a.order - b.order
+        }),
+    [products]
+  )
+
+  const defaultPrices = useMemo<Price[]>(() => {
+    return sortedProducts.map(
+      (product) => getSortedPrices(product.prices)[0]
+    ) as Price[]
+  }, [sortedProducts])
+  return sortedProducts.map((product, index) => {
+    const sortedPrices = getSortedPrices(product.prices)
+    return (
+      <div
+        key={product.id}
+        className="flex items-center space-x-2 p-3 border bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors"
+      >
+        <Select
+          value={value?.[index]?.id || defaultPrices[0].id}
+          onValueChange={(_priceValue) => {
+            const priceValue = _priceValue === '__none__' ? '' : _priceValue
+            const newPrice = sortedPrices.find(
+              (price) => price.id === priceValue
+            )
+            const newPrices: Price[] = value ? [...value] : [...defaultPrices]
+            newPrices[index] = newPrice as Price
+            onSelect(newPrices)
+          }}
+        >
+          <SelectTrigger className="flex flex-row justify-items-start">
+            {value?.[index] && value?.[index]?.id !== ''
+              ? formatNumber(
+                  (value[index].unit_amount || 0) / 100,
+                  'currency',
+                  value[index]?.currency?.toUpperCase?.() || 'USD'
+                )
+              : '-- NA --'}{' '}
+            <div className="text-xs text-white/60">{product.name}</div>
+            <div>{product.description}</div>
+          </SelectTrigger>
+          <SelectContent>
+            {sortedPrices.map((price) => (
+              <SelectItem key={price.id} value={price.id || '__none__'}>
+                {price.id !== ''
+                  ? formatNumber(
+                      price.unit_amount / 100,
+                      'currency',
+                      price?.currency || 'USD'
+                    )
+                  : '-- NA --'}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )
+  })
+}
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -34,10 +125,7 @@ const AppIP = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [businessModel, setBusinessModel] = useState('Protected Evaluation')
-  const [evaluationPeriod, setEvaluationPeriod] = useState('one-day')
-  const [dayPrice, setDayPrice] = useState('5.00')
-  const [weekPrice, setWeekPrice] = useState('25.00')
-  const [monthPrice, setMonthPrice] = useState('90.00')
+  const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
   const [ndaConfirmed, setNdaConfirmed] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const stytchClient = useStytch()
@@ -45,6 +133,8 @@ const AppIP = () => {
   const [status, setStatus] = useState<IPAudit>()
   const [localStatus, setLocalStatus] = useState('')
   const { litClient, fbPromise, litPromise, sessionSigs } = useSession()
+  const products = useProducts()
+  console.log(products)
   const config = useConfig()
   useEffect(() => {
     if (docId) {
@@ -175,16 +265,19 @@ const AppIP = () => {
             downSampledUnifiedAccessControlConditions,
         },
         category: businessModel || 'Intellectual Property',
-        tags: ['IP', evaluationPeriod],
+        tags: ['IP'],
         // Include all terms information
         terms: {
           businessModel,
-          evaluationPeriod,
-          pricing: {
-            dayPrice,
-            weekPrice,
-            monthPrice,
-          },
+          pricing:
+            selectedPrices?.reduce(
+              (acc, price) => {
+                acc[products[price.product].metadata?.duration || 'unknown'] =
+                  price.unit_amount
+                return acc
+              },
+              {} as Record<string, number>
+            ) || {},
           ndaRequired: ndaConfirmed,
         },
       }
@@ -220,10 +313,8 @@ const AppIP = () => {
     fbPromise,
     litPromise,
     businessModel,
-    evaluationPeriod,
-    dayPrice,
-    weekPrice,
-    monthPrice,
+    selectedPrices,
+    products,
     fb,
     stytchClient?.session,
     config,
@@ -532,116 +623,11 @@ const AppIP = () => {
                       Evaluation Period
                     </label>
                     <div className="space-y-3">
-                      <div
-                        className={`flex items-center space-x-2 p-3 border ${
-                          evaluationPeriod === 'one-day'
-                            ? 'border-primary/50'
-                            : 'border-white/20'
-                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod('one-day')}
-                      >
-                        <input
-                          type="radio"
-                          id="one-day"
-                          name="evaluation-period"
-                          value="one-day"
-                          checked={evaluationPeriod === 'one-day'}
-                          onChange={() => setEvaluationPeriod('one-day')}
-                          className="text-primary rounded-full"
-                        />
-                        <label
-                          htmlFor="one-day"
-                          className="text-white cursor-pointer flex-grow"
-                        >
-                          One Day
-                        </label>
-                        <div className="flex items-center">
-                          <span className="text-white/70 mr-2">$</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={dayPrice}
-                            onChange={(e) => setDayPrice(e.target.value)}
-                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      </div>
-
-                      <div
-                        className={`flex items-center space-x-2 p-3 border ${
-                          evaluationPeriod === 'one-week'
-                            ? 'border-primary/50'
-                            : 'border-white/20'
-                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod('one-week')}
-                      >
-                        <input
-                          type="radio"
-                          id="one-week"
-                          name="evaluation-period"
-                          value="one-week"
-                          checked={evaluationPeriod === 'one-week'}
-                          onChange={() => setEvaluationPeriod('one-week')}
-                          className="text-primary rounded-full"
-                        />
-                        <label
-                          htmlFor="one-week"
-                          className="text-white cursor-pointer flex-grow"
-                        >
-                          One Week
-                        </label>
-                        <div className="flex items-center">
-                          <span className="text-white/70 mr-2">$</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={weekPrice}
-                            onChange={(e) => setWeekPrice(e.target.value)}
-                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      </div>
-
-                      <div
-                        className={`flex items-center space-x-2 p-3 border ${
-                          evaluationPeriod === 'one-month'
-                            ? 'border-primary/50'
-                            : 'border-white/20'
-                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setEvaluationPeriod('one-month')}
-                      >
-                        <input
-                          type="radio"
-                          id="one-month"
-                          name="evaluation-period"
-                          value="one-month"
-                          checked={evaluationPeriod === 'one-month'}
-                          onChange={() => setEvaluationPeriod('one-month')}
-                          className="text-primary rounded-full"
-                        />
-                        <label
-                          htmlFor="one-month"
-                          className="text-white cursor-pointer flex-grow"
-                        >
-                          One Month
-                        </label>
-                        <div className="flex items-center">
-                          <span className="text-white/70 mr-2">$</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={monthPrice}
-                            onChange={(e) => setMonthPrice(e.target.value)}
-                            className="w-16 p-1 rounded bg-muted/40 border-white/20 text-white text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      </div>
+                      <SortedProducts
+                        products={products}
+                        value={selectedPrices}
+                        onSelect={setSelectedPrices}
+                      />
                     </div>
                     <p className="text-xs text-white/60 mt-1">
                       Period begins after transaction is completed
