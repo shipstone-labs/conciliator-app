@@ -285,11 +285,14 @@ const AppIP = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2">
-              <h3 className="font-semibold text-primary text-sm mb-1">
-                Step 1: Public Information
-              </h3>
-              <p className="text-sm text-white/90">
+            <div className="p-4 mb-2">
+              <div className="flex items-center mb-1">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">1</div>
+                <h3 className="font-semibold text-primary text-sm">
+                  Public Information
+                </h3>
+              </div>
+              <p className="text-sm text-white/90 ml-8">
                 First enter the publicly available information you want to use
                 to describe your idea. This information can be seen by others on
                 the Internet.
@@ -329,11 +332,14 @@ const AppIP = () => {
               />
             </div>
 
-            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
-              <h3 className="font-semibold text-primary text-sm mb-1">
-                Step 2: Private Document
-              </h3>
-              <p className="text-sm text-white/90">
+            <div className="p-4 mb-2 mt-4">
+              <div className="flex items-center mb-1">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">2</div>
+                <h3 className="font-semibold text-primary text-sm">
+                  Private Document
+                </h3>
+              </div>
+              <p className="text-sm text-white/90 ml-8">
                 Now you need to add a text or markdown file that contains the
                 details about your idea. The file will be encrypted so that only
                 you can access it.
@@ -391,11 +397,14 @@ const AppIP = () => {
             )}
 
             {/* Step 3 section - always visible */}
-            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
-              <h3 className="font-semibold text-primary text-sm mb-1">
-                Step 3: Share Your Idea
-              </h3>
-              <p className="text-sm text-white/90">
+            <div className="p-4 mb-2 mt-4">
+              <div className="flex items-center mb-1">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">3</div>
+                <h3 className="font-semibold text-primary text-sm">
+                  Share Your Idea
+                </h3>
+              </div>
+              <p className="text-sm text-white/90 ml-8">
                 Now, you can choose how you want to share it. Click
                 <strong> Set Terms </strong> to configure sharing options.
               </p>
@@ -412,10 +421,10 @@ const AppIP = () => {
             </Button>
 
             {/* Create Page explanation */}
-            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+            <div className="p-4 mb-2 mt-4">
               <p className="text-sm text-white/90">
-                Clicking <strong>View Idea Page</strong> takes you to your new
-                Idea page. You can share this page address with others to
+                Clicking <strong>Create Idea Page</strong> submits your idea and takes you to your new
+                idea page. You can share this page address with others to
                 explore your secure idea.
               </p>
             </div>
@@ -448,7 +457,7 @@ const AppIP = () => {
                     </span>
                   </>
                 ) : (
-                  'View Idea Page'
+                  'Create Idea Page'
                 )}
               </Button>
               {status?.status || localStatus ? (
