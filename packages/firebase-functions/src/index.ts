@@ -228,8 +228,11 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       error('No id found in event', e)
       throw new Error('No id found')
     }
-    const record = records.docs[0]
-    const { metadata, price: priceId } = record.data()
+    debug('Found records', records.docs.length, records.docs[0].ref.path)
+    const record = records.docs[0].data()
+    debug('Found record', Object.keys(record), JSON.stringify(record))
+    const { metadata, price: priceId } = record
+    debug('Found metadata', JSON.stringify(metadata))
     const price = priceId
       ? await stripe.prices.retrieve(priceId as string)
       : undefined
@@ -261,7 +264,7 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     const {
       contract_name: __contract_name,
       contract_address: __contract_address,
-      contract: { address: _contract_address, name: _contract_name },
+      contract: { address: _contract_address, name: _contract_name } = {},
       docId,
       signature,
       to,
@@ -272,11 +275,14 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     const contract_name = __contract_name || _contract_name
     const contract_address = __contract_address || _contract_address
     const expiration = durations[duration] + Math.round(Date.now() / 1000)
-    if (!contract_address || contract_name || !tokenId) {
+    if (!contract_address || !contract_name || !tokenId) {
       error('No contract name or address found', metadata)
       throw new Error('No contract name or address found')
     }
-    info('Transfer token', { contract_address, tokenId, to, signature })
+    info(
+      'Transfer token',
+      JSON.stringify({ contract_address, tokenId, to, signature })
+    )
     await transferToken(
       app,
       contract_address as `0x${string}`,
