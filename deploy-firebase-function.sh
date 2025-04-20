@@ -99,6 +99,17 @@ gcloud run services add-iam-policy-binding "$SERVICE_NAME" \
   --member="serviceAccount:${PUBSUB_SA}" \
   --role="roles/run.invoker"
 
+# Add necessary roles to the PubSub service account
+# eventarc.eventReceiver - Required for receiving Eventarc events
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${PUBSUB_SA}" \
+  --role="roles/eventarc.eventReceiver"
+
+# iam.serviceAccountTokenCreator - Required for creating tokens for authentication
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${PUBSUB_SA}" \
+  --role="roles/iam.serviceAccountTokenCreator"
+
 # Add the PubSub audience to the Cloud Run service
 echo "Adding PubSub audience to Cloud Run service..."
 gcloud run services update "$SERVICE_NAME" \

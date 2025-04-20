@@ -25,11 +25,23 @@ echo "Adding PubSub service agent permissions to Cloud Run services..."
 for SERVICE in "${SERVICES[@]}"; do
   echo "Fixing permissions for $SERVICE..."
   
-  # Add the PubSub service agent with run.invoker role
+  # Add the PubSub service agent with run.invoker and eventarc.eventReceiver roles
   gcloud run services add-iam-policy-binding "$SERVICE" \
     --region="$REGION" \
     --member="serviceAccount:$PUBSUB_SA" \
     --role="roles/run.invoker"
+    
+  # Add necessary roles to the service account
+  
+  # eventarc.eventReceiver - Required for receiving Eventarc events
+  gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:$PUBSUB_SA" \
+    --role="roles/eventarc.eventReceiver"
+    
+  # iam.serviceAccountTokenCreator - Required for creating tokens for authentication
+  gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:$PUBSUB_SA" \
+    --role="roles/iam.serviceAccountTokenCreator"
   
   echo "Done fixing $SERVICE"
   echo ""

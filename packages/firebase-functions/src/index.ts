@@ -203,9 +203,7 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     const config = JSON.parse(FIREBASE_SA)
     const app = initializeApp(config, `checkout${Date.now()}`)
     const {
-      data: {
-        object: { id, metadata },
-      },
+      data: { id, metadata },
     } = e
     const apiVersion = '2022-11-15'
     const stripe = new Stripe(STIPE_RK || '', {
