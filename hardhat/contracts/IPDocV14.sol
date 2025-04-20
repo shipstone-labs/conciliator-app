@@ -170,13 +170,15 @@ contract IPDocV13 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, E
         public
         onlyRole(MINTER_ROLE)
     {
+        // The token must not already have an owner
+        address owner = _originalOwners[tokenId];
+        require(owner == address(0), "IPDocV12: token already is owned");
+
         _mint(account, id, amount, data);
         
         // Set this account as both the original and current owner if not already set
-        if (_originalOwners[id] == address(0)) {
-            _originalOwners[id] = account;
-            _currentOwners[id] = account;
-        }
+        _originalOwners[id] = account;
+        _currentOwners[id] = account;
     }
     
     /**
