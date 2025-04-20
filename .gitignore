@@ -46,3 +46,4 @@ CLAUDE.md
 .dev.vars
 /conciliator-*.json
 !/.husky
+/*.json

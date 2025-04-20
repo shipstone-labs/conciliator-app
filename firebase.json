@@ -17,7 +17,21 @@
         "firebase-debug.*.log",
         "*.local"
       ],
-      "predeploy": ["pnpm --filter functions run build"]
+      "predeploy": ["pnpm --filter functions run build"],
+      "secret_environment_vars": [
+        {
+          "key": "SECRET_PROJECT",
+          "secret": "SECRET_PROJECT"
+        },
+        {
+          "key": "SECRET_NAME",
+          "secret": "SECRET_NAME"
+        },
+        {
+          "key": "SECRET_VERSION",
+          "secret": "SECRET_VERSION"
+        }
+      ]
     }
   ]
 }

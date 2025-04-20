@@ -189,7 +189,10 @@ async function transferToken(
 }
 
 export const stripeCheckoutCompleted = onCustomEventPublished(
-  'com.stripe.v1.checkout.session.completed',
+  {
+    eventType: 'com.stripe.v1.checkout.session.completed',
+    secrets: ['SECRET_PROJECT', 'SECRET_NAME', 'SECRET_VERSION'],
+  },
   async (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
@@ -198,7 +201,7 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       'STRIPE_PK',
     ])
     const config = JSON.parse(FIREBASE_SA)
-    const app = initializeApp(config, 'checkout')
+    const app = initializeApp(config, `checkout${Date.now()}`)
     const {
       data: {
         object: { id, metadata },
@@ -288,7 +291,10 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
 )
 
 export const stripeCheckoutSucceeded = onCustomEventPublished(
-  'com.stripe.v1.checkout.session.async_payment_succeeded',
+  {
+    eventType: 'com.stripe.v1.checkout.session.async_payment_succeeded',
+    secrets: [],
+  },
   (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
@@ -296,7 +302,10 @@ export const stripeCheckoutSucceeded = onCustomEventPublished(
 )
 
 export const stripeCheckoutFailed = onCustomEventPublished(
-  'com.stripe.v1.checkout.session.async_payment_failed',
+  {
+    eventType: 'com.stripe.v1.checkout.session.async_payment_failed',
+    secrets: [],
+  },
   (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
@@ -304,7 +313,10 @@ export const stripeCheckoutFailed = onCustomEventPublished(
 )
 
 export const stripeInvoiceSucceeded = onCustomEventPublished(
-  'com.stripe.v1.invoice.payment_succeeded',
+  {
+    eventType: 'com.stripe.v1.invoice.payment_succeeded',
+    secrets: [],
+  },
   (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
@@ -312,7 +324,10 @@ export const stripeInvoiceSucceeded = onCustomEventPublished(
 )
 
 export const stripeInvoiceFailed = onCustomEventPublished(
-  'com.stripe.v1.invoice.payment_failed',
+  {
+    eventType: 'com.stripe.v1.invoice.payment_failed',
+    secrets: [],
+  },
   (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
@@ -320,7 +335,10 @@ export const stripeInvoiceFailed = onCustomEventPublished(
 )
 
 export const stripePaymentSucceeded = onCustomEventPublished(
-  'com.stripe.v1.payment_intent.succeeded',
+  {
+    eventType: 'com.stripe.v1.payment_intent.succeeded',
+    secrets: [],
+  },
   (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
@@ -328,7 +346,10 @@ export const stripePaymentSucceeded = onCustomEventPublished(
 )
 
 export const stripePaymentFailed = onCustomEventPublished(
-  'com.stripe.v1.payment_intent.payment_failed',
+  {
+    eventType: 'com.stripe.v1.payment_intent.payment_failed',
+    secrets: [],
+  },
   (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
