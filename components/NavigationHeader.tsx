@@ -86,14 +86,25 @@ export default function NavigationHeader() {
           </Link>
         )}
         <Link
-          href="/list-ip"
+          href="/idea-shop"
           className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
           onClick={() =>
-            traceAction('Navigate', undefined, { destination: '/list-ip' })
+            traceAction('Navigate', undefined, { destination: '/idea-shop' })
           }
         >
-          Explore Ideas
+          Idea Shop
         </Link>
+        {isAuthenticated && (
+          <Link
+            href="/list-ip"
+            className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+            onClick={() =>
+              traceAction('Navigate', undefined, { destination: '/list-ip' })
+            }
+          >
+            Explore Ideas
+          </Link>
+        )}
       </nav>
 
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}

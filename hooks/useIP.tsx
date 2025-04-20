@@ -29,15 +29,15 @@ import { useEffect, useState } from 'react'
 import { bytesToString, numberToBytes } from 'viem'
 import { useSession } from './useSession'
 
-export function useIP(docId: string) {
+export function useIP(docId: string, shopMode = false) {
   const { fbPromise, fbUser } = useSession()
-  if (!fbUser && fbPromise) {
+  if (!fbUser && fbPromise && !shopMode) {
     throw fbPromise
   }
   const [ideaData, setIdeaData] = useState<IPDoc | undefined>()
   const { user } = useStytchUser()
   useEffect(() => {
-    if (!user) {
+    if (!user && !shopMode) {
       setIdeaData(undefined)
       return
     }
@@ -50,8 +50,11 @@ export function useIP(docId: string) {
       const docRef = await getDoc(doc(fs, 'ip', actualDocId))
       if (docRef.exists()) {
         const { creator } = docRef.data() as { creator?: string }
-        let hasAccess = creator === user.user_id
-        if (!hasAccess) {
+        // In shop mode, no encrypted access is given, but basic details are viewable
+        let hasAccess = shopMode ? false : (creator === user?.user_id)
+        
+        // Only check for deals if not in shop mode and not the creator
+        if (!hasAccess && !shopMode && user) {
           const deals = await getDocs(
             query(
               query(
@@ -89,7 +92,7 @@ export function useIP(docId: string) {
     }
 
     fetchData()
-  }, [docId, user])
+  }, [docId, user, shopMode])
 
   return ideaData
 }
@@ -100,15 +103,17 @@ export function useIPs({
   itemsPerPage: _limit = 16,
   filter,
   currentPage: _page = 1,
+  shopMode = false,
 }: {
   orderBy?: string
   orderDirection?: OrderByDirection
   itemsPerPage?: number
   filter?: QueryCompositeFilterConstraint
   currentPage?: number
+  shopMode?: boolean
 }) {
   const { fbPromise, fbUser } = useSession()
-  if (!fbUser && fbPromise) {
+  if (!fbUser && fbPromise && !shopMode) {
     throw fbPromise
   }
   const [ideaData, setIdeaData] = useState<{

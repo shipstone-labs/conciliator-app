@@ -65,7 +65,8 @@ export default function Authenticated({
   children,
   requireLit = false,
   requireFirebase = true,
-}: PropsWithChildren<{ requireLit?: boolean; requireFirebase?: boolean }>) {
+  ideaShopMode = false,
+}: PropsWithChildren<{ requireLit?: boolean; requireFirebase?: boolean; ideaShopMode?: boolean }>) {
   const { user, isInitialized } = useStytchUser()
   const stytchClient = useStytch()
   const isLoggingOff = globalSession.isLoggingOff
@@ -81,7 +82,10 @@ export default function Authenticated({
   const amendLoggedIn = useCallback(
     (state: Session) => {
       let isLoggedIn = true
-      if (!user) {
+      // If ideaShopMode is true, consider the user "logged in" for display purposes
+      if (ideaShopMode) {
+        isLoggedIn = true
+      } else if (!user) {
         isLoggedIn = false
       } else if (requireLit && !state.sessionSigs) {
         isLoggedIn = false
@@ -93,11 +97,11 @@ export default function Authenticated({
       globalSession = updatedState
       return updatedState
     },
-    [requireLit, requireFirebase, user]
+    [requireLit, requireFirebase, user, ideaShopMode]
   )
 
   useEffect(() => {
-    if (isInitialized && !user) {
+    if (isInitialized && !user && !ideaShopMode) {
       setShowAuthModal(true)
     }
     if (isInitialized && user) {
@@ -419,6 +423,17 @@ export default function Authenticated({
     }
   }, [isLoggingOff])
 
+  // Initialize as logged in for shop mode, otherwise wait for auth
+  useEffect(() => {
+    if (ideaShopMode && !sessionSigs.isLoggedIn) {
+      setSessionSigs((state) => amendLoggedIn({
+        ...state,
+        // Mark as shop mode session
+        isLoggedIn: true,
+      }))
+    }
+  }, [ideaShopMode, amendLoggedIn, sessionSigs.isLoggedIn])
+
   return (
     <>
       <sessionContext.Provider value={sessionSigs}>
@@ -431,12 +446,14 @@ export default function Authenticated({
         </Suspense>
       </sessionContext.Provider>
 
-      {/* Authentication Modal */}
-      <AuthModal
-        onClose={onClose}
-        isOpen={showAuthModal}
-        onSuccess={handleAuthSuccess}
-      />
+      {/* Authentication Modal - not shown in shop mode */}
+      {!ideaShopMode && (
+        <AuthModal
+          onClose={onClose}
+          isOpen={showAuthModal}
+          onSuccess={handleAuthSuccess}
+        />
+      )}
     </>
   )
 }

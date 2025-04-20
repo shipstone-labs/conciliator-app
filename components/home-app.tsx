@@ -78,7 +78,14 @@ function HomeApp() {
         {/* Button Section */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
           {
-            !isInitialized ? null : isInitialized && user ? (
+            !isInitialized ? (
+              <Link
+                href="/idea-shop"
+                className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
+              >
+                Browse Idea Shop
+              </Link>
+            ) : isInitialized && user ? (
               <>
                 <Link
                   href="/add-ip"
@@ -99,7 +106,14 @@ function HomeApp() {
                   Explore Ideas
                 </Link>
               </>
-            ) : null /* Removed AuthButton from here */
+            ) : (
+              <Link
+                href="/idea-shop"
+                className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
+              >
+                Browse Idea Shop
+              </Link>
+            )
           }
         </div>
       </div>

@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowRight, Loader2, LogIn } from 'lucide-react'
 import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
@@ -31,9 +32,11 @@ import { type Price, type Product, useProducts } from '@/hooks/useProducts'
 const DetailIP = ({
   docId,
   view = false,
+  shopMode = false,
 }: {
   docId: string
   view?: boolean
+  shopMode?: boolean
 }) => {
   const [ndaChecked, setNdaChecked] = useState(false)
   const isViewLoading = useRef(false)
@@ -47,7 +50,7 @@ const DetailIP = ({
   } = useSession()
   const config = useConfig()
   const router = useRouter()
-  const ideaData = useIP(docId)
+  const ideaData = useIP(docId, shopMode)
   const prices = useMemo(() => {
     const {
       terms: { pricing } = {},
@@ -309,6 +312,30 @@ const DetailIP = ({
   return (
     <div className="w-full py-8">
       <div className="max-w-4xl mx-auto space-y-8 px-4">
+        {/* Shop Mode Banner - Only shown in shop mode */}
+        {shopMode && (
+          <Card className="w-full backdrop-blur-lg bg-primary/10 border border-primary/30 shadow-xl overflow-hidden">
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
+                <LogIn className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-primary font-bold text-lg mb-1">Idea Shop Mode</h2>
+                <p className="text-white/90">
+                  You are browsing in public shop mode. To purchase access or interact with this idea, please sign in.
+                </p>
+                <Link 
+                  href="/" 
+                  className="inline-flex items-center mt-2 text-primary hover:underline font-medium"
+                >
+                  Sign in to your account
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         {/* Header with page title and image */}
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center">
@@ -460,47 +487,80 @@ const DetailIP = ({
                     <h4 className="text-sm font-medium text-white/70 mb-2">
                       Access Options:
                     </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                      {prices?.map((item: Product & { price: Price }) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
-                              : 'border-white/10 bg-muted/20 opacity-50'
-                          }`}
-                          disabled={!ndaChecked}
-                          onClick={() =>
-                            ndaChecked &&
-                            buy({
-                              metadata: {
-                                ...ideaData.metadata,
-                                contract_address:
-                                  ideaData.metadata?.contract?.address || '',
-                                contract_name:
-                                  ideaData.metadata?.contract?.name || '',
-                                duration: item.metadata?.duration,
-                              },
-                              price: item.price,
-                            })
-                          }
-                          role={ndaChecked ? 'button' : ''}
-                          tabIndex={ndaChecked ? 0 : -1}
-                        >
-                          <p className="text-white/70 text-xs">One Day</p>
-                          <p className="text-primary font-medium mt-1">
-                            {item.price != null && item.price?.id !== ''
-                              ? formatNumber(
-                                  item.price.unit_amount / 100,
-                                  'currency',
-                                  item.price.currency
-                                )
-                              : 'Not available'}
-                          </p>
-                        </button>
-                      )) || null}
-                    </div>
+                    {shopMode ? (
+                      <div className="border border-primary/20 bg-muted/20 rounded-xl p-4 text-center">
+                        <p className="text-white/90 mb-4">
+                          Sign in to purchase access to this intellectual property
+                        </p>
+                        <Link href="/">
+                          <Button className="px-6 py-2 bg-primary hover:bg-primary/80 text-black font-medium">
+                            <LogIn className="h-4 w-4 mr-2" />
+                            Sign In to Purchase
+                          </Button>
+                        </Link>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                          {prices?.map((item: Product & { price: Price }) => (
+                            <div
+                              key={item.id}
+                              className="p-3 border border-white/10 bg-muted/20 opacity-70 rounded-xl"
+                            >
+                              <p className="text-white/70 text-xs">{item.name}</p>
+                              <p className="text-primary font-medium mt-1">
+                                {item.price != null && item.price?.id !== ''
+                                  ? formatNumber(
+                                      item.price.unit_amount / 100,
+                                      'currency',
+                                      item.price.currency
+                                    )
+                                  : 'Not available'}
+                              </p>
+                            </div>
+                          )) || null}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {prices?.map((item: Product & { price: Price }) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className={`p-3 border rounded-xl transition-all ${
+                              ndaChecked
+                                ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
+                                : 'border-white/10 bg-muted/20 opacity-50'
+                            }`}
+                            disabled={!ndaChecked}
+                            onClick={() =>
+                              ndaChecked &&
+                              buy({
+                                metadata: {
+                                  ...ideaData.metadata,
+                                  contract_address:
+                                    ideaData.metadata?.contract?.address || '',
+                                  contract_name:
+                                    ideaData.metadata?.contract?.name || '',
+                                  duration: item.metadata?.duration,
+                                },
+                                price: item.price,
+                              })
+                            }
+                            role={ndaChecked ? 'button' : ''}
+                            tabIndex={ndaChecked ? 0 : -1}
+                          >
+                            <p className="text-white/70 text-xs">{item.name || "One Day"}</p>
+                            <p className="text-primary font-medium mt-1">
+                              {item.price != null && item.price?.id !== ''
+                                ? formatNumber(
+                                    item.price.unit_amount / 100,
+                                    'currency',
+                                    item.price.currency
+                                  )
+                                : 'Not available'}
+                            </p>
+                          </button>
+                        )) || null}
+                      </div>
+                    )}
                   </div>
 
                   {/* NDA Information */}
@@ -522,7 +582,15 @@ const DetailIP = ({
                               ? 'NDA Required: Access to this idea requires a signed Non-Disclosure Agreement.'
                               : 'NDA Not Required: This idea can be accessed without a signed NDA.'}
                           </p>
-                          {ideaData.terms.ndaRequired && (
+                          
+                          {/* For shop mode, show sign in prompt instead of NDA checkbox if needed */}
+                          {shopMode && ideaData.terms.ndaRequired ? (
+                            <div className="mt-2">
+                              <Link href="/" className="text-primary hover:underline">
+                                Sign in to view and sign the required NDA
+                              </Link>
+                            </div>
+                          ) : !shopMode && ideaData.terms.ndaRequired && (
                             <div className="flex items-center mt-2">
                               <input
                                 type="checkbox"

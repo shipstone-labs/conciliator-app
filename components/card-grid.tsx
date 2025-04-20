@@ -29,9 +29,10 @@ function getImageWidth() {
 type CardGridProps = {
   filter?: QueryCompositeFilterConstraint
   itemsPerPage?: number
+  shopMode?: boolean
 }
 
-function CardGrid({ filter, itemsPerPage = 16 }: CardGridProps) {
+function CardGrid({ filter, itemsPerPage = 16, shopMode = false }: CardGridProps) {
   const [imageWidth, setImageWidth] = useState(getImageWidth()) // Default width
   const [currentPage, setCurrentPage] = useState(1)
   const { data: visibleItems, pages: totalPages } = useIPs({
@@ -40,6 +41,7 @@ function CardGrid({ filter, itemsPerPage = 16 }: CardGridProps) {
     itemsPerPage,
     currentPage,
     filter,
+    shopMode,
   }) || { pages: 1 }
 
   // Responsive image size calculation
