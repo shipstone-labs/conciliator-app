@@ -175,8 +175,8 @@ async function transferToken(
         address: contract,
         nonce,
         abi,
-        functionName: 'mintWithSignature',
-        args: [to, tokenId, 1, Math.round(expiration / 1000), '0x', signature],
+        functionName: 'mintWithExpiration',
+        args: [to, tokenId, 1, Math.round(expiration / 1000), '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
