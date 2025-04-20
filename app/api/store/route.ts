@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
       .doc(id)
       .collection('status')
       .doc('status')
-    const auditTable = firestore.collection('id').doc(id).collection('audit')
+    const auditTable = firestore.collection('ip').doc(id).collection('audit')
     await status.set({
       status: 'Storing encrypted document in storacha',
       creator: user.user.user_id,
@@ -189,7 +189,10 @@ export async function POST(req: NextRequest) {
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })
-    async function setStatus(message: string, extra?: Record<string, unknown>) {
+    const setStatus = async (
+      message: string,
+      extra?: Record<string, unknown>
+    ) => {
       await status.update({
         status: message,
         updatedAt: FieldValue.serverTimestamp(),

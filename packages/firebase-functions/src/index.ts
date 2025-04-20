@@ -159,7 +159,7 @@ async function transferToken(
   contract: `0x${string}`,
   tokenId: number,
   to: `0x${string}`,
-  signature: `0x${string}`,
+  _signature: `0x${string}`,
   expiration = 0
 ) {
   const { FILCOIN_PK } = await loadSecrets(['FILCOIN_PK'])
@@ -252,9 +252,9 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     const durations:
       | Record<'day' | 'week' | 'month', number>
       | { [key: string]: number } = {
-      day: 60 * 60 * 24,
-      week: 60 * 60 * 24 * 7,
-      month: 60 * 60 * 24 * 30,
+      day: 60 * 60 * 24 * 1000, // Times in ms.
+      week: 60 * 60 * 24 * 7 * 1000,
+      month: 60 * 60 * 24 * 30 * 1000,
     }
     if (!_duration || !(_duration in durations)) {
       error('No or invalid duration found', _duration, e)
@@ -274,7 +274,7 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     } = metadata || {}
     const contract_name = __contract_name || _contract_name
     const contract_address = __contract_address || _contract_address
-    const expiration = durations[duration] + Math.round(Date.now() / 1000)
+    const expiration = durations[duration] + Date.now()
     if (!contract_address || !contract_name || !tokenId) {
       error('No contract name or address found', metadata)
       throw new Error('No contract name or address found')
@@ -286,10 +286,10 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     await transferToken(
       app,
       contract_address as `0x${string}`,
-      Number.parseInt(tokenId),
+      tokenId,
       to as `0x${string}`,
       signature as `0x${string}`,
-      expiration
+      expiration // expiration in ms
     ).then(async (hash) => {
       const db = getFirestore(app)
       const now = new Date()

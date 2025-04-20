@@ -12,7 +12,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /// @custom:security-contact andy@shipstone.com
-contract IPDocV13 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ERC1155Supply, ERC1155URIStorage {
+contract IPDocV14 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ERC1155Supply, ERC1155URIStorage {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
@@ -171,7 +171,7 @@ contract IPDocV13 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, E
         onlyRole(MINTER_ROLE)
     {
         // The token must not already have an owner
-        address owner = _originalOwners[tokenId];
+        address owner = _originalOwners[id];
         require(owner == address(0), "IPDocV12: token already is owned");
 
         _mint(account, id, amount, data);
@@ -186,7 +186,7 @@ contract IPDocV13 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, E
      * @param to Address to mint to
      * @param tokenId Token ID to mint
      * @param amount Amount to mint
-     * @param expiration Optional expiration date (0=none)
+     * @param expirationTime Optional expiration date (0=none)
      * @param data Additional data
      * @param signature Signature from the token owner
      */
@@ -228,7 +228,7 @@ contract IPDocV13 is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, E
      * @param to Address to mint to
      * @param tokenId Token ID to mint
      * @param amount Amount to mint
-     * @param expiration Optional expiration date (0=none)
+     * @param expirationTime Optional expiration date (0=none)
      * @param data extra data
      */
     function mintWithExpiration(
