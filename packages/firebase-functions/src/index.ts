@@ -10,7 +10,7 @@
 // import {onRequest} from "firebase-functions/v2/https";
 // import * as logger from "firebase-functions/logger";
 import { onCustomEventPublished } from 'firebase-functions/v2/eventarc'
-import { debug } from 'firebase-functions/logger'
+import { debug, info } from 'firebase-functions/logger'
 import { loadSecrets } from './secrets'
 import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
@@ -182,7 +182,7 @@ async function transferToken(
         await waitForTransactionReceipt(wallet, {
           hash,
         })
-        console.info('Transaction hash', { hash, to, tokenId, expiration })
+        info('Transaction hash', { hash, to, tokenId, expiration })
         return hash
       })
   })
@@ -196,9 +196,9 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
   async (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
-    const { FIREBASE_SA, STIPE_RK } = await loadSecrets([
+    const { FIREBASE_SA, STRIPE_RK } = await loadSecrets([
       'FIREBASE_SA',
-      'STRIPE_PK',
+      'STRIPE_RK',
     ])
     const config = JSON.parse(FIREBASE_SA)
     const app = initializeApp(config, `checkout${Date.now()}`)
@@ -206,7 +206,7 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       data: { id, metadata },
     } = e
     const apiVersion = '2022-11-15'
-    const stripe = new Stripe(STIPE_RK || '', {
+    const stripe = new Stripe(STRIPE_RK || '', {
       apiVersion,
       // Register extension as a Stripe plugin
       // https://stripe.com/docs/building-plugins#setappinfo

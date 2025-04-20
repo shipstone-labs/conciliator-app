@@ -1,6 +1,6 @@
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 import { parse } from 'dotenv'
-
+import { error, debug } from 'firebase-functions/logger'
 /**
  * Loads secrets from Google Secret Manager and applies them to process.env
  *
@@ -43,7 +43,9 @@ export async function loadSecrets(
   const client = new SecretManagerServiceClient()
   const [version] = await client.accessSecretVersion({ name })
   const payload = version.payload?.data?.toString() || ''
-
+  if (!payload) {
+    error('No payload found in secret version')
+  }
   const loadedSecrets: Record<string, string> = parse(payload)
   const contract_name =
     loadedSecrets.FILCOIN_CONTRACT_VERIFIED ||
@@ -57,6 +59,13 @@ export async function loadSecrets(
   ) as `0x${string}`
   loadedSecrets.CONTRACT = contract
   loadedSecrets.CONTRACT_NAME = contract_name
+  debug('has names', Object.keys(loadedSecrets))
+  for (const key of secretNames) {
+    if (!loadedSecrets[key]) {
+      error(`Secret ${key} not found in loaded secrets`)
+    }
+  }
+
   return Object.fromEntries(
     Object.entries(loadedSecrets).filter(([key]) => secretNames.includes(key))
   )

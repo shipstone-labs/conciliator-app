@@ -6,7 +6,7 @@ import { getUser } from '../stytch'
 // import { getLit } from '../utils'
 
 // const apiVersion = '2022-11-15'
-// const stripe = new Stripe(process.env.STIPE_RK || '', {
+// const stripe = new Stripe(process.env.STRIPE_RK || '', {
 //   apiVersion,
 //   // Register extension as a Stripe plugin
 //   // https://stripe.com/docs/building-plugins#setappinfo
