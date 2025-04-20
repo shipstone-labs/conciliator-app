@@ -10,7 +10,7 @@
 // import {onRequest} from "firebase-functions/v2/https";
 // import * as logger from "firebase-functions/logger";
 import { onCustomEventPublished } from 'firebase-functions/v2/eventarc'
-import { debug, info } from 'firebase-functions/logger'
+import { debug, info, error } from 'firebase-functions/logger'
 import { loadSecrets } from './secrets'
 import { privateKeyToAccount } from 'viem/accounts'
 import { filecoinCalibration } from 'viem/chains'
@@ -23,7 +23,7 @@ import {
 } from 'viem'
 import { abi } from './abi'
 import { estimateFeesPerGas, waitForTransactionReceipt } from 'viem/actions'
-import { deleteApp, initializeApp } from 'firebase-admin/app'
+import { cert, deleteApp, initializeApp } from 'firebase-admin/app'
 import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { getDatabase } from 'firebase-admin/database'
 import Stripe from 'stripe'
@@ -196,12 +196,19 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
   async (e) => {
     // Handle extension event here.
     debug(JSON.stringify(e))
-    const { FIREBASE_SA, STRIPE_RK } = await loadSecrets([
+    const { FIREBASE_SA, STRIPE_RK, FIREBASE_DB } = await loadSecrets([
       'FIREBASE_SA',
       'STRIPE_RK',
+      'FIREBASE_DB',
     ])
-    const config = JSON.parse(FIREBASE_SA)
-    const app = initializeApp(config, `checkout${Date.now()}`)
+    const credential = cert(JSON.parse(FIREBASE_SA))
+    const app = initializeApp(
+      {
+        credential,
+        databaseURL: FIREBASE_DB,
+      },
+      `checkout${Date.now()}`
+    )
     const {
       data: { id, metadata },
     } = e
@@ -216,15 +223,22 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       },
     })
     const lines = await stripe.checkout.sessions.listLineItems(id)
+    debug('lines', JSON.stringify(lines))
     const {
       data: [{ price } = {}] = [],
     } = lines
     if (!price) {
+      error("lines didn't contain price", lines)
       throw new Error('No price found')
+    }
+    const { product: product_id } = price
+    const product = await stripe.products.retrieve(product_id as string)
+    if (!product) {
+      throw new Error(`No product found ${product_id}`)
     }
     const {
       metadata: { duration: _duration } = {},
-    } = price
+    } = product
     const durations:
       | Record<'day' | 'week' | 'month', number>
       | { [key: string]: number } = {
