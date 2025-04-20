@@ -157,7 +157,7 @@ export async function runWithNonce<T>(
 async function transferToken(
   app: ReturnType<typeof initializeApp>,
   contract: `0x${string}`,
-  tokenId: `0x${string}`,
+  tokenId: number,
   to: `0x${string}`,
   signature: `0x${string}`,
   expiration = 0
@@ -176,7 +176,7 @@ async function transferToken(
         nonce,
         abi,
         functionName: 'mintWithSignature',
-        args: [to, tokenId, 1, Math.round(expiration / 1000), signature],
+        args: [to, tokenId, 1, Math.round(expiration / 1000), '0x', signature],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -209,9 +209,6 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       },
       `checkout${Date.now()}`
     )
-    const {
-      data: { id, metadata },
-    } = e
     const apiVersion = '2022-11-15'
     const stripe = new Stripe(STRIPE_RK || '', {
       apiVersion,
@@ -222,18 +219,28 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
         version: '0.3.5',
       },
     })
-    const lines = await stripe.checkout.sessions.listLineItems(id)
-    debug('lines', JSON.stringify(lines))
-    const {
-      data: [{ price } = {}] = [],
-    } = lines
+    const fs = getFirestore(app)
+    const records = await fs
+      .collectionGroup('checkout_sessions')
+      .where('sessionId', '==', e.data.id)
+      .get()
+    if (records.empty) {
+      error('No id found in event', e)
+      throw new Error('No id found')
+    }
+    const record = records.docs[0]
+    const { metadata, price: priceId } = record.data()
+    const price = priceId
+      ? await stripe.prices.retrieve(priceId as string)
+      : undefined
     if (!price) {
-      error("lines didn't contain price", lines)
+      error('No price found in event', priceId, e)
       throw new Error('No price found')
     }
     const { product: product_id } = price
     const product = await stripe.products.retrieve(product_id as string)
     if (!product) {
+      error('No product found', product_id, e)
       throw new Error(`No product found ${product_id}`)
     }
     const {
@@ -247,57 +254,72 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       month: 60 * 60 * 24 * 30,
     }
     if (!_duration || !(_duration in durations)) {
+      error('No or invalid duration found', _duration, e)
       throw new Error('No or invalid duration found')
     }
     const duration = _duration as 'day' | 'week' | 'month'
-    const expiration = durations[duration] + Math.round(Date.now() / 1000)
     const {
-      contract: { name, address } = {},
+      contract_name: __contract_name,
+      contract_address: __contract_address,
+      contract: { address: _contract_address, name: _contract_name },
       docId,
       signature,
       to,
       tokenId,
       expiration: _expiration,
       owner,
-    } = metadata
-    await transferToken(app, address, tokenId, to, signature, _expiration).then(
-      async (hash) => {
-        const db = getFirestore(app)
-        const now = new Date()
-        const docRef = db.collection('ip').doc(docId)
-        const doc = await docRef.get()
-        const { creator, from } = doc.data() || {}
-        const deal = {
-          status: 'completed',
-          metadata: {
-            tokenId,
-            to,
-            owner,
-            ...(from ? { from } : {}),
-            creator,
-            transfer: hash,
-            contract: {
-              address,
-              name,
-            },
-            ...(expiration ? { end: Timestamp.fromMillis(expiration) } : {}),
-            start: Timestamp.fromDate(now),
+    } = metadata || {}
+    const contract_name = __contract_name || _contract_name
+    const contract_address = __contract_address || _contract_address
+    const expiration = durations[duration] + Math.round(Date.now() / 1000)
+    if (!contract_address || contract_name || !tokenId) {
+      error('No contract name or address found', metadata)
+      throw new Error('No contract name or address found')
+    }
+    info('Transfer token', { contract_address, tokenId, to, signature })
+    await transferToken(
+      app,
+      contract_address as `0x${string}`,
+      Number.parseInt(tokenId),
+      to as `0x${string}`,
+      signature as `0x${string}`,
+      expiration
+    ).then(async (hash) => {
+      const db = getFirestore(app)
+      const now = new Date()
+      const docRef = db.collection('ip').doc(docId)
+      const doc = await docRef.get()
+      const { creator, from } = doc.data() || {}
+      const deal = {
+        status: 'completed',
+        metadata: {
+          tokenId,
+          to,
+          owner,
+          ...(from ? { from } : {}),
+          creator,
+          transfer: hash,
+          contract: {
+            address: contract_address,
+            name: contract_name,
           },
-          createdAt: Timestamp.fromDate(now),
-          updatedAt: Timestamp.fromDate(now),
-        }
-        const dealDoc = await docRef.collection('deals').add(deal)
-        if (creator) {
-          await db
-            .collection('users')
-            .doc(owner)
-            .collection('deals')
-            .doc(dealDoc.id)
-            .set(deal)
-        }
-        return hash
+          ...(expiration ? { end: Timestamp.fromMillis(expiration) } : {}),
+          start: Timestamp.fromDate(now),
+        },
+        createdAt: Timestamp.fromDate(now),
+        updatedAt: Timestamp.fromDate(now),
       }
-    )
+      const dealDoc = await docRef.collection('deals').add(deal)
+      if (creator) {
+        await db
+          .collection('users')
+          .doc(owner)
+          .collection('deals')
+          .doc(dealDoc.id)
+          .set(deal)
+      }
+      return hash
+    })
     await deleteApp(app)
   }
 )
