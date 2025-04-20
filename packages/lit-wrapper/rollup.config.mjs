@@ -42,6 +42,49 @@ export default {
     virtual({
       '@walletconnect/modal': 'export default {}',
       process: 'export default {}',
+      // Stub out punycode to prevent deprecation warnings
+      punycode: `
+        export function decode(string) { return string; }
+        export function encode(string) { return string; }
+        export function toASCII(domain) { return domain; }
+        export function toUnicode(domain) { return domain; }
+        export default { decode, encode, toASCII, toUnicode };
+      `,
+      depd: `
+        // Complete replacement for depd
+        export default () => {
+          // Return a function that creates deprecation warnings
+          const deprecate = () => {
+            return () => {
+              // No-op function
+              return
+            }
+          }
+
+          // Add properties to match the real depd API
+          deprecate.function = (fn) => {
+            return fn
+          }
+
+          deprecate.property = (obj) => {
+            return obj
+          }
+
+          deprecate.class = (fn) => {
+            return fn
+          }
+
+          // Support for calling directly
+          const callable = () => {
+            return deprecate()
+          }
+
+          // Copy all properties to the callable
+          Object.assign(callable, deprecate)
+
+          return callable
+        }
+      `,
       // Add any other modules to stub here as needed
     }),
     // Explicitly resolve from this package's node_modules
@@ -75,8 +118,33 @@ export default {
     if (warning.code === 'CIRCULAR_DEPENDENCY') return
     // Suppress this is undefined warnings (common in browser code)
     if (warning.code === 'THIS_IS_UNDEFINED') return
+    // Suppress deprecation warnings
+    if (
+      warning.message &&
+      (warning.message.includes('deprecated') ||
+        warning.message.includes('punycode'))
+    )
+      return
     warn(warning)
   },
   // We don't want ANY externals - everything should be bundled
-  external: [],
+  external: [
+    '@lit-protocol/accs-schemas',
+    '@lit-protocol/auth-helpers',
+    '@lit-protocol/constants',
+    '@lit-protocol/contracts',
+    // '@lit-protocol/contracts-sdk',
+    '@lit-protocol/crypto',
+    // '@lit-protocol/lit-auth-client',
+    '@lit-protocol/lit-node-client',
+    '@lit-protocol/types',
+    // '@simplewebauthn/browser',
+    'blakejs',
+    'browser-headers',
+    'cross-fetch',
+    'js-sha256',
+    // 'multiformats',
+    // 'uint8arrays',
+    'utf-8-validate',
+  ],
 }

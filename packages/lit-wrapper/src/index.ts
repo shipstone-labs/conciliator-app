@@ -6,6 +6,11 @@ import {
   PROVIDER_TYPE,
   LIT_ABILITY,
 } from '@lit-protocol/constants'
+import type {
+  AuthCallbackParams,
+  SessionSigsMap,
+  AuthSig,
+} from '@lit-protocol/types'
 import { LitNodeClient } from '@lit-protocol/lit-node-client'
 import {
   LitAccessControlConditionResource,
@@ -16,6 +21,7 @@ import {
   createSiweMessageWithRecaps,
   generateAuthSig,
 } from '@lit-protocol/auth-helpers'
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers'
 import {
   LitRelay,
   StytchOtpProvider,
@@ -94,12 +100,17 @@ export {
   LIT_NETWORK,
   LIT_ABILITY,
   type LitNodeClient,
+  type AuthMethod,
+  type AuthCallbackParams,
+  type AuthSig,
   LitAccessControlConditionResource,
+  PKPEthersWallet,
   type LitResourceAbilityRequest,
   newSessionCapabilityObject,
   createSiweMessageWithRecaps,
   generateAuthSig,
   LitPKPResource,
   LitActionResource,
+  type SessionSigsMap,
   type EncryptResponse,
 }

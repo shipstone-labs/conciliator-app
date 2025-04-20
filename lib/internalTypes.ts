@@ -11,16 +11,17 @@ export type IPDocJSON = {
     mint: `0x${string}`
     transfer: `0x${string}`
     update: `0x${string}`
+    contract?: {
+      address?: `0x${string}`
+      name?: string
+    }
   }
   // Terms information for the idea
   terms?: {
     businessModel: string
     evaluationPeriod: string
-    pricing: {
-      dayPrice: string
-      weekPrice: string
-      monthPrice: string
-    }
+    // ProductID=PriceID
+    pricing: Record<string, string>
     ndaRequired: boolean
   }
   image?: { cid: string; width: number; height: number; mimeType: string }

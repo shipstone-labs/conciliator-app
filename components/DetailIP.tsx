@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -9,13 +9,24 @@ import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
-import { Modal } from '@/components/ui/modal'
 import { cidAsURL } from '@/lib/internalTypes'
 import { useSession } from '@/hooks/useSession'
 import Markdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
+import * as cbor from 'cbor-web'
+import { useStytchUser } from '@stytch/nextjs'
+import {
+  addDoc,
+  collection,
+  type DocumentSnapshot,
+  getFirestore,
+  onSnapshot,
+} from 'firebase/firestore'
+import { type Address, encodePacked, hexToBytes, zeroAddress } from 'viem'
+import { PKPEthersWallet } from '@/packages/lit-wrapper/dist'
+import { type Price, type Product, useProducts } from '@/hooks/useProducts'
 
 const DetailIP = ({
   docId,
@@ -27,13 +38,150 @@ const DetailIP = ({
   const [ndaChecked, setNdaChecked] = useState(false)
   const isViewLoading = useRef(false)
   const [viewed, setViewed] = useState<string>()
-  const [isAccessModalOpen, setIsAccessModalOpen] = useState(false)
-  const { litClient, delegatedSessionSigs } = useSession()
+  const products = useProducts()
+  const {
+    litClient,
+    litPromise,
+    delegatedSessionSigs,
+    sessionSigs: originalSessionSigs,
+  } = useSession()
   const config = useConfig()
   const router = useRouter()
   const ideaData = useIP(docId)
+  const prices = useMemo(() => {
+    const {
+      terms: { pricing } = {},
+    } = ideaData || {}
+    const orders = ['day', 'week', 'month']
+    const prices = []
+    for (const product of Object.values(products)) {
+      if (product) {
+        const order = orders.indexOf(product.metadata?.duration)
+        if (order === -1) {
+          continue
+        }
+        let price = product.prices?.[pricing?.[product.id] || '']
+        if (!price) {
+          const sortedPrices = Object.values(product.prices).sort(
+            (a, b) => a.unit_amount - b.unit_amount
+          )
+          price = sortedPrices[0]
+        }
+        if (price) {
+          prices.push({ ...product, price, order })
+        }
+      }
+    }
+    return prices.sort((a, b) => a.order - b.order)
+  }, [products, ideaData])
   const audit = useIPAudit(docId)
+  const { user } = useStytchUser()
 
+  const buy = useCallback(
+    async (
+      options: Record<string, unknown> & {
+        metadata: Record<string, unknown>
+        price: Price
+      }
+    ) => {
+      await litPromise
+      if (!litClient) {
+        throw new Error('No litClient')
+      }
+      const db = getFirestore()
+      let duration = 0
+      switch (options.duration) {
+        case 'day':
+          duration = 24 * 3600 * 1000 // 1 day
+          break
+        case 'week':
+          duration = 7 * 24 * 3600 * 1000 // 7 days
+          break
+        case 'year':
+          duration = 365 * 24 * 3600 * 1000 // 1 year
+          break
+        case 'month':
+          duration = 30 * 24 * 3600 * 1000 // 30 days
+          break
+      }
+      const {
+        metadata: {
+          tokenId,
+          contract: { address: contractAddress } = {},
+        } = {},
+      } = ideaData || {}
+      const to = (originalSessionSigs?.address || zeroAddress) as Address
+      const params = [
+        to,
+        BigInt(tokenId || '0'),
+        1n,
+        contractAddress || zeroAddress,
+      ] as [Address, bigint, bigint, Address]
+      const message = hexToBytes(
+        encodePacked(['address', 'uint256', 'uint256', 'address'], params)
+      )
+      const { sessionSigs } = (await delegatedSessionSigs?.(docId)) || {}
+      if (!sessionSigs || !originalSessionSigs?.pkpPublicKey) {
+        throw new Error('No sessionSigs')
+      }
+      if (!ideaData?.metadata?.contract) {
+        throw new Error('No contract address')
+      }
+      const wallet = new PKPEthersWallet({
+        litNodeClient: litClient,
+        pkpPubKey: originalSessionSigs?.pkpPublicKey,
+        controllerSessionSigs: sessionSigs,
+      })
+      const signature = (await wallet.signMessage(message)) as `0x${string}`
+      if (!signature) {
+        throw new Error('No signature')
+      }
+      const { contract, ...docMetadata } = options.metadata
+      const docRef = await addDoc(
+        collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
+        {
+          mode: 'payment',
+          success_url: window.location.href,
+          cancel_url: window.location.href,
+          ...options,
+          price: options.price.id,
+          metadata: {
+            ...docMetadata,
+            owner: user?.user_id,
+            tokenId,
+            to,
+            contract_name: ideaData?.metadata?.contract?.name || '',
+            contract_address: ideaData?.metadata?.contract?.address || '',
+            docId,
+            signature: signature,
+            duration,
+            expiration: Date.now() + duration,
+          },
+        }
+      )
+      onSnapshot(docRef, async (doc: DocumentSnapshot) => {
+        const { error, url } = doc.data() || {}
+        if (error) {
+          // Show an error to your customer and
+          // inspect your Cloud Function logs in the Firebase console.
+          alert(`An error occured: ${error.message}`)
+        }
+        if (url) {
+          // We have a Stripe Checkout URL, let's redirect.
+          window.location.assign(url)
+        }
+      })
+    },
+    [
+      user?.user_id,
+      docId,
+      ideaData,
+      litClient,
+      originalSessionSigs,
+      litPromise,
+      delegatedSessionSigs,
+    ]
+  )
   useEffect(() => {
     if (isViewLoading.current) {
       return
@@ -55,25 +203,72 @@ const DetailIP = ({
           return
         }
 
-        const data = await fetch(url)
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error('Failed to fetch encrypted data')
-            }
-            return res.json()
-          })
-          .then(
-            (data) =>
-              data as {
-                ciphertext: string
-                dataToEncryptHash: string
-                unifiedAccessControlConditions: unknown
+        const arrayData = url
+          ? await fetch(url).then((res) => {
+              if (!res.ok) {
+                throw new Error('Failed to fetch encrypted data')
               }
-          )
+              return res.arrayBuffer()
+            })
+          : undefined
+
+        let data: {
+          dataToEncryptHash: string
+          unifiedAccessControlConditions: unknown[]
+          ciphertext: string
+        }
+        try {
+          if (!arrayData) {
+            throw new Error('No data')
+          }
+          const content = await cbor.decodeAll(new Uint8Array(arrayData))
+          const [tag, network] = content
+          if (!tag) {
+            throw new Error('No tag')
+          }
+          if (tag !== 'LIT-ENCRYPTED') {
+            throw new Error('Invalid tag')
+          }
+          if (content.length !== 8 && content.length !== 7) {
+            throw new Error('Invalid content length')
+          }
+          if (
+            content.length === 8 &&
+            network !== 'filecoinCalibrationTestnet'
+          ) {
+            throw new Error('Invalid network')
+          }
+          const [
+            dataToEncryptHash,
+            unifiedAccessControlConditions,
+            _ciphertext,
+          ] = content.slice(-3)
+          data = {
+            dataToEncryptHash,
+            unifiedAccessControlConditions,
+            ciphertext: _ciphertext.toString('base64'),
+          }
+        } catch {
+          data = JSON.parse(
+            new TextDecoder().decode(arrayData || new Uint8Array())
+          ) as {
+            dataToEncryptHash: string
+            unifiedAccessControlConditions: unknown[]
+            ciphertext: string
+          }
+        }
+
         const { ciphertext, dataToEncryptHash } = data
         const { sessionSigs, capacityDelegationAuthSig } =
           await delegatedSessionSigs(docId)
         const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
+        console.log({
+          sessionSigs,
+          capacityDelegationAuthSig,
+          accessControlConditions,
+          data,
+          ciphertext: data.ciphertext.slice(0, 100),
+        })
         const request = {
           accessControlConditions,
           // pkpPublicKey: sessionSigs?.pkpPublicKey,
@@ -261,77 +456,52 @@ const DetailIP = ({
                   </div>
 
                   {/* Access Options - Show if pricing information exists */}
-                  {ideaData.terms.pricing && (
-                    <div className="mt-4">
-                      <h4 className="text-sm font-medium text-white/70 mb-2">
-                        Access Options:
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        {/* Day Price */}
-                        <div
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-white/70 mb-2">
+                      Access Options:
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {prices?.map((item: Product & { price: Price }) => (
+                        <button
+                          key={item.id}
+                          type="button"
                           className={`p-3 border rounded-xl transition-all ${
                             ndaChecked
                               ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
                               : 'border-white/10 bg-muted/20 opacity-50'
                           }`}
+                          disabled={!ndaChecked}
                           onClick={() =>
-                            ndaChecked && setIsAccessModalOpen(true)
+                            ndaChecked &&
+                            buy({
+                              metadata: {
+                                ...ideaData.metadata,
+                                contract_address:
+                                  ideaData.metadata?.contract?.address || '',
+                                contract_name:
+                                  ideaData.metadata?.contract?.name || '',
+                                duration: item.metadata?.duration,
+                              },
+                              price: item.price,
+                            })
                           }
                           role={ndaChecked ? 'button' : ''}
                           tabIndex={ndaChecked ? 0 : -1}
                         >
                           <p className="text-white/70 text-xs">One Day</p>
                           <p className="text-primary font-medium mt-1">
-                            {formatNumber(
-                              ideaData.terms.pricing.dayPrice || '5.00'
-                            )}
+                            {item.price != null && item.price?.id !== ''
+                              ? formatNumber(
+                                  item.price.unit_amount / 100,
+                                  'currency',
+                                  item.price.currency
+                                )
+                              : 'Not available'}
                           </p>
-                        </div>
-
-                        {/* Week Price */}
-                        <div
-                          className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
-                              : 'border-white/10 bg-muted/20 opacity-50'
-                          }`}
-                          onClick={() =>
-                            ndaChecked && setIsAccessModalOpen(true)
-                          }
-                          role={ndaChecked ? 'button' : ''}
-                          tabIndex={ndaChecked ? 0 : -1}
-                        >
-                          <p className="text-white/70 text-xs">One Week</p>
-                          <p className="text-primary font-medium mt-1">
-                            {formatNumber(
-                              ideaData.terms.pricing.weekPrice || '25.00'
-                            )}
-                          </p>
-                        </div>
-
-                        {/* Month Price */}
-                        <div
-                          className={`p-3 border rounded-xl transition-all ${
-                            ndaChecked
-                              ? 'border-primary/30 bg-muted/30 cursor-pointer hover:bg-muted/40 hover:scale-[1.02] hover:border-primary/50'
-                              : 'border-white/10 bg-muted/20 opacity-50'
-                          }`}
-                          onClick={() =>
-                            ndaChecked && setIsAccessModalOpen(true)
-                          }
-                          role={ndaChecked ? 'button' : ''}
-                          tabIndex={ndaChecked ? 0 : -1}
-                        >
-                          <p className="text-white/70 text-xs">One Month</p>
-                          <p className="text-primary font-medium mt-1">
-                            {formatNumber(
-                              ideaData.terms.pricing.monthPrice || '90.00'
-                            )}
-                          </p>
-                        </div>
-                      </div>
+                        </button>
+                      )) || null}
                     </div>
-                  )}
+                  </div>
 
                   {/* NDA Information */}
                   {ideaData.terms.ndaRequired !== undefined && (
@@ -536,27 +706,6 @@ const DetailIP = ({
             </CardContent>
           </Card>
         ) : null}
-
-        {/* Access Option Modal */}
-        <Modal
-          isOpen={isAccessModalOpen}
-          onClose={() => setIsAccessModalOpen(false)}
-          title="Select Access Option"
-        >
-          <div className="space-y-4">
-            <p className="text-white/90">
-              Click on the Access Option you wish to acquire.
-            </p>
-            <div className="flex justify-end space-x-3 mt-6">
-              <Button
-                onClick={() => setIsAccessModalOpen(false)}
-                className="bg-primary hover:bg-primary/80 text-black font-medium px-5 py-2 rounded-xl"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        </Modal>
       </div>
     </div>
   )

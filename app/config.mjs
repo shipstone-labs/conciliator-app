@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 export const appConfig = {
   appName: 'SafeIdea',
   description: 'Securely Store, Share and Monetize IP',

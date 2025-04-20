@@ -1,48 +1,12 @@
 # syntax=docker.io/docker/dockerfile:1
 # check=skip=SecretsUsedInArgOrEnv
 
-FROM node:22-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat python3 make g++ git wget tar build-base bsd-compat-headers
-      
-WORKDIR /app
-
-ARG TINYGO_VERSION=0.30.0
-ARG GO_VERSION=1.21.6
-
-RUN wget -q https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
-  tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-  rm go${GO_VERSION}.linux-amd64.tar.gz
-
-RUN wget -q https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
-  tar -C /usr/local -xzf tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
-  rm tinygo${TINYGO_VERSION}.linux-amd64.tar.gz
-
-ENV PATH="${PATH}:/usr/local/go/bin:/usr/local/tinygo/bin:/root/go/bin"
-RUN mkdir -p /root/go
-ENV GOPATH="/root/go"
-
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
-COPY packages/lit-wrapper/package.json ./packages/lit-wrapper/
-COPY packages/web-storage-wrapper/package.json ./packages/web-storage-wrapper/
-COPY packages/lilypad-wrapper/package.json ./packages/lilypad-wrapper/
-
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
-
-COPY packages ./packages
-
-RUN pnpm build-wrappers
+ARG IMAGE_TAG="node:22-alpine"
 
 # Rebuild the source code only when needed
-FROM base AS builder
+FROM ${IMAGE_TAG} AS builder
 
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages ./packages
 COPY . .
 
 ENV STYTCH_APP_ID=build-value
@@ -54,21 +18,38 @@ ENV STYTCH_ENV=test
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN corepack enable pnpm &&  npx @biomejs/biome@^1.9.4 lint . && pnpm run build:plain
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV DISABLE_ANALYZER=1
+ENV NODE_NO_WARNINGS=1
+
+RUN corepack enable pnpm && \
+  npx @biomejs/biome@^1.9.4 lint . && \
+  npx @biomejs/biome@^1.9.4 check . && \
+  NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:plain --no-lint
 
 # Production image, copy all the files and run next
-FROM base AS runner
+FROM node:22-alpine
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED=1
+# Disable Next.js telemetry
+ENV NEXT_TELEMETRY_DISABLED=1
 
+# Configure OpenTelemetry for Google Cloud Trace
+# ENV OTEL_SERVICE_NAME="conciliate-app"
+# ENV OTEL_TRACES_EXPORTER="otlp"
+# ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+ENV OTEL_NODE_RESOURCE_DETECTORS="gcp"
+ENV OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=""
+ENV NEXT_PUBLIC_SERVICE_NAME="conciliate-app"
+ENV GOOGLE_CLOUD_PROJECT=""
+
+RUN apk add --no-cache libc6-compat
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-RUN npm add dotenv
-
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules.prod ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Automatically leverage output traces to reduce image size

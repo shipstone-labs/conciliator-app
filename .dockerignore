@@ -3,7 +3,7 @@ node_modules
 /.vercel
 /.output
 cloudbuild.yaml
-Dockerfile
+/Dockerfile*
 /*.md
 /hardhat
 /.env*
@@ -19,3 +19,4 @@ Dockerfile
 /LICENSE
 /.vscode
 /.gitignore
+/conciliator-*.json

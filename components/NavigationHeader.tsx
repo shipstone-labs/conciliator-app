@@ -14,12 +14,19 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { AccountModal } from './AccountModal'
 import { useSession } from '@/hooks/useSession'
+import { useClientTracing } from '@/hooks/useClientTracing'
 
 export default function NavigationHeader() {
   const router = useRouter()
   const { user, isInitialized } = useStytchUser()
   const { isLoggingOff, setLoggingOff } = useSession()
   const stytchClient = useStytch()
+  const { traceComponent, traceAction } = useClientTracing()
+
+  // Trace component lifecycle
+  traceComponent('NavigationHeader', {
+    isAuthenticated: Boolean(isInitialized && user).toString(),
+  })
 
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
 
@@ -29,22 +36,33 @@ export default function NavigationHeader() {
   // Handle logout
   const handleLogout = () => {
     if (isLoggingOff) return
-    setLoggingOff?.(true)
-    stytchClient.session
-      .revoke()
-      .catch(() => {
-        alert('Unable to log out, try again later')
-        setLoggingOff(false)
-      })
-      .then(() => {
-        router.replace('/')
-      })
+
+    // Trace the logout action
+    traceAction(
+      'User Logout',
+      async () => {
+        setLoggingOff?.(true)
+        try {
+          await stytchClient.session.revoke()
+          router.replace('/')
+        } catch (error) {
+          console.error('Logout error:', error)
+          alert('Unable to log out, try again later')
+          setLoggingOff(false)
+        }
+      },
+      { userId: user?.user_id || 'unknown' }
+    )
   }
 
   return (
     <div className="flex w-full items-center justify-between">
       {/* Logo on left */}
-      <Link href="/" className="mr-4">
+      <Link
+        href="/"
+        className="mr-4"
+        onClick={() => traceAction('Navigate', undefined, { destination: '/' })}
+      >
         <Image
           src="/svg/Black+Yellow.svg"
           alt="SafeIdea Logo"
@@ -60,6 +78,9 @@ export default function NavigationHeader() {
           <Link
             href="/add-ip"
             className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+            onClick={() =>
+              traceAction('Navigate', undefined, { destination: '/add-ip' })
+            }
           >
             Add Idea
           </Link>
@@ -67,6 +88,9 @@ export default function NavigationHeader() {
         <Link
           href="/list-ip"
           className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+          onClick={() =>
+            traceAction('Navigate', undefined, { destination: '/list-ip' })
+          }
         >
           Explore Ideas
         </Link>

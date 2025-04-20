@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+echo "🔍 Running lint-staged checks on staged files..."
+
+# Run lint-staged with color output
+export FORCE_COLOR=1
+pnpm lint-staged
+
+result=$?
+if [ $result -ne 0 ]; then
+  echo "❌ Pre-commit checks failed! Please fix the issues above."
+  exit $result
+fi
+
+echo "✅ All checks passed!"
+exit 0

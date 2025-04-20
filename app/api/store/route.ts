@@ -12,6 +12,7 @@ import { fetch } from 'undici'
 import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { encode } from 'cbor'
 
 export const runtime = 'nodejs'
 
@@ -201,7 +202,18 @@ export async function POST(req: NextRequest) {
       })
     }
     const encryptedBlob = new Blob(
-      [new TextEncoder().encode(JSON.stringify(encrypted))],
+      [
+        encode(
+          'LIT-ENCRYPTED',
+          'filecoinCalibrationTestnet',
+          contract_name,
+          contract,
+          to,
+          encrypted.dataToEncryptHash,
+          encrypted.unifiedAccessControlConditions,
+          Buffer.from(encrypted.ciphertext, 'base64')
+        ),
+      ],
       {
         type: 'application/json',
       }
@@ -209,7 +221,18 @@ export async function POST(req: NextRequest) {
     const encryptedCid = await w3Client.uploadFile(encryptedBlob)
     await setStatus('Storing downsampled encrypted document in storacha')
     const downSampledEncryptedBlob = new Blob(
-      [new TextEncoder().encode(JSON.stringify(downSampledEncrypted))],
+      [
+        encode(
+          'LIT-ENCRYPTED',
+          'filecoinCalibrationTestnet',
+          contract_name,
+          contract,
+          to,
+          downSampledEncrypted.dataToEncryptHash,
+          downSampledEncrypted.unifiedAccessControlConditions,
+          Buffer.from(downSampledEncrypted.ciphertext, 'base64')
+        ),
+      ],
       {
         type: 'application/json',
       }
@@ -269,6 +292,7 @@ export async function POST(req: NextRequest) {
         : {}),
       creator: user.user.user_id,
       metadata: {
+        from: to,
         cid: '',
         tokenId,
         contract: { address: contract, name: contract_name },

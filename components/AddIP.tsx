@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useRef, useEffect } from 'react'
+import { useCallback, useState, useRef, useEffect, useMemo } from 'react'
 import {
   Card,
   CardContent,
@@ -19,8 +19,99 @@ import type { EncryptResponse } from 'lit-wrapper'
 import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
-import type { IPAudit } from '@/lib/types'
+import { formatNumber, type IPAudit } from '@/lib/types'
 import { useConfig } from '@/app/authLayout'
+import { type Price, type Product, useProducts } from '@/hooks/useProducts'
+import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select'
+
+const getSortedPrices = (prices: Record<string, Price>) => {
+  const sorted = Object.values(prices).sort((a, b) => {
+    if (a.unit_amount === b.unit_amount) {
+      return a.id.localeCompare(b.id)
+    }
+    return a.unit_amount - b.unit_amount
+  })
+  const first = { id: '', active: false, product: sorted[0].product } as Price
+  return [first, ...sorted]
+}
+
+const SortedProducts = ({
+  products,
+  value,
+  onSelect,
+}: {
+  products: Record<string, Product>
+  value: Price[] | undefined
+  onSelect: (select: Price[]) => void
+}) => {
+  const order = ['day', 'week', 'month']
+  const sortedProducts = useMemo(
+    () =>
+      Object.values(products)
+        .map((product) => ({
+          ...product,
+          order: order.indexOf(product.metadata?.duration),
+        }))
+        .filter((product) => product.order !== -1)
+        .sort((a, b) => {
+          return a.order - b.order
+        }),
+    [products]
+  )
+
+  const defaultPrices = useMemo<Price[]>(() => {
+    return sortedProducts.map(
+      (product) => getSortedPrices(product.prices)[0]
+    ) as Price[]
+  }, [sortedProducts])
+  return sortedProducts.map((product, index) => {
+    const sortedPrices = getSortedPrices(product.prices)
+    return (
+      <div
+        key={product.id}
+        className="flex items-center space-x-2 p-3 border bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors"
+      >
+        <Select
+          value={value?.[index]?.id || defaultPrices[0].id}
+          onValueChange={(_priceValue) => {
+            const priceValue = _priceValue === '__none__' ? '' : _priceValue
+            const newPrice = sortedPrices.find(
+              (price) => price.id === priceValue
+            )
+            const newPrices: Price[] = value ? [...value] : [...defaultPrices]
+            newPrices[index] = newPrice as Price
+            onSelect(newPrices)
+          }}
+        >
+          <SelectTrigger className="flex flex-row justify-items-start">
+            {value?.[index] && value?.[index]?.id !== ''
+              ? formatNumber(
+                  (value[index].unit_amount || 0) / 100,
+                  'currency',
+                  value[index]?.currency?.toUpperCase?.() || 'USD'
+                )
+              : '-- NA --'}{' '}
+            <div className="text-xs text-white/60">{product.name}</div>
+            <div>{product.description}</div>
+          </SelectTrigger>
+          <SelectContent>
+            {sortedPrices.map((price) => (
+              <SelectItem key={price.id} value={price.id || '__none__'}>
+                {price.id !== ''
+                  ? formatNumber(
+                      price.unit_amount / 100,
+                      'currency',
+                      price?.currency || 'USD'
+                    )
+                  : '-- NA --'}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )
+  })
+}
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -34,22 +125,16 @@ const AppIP = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [businessModel, setBusinessModel] = useState('Protected Evaluation')
-  const [isDayEnabled, setIsDayEnabled] = useState(false)
-  const [isWeekEnabled, setIsWeekEnabled] = useState(false)
-  const [isMonthEnabled, setIsMonthEnabled] = useState(false)
-  const [dayPrice, setDayPrice] = useState('0')
-  const [weekPrice, setWeekPrice] = useState('0')
-  const [monthPrice, setMonthPrice] = useState('0')
+  const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
   const [ndaConfirmed, setNdaConfirmed] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
-  const [isDayPriceModalOpen, setIsDayPriceModalOpen] = useState(false)
-  const [isWeekPriceModalOpen, setIsWeekPriceModalOpen] = useState(false)
-  const [isMonthPriceModalOpen, setIsMonthPriceModalOpen] = useState(false)
   const stytchClient = useStytch()
   const [docId, setDocId] = useState('')
   const [status, setStatus] = useState<IPAudit>()
   const [localStatus, setLocalStatus] = useState('')
-  const { litClient, sessionSigs } = useSession()
+  const { litClient, fbPromise, litPromise, sessionSigs } = useSession()
+  const products = useProducts()
+  console.log(products)
   const config = useConfig()
   useEffect(() => {
     if (docId) {
@@ -64,7 +149,11 @@ const AppIP = () => {
     setError(null)
     setIsLoading(true)
     setLocalStatus('Encrypting your idea')
+
+    // Normal production flow
     try {
+      await litPromise
+      await fbPromise
       if (!litClient) {
         throw new Error('Lit client is not initialized')
       }
@@ -176,20 +265,19 @@ const AppIP = () => {
             downSampledUnifiedAccessControlConditions,
         },
         category: businessModel || 'Intellectual Property',
-        tags: ['IP', 'custom-pricing'],
+        tags: ['IP'],
         // Include all terms information
         terms: {
           businessModel,
-          enabledPeriods: {
-            day: isDayEnabled,
-            week: isWeekEnabled,
-            month: isMonthEnabled,
-          },
-          pricing: {
-            dayPrice: isDayEnabled ? dayPrice : '0',
-            weekPrice: isWeekEnabled ? weekPrice : '0',
-            monthPrice: isMonthEnabled ? monthPrice : '0',
-          },
+          pricing:
+            selectedPrices?.reduce(
+              (acc, price) => {
+                acc[products[price.product].metadata?.duration || 'unknown'] =
+                  price.unit_amount
+                return acc
+              },
+              {} as Record<string, number>
+            ) || {},
           ndaRequired: ndaConfirmed,
         },
       }
@@ -216,18 +304,17 @@ const AppIP = () => {
     } finally {
       setIsLoading(false)
     }
+    // ⚠️ Remove testTokenCounter when removing test mode
   }, [
     content,
     description,
     name,
     litClient,
+    fbPromise,
+    litPromise,
     businessModel,
-    isDayEnabled,
-    isWeekEnabled,
-    isMonthEnabled,
-    dayPrice,
-    weekPrice,
-    monthPrice,
+    selectedPrices,
+    products,
     fb,
     stytchClient?.session,
     config,
@@ -259,6 +346,7 @@ const AppIP = () => {
       const reader = new FileReader()
       reader.onload = (event) => {
         const fileContent = event.target?.result as string
+
         setContent(fileContent)
         setIsModalOpen(false)
       }
@@ -287,7 +375,9 @@ const AppIP = () => {
           <CardContent className="space-y-5">
             <div className="p-4 mb-2">
               <div className="flex items-center mb-1">
-                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">1</div>
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
+                  1
+                </div>
                 <h3 className="font-semibold text-primary text-sm">
                   Public Information
                 </h3>
@@ -334,7 +424,9 @@ const AppIP = () => {
 
             <div className="p-4 mb-2 mt-4">
               <div className="flex items-center mb-1">
-                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">2</div>
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
+                  2
+                </div>
                 <h3 className="font-semibold text-primary text-sm">
                   Private Document
                 </h3>
@@ -399,7 +491,9 @@ const AppIP = () => {
             {/* Step 3 section - always visible */}
             <div className="p-4 mb-2 mt-4">
               <div className="flex items-center mb-1">
-                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">3</div>
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
+                  3
+                </div>
                 <h3 className="font-semibold text-primary text-sm">
                   Share Your Idea
                 </h3>
@@ -423,9 +517,9 @@ const AppIP = () => {
             {/* Create Page explanation */}
             <div className="p-4 mb-2 mt-4">
               <p className="text-sm text-white/90">
-                Clicking <strong>Create Idea Page</strong> submits your idea and takes you to your new
-                idea page. You can share this page address with others to
-                explore your secure idea.
+                Clicking <strong>Create Idea Page</strong> submits your idea and
+                takes you to your new idea page. You can share this page address
+                with others to explore your secure idea.
               </p>
             </div>
 
@@ -544,134 +638,11 @@ const AppIP = () => {
                       Evaluation Period
                     </label>
                     <div className="space-y-3">
-                      <div
-                        className={`flex items-center space-x-2 p-3 border ${
-                          isDayEnabled
-                            ? 'border-primary/50'
-                            : 'border-white/20'
-                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setIsDayEnabled(!isDayEnabled)}
-                      >
-                        <input
-                          type="checkbox"
-                          id="one-day"
-                          checked={isDayEnabled}
-                          onChange={() => setIsDayEnabled(!isDayEnabled)}
-                          className="text-primary rounded"
-                        />
-                        <label
-                          htmlFor="one-day"
-                          className="text-white cursor-pointer flex-grow"
-                        >
-                          One Day
-                        </label>
-                        <div className="flex items-center">
-                          <span className="text-white/70 mr-2">$</span>
-                          <button
-                            type="button"
-                            className={`py-1 px-3 rounded ${
-                              isDayEnabled 
-                                ? 'bg-muted/40 border border-white/20 text-white'
-                                : 'bg-muted/20 border border-white/10 text-white/50 cursor-not-allowed'
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (isDayEnabled) {
-                                setIsDayPriceModalOpen(true);
-                              }
-                            }}
-                            disabled={!isDayEnabled}
-                          >
-                            {dayPrice}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`flex items-center space-x-2 p-3 border ${
-                          isWeekEnabled
-                            ? 'border-primary/50'
-                            : 'border-white/20'
-                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setIsWeekEnabled(!isWeekEnabled)}
-                      >
-                        <input
-                          type="checkbox"
-                          id="one-week"
-                          checked={isWeekEnabled}
-                          onChange={() => setIsWeekEnabled(!isWeekEnabled)}
-                          className="text-primary rounded"
-                        />
-                        <label
-                          htmlFor="one-week"
-                          className="text-white cursor-pointer flex-grow"
-                        >
-                          One Week
-                        </label>
-                        <div className="flex items-center">
-                          <span className="text-white/70 mr-2">$</span>
-                          <button
-                            type="button"
-                            className={`py-1 px-3 rounded ${
-                              isWeekEnabled 
-                                ? 'bg-muted/40 border border-white/20 text-white'
-                                : 'bg-muted/20 border border-white/10 text-white/50 cursor-not-allowed'
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (isWeekEnabled) {
-                                setIsWeekPriceModalOpen(true);
-                              }
-                            }}
-                            disabled={!isWeekEnabled}
-                          >
-                            {weekPrice}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`flex items-center space-x-2 p-3 border ${
-                          isMonthEnabled
-                            ? 'border-primary/50'
-                            : 'border-white/20'
-                        } bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors`}
-                        onClick={() => setIsMonthEnabled(!isMonthEnabled)}
-                      >
-                        <input
-                          type="checkbox"
-                          id="one-month"
-                          checked={isMonthEnabled}
-                          onChange={() => setIsMonthEnabled(!isMonthEnabled)}
-                          className="text-primary rounded"
-                        />
-                        <label
-                          htmlFor="one-month"
-                          className="text-white cursor-pointer flex-grow"
-                        >
-                          One Month
-                        </label>
-                        <div className="flex items-center">
-                          <span className="text-white/70 mr-2">$</span>
-                          <button
-                            type="button"
-                            className={`py-1 px-3 rounded ${
-                              isMonthEnabled 
-                                ? 'bg-muted/40 border border-white/20 text-white'
-                                : 'bg-muted/20 border border-white/10 text-white/50 cursor-not-allowed'
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (isMonthEnabled) {
-                                setIsMonthPriceModalOpen(true);
-                              }
-                            }}
-                            disabled={!isMonthEnabled}
-                          >
-                            {monthPrice}
-                          </button>
-                        </div>
-                      </div>
+                      <SortedProducts
+                        products={products}
+                        value={selectedPrices}
+                        onSelect={setSelectedPrices}
+                      />
                     </div>
                     <p className="text-xs text-white/60 mt-1">
                       Period begins after transaction is completed
@@ -714,13 +685,6 @@ const AppIP = () => {
                         alert('Please confirm you have a signed NDA in place')
                         return
                       }
-                      
-                      // Check if at least one duration is selected
-                      if (!isDayEnabled && !isWeekEnabled && !isMonthEnabled) {
-                        alert('Please select at least one evaluation period')
-                        return
-                      }
-                      
                       // Save terms logic would go here
                       setTermsAccepted(true)
                       setIsTermsModalOpen(false)
@@ -742,168 +706,6 @@ const AppIP = () => {
               accept=".txt,.md,.markdown,text/plain,text/markdown"
               className="hidden"
             />
-
-            {/* Day Price Modal */}
-            <Modal
-              isOpen={isDayPriceModalOpen}
-              onClose={() => setIsDayPriceModalOpen(false)}
-              title="Select Daily Price"
-            >
-              <div className="space-y-4">
-                <p className="text-white/90">
-                  Select a price for one day access:
-                </p>
-                <div className="grid grid-cols-3 gap-4 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDayPrice('0');
-                      setIsDayPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $0
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDayPrice('50');
-                      setIsDayPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $50
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDayPrice('100');
-                      setIsDayPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $100
-                  </button>
-                </div>
-                <div className="flex justify-end space-x-3 mt-6">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setIsDayPriceModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </Modal>
-
-            {/* Week Price Modal */}
-            <Modal
-              isOpen={isWeekPriceModalOpen}
-              onClose={() => setIsWeekPriceModalOpen(false)}
-              title="Select Weekly Price"
-            >
-              <div className="space-y-4">
-                <p className="text-white/90">
-                  Select a price for one week access:
-                </p>
-                <div className="grid grid-cols-3 gap-4 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setWeekPrice('0');
-                      setIsWeekPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $0
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setWeekPrice('50');
-                      setIsWeekPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $50
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setWeekPrice('200');
-                      setIsWeekPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $200
-                  </button>
-                </div>
-                <div className="flex justify-end space-x-3 mt-6">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setIsWeekPriceModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </Modal>
-
-            {/* Month Price Modal */}
-            <Modal
-              isOpen={isMonthPriceModalOpen}
-              onClose={() => setIsMonthPriceModalOpen(false)}
-              title="Select Monthly Price"
-            >
-              <div className="space-y-4">
-                <p className="text-white/90">
-                  Select a price for one month access:
-                </p>
-                <div className="grid grid-cols-3 gap-4 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMonthPrice('0');
-                      setIsMonthPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $0
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMonthPrice('200');
-                      setIsMonthPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $200
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMonthPrice('800');
-                      setIsMonthPriceModalOpen(false);
-                    }}
-                    className="p-4 border border-white/20 bg-muted/30 rounded-xl hover:bg-muted/50 text-white text-center"
-                  >
-                    $800
-                  </button>
-                </div>
-                <div className="flex justify-end space-x-3 mt-6">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setIsMonthPriceModalOpen(false)}
-                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </Modal>
           </CardContent>
         </Card>
       </div>

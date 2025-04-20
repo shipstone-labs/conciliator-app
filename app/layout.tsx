@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { appConfig } from './config.mjs'
+
+export const runtime = 'nodejs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Footer } from '@/components/Footer'
 import AuthLayout from './authLayout'
@@ -10,6 +12,7 @@ import { ConfigProvider } from '@/lib/ConfigContext'
 import { getServerConfig } from '@/lib/getServerConfig'
 import { Suspense } from 'react'
 import Loading from '@/components/Loading'
+import ClientProviders from './client-provider'
 
 // Force dynamic rendering for this layout
 export const dynamic = 'force-dynamic'
@@ -49,15 +52,17 @@ export default async function RootLayout({
             <Suspense fallback={<Loading />}>
               {/* Wrap with ConfigProvider to make config available to all components */}
               <ConfigProvider config={serverConfig}>
-                <AuthLayout>
-                  <header className="fixed top-0 left-0 right-0 z-10 bg-[#2B5B75] border-b border-border/40 h-16 flex items-center px-4">
-                    <NavigationHeader />
-                  </header>
-                  <main className="flex-grow bg-gradient-to-b from-[#2B5B75] to-background pt-16">
-                    {children}
-                  </main>
-                </AuthLayout>
-                <Footer />
+                <ClientProviders>
+                  <AuthLayout>
+                    <header className="fixed top-0 left-0 right-0 z-10 bg-[#2B5B75] border-b border-border/40 h-16 flex items-center px-4">
+                      <NavigationHeader />
+                    </header>
+                    <main className="flex-grow bg-gradient-to-b from-[#2B5B75] to-background pt-16">
+                      {children}
+                    </main>
+                  </AuthLayout>
+                  <Footer />
+                </ClientProviders>
               </ConfigProvider>
             </Suspense>
           </div>

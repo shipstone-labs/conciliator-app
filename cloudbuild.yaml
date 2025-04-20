@@ -83,7 +83,7 @@ steps:
         fi
         
         # Save to a file that can be accessed by other steps
-        echo "$$CACHE_TAG" > /workspace/cache_tag.txt
+        echo -n "$$CACHE_TAG" > /workspace/cache_tag.txt
         echo "Using cache tag: $$CACHE_TAG"
         
         if [[ "$_PR_NUMBER" != "" ]]; then
@@ -118,30 +118,6 @@ steps:
               -f description="Building Container..."
           fi
         fi
-
-  # Build with cache
-  # - name: 'gcr.io/cloud-builders/pack'
-  #   id: Build
-  #   entrypoint: bash
-  #   args:
-  #     - -c
-  #     - |
-  #       CACHE_TAG=$$(cat /workspace/cache_tag.txt)
-
-  #       # Pull the cache image if it exists (won't fail if it doesn't)
-  #       docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
-
-  #       export DOCKER_BUILDKIT=1
-  #       set -o pipefail
-  #       if ! (pack build \
-  #         --builder=gcr.io/buildpacks/builder \
-  #         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA 2>&1) | tee ./.info.log
-  #       then
-  #         cp ./.info.log /workspace/raw_error.log
-  #         echo "Build failed"
-  #         touch /workspace/failed
-  #         exit 0
-  #       fi
         
   - name: 'gcr.io/cloud-builders/docker'
     id: Build
@@ -149,23 +125,65 @@ steps:
     args:
       - -c
       - |
-        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
+        # Define project ID and repository
+        # Create a hash of all dependency-related files
+        # Explicitly exclude node_modules directories
+        echo "Calculating dependency hash..."
+        DEP_HASH=$(find . -type f \( -name "package.json" -o -name "pnpm-lock.yaml" -o -ipath "./packages/*" -o -name "Dockerfile.dependencies" -o -name "pnpm-workspace.yaml" \) -not -path "*/node_modules/*" |
+        sort | xargs cat | sha256sum | cut -d ' ' -f 1 | cut -c 1-12)
+        echo "Dependency hash: $${DEP_HASH}"
 
+        # Image tag based on hash
+        IMAGE_TAG="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliate-app/conciliator/deps:$${DEP_HASH}"
+
+        # Check if the image with this hash already exists
+        echo "Checking if dependency image already exists..."
+        if ! docker pull "$${IMAGE_TAG}" &>/dev/null; then
+          echo "🔨 Building dependency container $${IMAGE_TAG}..."
+
+          # Build the dependency container
+          if ! (docker build \
+            -t "$${IMAGE_TAG}" \
+            -f Dockerfile.dependencies \
+            --build-arg NODE_ENV=production \
+            . 2>&1) | tee ./.info.log
+          then
+            cp ./.info.log /workspace/raw_error.log
+            echo "Build failed"
+            touch /workspace/failed
+            exit 0
+          fi
+
+          # Push the container
+          echo "📤 Pushing dependency container $${IMAGE_TAG}..."
+          docker push "$${IMAGE_TAG}"
+
+          # Store the container reference for later use
+          echo "$${IMAGE_TAG}" > .dependency-container
+
+          echo "✅ Dependency container built and pushed successfully!"
+        else
+          echo "✅ Dependency container already built and up to date!"
+        fi
+
+        CACHE_TAG=$$(cat /workspace/cache_tag.txt)
         # Pull the cache image if it exists (won't fail if it doesn't)
         docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG || true
-
         export DOCKER_BUILDKIT=1
+        NAME=${_SERVICE_NAME}
+        if [[ "$_PR_NUMBER" != "" ]]; then
+          NAME="$${NAME}:pr-$_PR_NUMBER"
+        else
+          NAME="$${NAME}:latest"
+        fi
+        NAME="$${NAME}:${COMMIT_SHA}"
+        echo "Building image with tag: $${NAME}"
         set -o pipefail
         if ! (docker build \
           --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG \
-          --build-arg=NEXT_PUBLIC_STYTCH_PROJECT_ENV=$_NEXT_PUBLIC_STYTCH_PROJECT_ENV \
-          --build-arg=NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=$_NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN \
-          --build-arg=NEXT_PUBLIC_STYTCH_APP_ID=$_NEXT_PUBLIC_STYTCH_APP_ID \
-          --build-arg=NEXT_PUBLIC_LIT_RELAY_API_KEY=$_NEXT_PUBLIC_LIT_RELAY_API_KEY \
-          --build-arg=NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=$_NEXT_PUBLIC_LIT_CONTRACT_ADDRESS \
-          --build-arg=NEXT_PUBLIC_LIT_ADDRESS=$_NEXT_PUBLIC_LIT_ADDRESS \
-          --build-arg=NEXT_PUBLIC_FIREBASE_CONFIG=$_NEXT_PUBLIC_FIREBASE_CONFIG \
+          --build-arg=IMAGE_TAG=$${IMAGE_TAG} \
+          --build-arg=NEXT_PUBLIC_SERVICE_NAME=$${NAME} \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           . 2>&1) | tee ./.info.log
         then
@@ -174,31 +192,7 @@ steps:
           touch /workspace/failed
           exit 0
         fi
-
-  # Push with commit SHA
-  - name: 'gcr.io/cloud-builders/docker'
-    id: Push
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        if [ -f /workspace/failed ]; then
-          echo "Build failed, skipping push"
-          exit 0
-        fi
         docker push '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA'
-      
-  # Tag and push with cache tag
-  - name: 'gcr.io/cloud-builders/docker'
-    id: TagForCache
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        if [ -f /workspace/failed  ]; then
-          echo "Build failed, skipping tag"
-          exit 0
-        fi
         CACHE_TAG=$$(cat /workspace/cache_tag.txt)
         docker tag $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$$CACHE_TAG
@@ -311,7 +305,8 @@ steps:
       - |
         if [ -f /workspace/failed ]; then
           echo "Extracting errors"
-          npm install -g strip-ansi
+          corepack enable pnpm
+          pnpm install
           node ./extract-build-errors.mjs \
             /workspace/raw_error.log > /workspace/raw_error.md
           cat /workspace/raw_error.md
@@ -367,6 +362,7 @@ images:
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
 substitutions:
   _TRIGGER_ID: 9cb89cf6-252e-44ae-a6b5-4e104ca14efa
   _AR_HOSTNAME: us-central1-docker.pkg.dev

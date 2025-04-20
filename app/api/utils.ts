@@ -206,6 +206,7 @@ export async function replaceDummyNonce(
     })
 }
 
+// NOTE: This function is in two places because of firebase functions
 export async function runWithNonce<T>(
   wallet: WalletClient,
   call: (nonce: number) => Promise<T>

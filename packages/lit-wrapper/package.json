@@ -31,6 +31,7 @@
     "@lit-protocol/crypto": "7.0.10-alpha.0",
     "@lit-protocol/lit-auth-client": "7.0.10-alpha.0",
     "@lit-protocol/lit-node-client": "7.0.10-alpha.0",
+    "@lit-protocol/pkp-ethers": "^7.1.1",
     "@lit-protocol/types": "^7.1.0",
     "@simplewebauthn/browser": "^13.1.0",
     "blakejs": "^1.2.1",
