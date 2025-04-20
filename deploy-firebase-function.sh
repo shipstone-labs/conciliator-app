@@ -82,11 +82,21 @@ if [[ "$CURRENT_AUDIENCES" == *"$PUBSUB_AUDIENCE"* ]]; then
   exit 0
 fi
 
-# Add IAM permission for the service account
-echo "Adding IAM permission for compute service account..."
+# Get project number and service accounts
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+COMPUTE_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+PUBSUB_SA="service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"
+
+# Add IAM permission for the service accounts
+echo "Adding IAM permissions for service accounts..."
 gcloud run services add-iam-policy-binding "$SERVICE_NAME" \
   --region="$REGION" \
-  --member="serviceAccount:520982535775-compute@developer.gserviceaccount.com" \
+  --member="serviceAccount:${COMPUTE_SA}" \
+  --role="roles/run.invoker"
+
+gcloud run services add-iam-policy-binding "$SERVICE_NAME" \
+  --region="$REGION" \
+  --member="serviceAccount:${PUBSUB_SA}" \
   --role="roles/run.invoker"
 
 # Add the PubSub audience to the Cloud Run service
