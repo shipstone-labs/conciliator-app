@@ -215,19 +215,19 @@ steps:
           # No tag for main branch
           TAG_OPTION="--no-traffic"
           DO_ROLLOUT="yes"
-          SERVICE_NAME_ENV="$${_SERVICE_NAME}:latest"
+          SERVICE_NAME_ENV="${_SERVICE_NAME}:latest"
         elif [[ "$BRANCH_NAME" == "legacy" ]]; then
           # Tag as legacy for legacy branch
           TAG_OPTION="--tag=legacy --no-traffic"
-          SERVICE_NAME_ENV="$${_SERVICE_NAME}:legacy"
+          SERVICE_NAME_ENV="${_SERVICE_NAME}:legacy"
         elif [[ "$_PR_NUMBER" != "" ]]; then
           # Tag with PR number for pull requests
           TAG_OPTION="--tag=pr-$_PR_NUMBER --no-traffic"
-          SERVICE_NAME_ENV="$${_SERVICE_NAME}:pr-$_PR_NUMBER"
+          SERVICE_NAME_ENV="${_SERVICE_NAME}:pr-$_PR_NUMBER"
         else
           # Default: no tag
           TAG_OPTION="--no-traffic"
-          SERVICE_NAME_ENV="$${_SERVICE_NAME}:unknown"
+          SERVICE_NAME_ENV="${_SERVICE_NAME}:unknown"
         fi
         
         if [[ "$_PR_NUMBER" != "" ]]; then

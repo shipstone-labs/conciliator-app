@@ -176,7 +176,6 @@ export function useIPAudit(tokenId: string) {
           ),
           (doc) => {
             const details = doc.docs.map((doc) => {
-              console.log('audit', doc.data())
               return castAuditDetailsToUIDoc({
                 ...doc.data(),
                 id: doc.id,
@@ -190,8 +189,6 @@ export function useIPAudit(tokenId: string) {
       )
       snapshots.push(
         onSnapshot(doc(fs, 'ip', tokenId, 'status', 'status'), (docRef) => {
-          console.log('status', docRef.id, docRef.ref.path, docRef)
-          console.log('status', docRef.data())
           setIdeaData((prev) => {
             return {
               ...prev,

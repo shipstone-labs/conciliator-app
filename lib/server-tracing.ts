@@ -76,10 +76,6 @@ export async function initServerTracing() {
     // We'll continue without gRPC instrumentation
   }
 
-  // Use a more specific service name that will stand out in the Jaeger UI
-  const tracingServiceName =
-    process.env.SERVICE_NAME || 'conciliate-app-backend'
-
   // Configure the OTLP exporter - using HTTP protocol (port 4318) instead of gRPC (port 4317)
   // Then in your initialization code:
   // Choose the appropriate exporter based on environment
@@ -103,11 +99,22 @@ export async function initServerTracing() {
     const processResource = await processDetector.detect()
     const osResource = await osDetector.detect()
 
+    const [tracingServiceName, tracingServiceVersion] =
+      process.env.SERVICE_NAME?.split(':') || [
+        'conciliate-app-backend',
+        'unknown',
+      ]
     // Create our custom resource with the service attributes
     const customResource = resourceFromAttributes({
       [ATTR_SERVICE_NAME]: tracingServiceName,
-      [ATTR_SERVICE_VERSION]: process.env.NEXT_PUBLIC_VERSION || '1.0.0',
+      [ATTR_SERVICE_VERSION]: tracingServiceVersion,
       [ATTR_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
+      'g.co/agent':
+        'opentelemetry-js ^2.0.0; google-cloud-trace-exporter ^2.4.1',
+      'g.co/r/generic_node/namespace':
+        process.env.K_SERVICE || tracingServiceName,
+      'g.co/r/generic_node/node_id':
+        process.env.K_REVISION || tracingServiceVersion,
     })
 
     // Extract attributes from detected resources and create a new resource
