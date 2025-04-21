@@ -12,6 +12,7 @@ export type IPDoc = IPDocJSON & {
   createdAt: Timestamp
   canView?: boolean
   deals?: IPDeal[]
+  dealsCount?: number
 }
 
 export type IPAudit = IPAuditJSON & {

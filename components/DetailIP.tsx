@@ -635,7 +635,8 @@ const DetailIP = ({
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
             <CardHeader>
               <CardTitle className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
-                Active Deals
+                Active Deals{' '}
+                {ideaData.dealsCount ? `(${ideaData.dealsCount})` : ''}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 flex flex-row gap-4 items-center">

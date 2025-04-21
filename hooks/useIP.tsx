@@ -48,6 +48,7 @@ export function useIP(
       return
     }
     const snapshots: (() => void)[] = []
+    let deals: Array<IPDeal & { id: string }> = []
     const fs = getFirestore()
     const actualDocId =
       docId.startsWith('0x') || /^\d+$/.test(docId)
@@ -62,7 +63,8 @@ export function useIP(
           } as IPDoc)
 
           setIdeaData((prev) => {
-            const hasAccess = (prev?.deals || [])
+            const hasAccess = deals
+              .filter((doc) => doc.owner === user.user_id)
               .map((doc) => doc.expiresAt)
               .some((expiresAt) => {
                 if (expiresAt) {
@@ -73,6 +75,12 @@ export function useIP(
             return {
               ...prev,
               ...casted,
+              deals: deals.filter((doc) => {
+                if (prev?.creator === user.user_id) {
+                  return true
+                }
+                return doc.owner === user.user_id
+              }),
               canView: hasAccess || prev?.creator === user.user_id,
             } as IPDoc & { deals?: IPDeal[]; canView?: boolean }
           })
@@ -106,14 +114,11 @@ export function useIP(
     snapshots.push(
       onSnapshot(
         query(
-          query(
-            collection(fs, 'ip', actualDocId, 'deals'),
-            where('owner', '==', user.user_id)
-          ),
+          collection(fs, 'ip', actualDocId, 'deals'),
           orderBy('createdAt', 'desc')
         ),
         (docSnaps) => {
-          const deals = docSnaps.docs.map((doc) => {
+          deals = docSnaps.docs.map((doc) => {
             return castDealToUIDoc({
               ...doc.data(),
               id: doc.id,
@@ -122,19 +127,31 @@ export function useIP(
 
           setIdeaData((prev) => {
             const hasAccess = deals
-              .map((doc) => doc.expiresAt)
-              .some((expiresAt) => {
-                if (expiresAt) {
-                  return expiresAt.toDate() > new Date()
+              .filter((doc) => doc.owner === user.user_id)
+              .some((doc) => {
+                if (doc.expiresAt) {
+                  return doc.expiresAt.toDate() > new Date()
                 }
                 return true
               })
+            const dealsCount = deals.map((doc) => {
+              if (doc.expiresAt) {
+                return doc.expiresAt.toDate() > new Date()
+              }
+              return true
+            }).length
             return {
               id: actualDocId,
               ...prev,
-              deals,
+              dealsCount,
+              deals: deals.filter((doc) => {
+                if (prev?.creator === user.user_id) {
+                  return true
+                }
+                return doc.owner === user.user_id
+              }),
               canView: hasAccess || prev?.creator === user.user_id,
-            } as IPDoc & { deals?: IPDeal[]; canView?: boolean }
+            } as IPDoc
           })
         }
       )
