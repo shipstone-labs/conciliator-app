@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { getContractInfo, getModel, getImageAI, runWithNonce } from '../utils'
 import { abi } from '../abi'
 import { createWalletClient, http } from 'viem'
@@ -13,6 +13,7 @@ import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { encode } from 'cbor'
+import { withTracing } from '@/lib/apiWithTracing'
 
 export const runtime = 'nodejs'
 
@@ -122,7 +123,7 @@ async function cleanupTable() {
   return false
 }
 
-export async function POST(req: NextRequest) {
+export const POST = withTracing(async function POST(req: NextRequest) {
   try {
     await initAPIConfig()
 
@@ -149,10 +150,13 @@ export async function POST(req: NextRequest) {
           checkDoc.data()?.creator !== user.user.user_id) ||
         checkDoc.data()?.metadata?.tokenId != null
       ) {
-        return new Response(JSON.stringify({ error: 'ID already exists' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        })
+        return new NextResponse(
+          JSON.stringify({ error: 'ID already exists' }),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
       }
     }
     const { contract, contract_name } = getContractInfo()
@@ -395,14 +399,17 @@ export async function POST(req: NextRequest) {
     }
     await setStatus('Finished')
     await doc.set(updateData)
-    return new Response(JSON.stringify({ ...data, id: doc.id }), {
+    return new NextResponse(JSON.stringify({ ...data, id: doc.id }), {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {
     console.error(error)
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return new NextResponse(
+      JSON.stringify({ error: 'Internal Server Error' }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   }
-}
+})

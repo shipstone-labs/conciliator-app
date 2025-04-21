@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import {
   getCompletionAI,
   genSession,
@@ -31,13 +31,14 @@ import { getUser } from '../stytch'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { LRUCache } from 'next/dist/server/lib/lru-cache'
 import { decodeAll } from 'cbor'
+import { withTracing } from '@/lib/apiWithTracing'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
 const contentCache = new LRUCache<Promise<string>>(100)
 
-export async function POST(req: NextRequest) {
+export const POST = withTracing(async (req: NextRequest) => {
   try {
     await initAPIConfig()
 
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
       throw new Error('Document not found')
     }
     if (messages.length === 0) {
-      return new Response(
+      return new NextResponse(
         JSON.stringify({
           name: data.name,
           description: data.description,
@@ -91,7 +92,7 @@ ${data.description}`,
           content: message.content?.replace(/^(Yes|No|Stop)/i, '$1') || '',
         })
         if (/Stop/i.test(request.at(-1)?.content || '')) {
-          return new Response(
+          return new NextResponse(
             JSON.stringify({ success: false, error: 'Completed' }),
             {
               status: 200,
@@ -253,7 +254,7 @@ ${data.description}`,
         answer: messages.at(-1)?.content,
       },
     })
-    return new Response(
+    return new NextResponse(
       JSON.stringify({
         messages,
         name: data.name,
@@ -272,7 +273,7 @@ ${data.description}`,
       name?: string
       headers?: Record<string, unknown>
     }
-    return new Response(
+    return new NextResponse(
       JSON.stringify({
         success: false,
         error: {
@@ -289,4 +290,4 @@ ${data.description}`,
       }
     )
   }
-}
+})

@@ -81,7 +81,7 @@ export async function initServerTracing() {
 
   // Use a more specific service name that will stand out in the Jaeger UI
   const tracingServiceName =
-    process.env.NEXT_PUBLIC_SERVICE_NAME || 'conciliate-app-backend'
+    process.env.SERVICE_NAME || 'conciliate-app-backend'
 
   // Configure the OTLP exporter - using HTTP protocol (port 4318) instead of gRPC (port 4317)
   // Then in your initialization code:

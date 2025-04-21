@@ -210,19 +210,24 @@ steps:
         fi
         # Set tag based on branch or PR
         DO_ROLLOUT=""
+        SERVICE_NAME_ENV="$${_SERVICE_NAME}"
         if [[ "$BRANCH_NAME" == "main" ]]; then
           # No tag for main branch
           TAG_OPTION="--no-traffic"
           DO_ROLLOUT="yes"
+          SERVICE_NAME_ENV="$${_SERVICE_NAME}:latest"
         elif [[ "$BRANCH_NAME" == "legacy" ]]; then
           # Tag as legacy for legacy branch
           TAG_OPTION="--tag=legacy --no-traffic"
+          SERVICE_NAME_ENV="$${_SERVICE_NAME}:legacy"
         elif [[ "$_PR_NUMBER" != "" ]]; then
           # Tag with PR number for pull requests
           TAG_OPTION="--tag=pr-$_PR_NUMBER --no-traffic"
+          SERVICE_NAME_ENV="$${_SERVICE_NAME}:pr-$_PR_NUMBER"
         else
           # Default: no tag
           TAG_OPTION="--no-traffic"
+          SERVICE_NAME_ENV="$${_SERVICE_NAME}:unknown"
         fi
         
         if [[ "$_PR_NUMBER" != "" ]]; then
@@ -248,6 +253,7 @@ steps:
         # Use $$ to escape bash variables in Cloud Build YAML
         (gcloud run services update $_SERVICE_NAME \
           --platform=managed \
+          --set-env-vars=SERVICE_NAME=$${SERVICE_NAME_ENV} \q
           --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID \
           --region=$_DEPLOY_REGION \
