@@ -300,8 +300,6 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
         status: 'completed',
         metadata: {
           tokenId,
-          to,
-          owner,
           ...(from ? { from } : {}),
           creator,
           transfer: hash,
@@ -310,6 +308,8 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
             name: contract_name,
           },
         },
+        to,
+        owner,
         ...(expiration ? { expiresAt: Timestamp.fromMillis(expiration) } : {}),
         createdAt: Timestamp.fromDate(now),
         updatedAt: Timestamp.fromDate(now),

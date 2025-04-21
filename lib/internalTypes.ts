@@ -72,6 +72,10 @@ export type IPDealJSON = {
       name: string
     }
   }
+  error?: {
+    message?: string
+  }
+  url?: string
   expiresAt?: unknown
   createdAt: unknown
   updatedAt: unknown

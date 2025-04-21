@@ -1,6 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -590,8 +597,8 @@ const DetailIP = ({
         </a>
 
         {ideaData.canView && !view ? (
-          <a
-            href={`/view/${docId}`}
+          <div
+            onClick={() => router.push(`/view/${docId}`)}
             className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
             aria-label="Go to View Mode"
           >
@@ -619,71 +626,88 @@ const DetailIP = ({
                     now view it.
                   </p>
                 </div>
-                <div className="flex-1">
-                  {ideaData.deals?.map((deal) => (
-                    <div
-                      key={deal.id}
-                      className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
-                      style={{ gridTemplateColumns: '12em 1fr' }}
-                    >
-                      <div className="text-white font-bold text-sm">
-                        Expires On
-                      </div>
-                      <div className="text-white/80 text-sm">
-                        {formatDate(deal.expiresAt)}
-                      </div>
-                      <div className="text-white font-bold text-sm">Status</div>
-                      <div className="text-white/80 text-sm">{deal.status}</div>
-                      <div className="text-white font-bold text-sm">Status</div>
-                      <div className="text-white/80 text-sm">{deal.status}</div>
-                      <Button
-                        asChild
-                        size="sm"
-                        variant="outline"
-                        disabled={!deal.metadata?.transfer}
-                        className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
-                      >
-                        <a
-                          className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
-                          href={`https://calibration.filfox.info/en/message/${deal.metadata?.transfer}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {deal.metadata?.transfer
-                            ? '✓ Confirm Mint'
-                            : '⚠ Transaction Unavailable'}{' '}
-                        </a>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
               </CardContent>
             </Card>
-          </a>
+          </div>
         ) : null}
 
-        {/* Always display button, change text based on data availability */}
-        <div className="flex justify-end mb-4">
-          <Button
-            asChild
-            size="sm"
-            variant="outline"
-            disabled={!ideaData.metadata?.mint}
-            className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
-          >
-            <a
-              className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
-              href={`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {ideaData.metadata?.mint
-                ? '✓ Confirm Mint'
-                : '⚠ Transaction Unavailable'}
-            </a>
-          </Button>
-        </div>
+        {ideaData.deals?.length ? (
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
+                Active Deals
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 flex flex-row gap-4 items-center">
+              {ideaData.deals?.map((deal) => (
+                <Fragment key={deal.id}>
+                  <div
+                    className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+                    style={{ gridTemplateColumns: '12em 1fr' }}
+                  >
+                    <div className="text-white font-bold text-sm">
+                      Expires On
+                    </div>
+                    <div className="text-white/80 text-sm">
+                      {formatDate(deal.expiresAt)}
+                    </div>
+                    <div className="text-white font-bold text-sm">Status</div>
+                    <div className="text-white/80 text-sm">
+                      {deal.status}
+                    </div>{' '}
+                  </div>
 
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    disabled={!deal.metadata?.transfer}
+                    className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                  >
+                    <a
+                      className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                      href={`https://calibration.filfox.info/en/message/${deal.metadata?.transfer}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {deal.metadata?.transfer
+                        ? '✓ Confirm Purchase Mint'
+                        : '⚠ Transaction Unavailable'}{' '}
+                    </a>
+                  </Button>
+                </Fragment>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
+        {ideaData.checkouts?.length ? (
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
+                Checkouts
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
+              {ideaData.checkouts?.map((deal) => (
+                <Fragment key={deal.id}>
+                  <div
+                    className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+                    style={{ gridTemplateColumns: '12em 1fr' }}
+                  >
+                    <div className="text-white font-bold text-sm">DealID</div>
+                    <div className="text-white/80 text-sm">{deal.id}</div>
+                    <div className="text-white font-bold text-sm">
+                      {deal.error?.message ? 'Error' : 'Pending'}
+                    </div>
+                    <div className="text-white/80 text-sm">
+                      {deal.error?.message || ''}
+                    </div>
+                  </div>
+                </Fragment>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
         {audit ? (
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-white/10">
@@ -740,7 +764,7 @@ const DetailIP = ({
                       rel="noopener noreferrer"
                     >
                       {ideaData.metadata?.mint
-                        ? '✓ Confirm Mint'
+                        ? '✓ Confirm Creation Mint'
                         : '⚠ Transaction Unavailable'}{' '}
                     </a>
                   </Button>
