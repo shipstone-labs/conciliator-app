@@ -9,7 +9,7 @@ import type { StaticImageData } from 'next/image'
 type StaticImport = StaticImageData | string
 
 type CachedImageProps = {
-  src: string | StaticImport
+  src?: string | StaticImport
   alt: string
   width: number
   height: number
@@ -122,7 +122,7 @@ const CachedImage = React.memo(function CachedImage({
         }}
       >
         <Image
-          src={imageErrored.current ? fallbackSrc : src}
+          src={imageErrored.current || !src ? fallbackSrc : src}
           alt={alt}
           width={width}
           height={height}

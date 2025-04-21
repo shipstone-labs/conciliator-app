@@ -31,13 +31,17 @@ let sdk: NodeSDK | undefined
 
 export async function initServerTracing() {
   // Skip if already initialized or running in a browser environment
+  if (isInitialized) {
+    return
+  }
   if (
     isInitialized ||
     typeof window !== 'undefined' ||
     !process.env.GOOGLE_CLOUD_PROJECT
   ) {
     console.log(
-      'OpenTelemetry: SDK already initialized or not in server environment'
+      'OpenTelemetry: SDK already initialized or not in server environment',
+      process.env.GOOGLE_CLOUD_PROJECT
     )
     return
   }

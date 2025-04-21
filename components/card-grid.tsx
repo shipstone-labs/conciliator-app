@@ -89,10 +89,8 @@ function CardGrid({ filter, itemsPerPage = 16 }: CardGridProps) {
             {/* Image */}
             <CardContent className="flex justify-center p-4">
               <CachedImage
-                src={
-                  enhancedCidAsURL(item?.image?.cid) ||
-                  '/images/placeholder.png'
-                }
+                src={enhancedCidAsURL(item?.image?.cid)}
+                fallbackSrc="/images/placeholder.png"
                 alt={item.name}
                 width={imageWidth}
                 height={imageWidth}
