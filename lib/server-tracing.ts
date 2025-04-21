@@ -18,6 +18,18 @@ import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
 // to handle cases where the module can't be loaded
 let GrpcInstrumentation: any
 
+async function isRunningInGCP() {
+  try {
+    const response = await fetch(
+      'http://metadata.google.internal/computeMetadata/v1/instance/id',
+      { headers: { 'Metadata-Flavor': 'Google' } }
+    )
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 export const runtime = 'nodejs'
 
 // Define attribute keys (standard, not deprecated)
@@ -34,28 +46,31 @@ export async function initServerTracing() {
   if (isInitialized) {
     return
   }
-  if (
-    isInitialized ||
-    typeof window !== 'undefined' ||
-    !process.env.GOOGLE_APPLICATION_CREDENTIALS
-  ) {
+  if (isInitialized || typeof window !== 'undefined') {
     console.log(
       'OpenTelemetry: SDK already initialized or not in server environment'
     )
     return
   }
+  console.log(
+    'OpenTelemetry: Initializing server tracing',
+    Object.keys(process.env)
+  )
 
   // Set flag early to prevent concurrent initialization attempts
   isInitialized = true
 
+  const isGCP = await isRunningInGCP()
   console.log('OpenTelemetry: Initializing server instrumentation')
 
   // Try to dynamically import the gRPC instrumentation
   try {
-    // We use dynamic import to ensure this only happens on the server side
-    const grpcModule = await import('@opentelemetry/instrumentation-grpc')
-    GrpcInstrumentation = grpcModule.GrpcInstrumentation
-    console.log('OpenTelemetry: Successfully loaded gRPC instrumentation')
+    if (isGCP) {
+      // We use dynamic import to ensure this only happens on the server side
+      const grpcModule = await import('@opentelemetry/instrumentation-grpc')
+      GrpcInstrumentation = grpcModule.GrpcInstrumentation
+      console.log('OpenTelemetry: Successfully loaded gRPC instrumentation')
+    }
   } catch (error) {
     console.warn(
       'OpenTelemetry: gRPC instrumentation could not be loaded',
@@ -71,12 +86,8 @@ export async function initServerTracing() {
   // Configure the OTLP exporter - using HTTP protocol (port 4318) instead of gRPC (port 4317)
   // Then in your initialization code:
   // Choose the appropriate exporter based on environment
-  const exporter = process.env.GOOGLE_CLOUD_PROJECT
-    ? new TraceExporter({
-        // The project ID is optional, it will use the default from the environment
-        // if running on GCP, or from the credentials file
-        projectId: process.env.GOOGLE_CLOUD_PROJECT,
-      })
+  const exporter = isGCP
+    ? new TraceExporter()
     : new OTLPTraceExporter({
         url:
           process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
