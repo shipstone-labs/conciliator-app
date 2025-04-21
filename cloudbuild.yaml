@@ -253,7 +253,7 @@ steps:
         # Use $$ to escape bash variables in Cloud Build YAML
         (gcloud run services update $_SERVICE_NAME \
           --platform=managed \
-          --set-env-vars=SERVICE_NAME=$${SERVICE_NAME_ENV} \q
+          --set-env-vars=SERVICE_NAME=$${SERVICE_NAME_ENV} \
           --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/conciliator-app/$_SERVICE_NAME:$COMMIT_SHA \
           --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID \
           --region=$_DEPLOY_REGION \

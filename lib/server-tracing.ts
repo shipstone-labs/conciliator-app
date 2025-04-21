@@ -52,10 +52,7 @@ export async function initServerTracing() {
     )
     return
   }
-  console.log(
-    'OpenTelemetry: Initializing server tracing',
-    Object.keys(process.env)
-  )
+  console.log('OpenTelemetry: Initializing server tracing')
 
   // Set flag early to prevent concurrent initialization attempts
   isInitialized = true
