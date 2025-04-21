@@ -24,6 +24,7 @@ import { publicKeyToAddress } from 'viem/utils'
 import {
   getAuth,
   signInWithCustomToken,
+  signOut,
   type UserCredential,
 } from 'firebase/auth'
 import { usePathname } from 'next/navigation'
@@ -95,7 +96,26 @@ export default function Authenticated({
     if (isInitialized && !user) {
       setShowAuthModal(true)
     }
-    if (isInitialized && user) {
+    if (!isInitialized || !user) {
+      if (globalSession.litClient) {
+        globalSession.litClient.disconnect()
+        globalSession.litClient = undefined
+        globalSession.litPromise = undefined
+        globalSession.sessionSigs = undefined
+        globalSession.delegatedSessionSigs = undefined
+      }
+      if (globalSession.fbUser) {
+        globalSession.fbUser = undefined
+        globalSession.fbPromise = undefined
+        signOut(getAuth())
+      }
+      globalSession = amendLoggedIn({
+        ...globalSession,
+        isLoggingOff: false,
+        isLoggedIn: false,
+      })
+      setTrigger((prev) => prev + 1)
+    } else {
       globalSession = amendLoggedIn({
         ...globalSession,
       })
