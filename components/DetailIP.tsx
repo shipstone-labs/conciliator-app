@@ -407,7 +407,7 @@ const DetailIP = ({
             </div>
 
             {/* Access Terms Section - Show if terms information exists */}
-            {ideaData.terms && (
+            {ideaData.terms && !ideaData.deals?.length && (
               <div className="border-t border-white/10 pt-5 mt-5">
                 <h3 className="text-lg font-medium text-primary mb-3">
                   Access Terms
@@ -568,7 +568,7 @@ const DetailIP = ({
           aria-label="Go to My Agent"
           onKeyDown={onKeyDown}
         >
-          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all mt-8">
             <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
               <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
                 <Image

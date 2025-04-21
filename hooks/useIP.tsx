@@ -22,6 +22,7 @@ import {
   query,
   type QueryCompositeFilterConstraint,
   startAfter,
+  Timestamp,
   where,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
@@ -114,8 +115,11 @@ export function useIP(
     snapshots.push(
       onSnapshot(
         query(
-          collection(fs, 'ip', actualDocId, 'deals'),
-          orderBy('createdAt', 'desc')
+          query(
+            collection(fs, 'ip', actualDocId, 'deals'),
+            orderBy('createdAt', 'desc'),
+            where('expiresAt', '>', Timestamp.fromDate(new Date()))
+          )
         ),
         (docSnaps) => {
           deals = docSnaps.docs.map((doc) => {
