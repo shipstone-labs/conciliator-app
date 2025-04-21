@@ -1,3 +1,5 @@
+import type { Address } from 'viem'
+
 export type IPDocJSON = {
   id: string // firestore doc id
   name: string
@@ -56,6 +58,24 @@ export type IPAuditDetailsJSON = {
   createdAt: unknown
 }
 
+export type IPDealJSON = {
+  status: string
+  metadata: {
+    tokenId: number
+    to: Address
+    owner: string
+    from?: Address
+    creator: string
+    transfer: `0x${string}`
+    contract: {
+      address: Address
+      name: string
+    }
+  }
+  expiresAt?: unknown
+  createdAt: unknown
+  updatedAt: unknown
+}
 export function cidAsURL(cid?: string) {
   if (!cid) {
     return undefined

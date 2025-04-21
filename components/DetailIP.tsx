@@ -619,6 +619,44 @@ const DetailIP = ({
                     now view it.
                   </p>
                 </div>
+                <div className="flex-1">
+                  {ideaData.deals?.map((deal) => (
+                    <div
+                      key={deal.id}
+                      className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+                      style={{ gridTemplateColumns: '12em 1fr' }}
+                    >
+                      <div className="text-white font-bold text-sm">
+                        Expires On
+                      </div>
+                      <div className="text-white/80 text-sm">
+                        {formatDate(deal.expiresAt)}
+                      </div>
+                      <div className="text-white font-bold text-sm">Status</div>
+                      <div className="text-white/80 text-sm">{deal.status}</div>
+                      <div className="text-white font-bold text-sm">Status</div>
+                      <div className="text-white/80 text-sm">{deal.status}</div>
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        disabled={!deal.metadata?.transfer}
+                        className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                      >
+                        <a
+                          className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                          href={`https://calibration.filfox.info/en/message/${deal.metadata?.transfer}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {deal.metadata?.transfer
+                            ? '✓ Confirm Mint'
+                            : '⚠ Transaction Unavailable'}{' '}
+                        </a>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </a>
@@ -627,23 +665,22 @@ const DetailIP = ({
         {/* Always display button, change text based on data availability */}
         <div className="flex justify-end mb-4">
           <Button
+            asChild
             size="sm"
             variant="outline"
+            disabled={!ideaData.metadata?.mint}
             className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
-            onClick={() => {
-              if (ideaData.metadata?.mint) {
-                window.open(
-                  `https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`,
-                  '_blank'
-                )
-              } else {
-                alert('No mint transaction available')
-              }
-            }}
           >
-            {ideaData.metadata?.mint
-              ? '✓ Confirm Mint'
-              : '⚠ Transaction Unavailable'}
+            <a
+              className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+              href={`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {ideaData.metadata?.mint
+                ? '✓ Confirm Mint'
+                : '⚠ Transaction Unavailable'}
+            </a>
           </Button>
         </div>
 
@@ -667,7 +704,9 @@ const DetailIP = ({
                 <div className="text-white/80 text-sm">{audit.status}</div>
                 <div className="text-white font-bold text-sm">Creator</div>
                 <div className="text-white/80 text-sm">
-                  {audit.creator}@{audit.address}
+                  id={audit.creator}
+                  <br />
+                  address={audit.address}
                 </div>
                 <div className="text-white font-bold text-sm">Token ID</div>
                 <div className="text-white/80 text-sm">
@@ -677,15 +716,34 @@ const DetailIP = ({
                   IPDocV2 Contract
                 </div>
                 <div className="text-white/80 text-sm">
-                  {config.CONTRACT_NAME as string}
+                  name={config.CONTRACT_NAME as string}
                   <br />
-                  {config.CONTRACT as string}
+                  address={config.CONTRACT as string}
                 </div>
                 <div className="text-white font-bold text-sm">
                   Mint Transaction
                 </div>
                 <div className="text-white/80 text-sm">
                   {ideaData.metadata?.mint || 'Not available'}
+                  <br />
+                  <Button
+                    asChild
+                    size="sm"
+                    disabled={!ideaData.metadata?.mint}
+                    variant="outline"
+                    className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                  >
+                    <a
+                      className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                      href={`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {ideaData.metadata?.mint
+                        ? '✓ Confirm Mint'
+                        : '⚠ Transaction Unavailable'}{' '}
+                    </a>
+                  </Button>
                 </div>
               </div>
               {audit.details?.map((detail) => (

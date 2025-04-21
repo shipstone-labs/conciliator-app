@@ -309,9 +309,8 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
             address: contract_address,
             name: contract_name,
           },
-          ...(expiration ? { end: Timestamp.fromMillis(expiration) } : {}),
-          start: Timestamp.fromDate(now),
         },
+        ...(expiration ? { expiresAt: Timestamp.fromMillis(expiration) } : {}),
         createdAt: Timestamp.fromDate(now),
         updatedAt: Timestamp.fromDate(now),
       }
