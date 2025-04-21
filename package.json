@@ -85,6 +85,7 @@
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "sharp": "^0.34.1",
     "siwe": "^2.3.2",
     "sonner": "^2.0.3",
     "strip-ansi": "^7.1.0",

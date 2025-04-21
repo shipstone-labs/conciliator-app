@@ -19,26 +19,37 @@ export default function ipfsImageLoader({
 
     if (cidPath) {
       // Return URL to our own API endpoint that will handle caching
-      return `/api/cached-image/${cidPath}?width=${width}&quality=${quality || 75}`
+      return `/api/cached-image/${cidPath}?width=${width}&quality=${quality || 75}&format=webp`
     }
   }
 
   // If it's already our cached image path
   if (src.startsWith('/api/cached-image/')) {
     // Just add width and quality params
-    return `${src}${src.includes('?') ? '&' : '?'}width=${width}&quality=${quality || 75}`
+    const params = new URLSearchParams()
+    params.set('width', width.toString())
+    params.set('quality', (quality || 75).toString())
+    params.set('format', 'webp')
+
+    return `${src}${src.includes('?') ? '&' : '?'}${params.toString()}`
   }
 
   // For non-IPFS sources, return the original URL with width and quality
   return `${src}?w=${width}&q=${quality || 75}`
 }
 
-// Enhanced version of the cidAsURL function that returns the cached version URL
-export function enhancedCidAsURL(cid?: string) {
+/**
+ * Enhanced version of the cidAsURL function that returns the cached version URL
+ * @param cid The IPFS content identifier
+ * @param width Optional width for the image (default: 800)
+ * @param format Optional format for the image (default: webp)
+ * @returns URL to the cached image
+ */
+export function enhancedCidAsURL(cid?: string, width = 800, format = 'webp') {
   if (!cid) {
     return undefined
   }
 
-  // Return the URL to our cached image API instead of direct IPFS
-  return `/api/cached-image/${cid}`
+  // Return the URL to our cached image API with optimized defaults
+  return `/api/cached-image/${cid}?width=${width}&quality=80&format=${format}`
 }

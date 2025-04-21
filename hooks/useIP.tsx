@@ -209,12 +209,13 @@ export function useIPs({
       qry = query(qry, startAfter(_startAfter))
     }
     qry = query(qry, limit(_limit))
+    let last: DocumentReference | undefined = undefined
     const snapshot = onSnapshot(qry, (docsSnap) => {
+      last = undefined
       const data = docsSnap.docs.map((doc) => {
         last = doc.ref
         return castToUIDoc({ ...doc.data(), id: doc.id } as IPDoc)
       })
-      let last: DocumentReference | undefined = undefined
       const _pages = pages
       if (last) {
         _pages[_page + 1] = last
