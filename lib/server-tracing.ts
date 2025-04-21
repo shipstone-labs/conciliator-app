@@ -37,11 +37,10 @@ export async function initServerTracing() {
   if (
     isInitialized ||
     typeof window !== 'undefined' ||
-    !process.env.GOOGLE_CLOUD_PROJECT
+    !process.env.GOOGLE_APPLICATION_CREDENTIALS
   ) {
     console.log(
-      'OpenTelemetry: SDK already initialized or not in server environment',
-      process.env.GOOGLE_CLOUD_PROJECT
+      'OpenTelemetry: SDK already initialized or not in server environment'
     )
     return
   }
