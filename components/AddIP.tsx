@@ -71,7 +71,7 @@ const SortedProducts = ({
         <div className="flex items-center space-x-2 p-3 border bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors">
           <Select
             value={value?.[index]?.id || defaultPrices[0].id}
-            onValueChange={(_priceValue) => {
+            onValueChange={(_priceValue: string) => {
               const priceValue = _priceValue === '__none__' ? '' : _priceValue
               const newPrice = sortedPrices.find(
                 (price) => price.id === priceValue
@@ -578,7 +578,9 @@ const AppIP = () => {
       if (win.importToolReady) {
         win.importToolReady.createButtonReady = Boolean(readyToCreate)
         win.importToolReady.currentStep = currentStep
-        win.importToolReady.formStepComplete = formStepComplete.map(status => Boolean(status))
+        win.importToolReady.formStepComplete = formStepComplete.map((status) =>
+          Boolean(status)
+        )
       }
     }
   }, [readyToCreate, currentStep, formStepComplete])
