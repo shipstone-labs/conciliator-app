@@ -42,7 +42,7 @@ export function initBrowserTracing() {
     const isDev = process.env.NODE_ENV === 'development'
     const collectorEndpoint = isDev
       ? 'http://localhost:4318/v1/traces' // Direct to collector in development
-      : '/api/telemetry' // Proxy through API in production
+      : `${window.location.origin}/api/telemetry` // Proxy through API in production
 
     const exporter = new OTLPTraceExporter({
       url: collectorEndpoint,

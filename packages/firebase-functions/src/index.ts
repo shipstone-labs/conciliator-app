@@ -159,7 +159,7 @@ async function transferToken(
   contract: `0x${string}`,
   tokenId: number,
   to: `0x${string}`,
-  signature: `0x${string}`,
+  _signature: `0x${string}`,
   expiration = 0
 ) {
   const { FILCOIN_PK } = await loadSecrets(['FILCOIN_PK'])
@@ -175,8 +175,8 @@ async function transferToken(
         address: contract,
         nonce,
         abi,
-        functionName: 'mintWithSignature',
-        args: [to, tokenId, 1, Math.round(expiration / 1000), '0x', signature],
+        functionName: 'mintWithExpiration',
+        args: [to, tokenId, 1, Math.round(expiration / 1000), '0x'],
       })
       .then(async (hash) => {
         await waitForTransactionReceipt(wallet, {
@@ -228,8 +228,11 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       error('No id found in event', e)
       throw new Error('No id found')
     }
-    const record = records.docs[0]
-    const { metadata, price: priceId } = record.data()
+    debug('Found records', records.docs.length, records.docs[0].ref.path)
+    const record = records.docs[0].data()
+    debug('Found record', Object.keys(record), JSON.stringify(record))
+    const { metadata, price: priceId } = record
+    debug('Found metadata', JSON.stringify(metadata))
     const price = priceId
       ? await stripe.prices.retrieve(priceId as string)
       : undefined
@@ -249,9 +252,9 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     const durations:
       | Record<'day' | 'week' | 'month', number>
       | { [key: string]: number } = {
-      day: 60 * 60 * 24,
-      week: 60 * 60 * 24 * 7,
-      month: 60 * 60 * 24 * 30,
+      day: 60 * 60 * 24 * 1000, // Times in ms.
+      week: 60 * 60 * 24 * 7 * 1000,
+      month: 60 * 60 * 24 * 30 * 1000,
     }
     if (!_duration || !(_duration in durations)) {
       error('No or invalid duration found', _duration, e)
@@ -261,7 +264,7 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     const {
       contract_name: __contract_name,
       contract_address: __contract_address,
-      contract: { address: _contract_address, name: _contract_name },
+      contract: { address: _contract_address, name: _contract_name } = {},
       docId,
       signature,
       to,
@@ -271,19 +274,22 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
     } = metadata || {}
     const contract_name = __contract_name || _contract_name
     const contract_address = __contract_address || _contract_address
-    const expiration = durations[duration] + Math.round(Date.now() / 1000)
-    if (!contract_address || contract_name || !tokenId) {
+    const expiration = durations[duration] + Date.now()
+    if (!contract_address || !contract_name || !tokenId) {
       error('No contract name or address found', metadata)
       throw new Error('No contract name or address found')
     }
-    info('Transfer token', { contract_address, tokenId, to, signature })
+    info(
+      'Transfer token',
+      JSON.stringify({ contract_address, tokenId, to, signature })
+    )
     await transferToken(
       app,
       contract_address as `0x${string}`,
-      Number.parseInt(tokenId),
+      tokenId,
       to as `0x${string}`,
       signature as `0x${string}`,
-      expiration
+      expiration // expiration in ms
     ).then(async (hash) => {
       const db = getFirestore(app)
       const now = new Date()
@@ -294,8 +300,6 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
         status: 'completed',
         metadata: {
           tokenId,
-          to,
-          owner,
           ...(from ? { from } : {}),
           creator,
           transfer: hash,
@@ -303,9 +307,10 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
             address: contract_address,
             name: contract_name,
           },
-          ...(expiration ? { end: Timestamp.fromMillis(expiration) } : {}),
-          start: Timestamp.fromDate(now),
         },
+        to,
+        owner,
+        ...(expiration ? { expiresAt: Timestamp.fromMillis(expiration) } : {}),
         createdAt: Timestamp.fromDate(now),
         updatedAt: Timestamp.fromDate(now),
       }

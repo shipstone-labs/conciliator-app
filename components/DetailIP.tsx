@@ -1,6 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -24,8 +31,7 @@ import {
   getFirestore,
   onSnapshot,
 } from 'firebase/firestore'
-import { type Address, encodePacked, hexToBytes, zeroAddress } from 'viem'
-import { PKPEthersWallet } from '@/packages/lit-wrapper/dist'
+import { type Address, zeroAddress } from 'viem'
 import { type Price, type Product, useProducts } from '@/hooks/useProducts'
 
 const DetailIP = ({
@@ -105,37 +111,9 @@ const DetailIP = ({
           break
       }
       const {
-        metadata: {
-          tokenId,
-          contract: { address: contractAddress } = {},
-        } = {},
+        metadata: { tokenId } = {},
       } = ideaData || {}
       const to = (originalSessionSigs?.address || zeroAddress) as Address
-      const params = [
-        to,
-        BigInt(tokenId || '0'),
-        1n,
-        contractAddress || zeroAddress,
-      ] as [Address, bigint, bigint, Address]
-      const message = hexToBytes(
-        encodePacked(['address', 'uint256', 'uint256', 'address'], params)
-      )
-      const { sessionSigs } = (await delegatedSessionSigs?.(docId)) || {}
-      if (!sessionSigs || !originalSessionSigs?.pkpPublicKey) {
-        throw new Error('No sessionSigs')
-      }
-      if (!ideaData?.metadata?.contract) {
-        throw new Error('No contract address')
-      }
-      const wallet = new PKPEthersWallet({
-        litNodeClient: litClient,
-        pkpPubKey: originalSessionSigs?.pkpPublicKey,
-        controllerSessionSigs: sessionSigs,
-      })
-      const signature = (await wallet.signMessage(message)) as `0x${string}`
-      if (!signature) {
-        throw new Error('No signature')
-      }
       const { contract, ...docMetadata } = options.metadata
       const docRef = await addDoc(
         collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
@@ -153,7 +131,6 @@ const DetailIP = ({
             contract_name: ideaData?.metadata?.contract?.name || '',
             contract_address: ideaData?.metadata?.contract?.address || '',
             docId,
-            signature: signature,
             duration,
             expiration: Date.now() + duration,
           },
@@ -172,15 +149,7 @@ const DetailIP = ({
         }
       })
     },
-    [
-      user?.user_id,
-      docId,
-      ideaData,
-      litClient,
-      originalSessionSigs,
-      litPromise,
-      delegatedSessionSigs,
-    ]
+    [user?.user_id, docId, ideaData, litClient, originalSessionSigs, litPromise]
   )
   useEffect(() => {
     if (isViewLoading.current) {
@@ -400,7 +369,7 @@ const DetailIP = ({
             </div>
 
             {/* Access Terms Section - Show if terms information exists */}
-            {ideaData.terms && (
+            {ideaData.terms && !ideaData.deals?.length && (
               <div className="border-t border-white/10 pt-5 mt-5">
                 <h3 className="text-lg font-medium text-primary mb-3">
                   Access Terms
@@ -561,7 +530,7 @@ const DetailIP = ({
           aria-label="Go to My Agent"
           onKeyDown={onKeyDown}
         >
-          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all mt-8">
             <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
               <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
                 <Image
@@ -590,8 +559,8 @@ const DetailIP = ({
         </a>
 
         {ideaData.canView && !view ? (
-          <a
-            href={`/view/${docId}`}
+          <div
+            onClick={() => router.push(`/view/${docId}`)}
             className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
             aria-label="Go to View Mode"
           >
@@ -621,32 +590,87 @@ const DetailIP = ({
                 </div>
               </CardContent>
             </Card>
-          </a>
+          </div>
         ) : null}
 
-        {/* Always display button, change text based on data availability */}
-        <div className="flex justify-end mb-4">
-          <Button
-            size="sm"
-            variant="outline"
-            className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
-            onClick={() => {
-              if (ideaData.metadata?.mint) {
-                window.open(
-                  `https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`,
-                  '_blank'
-                )
-              } else {
-                alert('No mint transaction available')
-              }
-            }}
-          >
-            {ideaData.metadata?.mint
-              ? '✓ Confirm Mint'
-              : '⚠ Transaction Unavailable'}
-          </Button>
-        </div>
+        {ideaData.deals?.length ? (
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
+                Active Deals{' '}
+                {ideaData.dealsCount ? `(${ideaData.dealsCount})` : ''}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 flex flex-row gap-4 items-center">
+              {ideaData.deals?.map((deal) => (
+                <Fragment key={deal.id}>
+                  <div
+                    className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+                    style={{ gridTemplateColumns: '12em 1fr' }}
+                  >
+                    <div className="text-white font-bold text-sm">
+                      Expires On
+                    </div>
+                    <div className="text-white/80 text-sm">
+                      {formatDate(deal.expiresAt)}
+                    </div>
+                    <div className="text-white font-bold text-sm">Status</div>
+                    <div className="text-white/80 text-sm">
+                      {deal.status}
+                    </div>{' '}
+                  </div>
 
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    disabled={!deal.metadata?.transfer}
+                    className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                  >
+                    <a
+                      className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                      href={`https://calibration.filfox.info/en/message/${deal.metadata?.transfer}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {deal.metadata?.transfer
+                        ? '✓ Confirm Purchase Mint'
+                        : '⚠ Transaction Unavailable'}{' '}
+                    </a>
+                  </Button>
+                </Fragment>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
+        {ideaData.checkouts?.length ? (
+          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
+                Checkouts
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
+              {ideaData.checkouts?.map((deal) => (
+                <Fragment key={deal.id}>
+                  <div
+                    className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+                    style={{ gridTemplateColumns: '12em 1fr' }}
+                  >
+                    <div className="text-white font-bold text-sm">DealID</div>
+                    <div className="text-white/80 text-sm">{deal.id}</div>
+                    <div className="text-white font-bold text-sm">
+                      {deal.error?.message ? 'Error' : 'Pending'}
+                    </div>
+                    <div className="text-white/80 text-sm">
+                      {deal.error?.message || ''}
+                    </div>
+                  </div>
+                </Fragment>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
         {audit ? (
           <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-white/10">
@@ -667,7 +691,9 @@ const DetailIP = ({
                 <div className="text-white/80 text-sm">{audit.status}</div>
                 <div className="text-white font-bold text-sm">Creator</div>
                 <div className="text-white/80 text-sm">
-                  {audit.creator}@{audit.address}
+                  id={audit.creator}
+                  <br />
+                  address={audit.address}
                 </div>
                 <div className="text-white font-bold text-sm">Token ID</div>
                 <div className="text-white/80 text-sm">
@@ -677,15 +703,34 @@ const DetailIP = ({
                   IPDocV2 Contract
                 </div>
                 <div className="text-white/80 text-sm">
-                  {config.CONTRACT_NAME as string}
+                  name={config.CONTRACT_NAME as string}
                   <br />
-                  {config.CONTRACT as string}
+                  address={config.CONTRACT as string}
                 </div>
                 <div className="text-white font-bold text-sm">
                   Mint Transaction
                 </div>
                 <div className="text-white/80 text-sm">
                   {ideaData.metadata?.mint || 'Not available'}
+                  <br />
+                  <Button
+                    asChild
+                    size="sm"
+                    disabled={!ideaData.metadata?.mint}
+                    variant="outline"
+                    className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                  >
+                    <a
+                      className="px-3 py-1 h-auto text-sm font-bold bg-primary/40 hover:bg-primary/60 border-primary/50"
+                      href={`https://calibration.filfox.info/en/message/${ideaData.metadata?.mint}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {ideaData.metadata?.mint
+                        ? '✓ Confirm Creation Mint'
+                        : '⚠ Transaction Unavailable'}{' '}
+                    </a>
+                  </Button>
                 </div>
               </div>
               {audit.details?.map((detail) => (

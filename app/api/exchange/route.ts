@@ -1,9 +1,10 @@
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 import { getUser } from '@/app/api/stytch'
 import { getToken } from '../firebase'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { LRUCache } from 'typescript-lru-cache'
+import { withTracing } from '@/lib/apiWithTracing'
 
 export const runtime = 'nodejs'
 
@@ -12,7 +13,7 @@ const validated = new LRUCache<string, Promise<string>>({
   entryExpirationTimeInMS: 1000 * 60 * 30,
 })
 
-export async function GET(req: NextRequest) {
+export const GET = withTracing(async (req: NextRequest) => {
   try {
     const authorization = req.headers
       .get('authorization')
@@ -30,14 +31,17 @@ export async function GET(req: NextRequest) {
       })()
     }
     const token = await promise
-    return new Response(JSON.stringify({ token }), {
+    return new NextResponse(JSON.stringify({ token }), {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {
     console.error(error)
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return new NextResponse(
+      JSON.stringify({ error: 'Internal Server Error' }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   }
-}
+})

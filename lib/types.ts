@@ -2,24 +2,37 @@ import { Timestamp } from 'firebase/firestore'
 import type {
   IPAuditDetailsJSON,
   IPAuditJSON,
+  IPDealJSON,
   IPDocJSON,
 } from './internalTypes'
 
 export type IPDoc = IPDocJSON & {
+  id: string // firestore doc id
   updatedAt: Timestamp
   createdAt: Timestamp
   canView?: boolean
+  deals?: IPDeal[]
+  dealsCount?: number
 }
 
 export type IPAudit = IPAuditJSON & {
+  id: string // firestore doc id
   updatedAt: Timestamp
   createdAt: Timestamp
   details?: IPAuditDetails[]
 }
 
 export type IPAuditDetails = IPAuditDetailsJSON & {
+  id: string // firestore doc id
   updatedAt: Timestamp
   createdAt: Timestamp
+}
+
+export type IPDeal = IPDealJSON & {
+  id: string // firestore doc id
+  updatedAt: Timestamp
+  createdAt: Timestamp
+  expiresAt?: Timestamp
 }
 
 export function castToTimestamp(date: unknown): Timestamp {
@@ -56,6 +69,15 @@ export function castAuditDetailsToUIDoc(
   }
 }
 
+export function castDealToUIDoc(record: IPDealJSON & { id: string }): IPDeal {
+  return {
+    ...record,
+    updatedAt: castToTimestamp(record.updatedAt),
+    createdAt: castToTimestamp(record.createdAt),
+    expiresAt: record.expiresAt ? castToTimestamp(record.expiresAt) : undefined,
+  }
+}
+
 export function castAuditToUIDoc(
   record: IPAuditJSON,
   details?: IPAuditDetails[]
@@ -76,7 +98,7 @@ export function castToUIDoc(record: IPDocJSON | IPDoc): IPDoc {
   }
 }
 
-export function formatDate(_date: Timestamp | Date | string | number): string {
+export function formatDate(_date?: Timestamp | Date | string | number): string {
   if (!_date) {
     return '- no date -'
   }

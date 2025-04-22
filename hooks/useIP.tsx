@@ -5,14 +5,14 @@ import {
   type IPAuditDetails,
   type IPAudit,
   type IPDoc,
+  castDealToUIDoc,
+  type IPDeal,
 } from '@/lib/types'
 import { useStytchUser } from '@stytch/nextjs'
 import {
   collection,
   doc,
   type DocumentReference,
-  getDoc,
-  getDocs,
   getFirestore,
   limit,
   onSnapshot,
@@ -22,75 +22,150 @@ import {
   query,
   type QueryCompositeFilterConstraint,
   startAfter,
-  type Timestamp,
+  Timestamp,
   where,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { bytesToString, numberToBytes } from 'viem'
 import { useSession } from './useSession'
+import type { IPDealJSON } from '@/lib/internalTypes'
 
-export function useIP(docId: string) {
+export function useIP(
+  docId: string
+):
+  | (IPDoc & { deals?: IPDeal[]; checkouts?: IPDeal[]; canView?: boolean })
+  | undefined {
   const { fbPromise, fbUser } = useSession()
   if (!fbUser && fbPromise) {
     throw fbPromise
   }
-  const [ideaData, setIdeaData] = useState<IPDoc | undefined>()
+  const [ideaData, setIdeaData] = useState<
+    (IPDoc & { deals?: IPDeal[]; canView?: boolean }) | undefined
+  >()
   const { user } = useStytchUser()
   useEffect(() => {
     if (!user) {
       setIdeaData(undefined)
       return
     }
-    const fetchData = async () => {
-      const fs = getFirestore()
-      const actualDocId =
-        docId.startsWith('0x') || /^\d+$/.test(docId)
-          ? bytesToString(numberToBytes(BigInt(docId)))
-          : docId
-      const docRef = await getDoc(doc(fs, 'ip', actualDocId))
-      if (docRef.exists()) {
-        const { creator } = docRef.data() as { creator?: string }
-        let hasAccess = creator === user.user_id
-        if (!hasAccess) {
-          const deals = await getDocs(
-            query(
-              query(
-                collection(fs, 'ip', docId, 'deals'),
-                where('to', '==', user.user_id)
-              ),
-              orderBy('createdAt', 'desc')
-            )
+    const snapshots: (() => void)[] = []
+    let deals: Array<IPDeal & { id: string }> = []
+    const fs = getFirestore()
+    const actualDocId =
+      docId.startsWith('0x') || /^\d+$/.test(docId)
+        ? bytesToString(numberToBytes(BigInt(docId)))
+        : docId
+    snapshots.push(
+      onSnapshot(doc(fs, 'ip', actualDocId), (docSnap) => {
+        if (docSnap.exists()) {
+          const casted = castToUIDoc({
+            ...docSnap.data(),
+            id: docSnap.id,
+          } as IPDoc)
+
+          setIdeaData((prev) => {
+            const hasAccess = deals
+              .filter((doc) => doc.owner === user.user_id)
+              .map((doc) => doc.expiresAt)
+              .some((expiresAt) => {
+                if (expiresAt) {
+                  return expiresAt.toDate() > new Date()
+                }
+                return true
+              })
+            return {
+              ...prev,
+              ...casted,
+              deals: deals.filter((doc) => {
+                if (prev?.creator === user.user_id) {
+                  return true
+                }
+                return doc.owner === user.user_id
+              }),
+              canView: hasAccess || prev?.creator === user.user_id,
+            } as IPDoc & { deals?: IPDeal[]; canView?: boolean }
+          })
+        }
+      })
+    )
+    snapshots.push(
+      onSnapshot(
+        query(
+          collection(fs, 'customers', user.user_id, 'checkout_sessions'),
+          where('metadata.docId', '==', actualDocId)
+        ),
+        (docsSnap) => {
+          const checkouts = docsSnap.docs.map((doc) => {
+            return castDealToUIDoc({
+              ...doc.data(),
+              id: doc.id,
+            } as IPDealJSON & { id: string })
+          })
+          setIdeaData((prev) => {
+            return {
+              ...prev,
+              checkouts: checkouts.filter((doc) => {
+                doc.error !== undefined || !('url' in doc)
+              }),
+            } as IPDoc & { checkouts?: IPDeal[] }
+          })
+        }
+      )
+    )
+    snapshots.push(
+      onSnapshot(
+        query(
+          query(
+            collection(fs, 'ip', actualDocId, 'deals'),
+            orderBy('createdAt', 'desc'),
+            where('expiresAt', '>', Timestamp.fromDate(new Date()))
           )
-          hasAccess = deals.docs
-            .map(
-              (doc) =>
-                ({
-                  ...doc.data(),
-                  id: doc.id,
-                }) as { expiresAt?: Timestamp }
-            )
-            .some((deal) => {
-              const { expiresAt } = deal
-              if (expiresAt) {
-                return expiresAt.toDate() > new Date()
+        ),
+        (docSnaps) => {
+          deals = docSnaps.docs.map((doc) => {
+            return castDealToUIDoc({
+              ...doc.data(),
+              id: doc.id,
+            } as IPDealJSON & { id: string })
+          })
+
+          setIdeaData((prev) => {
+            const hasAccess = deals
+              .filter((doc) => doc.owner === user.user_id)
+              .some((doc) => {
+                if (doc.expiresAt) {
+                  return doc.expiresAt.toDate() > new Date()
+                }
+                return true
+              })
+            const dealsCount = deals.map((doc) => {
+              if (doc.expiresAt) {
+                return doc.expiresAt.toDate() > new Date()
               }
               return true
-            })
+            }).length
+            return {
+              id: actualDocId,
+              ...prev,
+              dealsCount,
+              deals: deals.filter((doc) => {
+                if (prev?.creator === user.user_id) {
+                  return true
+                }
+                return doc.owner === user.user_id
+              }),
+              canView: hasAccess || prev?.creator === user.user_id,
+            } as IPDoc
+          })
         }
-        const casted = castToUIDoc({
-          ...docRef.data(),
-          id: docRef.id,
-          canView: hasAccess,
-        } as IPDoc)
-        setIdeaData(casted)
-      } else {
-        setIdeaData(undefined)
+      )
+    )
+    return () => {
+      for (const snapshot of snapshots) {
+        snapshot()
       }
     }
-
-    fetchData()
   }, [docId, user])
-
   return ideaData
 }
 
@@ -119,25 +194,25 @@ export function useIPs({
     Record<number, DocumentReference | undefined>
   >({ 1: undefined })
   useEffect(() => {
-    const doIt = async () => {
-      const fs = getFirestore()
-      let qry: Query = collection(fs, 'ip')
-      if (filter) {
-        qry = query(qry, filter)
-      }
-      qry = query(qry, orderBy(_orderBy, _orderDir))
-      const _startAfter = pages[_page]
-      if (!_startAfter && _page > 1) {
-        console.error('Last page')
-        return
-      }
-      if (_startAfter) {
-        qry = query(qry, startAfter(_startAfter))
-      }
-      qry = query(qry, limit(_limit))
-      const snapshot = await getDocs(qry)
-      let last: DocumentReference | undefined = undefined
-      const data = snapshot.docs.map((doc) => {
+    const fs = getFirestore()
+    let qry: Query = collection(fs, 'ip')
+    if (filter) {
+      qry = query(qry, filter)
+    }
+    qry = query(qry, orderBy(_orderBy, _orderDir))
+    const _startAfter = pages[_page]
+    if (!_startAfter && _page > 1) {
+      console.error('Last page')
+      return
+    }
+    if (_startAfter) {
+      qry = query(qry, startAfter(_startAfter))
+    }
+    qry = query(qry, limit(_limit))
+    let last: DocumentReference | undefined = undefined
+    const snapshot = onSnapshot(qry, (docsSnap) => {
+      last = undefined
+      const data = docsSnap.docs.map((doc) => {
         last = doc.ref
         return castToUIDoc({ ...doc.data(), id: doc.id } as IPDoc)
       })
@@ -147,8 +222,8 @@ export function useIPs({
         setPages(_pages)
       }
       setIdeaData({ data, pages: Object.keys(pages).length })
-    }
-    doIt()
+    })
+    return snapshot
   }, [_orderBy, _orderDir, _limit, _page, pages[_page], filter])
   return ideaData
 }
@@ -160,37 +235,45 @@ export function useIPAudit(tokenId: string) {
   }
   const [ideaData, setIdeaData] = useState<IPAudit | undefined>()
   useEffect(() => {
-    let snapshot: () => void = () => {}
+    const snapshots: (() => void)[] = []
     const fetchData = async () => {
       const fs = getFirestore()
-      snapshot = onSnapshot(
-        query(
-          collection(fs, 'ip', tokenId, 'audit'),
-          orderBy('createdAt', 'desc')
-        ),
-        (doc) => {
-          const details = doc.docs.map((doc) =>
-            castAuditDetailsToUIDoc({
-              ...doc.data(),
-              id: doc.id,
-            } as IPAuditDetails)
-          )
-          setIdeaData((prev) => {
-            return { ...prev, details } as IPAudit
-          })
-        }
+      snapshots.push(
+        onSnapshot(
+          query(
+            collection(fs, 'ip', tokenId, 'audit'),
+            orderBy('createdAt', 'desc')
+          ),
+          (doc) => {
+            const details = doc.docs.map((doc) => {
+              return castAuditDetailsToUIDoc({
+                ...doc.data(),
+                id: doc.id,
+              } as IPAuditDetails)
+            })
+            setIdeaData((prev) => {
+              return { ...prev, details } as IPAudit
+            })
+          }
+        )
       )
-      const docRef = await getDoc(doc(fs, 'id', tokenId, 'status', 'status'))
-      if (docRef.exists()) {
-        setIdeaData((prev) => {
-          return { ...prev, ...castAuditToUIDoc(docRef.data() as IPAudit) }
+      snapshots.push(
+        onSnapshot(doc(fs, 'ip', tokenId, 'status', 'status'), (docRef) => {
+          setIdeaData((prev) => {
+            return {
+              ...prev,
+              ...castAuditToUIDoc((docRef.data() || {}) as IPAudit),
+            }
+          })
         })
-      } else {
-        setIdeaData(undefined)
-      }
+      )
     }
     fetchData()
-    return snapshot
+    return () => {
+      for (const snapshot of snapshots) {
+        snapshot()
+      }
+    }
   }, [tokenId])
 
   return ideaData

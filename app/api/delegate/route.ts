@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { getFirestore } from '../firebase'
 // import { SignableMessage } from "viem";
 import { getUser } from '../stytch'
@@ -13,10 +13,11 @@ import {
   type SignableMessage,
 } from 'viem'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { withTracing } from '@/lib/apiWithTracing'
 
 export const runtime = 'nodejs'
 
-export async function POST(req: NextRequest) {
+export const POST = withTracing(async (req: NextRequest) => {
   try {
     await initAPIConfig()
 
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       (deal) => deal.expiresAt === undefined || deal.expiresAt.toDate() > now
     )
     if (!hasAccess) {
-      return new Response(
+      return new NextResponse(
         JSON.stringify({ success: false, error: 'No access' }),
         {
           status: 403,
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
         capacityTokenId: process.env.LIT_CAPACITY_TOKEN_ID || '0',
         delegateeAddresses: [getAddress(pkp)],
       })
-    return new Response(
+    return new NextResponse(
       JSON.stringify({
         capacityDelegationAuthSig,
       }),
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
       name?: string
       headers?: Record<string, unknown>
     }
-    return new Response(
+    return new NextResponse(
       JSON.stringify({
         success: false,
         error: {
@@ -117,4 +118,4 @@ export async function POST(req: NextRequest) {
       }
     )
   }
-}
+})

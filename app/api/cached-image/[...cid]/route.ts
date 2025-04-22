@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import 'firebase-admin/storage'
 import { getBucket } from '@/app/api/firebase'
 import { initAPIConfig } from '@/lib/apiUtils'
+import sharp from 'sharp'
 
 // Set extremely long cache since IPFS content is immutable (1 year)
 const CACHE_CONTROL =
@@ -11,6 +12,16 @@ const CACHE_CONTROL =
 export const dynamic = 'force-dynamic' // Allow dynamic handling for first request
 export const revalidate = false // Don't revalidate automatically
 export const fetchCache = 'force-cache' // Use cache when possible
+
+// List of supported image formats for resizing
+const RESIZABLE_FORMATS = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'image/tiff',
+  'image/gif',
+]
 
 export async function GET(
   request: NextRequest,
@@ -28,11 +39,12 @@ export async function GET(
   }
 
   const { searchParams } = new URL(request.url)
-  const width = searchParams.get('width') || '800'
-  const quality = searchParams.get('quality') || '75'
+  const width = Number.parseInt(searchParams.get('width') || '800', 10)
+  const quality = Number.parseInt(searchParams.get('quality') || '75', 10)
+  const format = searchParams.get('format') || 'webp' // Default to webp for better compression
 
   // Base storage path (without extension)
-  const basePath = `ipfs-cache/${cidPath}_${width}_${quality}`
+  const basePath = `images-cache/${cidPath}_${width}_${quality}_${format}`
 
   try {
     // Initialize Firebase
@@ -50,7 +62,7 @@ export async function GET(
       // Create a readable stream from the file
       const fileStream = file.createReadStream()
 
-      // Use NextResponse.json() to create a streaming response
+      // Return streaming response
       return new NextResponse(fileStream as unknown as ReadableStream, {
         headers: {
           'Content-Type': contentType,
@@ -77,11 +89,72 @@ export async function GET(
       }
 
       // Get the content type from the response
-      const contentType =
+      const sourceContentType =
         response.headers.get('Content-Type') || 'application/octet-stream'
 
+      // Get buffer data from response
+      const originalBuffer = Buffer.from(await response.arrayBuffer())
+
+      // Determine output format and content type
+      const isResizableFormat = RESIZABLE_FORMATS.includes(sourceContentType)
+      const outputFormat = format === 'auto' ? 'webp' : format
+      const contentType = `image/${outputFormat}`
+
+      // Only resize if it's a supported image format
+      let processedBuffer: Buffer<ArrayBufferLike> = originalBuffer
+      let optimizedBuffer: Buffer<ArrayBufferLike> = originalBuffer
+
+      if (isResizableFormat) {
+        try {
+          // Create Sharp instance from the buffer
+          let image = sharp(originalBuffer)
+
+          // Get image metadata
+          const metadata = await image.metadata()
+          const originalWidth = metadata.width || 0
+
+          // Only resize if requested width is smaller than original or format conversion is needed
+          if (
+            width < originalWidth ||
+            outputFormat !== (metadata.format || '')
+          ) {
+            // Resize the image
+            image = image.resize({
+              width: width,
+              withoutEnlargement: true, // Don't enlarge if image is smaller than requested width
+            })
+
+            // Convert to desired format with quality setting
+            switch (outputFormat) {
+              case 'jpeg':
+                optimizedBuffer = await image.jpeg({ quality }).toBuffer()
+                break
+              case 'png':
+                optimizedBuffer = await image.png({ quality }).toBuffer()
+                break
+              case 'webp':
+                optimizedBuffer = await image.webp({ quality }).toBuffer()
+                break
+              case 'avif':
+                optimizedBuffer = await image.avif({ quality }).toBuffer()
+                break
+              default:
+                optimizedBuffer = await image.webp({ quality }).toBuffer()
+                break
+            }
+
+            // Use the optimized buffer
+            processedBuffer = optimizedBuffer
+          }
+        } catch (resizeError) {
+          console.error('Image resize failed:', resizeError)
+          // Fall back to original buffer if resize fails
+          processedBuffer = originalBuffer
+        }
+      }
+
       // Create a storage path with the proper extension
-      const finalStoragePath = `${basePath}`
+      const finalStoragePath = basePath
 
       // Create a file reference in Firebase Storage
       const file = bucket.file(finalStoragePath)
@@ -93,49 +166,33 @@ export async function GET(
           cacheControl: CACHE_CONTROL,
           metadata: {
             originalCid: cidPath,
-            width: width,
-            quality: quality,
+            width: String(width),
+            quality: String(quality),
+            format: outputFormat,
             cachedAt: new Date().toISOString(),
+            optimized: isResizableFormat ? 'true' : 'false',
           },
         },
       })
-
-      // Get the response body as a readable stream
-      const responseStream = response.body
-
-      if (!responseStream) {
-        throw new Error('No response body stream available')
-      }
-
-      // Create a clone of the response to use for the client
-      const clonedResponse = response.clone()
-      const clientStream = clonedResponse.body
-
-      if (!clientStream) {
-        throw new Error('Failed to clone response stream')
-      }
-
-      // We'll need to buffer the response for Firebase Storage
-      // since stream conversion is tricky in this environment
-      const responseBuffer = Buffer.from(await response.arrayBuffer())
 
       // Write the buffer to Firebase Storage
       const streamPromise = new Promise((resolve, reject) => {
         writeStream.on('finish', resolve)
         writeStream.on('error', reject)
-        writeStream.end(responseBuffer)
+        writeStream.end(processedBuffer)
       })
 
-      // Start the streaming process in the background
+      // Start the storage process in the background
       streamPromise.catch((err) => {
         console.error('Error saving to Firebase Storage:', err)
       })
 
-      // Return the image stream directly to the client without waiting for caching to complete
-      return new NextResponse(clientStream, {
+      // Return the processed image directly to the client
+      return new NextResponse(processedBuffer, {
         headers: {
           'Content-Type': contentType,
           'Cache-Control': CACHE_CONTROL,
+          'Content-Length': processedBuffer.length.toString(),
         },
       })
     } finally {

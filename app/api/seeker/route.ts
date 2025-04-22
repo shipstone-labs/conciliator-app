@@ -1,15 +1,16 @@
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { getCompletionAI, getModel } from '../utils'
 // Dynamic import for the template file
 import templateFile from './system.hbs'
 import { getUser } from '../stytch'
 import { getFirestore } from '../firebase'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { withTracing } from '@/lib/apiWithTracing'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
-export async function POST(req: NextRequest) {
+export const POST = withTracing(async (req: NextRequest) => {
   try {
     await initAPIConfig()
 
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
           role === 'assistant' && /^(None),\d*/i.test(content)
       )
     ) {
-      return new Response(
+      return new NextResponse(
         JSON.stringify({ success: false, error: 'Completed' }),
         {
           status: 200,
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
             role: 'user',
           })
           if (previous.at(-1)?.content === 'Stop') {
-            return new Response(
+            return new NextResponse(
               JSON.stringify({ success: false, error: 'Completed' }),
               {
                 status: 200,
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
       .join('\n')
     console.log('seeker', content)
     messages.push({ content, role: 'user' })
-    return new Response(JSON.stringify({ success: true, messages }), {
+    return new NextResponse(JSON.stringify({ success: true, messages }), {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest) {
       name?: string
       headers?: Record<string, unknown>
     }
-    return new Response(
+    return new NextResponse(
       JSON.stringify({
         success: false,
         error: {
@@ -132,4 +133,4 @@ export async function POST(req: NextRequest) {
       }
     )
   }
-}
+})

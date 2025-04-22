@@ -1,14 +1,8 @@
 import type { NextRequest } from 'next/server'
-// import { abi } from "../utils";
-// import { createWalletClient, decodeEventLog, http } from "viem";
 import type { IPDocJSON } from '@/lib/internalTypes'
 import { getFirestore } from '../firebase'
 import { createAsAgent } from '@/packages/web-storage-wrapper/dist'
 import { initAPIConfig } from '@/lib/apiUtils'
-// import { createWalletClient, http } from "viem";
-// import { privateKeyToAccount } from "viem/accounts";
-// import { filecoinCalibration } from "viem/chains";
-// import { waitForTransactionReceipt } from "viem/actions";
 
 export const runtime = 'nodejs'
 

@@ -8,7 +8,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 import { AuthModal } from './AuthModal'
@@ -25,6 +24,7 @@ import { publicKeyToAddress } from 'viem/utils'
 import {
   getAuth,
   signInWithCustomToken,
+  signOut,
   type UserCredential,
 } from 'firebase/auth'
 import { usePathname } from 'next/navigation'
@@ -68,15 +68,12 @@ export default function Authenticated({
 }: PropsWithChildren<{ requireLit?: boolean; requireFirebase?: boolean }>) {
   const { user, isInitialized } = useStytchUser()
   const stytchClient = useStytch()
-  const isLoggingOff = globalSession.isLoggingOff
+  const [isLoggingOff, setLoggingOff] = useState(globalSession.isLoggingOff)
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [sessionSigs, setSessionSigs] = useState<Session>(() => globalSession)
   const config = useConfig()
-  const litActive = useRef<Promise<void> | undefined>(globalSession.litPromise)
-  const firebaseActive = useRef<Promise<void> | undefined>(
-    globalSession.fbPromise
-  )
+  const [, setTrigger] = useState(0)
 
+  globalSession.setLoggingOff = setLoggingOff
   // Show auth modal if not authenticated and not ignored
   const amendLoggedIn = useCallback(
     (state: Session) => {
@@ -100,16 +97,46 @@ export default function Authenticated({
     if (isInitialized && !user) {
       setShowAuthModal(true)
     }
-    if (isInitialized && user) {
-      setSessionSigs((state) =>
-        amendLoggedIn({
-          ...state,
+    if (!isInitialized || !user || isLoggingOff) {
+      setLoggingOff(true)
+      try {
+        if (globalSession.litClient) {
+          try {
+            globalSession.litClient.disconnect()
+          } catch (error) {
+            console.error('Error disconnecting Lit client:', error)
+          }
+          globalSession.litClient = undefined
+          globalSession.litPromise = undefined
+          globalSession.sessionSigs = undefined
+          globalSession.delegatedSessionSigs = undefined
+        }
+        if (globalSession.fbUser) {
+          globalSession.fbUser = undefined
+          globalSession.fbPromise = undefined
+          try {
+            signOut(getAuth())
+          } catch (error) {
+            console.error('Error signing out of Firebase:', error)
+          }
+        }
+        globalSession = amendLoggedIn({
+          ...globalSession,
+          isLoggingOff: false,
+          isLoggedIn: false,
         })
-      )
+      } finally {
+        setLoggingOff(false)
+        setTrigger((prev) => prev + 1)
+      }
+    } else {
+      globalSession = amendLoggedIn({
+        ...globalSession,
+      })
       const task = async () => {
         const litModule = await import('lit-wrapper')
         try {
-          if (requireFirebase && !firebaseActive.current) {
+          if (requireFirebase && !globalSession.fbPromise) {
             const { currentUser } = getAuth()
             const fbUser =
               user &&
@@ -119,15 +146,14 @@ export default function Authenticated({
                 ? (currentUser as unknown as UserCredential)
                 : undefined
             if (fbUser) {
-              setSessionSigs((state) =>
-                amendLoggedIn({
-                  ...state,
-                  fbUser,
-                })
-              )
-              firebaseActive.current = Promise.resolve()
+              globalSession = amendLoggedIn({
+                ...globalSession,
+                fbUser,
+              })
+              setTrigger((prev) => prev + 1)
+              globalSession.fbPromise = Promise.resolve()
             } else {
-              firebaseActive.current = (async () => {
+              globalSession.fbPromise = (async () => {
                 true
                 await fetch('/api/exchange', {
                   headers: {
@@ -142,46 +168,44 @@ export default function Authenticated({
                   })
                   .catch((error) => {
                     console.error('Error fetching token', error)
-                    firebaseActive.current = undefined
+                    globalSession.fbPromise = undefined
                   })
                   .then((res) => {
                     return signInWithCustomToken(getAuth(), res.token).then(
                       (fbUser) => {
-                        setSessionSigs((state) =>
-                          amendLoggedIn({
-                            ...state,
-                            fbUser,
-                          })
-                        )
-                        firebaseActive.current = Promise.resolve()
+                        globalSession = amendLoggedIn({
+                          ...globalSession,
+                          fbUser,
+                        })
+                        globalSession.fbPromise = Promise.resolve()
+                        setTrigger((prev) => prev + 1)
                       }
                     )
                   })
                   .catch((error) => {
                     console.error(error)
-                    firebaseActive.current = undefined
+                    globalSession.fbPromise = undefined
                   })
               })()
-              setSessionSigs((state) =>
-                amendLoggedIn({
-                  ...state,
-                  fbPromise: firebaseActive.current,
-                })
-              )
+              globalSession = amendLoggedIn({
+                ...globalSession,
+                fbPromise: globalSession.fbPromise,
+              })
+              setTrigger((prev) => prev + 1)
             }
           }
-          if (requireLit && !litActive.current) {
-            litActive.current = (async () => {
+          if (requireLit && !globalSession.litPromise) {
+            globalSession.litPromise = (async () => {
               try {
                 const litClient = await litModule.createLitClient({
                   litNetwork: litModule.LIT_NETWORK.Datil,
                 })
-                setSessionSigs((state) =>
-                  amendLoggedIn({
-                    ...state,
-                    litClient,
-                  })
-                )
+                globalSession = amendLoggedIn({
+                  ...globalSession,
+                  litClient,
+                })
+                setTrigger((prev) => prev + 1)
+
                 litClient.connect()
                 const { authMethod, provider } = await litModule.authenticate(
                   litClient,
@@ -343,32 +367,30 @@ export default function Authenticated({
                     address: pkp.ethAddress as `0x${string}`,
                   }
                 }
-                setSessionSigs((state) =>
-                  amendLoggedIn({
-                    ...state,
-                    litPromise: litActive.current,
-                    litClient,
-                    delegatedSessionSigs,
-                    sessionSigs: {
-                      authMethod,
-                      pkpPublicKey: pkp.publicKey,
-                      address: publicKeyToAddress(
-                        pkps[0].publicKey as `0x${string}`
-                      ),
-                      sessionSigs,
-                    },
-                  })
-                )
+                globalSession = amendLoggedIn({
+                  ...globalSession,
+                  litPromise: globalSession.litPromise,
+                  litClient,
+                  delegatedSessionSigs,
+                  sessionSigs: {
+                    authMethod,
+                    pkpPublicKey: pkp.publicKey,
+                    address: publicKeyToAddress(
+                      pkps[0].publicKey as `0x${string}`
+                    ),
+                    sessionSigs,
+                  },
+                })
+                setTrigger((prev) => prev + 1)
               } catch {
-                litActive.current = undefined
+                globalSession.litPromise = undefined
               }
             })()
-            setSessionSigs((state) =>
-              amendLoggedIn({
-                ...state,
-                litPromise: litActive.current,
-              })
-            )
+            globalSession = amendLoggedIn({
+              ...globalSession,
+              litPromise: globalSession.litPromise,
+            })
+            setTrigger((prev) => prev + 1)
           }
         } catch (initError) {
           console.error('Error initializing Lit client:', initError)
@@ -382,6 +404,7 @@ export default function Authenticated({
     requireLit,
     requireFirebase,
     amendLoggedIn,
+    isLoggingOff,
     config,
     stytchClient,
   ])
@@ -421,9 +444,9 @@ export default function Authenticated({
 
   return (
     <>
-      <sessionContext.Provider value={sessionSigs}>
+      <sessionContext.Provider value={globalSession}>
         <Suspense fallback={<Loading />}>
-          {sessionSigs.isLoggedIn && !sessionSigs.isLoggingOff ? (
+          {globalSession.isLoggedIn && !globalSession.isLoggingOff ? (
             children
           ) : (
             <Loading />
