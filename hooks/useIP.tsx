@@ -11,11 +11,14 @@ import {
 import { useStytchUser } from '@stytch/nextjs'
 import {
   collection,
+  collectionGroup,
   doc,
+  documentId,
   type DocumentReference,
   getFirestore,
   limit,
   onSnapshot,
+  or,
   orderBy,
   type OrderByDirection,
   type Query,
@@ -25,16 +28,14 @@ import {
   Timestamp,
   where,
 } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { bytesToString, numberToBytes } from 'viem'
 import { useSession } from './useSession'
 import type { IPDealJSON } from '@/lib/internalTypes'
 
 export function useIP(
   docId: string
-):
-  | (IPDoc & { deals?: IPDeal[]; checkouts?: IPDeal[]; canView?: boolean })
-  | undefined {
+): (IPDoc & { deals?: IPDeal[]; canView?: boolean }) | undefined {
   const { fbPromise, fbUser } = useSession()
   if (!fbUser && fbPromise) {
     throw fbPromise
@@ -64,53 +65,38 @@ export function useIP(
           } as IPDoc)
 
           setIdeaData((prev) => {
-            const hasAccess = deals
-              .filter((doc) => doc.owner === user.user_id)
-              .map((doc) => doc.expiresAt)
-              .some((expiresAt) => {
-                if (expiresAt) {
-                  return expiresAt.toDate() > new Date()
-                }
-                return true
-              })
+            const hasAccess = prev?.creator === user.user_id
+            deals.filter(
+              (doc) =>
+                doc.owner === user.user_id &&
+                (doc.expiresAt == null ||
+                  doc.expiresAt.toDate() > new Date()) &&
+                doc.status === 'active'
+            ).length > 0
             return {
               ...prev,
               ...casted,
-              deals: deals.filter((doc) => {
-                if (prev?.creator === user.user_id) {
-                  return true
-                }
-                return doc.owner === user.user_id
-              }),
+              deals: deals
+                .filter((doc) => {
+                  if (prev?.creator === user.user_id) {
+                    return true
+                  }
+                  return doc.owner === user.user_id
+                })
+                .map((doc) => {
+                  if (doc.expiresAt && doc.expiresAt.toDate() < new Date()) {
+                    return {
+                      ...doc,
+                      status: 'expired',
+                    }
+                  }
+                  return doc
+                }),
               canView: hasAccess || prev?.creator === user.user_id,
             } as IPDoc & { deals?: IPDeal[]; canView?: boolean }
           })
         }
       })
-    )
-    snapshots.push(
-      onSnapshot(
-        query(
-          collection(fs, 'customers', user.user_id, 'checkout_sessions'),
-          where('metadata.docId', '==', actualDocId)
-        ),
-        (docsSnap) => {
-          const checkouts = docsSnap.docs.map((doc) => {
-            return castDealToUIDoc({
-              ...doc.data(),
-              id: doc.id,
-            } as IPDealJSON & { id: string })
-          })
-          setIdeaData((prev) => {
-            return {
-              ...prev,
-              checkouts: checkouts.filter((doc) => {
-                doc.error !== undefined || !('url' in doc)
-              }),
-            } as IPDoc & { checkouts?: IPDeal[] }
-          })
-        }
-      )
     )
     snapshots.push(
       onSnapshot(
@@ -128,32 +114,36 @@ export function useIP(
               id: doc.id,
             } as IPDealJSON & { id: string })
           })
-
           setIdeaData((prev) => {
-            const hasAccess = deals
-              .filter((doc) => doc.owner === user.user_id)
-              .some((doc) => {
-                if (doc.expiresAt) {
-                  return doc.expiresAt.toDate() > new Date()
-                }
-                return true
-              })
-            const dealsCount = deals.map((doc) => {
-              if (doc.expiresAt) {
-                return doc.expiresAt.toDate() > new Date()
-              }
-              return true
-            }).length
+            const hasAccess = prev?.creator === user.user_id
+            deals.filter(
+              (doc) =>
+                doc.owner === user.user_id &&
+                (doc.expiresAt == null ||
+                  doc.expiresAt.toDate() > new Date()) &&
+                doc.status === 'active'
+            ).length > 0
+            const dealsCount = deals.length
             return {
               id: actualDocId,
               ...prev,
               dealsCount,
-              deals: deals.filter((doc) => {
-                if (prev?.creator === user.user_id) {
-                  return true
-                }
-                return doc.owner === user.user_id
-              }),
+              deals: deals
+                .filter((doc) => {
+                  if (prev?.creator === user.user_id) {
+                    return true
+                  }
+                  return doc.owner === user.user_id
+                })
+                .map((doc) => {
+                  if (doc.expiresAt && doc.expiresAt.toDate() < new Date()) {
+                    return {
+                      ...doc,
+                      status: 'expired',
+                    }
+                  }
+                  return doc
+                }),
               canView: hasAccess || prev?.creator === user.user_id,
             } as IPDoc
           })
@@ -173,15 +163,32 @@ export function useIPs({
   orderBy: _orderBy = 'createdAt',
   orderDirection: _orderDir = 'desc',
   itemsPerPage: _limit = 16,
-  filter,
+  myItems = false,
   currentPage: _page = 1,
 }: {
   orderBy?: string
   orderDirection?: OrderByDirection
   itemsPerPage?: number
-  filter?: QueryCompositeFilterConstraint
+  myItems?: boolean
   currentPage?: number
 }) {
+  const { user } = useStytchUser()
+  const { owner, creator } = useMemo(() => {
+    if (!myItems) {
+      return {}
+    }
+    const creator = where(
+      'creator',
+      '==',
+      user?.user_id
+    ) as unknown as QueryCompositeFilterConstraint
+    const owner = where(
+      'owner',
+      '==',
+      user?.user_id
+    ) as unknown as QueryCompositeFilterConstraint
+    return { creator, owner }
+  }, [user?.user_id, myItems])
   const { fbPromise, fbUser } = useSession()
   if (!fbUser && fbPromise) {
     throw fbPromise
@@ -193,12 +200,18 @@ export function useIPs({
   const [pages, setPages] = useState<
     Record<number, DocumentReference | undefined>
   >({ 1: undefined })
+  const [additionalDocs, setAdditionalDocs] = useState<string[]>()
   useEffect(() => {
     const fs = getFirestore()
     let qry: Query = collection(fs, 'ip')
-    if (filter) {
-      qry = query(qry, filter)
+    if (additionalDocs) {
+      if (creator) {
+        qry = query(qry, or(creator, where(documentId(), 'in', additionalDocs)))
+      }
+    } else if (creator) {
+      qry = query(qry, creator)
     }
+
     qry = query(qry, orderBy(_orderBy, _orderDir))
     const _startAfter = pages[_page]
     if (!_startAfter && _page > 1) {
@@ -210,21 +223,71 @@ export function useIPs({
     }
     qry = query(qry, limit(_limit))
     let last: DocumentReference | undefined = undefined
-    const snapshot = onSnapshot(qry, (docsSnap) => {
-      last = undefined
-      const data = docsSnap.docs.map((doc) => {
-        last = doc.ref
-        return castToUIDoc({ ...doc.data(), id: doc.id } as IPDoc)
+    const snapshots: (() => void)[] = []
+    if (owner) {
+      snapshots.push(
+        onSnapshot(query(collectionGroup(fs, 'deals'), owner), (docSnap) => {
+          const deals = docSnap.docs
+            .filter((doc) => doc.ref.parent?.parent?.parent?.id === 'ip')
+            .map((doc) => {
+              return castDealToUIDoc({
+                ipDoc: doc.ref.parent?.parent?.id,
+                ...doc.data(),
+                id: doc.id,
+              } as IPDealJSON & { id: string; ipDoc: string }) as IPDeal & {
+                ipDoc: string
+                id: string
+              }
+            })
+            .filter((doc) => doc.ipDoc)
+          const docIds = deals.map((doc) => doc.ipDoc)
+          console.log('DealDocs', docIds)
+          setAdditionalDocs((current) => {
+            if (
+              new Set(docIds).intersection(new Set(current)).size ===
+              docIds.length
+            ) {
+              return current
+            }
+            return docIds
+          })
+        })
+      )
+    }
+    snapshots.push(
+      onSnapshot(qry, (docsSnap) => {
+        last = undefined
+        console.log(
+          'RetrievedDocs',
+          docsSnap.docs.map((doc) => doc.id)
+        )
+        const data = docsSnap.docs.map((doc) => {
+          last = doc.ref
+          return castToUIDoc({ ...doc.data(), id: doc.id } as IPDoc)
+        })
+        const _pages = pages
+        if (last && data.length === _limit) {
+          _pages[_page + 1] = last
+          setPages(_pages)
+        }
+        setIdeaData({ data, pages: Object.keys(pages).length })
       })
-      const _pages = pages
-      if (last) {
-        _pages[_page + 1] = last
-        setPages(_pages)
+    )
+    return () => {
+      for (const snapshot of snapshots) {
+        snapshot()
       }
-      setIdeaData({ data, pages: Object.keys(pages).length })
-    })
-    return snapshot
-  }, [_orderBy, _orderDir, _limit, _page, pages[_page], filter])
+    }
+  }, [
+    _orderBy,
+    _orderDir,
+    _limit,
+    _page,
+    pages[_page],
+    owner,
+    creator,
+    additionalDocs,
+  ])
   return ideaData
 }
 

@@ -13,7 +13,6 @@ import Link from 'next/link'
 import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import { useIPs } from '@/hooks/useIP'
 import CachedImage from '@/components/CachedImage'
-import type { QueryCompositeFilterConstraint } from 'firebase/firestore'
 
 function getImageWidth() {
   const screenWidth = window.innerWidth
@@ -27,11 +26,11 @@ function getImageWidth() {
 }
 
 type CardGridProps = {
-  filter?: QueryCompositeFilterConstraint
+  myItems?: boolean
   itemsPerPage?: number
 }
 
-function CardGrid({ filter, itemsPerPage = 16 }: CardGridProps) {
+function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
   const [imageWidth, setImageWidth] = useState(getImageWidth()) // Default width
   const [currentPage, setCurrentPage] = useState(1)
   const { data: visibleItems, pages: totalPages } = useIPs({
@@ -39,7 +38,7 @@ function CardGrid({ filter, itemsPerPage = 16 }: CardGridProps) {
     orderDirection: 'desc',
     itemsPerPage,
     currentPage,
-    filter,
+    myItems,
   }) || { pages: 1 }
 
   // Responsive image size calculation

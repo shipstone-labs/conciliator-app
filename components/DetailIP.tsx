@@ -608,6 +608,8 @@ const DetailIP = ({
                     className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
                     style={{ gridTemplateColumns: '12em 1fr' }}
                   >
+                    <div className="text-white font-bold text-sm">Status</div>
+                    <div className="text-white/80 text-sm">{deal.status}</div>
                     <div className="text-white font-bold text-sm">
                       Expires On
                     </div>
@@ -638,34 +640,6 @@ const DetailIP = ({
                         : '⚠ Transaction Unavailable'}{' '}
                     </a>
                   </Button>
-                </Fragment>
-              ))}
-            </CardContent>
-          </Card>
-        ) : null}
-        {ideaData.checkouts?.length ? (
-          <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
-                Checkouts
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">
-              {ideaData.checkouts?.map((deal) => (
-                <Fragment key={deal.id}>
-                  <div
-                    className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
-                    style={{ gridTemplateColumns: '12em 1fr' }}
-                  >
-                    <div className="text-white font-bold text-sm">DealID</div>
-                    <div className="text-white/80 text-sm">{deal.id}</div>
-                    <div className="text-white font-bold text-sm">
-                      {deal.error?.message ? 'Error' : 'Pending'}
-                    </div>
-                    <div className="text-white/80 text-sm">
-                      {deal.error?.message || ''}
-                    </div>
-                  </div>
                 </Fragment>
               ))}
             </CardContent>
