@@ -603,19 +603,19 @@ const AppIP = () => {
               <div
                 data-testid="form-step-1"
                 data-step-complete={formStepComplete[0].toString()}
-              ></div>
+              />
               <div
                 data-testid="form-step-2"
                 data-step-complete={formStepComplete[1].toString()}
-              ></div>
+              />
               <div
                 data-testid="form-step-3"
                 data-step-complete={formStepComplete[2].toString()}
-              ></div>
+              />
               <div
                 data-testid="form-step-4"
                 data-step-complete={formStepComplete[3].toString()}
-              ></div>
+              />
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
