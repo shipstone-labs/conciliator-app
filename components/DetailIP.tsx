@@ -231,13 +231,6 @@ const DetailIP = ({
         const { sessionSigs, capacityDelegationAuthSig } =
           await delegatedSessionSigs(docId)
         const accessControlConditions = JSON.parse(ideaData?.encrypted?.acl)
-        console.log({
-          sessionSigs,
-          capacityDelegationAuthSig,
-          accessControlConditions,
-          data,
-          ciphertext: data.ciphertext.slice(0, 100),
-        })
         const request = {
           accessControlConditions,
           // pkpPublicKey: sessionSigs?.pkpPublicKey,

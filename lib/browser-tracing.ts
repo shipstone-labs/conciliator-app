@@ -95,15 +95,6 @@ export function initBrowserTracing() {
     })
 
     isInitialized = true
-    console.log('Browser tracing initialized')
-    console.log(
-      'Trace attributes:',
-      Object.fromEntries(
-        Object.entries(customResource.attributes).filter(
-          ([key]) => key.startsWith('service.') || key.startsWith('deployment.')
-        )
-      )
-    )
   } catch (e) {
     console.error('Failed to initialize browser tracing:', e)
   }
