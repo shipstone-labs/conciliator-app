@@ -576,9 +576,9 @@ const AppIP = () => {
         }
 
       if (win.importToolReady) {
-        win.importToolReady.createButtonReady = readyToCreate
+        win.importToolReady.createButtonReady = Boolean(readyToCreate)
         win.importToolReady.currentStep = currentStep
-        win.importToolReady.formStepComplete = formStepComplete
+        win.importToolReady.formStepComplete = formStepComplete.map(status => Boolean(status))
       }
     }
   }, [readyToCreate, currentStep, formStepComplete])
