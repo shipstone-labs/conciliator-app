@@ -147,42 +147,74 @@ const AppIP = () => {
   
   // Initialize the global readiness object for automation
   useEffect(() => {
-    // Create global readiness object if it doesn't exist
-    window.importToolReady = window.importToolReady || {
-      formLoaded: false,
-      titleInputReady: false
-    };
-    
-    // Set form loaded flag after a short delay to ensure all is initialized
-    setTimeout(() => {
-      // Update the DOM attribute
-      const formElement = document.querySelector('.add-idea-form');
-      if (formElement) {
-        formElement.setAttribute('data-form-ready', 'true');
+    // Use TypeScript guard for browser APIs to prevent SSR errors
+    if (typeof window !== 'undefined') {
+      // Use type assertion for the extended window interface
+      const win = window as Window & typeof globalThis & { 
+        importToolReady?: {
+          formLoaded: boolean;
+          titleInputReady: boolean;
+          [key: string]: any;
+        } 
+      };
+      
+      // Create global readiness object if it doesn't exist
+      win.importToolReady = win.importToolReady || {
+        formLoaded: false,
+        titleInputReady: false
+      };
+      
+      // Set form loaded flag after a short delay to ensure all is initialized
+      setTimeout(() => {
+        // Update the DOM attribute
+        const formElement = document.querySelector('.add-idea-form');
+        if (formElement) {
+          formElement.setAttribute('data-form-ready', 'true');
+        }
+        
+        // Update the global readiness flag - use null checking
+        if (win.importToolReady) {
+          win.importToolReady.formLoaded = true;
+        }
+      }, 500);
+      
+      // Set title input ready when it's available
+      if (titleInputRef.current) {
+        // Update the DOM attribute
+        titleInputRef.current.setAttribute('data-ready', 'true');
+        
+        // Update the global readiness flag - use null checking
+        if (win.importToolReady) {
+          win.importToolReady.titleInputReady = true;
+        }
       }
-      
-      // Update the global readiness flag
-      window.importToolReady.formLoaded = true;
-    }, 500);
-    
-    // Set title input ready when it's available
-    if (titleInputRef.current) {
-      // Update the DOM attribute
-      titleInputRef.current.setAttribute('data-ready', 'true');
-      
-      // Update the global readiness flag
-      window.importToolReady.titleInputReady = true;
     }
   }, [])
   
   // Optional logging for debugging readiness states
   useEffect(() => {
+    // Use TypeScript guard for browser APIs
+    if (typeof window === 'undefined') return;
+    
+    // Use type assertion for the extended window interface
+    const win = window as Window & typeof globalThis & { 
+      importToolReady?: {
+        formLoaded: boolean;
+        titleInputReady: boolean;
+        [key: string]: any;
+      } 
+    };
+    
     const trackReadinessChanges = () => {
       // Create a proxy to monitor changes to the importToolReady object
-      const originalImportToolReady = window.importToolReady || {};
-      window.importToolReady = new Proxy(originalImportToolReady, {
+      // Use safe null checking pattern
+      if (!win.importToolReady) return;
+      
+      const originalImportToolReady = win.importToolReady;
+      win.importToolReady = new Proxy(originalImportToolReady, {
         set(target, property, value) {
-          console.log(`[ImportTool] Readiness change: ${property} = ${value}`);
+          // Handle property access types properly - Symbol could be a key
+          console.log(`[ImportTool] Readiness change: ${String(property)} = ${value}`);
           target[property] = value;
           return true;
         }
