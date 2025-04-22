@@ -71,7 +71,7 @@ const SortedProducts = ({
         <div className="flex items-center space-x-2 p-3 border bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors">
           <Select
             value={value?.[index]?.id || defaultPrices[0].id}
-            onValueChange={(_priceValue) => {
+            onValueChange={(_priceValue: string) => {
               const priceValue = _priceValue === '__none__' ? '' : _priceValue
               const newPrice = sortedPrices.find(
                 (price) => price.id === priceValue
@@ -122,6 +122,8 @@ const AppIP = () => {
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const titleInputRef = useRef<HTMLInputElement>(null)
+  const descriptionInputRef = useRef<HTMLTextAreaElement>(null)
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [businessModel, setBusinessModel] = useState('Protected Evaluation')
   const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
@@ -143,6 +145,121 @@ const AppIP = () => {
       })
     }
   }, [docId, fb])
+
+  // Initialize the global readiness object for automation
+  useEffect(() => {
+    // Use TypeScript guard for browser APIs to prevent SSR errors
+    if (typeof window !== 'undefined') {
+      // Use type assertion for the extended window interface
+      const win = window as Window &
+        typeof globalThis & {
+          importToolReady?: {
+            formLoaded: boolean
+            titleInputReady: boolean
+            descriptionInputReady: boolean
+            fileUploadReady: boolean
+            fileUploadComplete: boolean
+            termsDialogReady: boolean
+            createButtonReady: boolean
+            submissionComplete: boolean
+            currentStep?: number
+            formStepComplete?: boolean[]
+            [key: string]: any
+          }
+        }
+
+      // Create global readiness object if it doesn't exist
+      win.importToolReady = win.importToolReady || {
+        formLoaded: false,
+        titleInputReady: false,
+        descriptionInputReady: false,
+        fileUploadReady: false,
+        fileUploadComplete: false,
+        termsDialogReady: false,
+        createButtonReady: false,
+        submissionComplete: false,
+      }
+
+      // Set form loaded flag after a short delay to ensure all is initialized
+      setTimeout(() => {
+        // Update the DOM attribute
+        const formElement = document.querySelector('.add-idea-form')
+        if (formElement) {
+          formElement.setAttribute('data-form-ready', 'true')
+        }
+
+        // Update the global readiness flag - use null checking
+        if (win.importToolReady) {
+          win.importToolReady.formLoaded = true
+        }
+      }, 500)
+
+      // Set title input ready when it's available
+      if (titleInputRef.current) {
+        // Update the DOM attribute
+        titleInputRef.current.setAttribute('data-ready', 'true')
+
+        // Update the global readiness flag - use null checking
+        if (win.importToolReady) {
+          win.importToolReady.titleInputReady = true
+        }
+      }
+
+      // Set description input ready when it's available
+      if (descriptionInputRef.current) {
+        // Update the DOM attribute
+        descriptionInputRef.current.setAttribute('data-ready', 'true')
+
+        // Update the global readiness flag - use null checking
+        if (win.importToolReady) {
+          win.importToolReady.descriptionInputReady = true
+        }
+      }
+
+      // Set file upload ready when it's available
+      if (fileInputRef.current) {
+        if (win.importToolReady) {
+          win.importToolReady.fileUploadReady = true
+        }
+      }
+    }
+  }, [])
+
+  // Optional logging for debugging readiness states
+  useEffect(() => {
+    // Use TypeScript guard for browser APIs
+    if (typeof window === 'undefined') return
+
+    // Use type assertion for the extended window interface
+    const win = window as Window &
+      typeof globalThis & {
+        importToolReady?: {
+          formLoaded: boolean
+          titleInputReady: boolean
+          [key: string]: any
+        }
+      }
+
+    const trackReadinessChanges = () => {
+      // Create a proxy to monitor changes to the importToolReady object
+      // Use safe null checking pattern
+      if (!win.importToolReady) return
+
+      const originalImportToolReady = win.importToolReady
+      win.importToolReady = new Proxy(originalImportToolReady, {
+        set(target, property, value) {
+          // Handle property access types properly - Symbol could be a key
+          console.log(
+            `[ImportTool] Readiness change: ${String(property)} = ${value}`
+          )
+          target[property as keyof typeof target] = value
+          return true
+        },
+      })
+    }
+
+    trackReadinessChanges()
+  }, [])
 
   const handleStore = useCallback(async () => {
     setError(null)
@@ -296,6 +413,19 @@ const AppIP = () => {
         }
         return res.json()
       })
+
+      // Update submission status for automation
+      if (typeof window !== 'undefined') {
+        const win = window as Window &
+          typeof globalThis & {
+            importToolReady?: { submissionComplete?: boolean }
+          }
+
+        if (win.importToolReady) {
+          win.importToolReady.submissionComplete = true
+        }
+      }
+
       window.location.href = `/details/${id}`
     } catch (err) {
       console.error('API Key validation error:', err)
@@ -348,6 +478,27 @@ const AppIP = () => {
 
         setContent(fileContent)
         setIsModalOpen(false)
+
+        // Update file upload completion status for automation
+        if (typeof window !== 'undefined') {
+          const win = window as Window &
+            typeof globalThis & {
+              importToolReady?: { fileUploadComplete?: boolean }
+            }
+
+          if (win.importToolReady) {
+            win.importToolReady.fileUploadComplete = true
+          }
+
+          // Add a data attribute to the content container
+          const fileUploadZone = document.querySelector(
+            '.p-4.rounded-lg.border.border-primary\\/30.bg-muted\\/30'
+          )
+          if (fileUploadZone) {
+            fileUploadZone.setAttribute('data-upload-complete', 'true')
+            fileUploadZone.setAttribute('data-testid', 'file-upload-zone')
+          }
+        }
       }
       reader.readAsText(file)
     },
@@ -359,10 +510,88 @@ const AppIP = () => {
     setTermsAccepted(false)
   }, [])
 
+  // Set terms dialog readiness
+  useEffect(() => {
+    if (!isTermsModalOpen) return
+
+    if (typeof window !== 'undefined') {
+      const win = window as Window &
+        typeof globalThis & {
+          importToolReady?: { termsDialogReady?: boolean }
+        }
+
+      // Set terms dialog ready after a short delay for animations
+      setTimeout(() => {
+        const termsDialog = document.querySelector(
+          '[data-testid="terms-dialog"]'
+        )
+        if (termsDialog) {
+          termsDialog.setAttribute('data-terms-ready', 'true')
+        }
+
+        if (win.importToolReady) {
+          win.importToolReady.termsDialogReady = true
+        }
+      }, 500)
+    }
+  }, [isTermsModalOpen])
+
+  // Track create button readiness
+  const readyToCreate = useMemo(() => {
+    return !isLoading && content && name && description && termsAccepted
+  }, [isLoading, content, name, description, termsAccepted])
+
+  // Calculate form step completion status
+  const formStepComplete = useMemo(() => {
+    return [
+      // Step 1: Basic info (name and description)
+      Boolean(name && description),
+      // Step 2: Upload content
+      Boolean(content),
+      // Step 3: Set terms
+      Boolean(termsAccepted),
+      // Step 4: Ready to create
+      readyToCreate,
+    ]
+  }, [name, description, content, termsAccepted, readyToCreate])
+
+  // Calculate current step based on completion status
+  const currentStep = useMemo(() => {
+    if (!formStepComplete[0]) return 1
+    if (!formStepComplete[1]) return 2
+    if (!formStepComplete[2]) return 3
+    return 4
+  }, [formStepComplete])
+
+  // Track create button readiness and update global readiness API
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const win = window as Window &
+        typeof globalThis & {
+          importToolReady?: {
+            createButtonReady?: boolean
+            currentStep?: number
+            formStepComplete?: boolean[]
+          }
+        }
+
+      if (win.importToolReady) {
+        win.importToolReady.createButtonReady = Boolean(readyToCreate)
+        win.importToolReady.currentStep = currentStep
+        win.importToolReady.formStepComplete = formStepComplete.map((status) =>
+          Boolean(status)
+        )
+      }
+    }
+  }, [readyToCreate, currentStep, formStepComplete])
+
   return (
     <div className="w-full py-8">
       <div className="max-w-6xl mx-auto space-y-8 px-4">
-        <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
+        <Card
+          className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl add-idea-form"
+          data-form-ready="false"
+        >
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">
               Add Your Idea
@@ -370,6 +599,26 @@ const AppIP = () => {
             <CardDescription className="text-white/90 mt-2 text-base">
               Complete all three steps below to create your secure idea page.
             </CardDescription>
+
+            {/* Hidden form progress indicators for automation */}
+            <div className="hidden">
+              <div
+                data-testid="form-step-1"
+                data-step-complete={formStepComplete[0].toString()}
+              />
+              <div
+                data-testid="form-step-2"
+                data-step-complete={formStepComplete[1].toString()}
+              />
+              <div
+                data-testid="form-step-3"
+                data-step-complete={formStepComplete[2].toString()}
+              />
+              <div
+                data-testid="form-step-4"
+                data-step-complete={formStepComplete[3].toString()}
+              />
+            </div>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="p-4 mb-2">
@@ -396,7 +645,10 @@ const AppIP = () => {
               </label>
               <Input
                 id="public-title"
+                ref={titleInputRef}
                 placeholder="Enter the title that will appear in public listings"
+                data-testid="idea-title-input"
+                data-ready="false"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
@@ -413,7 +665,10 @@ const AppIP = () => {
               </label>
               <Textarea
                 id="public-description"
+                ref={descriptionInputRef}
                 placeholder="Enter a description that will be visible to the public"
+                data-testid="idea-description-input"
+                data-ready="false"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isLoading}
@@ -459,6 +714,7 @@ const AppIP = () => {
                 variant="outline"
                 className="w-full border border-white/20 bg-muted/30 text-white hover:bg-muted/50 py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 h-12"
                 disabled={isLoading || !name || !description}
+                data-testid="add-encrypt-button"
               >
                 Add and Encrypt your Idea
               </Button>
@@ -509,6 +765,7 @@ const AppIP = () => {
               variant="outline"
               className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-xl transition-all h-12"
               disabled={isLoading || !content}
+              data-testid="set-terms-button"
             >
               Set Terms
             </Button>
@@ -539,6 +796,14 @@ const AppIP = () => {
                   !description ||
                   !termsAccepted
                 }
+                data-testid="create-idea-button"
+                data-ready={(!(
+                  isLoading ||
+                  !content ||
+                  !name ||
+                  !description ||
+                  !termsAccepted
+                )).toString()}
               >
                 {isLoading ? (
                   <>
@@ -598,8 +863,10 @@ const AppIP = () => {
               isOpen={isTermsModalOpen}
               onClose={() => setIsTermsModalOpen(false)}
               title="Set Terms"
+              data-testid="terms-dialog"
+              data-terms-ready="false"
             >
-              <div className="space-y-5">
+              <div className="space-y-5" data-testid="terms-content">
                 <div className="space-y-2">
                   <label
                     htmlFor="business-model"
@@ -612,8 +879,12 @@ const AppIP = () => {
                     value={businessModel}
                     onChange={(e) => setBusinessModel(e.target.value)}
                     className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                    data-testid="business-model-select"
                   >
-                    <option value="Protected Evaluation">
+                    <option
+                      value="Protected Evaluation"
+                      data-testid="ip-protected-eval-option"
+                    >
                       Protected Evaluation
                     </option>
                     <option value="Provisional Patent" disabled>
@@ -657,6 +928,7 @@ const AppIP = () => {
                       checked={ndaConfirmed}
                       onChange={() => setNdaConfirmed(!ndaConfirmed)}
                       className="rounded border-white/20 bg-muted/30 text-primary"
+                      data-testid="nda-checkbox"
                     />
                     <label
                       htmlFor="nda-confirmed"
@@ -690,6 +962,7 @@ const AppIP = () => {
                     }}
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
                     disabled={!ndaConfirmed}
+                    data-testid="terms-accept-button"
                   >
                     Accept
                   </Button>
@@ -704,6 +977,7 @@ const AppIP = () => {
               onChange={handleFileSelection}
               accept=".txt,.md,.markdown,text/plain,text/markdown"
               className="hidden"
+              data-testid="file-upload-input"
             />
           </CardContent>
         </Card>

@@ -159,3 +159,22 @@ export function formatNumber(
     maximumFractionDigits: 2,
   }).format(number)
 }
+
+// Add ImportToolReady interface to the global Window interface
+declare global {
+  interface Window {
+    importToolReady?: {
+      formLoaded: boolean
+      titleInputReady: boolean
+      descriptionInputReady: boolean
+      fileUploadReady: boolean
+      fileUploadComplete: boolean
+      termsDialogReady: boolean
+      createButtonReady: boolean
+      submissionComplete: boolean
+      currentStep?: number
+      formStepComplete?: boolean[]
+      [key: string]: any
+    }
+  }
+}
