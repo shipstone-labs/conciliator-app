@@ -122,6 +122,7 @@ const AppIP = () => {
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const titleInputRef = useRef<HTMLInputElement>(null)
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [businessModel, setBusinessModel] = useState('Protected Evaluation')
   const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
@@ -143,6 +144,53 @@ const AppIP = () => {
       })
     }
   }, [docId, fb])
+  
+  // Initialize the global readiness object for automation
+  useEffect(() => {
+    // Create global readiness object if it doesn't exist
+    window.importToolReady = window.importToolReady || {
+      formLoaded: false,
+      titleInputReady: false
+    };
+    
+    // Set form loaded flag after a short delay to ensure all is initialized
+    setTimeout(() => {
+      // Update the DOM attribute
+      const formElement = document.querySelector('.add-idea-form');
+      if (formElement) {
+        formElement.setAttribute('data-form-ready', 'true');
+      }
+      
+      // Update the global readiness flag
+      window.importToolReady.formLoaded = true;
+    }, 500);
+    
+    // Set title input ready when it's available
+    if (titleInputRef.current) {
+      // Update the DOM attribute
+      titleInputRef.current.setAttribute('data-ready', 'true');
+      
+      // Update the global readiness flag
+      window.importToolReady.titleInputReady = true;
+    }
+  }, [])
+  
+  // Optional logging for debugging readiness states
+  useEffect(() => {
+    const trackReadinessChanges = () => {
+      // Create a proxy to monitor changes to the importToolReady object
+      const originalImportToolReady = window.importToolReady || {};
+      window.importToolReady = new Proxy(originalImportToolReady, {
+        set(target, property, value) {
+          console.log(`[ImportTool] Readiness change: ${property} = ${value}`);
+          target[property] = value;
+          return true;
+        }
+      });
+    };
+    
+    trackReadinessChanges();
+  }, [])
 
   const handleStore = useCallback(async () => {
     setError(null)
@@ -362,7 +410,7 @@ const AppIP = () => {
   return (
     <div className="w-full py-8">
       <div className="max-w-6xl mx-auto space-y-8 px-4">
-        <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
+        <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl add-idea-form" data-form-ready="false">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">
               Add Your Idea
@@ -396,7 +444,10 @@ const AppIP = () => {
               </label>
               <Input
                 id="public-title"
+                ref={titleInputRef}
                 placeholder="Enter the title that will appear in public listings"
+                data-testid="idea-title-input"
+                data-ready="false"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}

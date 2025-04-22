@@ -137,3 +137,14 @@ export function formatNumber(
     maximumFractionDigits: 2,
   }).format(number)
 }
+
+// Add ImportToolReady interface to the global Window interface
+declare global {
+  interface Window {
+    importToolReady?: {
+      formLoaded: boolean
+      titleInputReady: boolean
+      [key: string]: any
+    }
+  }
+}
