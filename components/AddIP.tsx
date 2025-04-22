@@ -23,6 +23,8 @@ import { formatNumber, type IPAudit } from '@/lib/types'
 import { useConfig } from '@/app/authLayout'
 import { type Price, type Product, useProducts } from '@/hooks/useProducts'
 import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const getSortedPrices = (prices: Record<string, Price>) => {
   const sorted = Object.values(prices).sort((a, b) => {
@@ -128,7 +130,21 @@ const AppIP = () => {
   const [businessModel, setBusinessModel] = useState('Protected Evaluation')
   const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
   const [ndaConfirmed, setNdaConfirmed] = useState(false)
+  const [noNdaSelected, setNoNdaSelected] = useState(false)
+  const [selectedDoc, setSelectedDoc] = useState('protected-eval')
+  const [isNdaModalOpen, setIsNdaModalOpen] = useState(false)
+  const [isDocViewerOpen, setIsDocViewerOpen] = useState(false)
+  const [markdownContent, setMarkdownContent] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
+
+  // Available legal documents
+  const legalDocuments = [
+    {
+      id: 'protected-eval',
+      name: 'SafeIdea Protected Evaluation Agreement',
+      path: '/legal-docs/protected-eval.md',
+    },
+  ]
   const stytchClient = useStytch()
   const [docId, setDocId] = useState('')
   const [status, setStatus] = useState<IPAudit>()
@@ -584,6 +600,26 @@ const AppIP = () => {
     }
   }, [readyToCreate, currentStep, formStepComplete])
 
+  // Function to load document content
+  const loadDocumentContent = useCallback(async (docId: string) => {
+    try {
+      const doc = legalDocuments.find((d) => d.id === docId)
+      if (!doc) return
+
+      const response = await fetch(doc.path)
+      if (response.ok) {
+        const markdown = await response.text()
+        setMarkdownContent(markdown)
+      } else {
+        console.error('Failed to load document:', response.statusText)
+        setError(`Failed to load document: ${response.statusText}`)
+      }
+    } catch (err) {
+      console.error('Error loading document:', err)
+      setError('Error loading document. Please try again.')
+    }
+  }, [])
+
   return (
     <div className="w-full py-8">
       <div className="max-w-6xl mx-auto space-y-8 px-4">
@@ -951,8 +987,17 @@ const AppIP = () => {
                   </Button>
                   <Button
                     onClick={() => {
+                      setIsNdaModalOpen(true)
+                    }}
+                    variant="outline"
+                    className="bg-muted/30 border-white/20 text-white hover:bg-muted/50 rounded-xl h-11"
+                  >
+                    Review NDA
+                  </Button>
+                  <Button
+                    onClick={() => {
                       if (!ndaConfirmed) {
-                        alert('Please confirm you have a signed NDA in place')
+                        alert('Please review the NDA options first')
                         return
                       }
                       // Save terms logic would go here
@@ -978,6 +1023,129 @@ const AppIP = () => {
               className="hidden"
               data-testid="file-upload-input"
             />
+
+            {/* NDA Selection Modal */}
+            <Modal
+              isOpen={isNdaModalOpen}
+              onClose={() => setIsNdaModalOpen(false)}
+              title="Select Sharing Agreement"
+            >
+              <div className="space-y-5">
+                <p className="text-white/90">
+                  Select the digital NDA sharing agreement and click OK. If you
+                  don&apos;t want to use an agreement within this system click
+                  the checkbox below.
+                </p>
+
+                {/* Document Selection Area */}
+                <div className="space-y-3 p-4 rounded-lg border border-white/20 bg-muted/30">
+                  <h3 className="font-semibold text-primary text-sm">
+                    Available Documents
+                  </h3>
+
+                  <div className="space-y-2">
+                    {legalDocuments.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className={`flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-muted/40 transition-colors ${selectedDoc === doc.id ? 'border border-primary/50 bg-muted/40' : 'border border-white/20'}`}
+                        onClick={() => {
+                          setSelectedDoc(doc.id)
+                          loadDocumentContent(doc.id)
+                        }}
+                      >
+                        <span className="text-white/90">{doc.name}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            loadDocumentContent(doc.id)
+                            setIsDocViewerOpen(true)
+                          }}
+                          className="text-primary hover:text-primary/80 hover:bg-muted/30"
+                        >
+                          View Document
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Opt-out Checkbox */}
+                <div className="flex items-center space-x-2 mt-4">
+                  <input
+                    type="checkbox"
+                    id="no-nda"
+                    checked={noNdaSelected}
+                    onChange={() => {
+                      setNoNdaSelected(!noNdaSelected)
+                      if (!noNdaSelected) {
+                        setSelectedDoc('')
+                      }
+                    }}
+                    className="rounded border-white/20 bg-muted/30 text-primary"
+                  />
+                  <label
+                    htmlFor="no-nda"
+                    className="text-white/90 cursor-pointer"
+                  >
+                    I choose to not include a SafeIdea sharing agreement for my
+                    Idea.
+                  </label>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsNdaModalOpen(false)}
+                    className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      // Set NDA confirmed based on selection
+                      setNdaConfirmed(true)
+                      setIsNdaModalOpen(false)
+                    }}
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
+                    disabled={!selectedDoc && !noNdaSelected}
+                  >
+                    OK
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+
+            {/* Document Viewer Modal */}
+            <Modal
+              isOpen={isDocViewerOpen}
+              onClose={() => setIsDocViewerOpen(false)}
+              title="Document Viewer"
+            >
+              <div className="space-y-4">
+                <div className="bg-muted/20 border border-white/10 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+                  <div className="prose prose-invert max-w-none">
+                    {markdownContent ? (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {markdownContent}
+                      </ReactMarkdown>
+                    ) : (
+                      <p className="text-white/90">Loading document...</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => setIsDocViewerOpen(false)}
+                    className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
+                  >
+                    Close Document
+                  </Button>
+                </div>
+              </div>
+            </Modal>
           </CardContent>
         </Card>
       </div>
