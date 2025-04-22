@@ -31,8 +31,7 @@ import {
   getFirestore,
   onSnapshot,
 } from 'firebase/firestore'
-import { type Address, encodePacked, hexToBytes, zeroAddress } from 'viem'
-import { PKPEthersWallet } from '@/packages/lit-wrapper/dist'
+import { type Address, zeroAddress } from 'viem'
 import { type Price, type Product, useProducts } from '@/hooks/useProducts'
 
 const DetailIP = ({
@@ -112,37 +111,9 @@ const DetailIP = ({
           break
       }
       const {
-        metadata: {
-          tokenId,
-          contract: { address: contractAddress } = {},
-        } = {},
+        metadata: { tokenId } = {},
       } = ideaData || {}
       const to = (originalSessionSigs?.address || zeroAddress) as Address
-      const params = [
-        to,
-        BigInt(tokenId || '0'),
-        1n,
-        contractAddress || zeroAddress,
-      ] as [Address, bigint, bigint, Address]
-      const message = hexToBytes(
-        encodePacked(['address', 'uint256', 'uint256', 'address'], params)
-      )
-      const { sessionSigs } = (await delegatedSessionSigs?.(docId)) || {}
-      if (!sessionSigs || !originalSessionSigs?.pkpPublicKey) {
-        throw new Error('No sessionSigs')
-      }
-      if (!ideaData?.metadata?.contract) {
-        throw new Error('No contract address')
-      }
-      const wallet = new PKPEthersWallet({
-        litNodeClient: litClient,
-        pkpPubKey: originalSessionSigs?.pkpPublicKey,
-        controllerSessionSigs: sessionSigs,
-      })
-      const signature = (await wallet.signMessage(message)) as `0x${string}`
-      if (!signature) {
-        throw new Error('No signature')
-      }
       const { contract, ...docMetadata } = options.metadata
       const docRef = await addDoc(
         collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
@@ -160,7 +131,6 @@ const DetailIP = ({
             contract_name: ideaData?.metadata?.contract?.name || '',
             contract_address: ideaData?.metadata?.contract?.address || '',
             docId,
-            signature: signature,
             duration,
             expiration: Date.now() + duration,
           },
@@ -179,15 +149,7 @@ const DetailIP = ({
         }
       })
     },
-    [
-      user?.user_id,
-      docId,
-      ideaData,
-      litClient,
-      originalSessionSigs,
-      litPromise,
-      delegatedSessionSigs,
-    ]
+    [user?.user_id, docId, ideaData, litClient, originalSessionSigs, litPromise]
   )
   useEffect(() => {
     if (isViewLoading.current) {
