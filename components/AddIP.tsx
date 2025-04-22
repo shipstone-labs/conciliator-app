@@ -144,84 +144,88 @@ const AppIP = () => {
       })
     }
   }, [docId, fb])
-  
+
   // Initialize the global readiness object for automation
   useEffect(() => {
     // Use TypeScript guard for browser APIs to prevent SSR errors
     if (typeof window !== 'undefined') {
       // Use type assertion for the extended window interface
-      const win = window as Window & typeof globalThis & { 
-        importToolReady?: {
-          formLoaded: boolean;
-          titleInputReady: boolean;
-          [key: string]: any;
-        } 
-      };
-      
+      const win = window as Window &
+        typeof globalThis & {
+          importToolReady?: {
+            formLoaded: boolean
+            titleInputReady: boolean
+            [key: string]: any
+          }
+        }
+
       // Create global readiness object if it doesn't exist
       win.importToolReady = win.importToolReady || {
         formLoaded: false,
-        titleInputReady: false
-      };
-      
+        titleInputReady: false,
+      }
+
       // Set form loaded flag after a short delay to ensure all is initialized
       setTimeout(() => {
         // Update the DOM attribute
-        const formElement = document.querySelector('.add-idea-form');
+        const formElement = document.querySelector('.add-idea-form')
         if (formElement) {
-          formElement.setAttribute('data-form-ready', 'true');
+          formElement.setAttribute('data-form-ready', 'true')
         }
-        
+
         // Update the global readiness flag - use null checking
         if (win.importToolReady) {
-          win.importToolReady.formLoaded = true;
+          win.importToolReady.formLoaded = true
         }
-      }, 500);
-      
+      }, 500)
+
       // Set title input ready when it's available
       if (titleInputRef.current) {
         // Update the DOM attribute
-        titleInputRef.current.setAttribute('data-ready', 'true');
-        
+        titleInputRef.current.setAttribute('data-ready', 'true')
+
         // Update the global readiness flag - use null checking
         if (win.importToolReady) {
-          win.importToolReady.titleInputReady = true;
+          win.importToolReady.titleInputReady = true
         }
       }
     }
   }, [])
-  
+
   // Optional logging for debugging readiness states
   useEffect(() => {
     // Use TypeScript guard for browser APIs
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === 'undefined') return
+
     // Use type assertion for the extended window interface
-    const win = window as Window & typeof globalThis & { 
-      importToolReady?: {
-        formLoaded: boolean;
-        titleInputReady: boolean;
-        [key: string]: any;
-      } 
-    };
-    
+    const win = window as Window &
+      typeof globalThis & {
+        importToolReady?: {
+          formLoaded: boolean
+          titleInputReady: boolean
+          [key: string]: any
+        }
+      }
+
     const trackReadinessChanges = () => {
       // Create a proxy to monitor changes to the importToolReady object
       // Use safe null checking pattern
-      if (!win.importToolReady) return;
-      
-      const originalImportToolReady = win.importToolReady;
+      if (!win.importToolReady) return
+
+      const originalImportToolReady = win.importToolReady
       win.importToolReady = new Proxy(originalImportToolReady, {
         set(target, property, value) {
           // Handle property access types properly - Symbol could be a key
-          console.log(`[ImportTool] Readiness change: ${String(property)} = ${value}`);
-          target[property] = value;
-          return true;
-        }
-      });
-    };
-    
-    trackReadinessChanges();
+          console.log(
+            `[ImportTool] Readiness change: ${String(property)} = ${value}`
+          )
+          target[property as keyof typeof target] = value
+          return true
+        },
+      })
+    }
+
+    trackReadinessChanges()
   }, [])
 
   const handleStore = useCallback(async () => {
@@ -442,7 +446,10 @@ const AppIP = () => {
   return (
     <div className="w-full py-8">
       <div className="max-w-6xl mx-auto space-y-8 px-4">
-        <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl add-idea-form" data-form-ready="false">
+        <Card
+          className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl add-idea-form"
+          data-form-ready="false"
+        >
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">
               Add Your Idea
