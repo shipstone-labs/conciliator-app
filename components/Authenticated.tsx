@@ -68,11 +68,12 @@ export default function Authenticated({
 }: PropsWithChildren<{ requireLit?: boolean; requireFirebase?: boolean }>) {
   const { user, isInitialized } = useStytchUser()
   const stytchClient = useStytch()
-  const isLoggingOff = globalSession.isLoggingOff
+  const [isLoggingOff, setLoggingOff] = useState(globalSession.isLoggingOff)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const config = useConfig()
   const [, setTrigger] = useState(0)
 
+  globalSession.setLoggingOff = setLoggingOff
   // Show auth modal if not authenticated and not ignored
   const amendLoggedIn = useCallback(
     (state: Session) => {
@@ -96,25 +97,38 @@ export default function Authenticated({
     if (isInitialized && !user) {
       setShowAuthModal(true)
     }
-    if (!isInitialized || !user) {
-      if (globalSession.litClient) {
-        globalSession.litClient.disconnect()
-        globalSession.litClient = undefined
-        globalSession.litPromise = undefined
-        globalSession.sessionSigs = undefined
-        globalSession.delegatedSessionSigs = undefined
+    if (!isInitialized || !user || isLoggingOff) {
+      setLoggingOff(true)
+      try {
+        if (globalSession.litClient) {
+          try {
+            globalSession.litClient.disconnect()
+          } catch (error) {
+            console.error('Error disconnecting Lit client:', error)
+          }
+          globalSession.litClient = undefined
+          globalSession.litPromise = undefined
+          globalSession.sessionSigs = undefined
+          globalSession.delegatedSessionSigs = undefined
+        }
+        if (globalSession.fbUser) {
+          globalSession.fbUser = undefined
+          globalSession.fbPromise = undefined
+          try {
+            signOut(getAuth())
+          } catch (error) {
+            console.error('Error signing out of Firebase:', error)
+          }
+        }
+        globalSession = amendLoggedIn({
+          ...globalSession,
+          isLoggingOff: false,
+          isLoggedIn: false,
+        })
+      } finally {
+        setLoggingOff(false)
+        setTrigger((prev) => prev + 1)
       }
-      if (globalSession.fbUser) {
-        globalSession.fbUser = undefined
-        globalSession.fbPromise = undefined
-        signOut(getAuth())
-      }
-      globalSession = amendLoggedIn({
-        ...globalSession,
-        isLoggingOff: false,
-        isLoggedIn: false,
-      })
-      setTrigger((prev) => prev + 1)
     } else {
       globalSession = amendLoggedIn({
         ...globalSession,
@@ -390,6 +404,7 @@ export default function Authenticated({
     requireLit,
     requireFirebase,
     amendLoggedIn,
+    isLoggingOff,
     config,
     stytchClient,
   ])
