@@ -21,8 +21,8 @@ import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import type { IPAudit } from '@/lib/types'
 import { useConfig } from '@/app/authLayout'
-import DOMPurify from 'isomorphic-dompurify'
-import { marked } from 'marked'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -46,11 +46,15 @@ const AppIP = () => {
   const [noNdaSelected, setNoNdaSelected] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState('protected-eval')
   const [termsAccepted, setTermsAccepted] = useState(false)
-  const [ndaDocument, setNdaDocument] = useState('')
-  
+  const [markdownContent, setMarkdownContent] = useState('')
+
   // Available legal documents
   const legalDocuments = [
-    { id: 'protected-eval', name: 'SafeIdea Protected Evaluation Agreement', path: '/legal-docs/protected-eval.md' }
+    {
+      id: 'protected-eval',
+      name: 'SafeIdea Protected Evaluation Agreement',
+      path: '/legal-docs/protected-eval.md',
+    },
   ]
   const stytchClient = useStytch()
   const [docId, setDocId] = useState('')
@@ -272,26 +276,24 @@ const AppIP = () => {
   useEffect(() => {
     setTermsAccepted(false)
   }, [])
-  
+
   // Function to load document content
   const loadDocumentContent = useCallback(async (docId: string) => {
     try {
-      const doc = legalDocuments.find(d => d.id === docId);
-      if (!doc) return;
-      
-      const response = await fetch(doc.path);
+      const doc = legalDocuments.find((d) => d.id === docId)
+      if (!doc) return
+
+      const response = await fetch(doc.path)
       if (response.ok) {
-        const markdown = await response.text();
-        // Convert markdown to HTML and sanitize
-        const html = DOMPurify.sanitize(marked.parse(markdown));
-        setNdaDocument(html);
+        const markdown = await response.text()
+        setMarkdownContent(markdown)
       } else {
-        console.error('Failed to load document:', response.statusText);
-        setError(`Failed to load document: ${response.statusText}`);
+        console.error('Failed to load document:', response.statusText)
+        setError(`Failed to load document: ${response.statusText}`)
       }
     } catch (err) {
-      console.error('Error loading document:', err);
-      setError('Error loading document. Please try again.');
+      console.error('Error loading document:', err)
+      setError('Error loading document. Please try again.')
     }
   }, [])
 
@@ -420,7 +422,8 @@ const AppIP = () => {
               </h3>
               <p className="text-sm text-white/90">
                 Now, you can choose how you want to share it. Click
-                <strong> Set Terms for Sharing </strong> to configure sharing options.
+                <strong> Set Terms for Sharing </strong> to configure sharing
+                options.
               </p>
             </div>
 
@@ -721,7 +724,7 @@ const AppIP = () => {
               accept=".txt,.md,.markdown,text/plain,text/markdown"
               className="hidden"
             />
-            
+
             {/* NDA Selection Modal */}
             <Modal
               isOpen={isNdaModalOpen}
@@ -730,21 +733,25 @@ const AppIP = () => {
             >
               <div className="space-y-5">
                 <p className="text-white/90">
-                  Select the digital NDA sharing agreement and click OK. If you don&apos;t want to use an agreement within this system click the checkbox below.
+                  Select the digital NDA sharing agreement and click OK. If you
+                  don&apos;t want to use an agreement within this system click
+                  the checkbox below.
                 </p>
-                
+
                 {/* Document Selection Area */}
                 <div className="space-y-3 p-4 rounded-lg border border-white/20 bg-muted/30">
-                  <h3 className="font-semibold text-primary text-sm">Available Documents</h3>
-                  
+                  <h3 className="font-semibold text-primary text-sm">
+                    Available Documents
+                  </h3>
+
                   <div className="space-y-2">
-                    {legalDocuments.map(doc => (
-                      <div 
+                    {legalDocuments.map((doc) => (
+                      <div
                         key={doc.id}
                         className={`flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-muted/40 transition-colors ${selectedDoc === doc.id ? 'border border-primary/50 bg-muted/40' : 'border border-white/20'}`}
                         onClick={() => {
-                          setSelectedDoc(doc.id);
-                          loadDocumentContent(doc.id);
+                          setSelectedDoc(doc.id)
+                          loadDocumentContent(doc.id)
                         }}
                       >
                         <span className="text-white/90">{doc.name}</span>
@@ -752,9 +759,9 @@ const AppIP = () => {
                           size="sm"
                           variant="ghost"
                           onClick={(e) => {
-                            e.stopPropagation();
-                            loadDocumentContent(doc.id);
-                            setIsDocViewerOpen(true);
+                            e.stopPropagation()
+                            loadDocumentContent(doc.id)
+                            setIsDocViewerOpen(true)
                           }}
                           className="text-primary hover:text-primary/80 hover:bg-muted/30"
                         >
@@ -764,7 +771,7 @@ const AppIP = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Opt-out Checkbox */}
                 <div className="flex items-center space-x-2 mt-4">
                   <input
@@ -772,9 +779,9 @@ const AppIP = () => {
                     id="no-nda"
                     checked={noNdaSelected}
                     onChange={() => {
-                      setNoNdaSelected(!noNdaSelected);
+                      setNoNdaSelected(!noNdaSelected)
                       if (!noNdaSelected) {
-                        setSelectedDoc('');
+                        setSelectedDoc('')
                       }
                     }}
                     className="rounded border-white/20 bg-muted/30 text-primary"
@@ -783,10 +790,11 @@ const AppIP = () => {
                     htmlFor="no-nda"
                     className="text-white/90 cursor-pointer"
                   >
-                    I choose to not include a SafeIdea sharing agreement for my Idea.
+                    I choose to not include a SafeIdea sharing agreement for my
+                    Idea.
                   </label>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 mt-6">
                   <Button
                     variant="ghost"
@@ -798,8 +806,8 @@ const AppIP = () => {
                   <Button
                     onClick={() => {
                       // Set NDA confirmed based on selection
-                      setNdaConfirmed(true);
-                      setIsNdaModalOpen(false);
+                      setNdaConfirmed(true)
+                      setIsNdaModalOpen(false)
                     }}
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
                     disabled={!selectedDoc && !noNdaSelected}
@@ -809,7 +817,7 @@ const AppIP = () => {
                 </div>
               </div>
             </Modal>
-            
+
             {/* Document Viewer Modal */}
             <Modal
               isOpen={isDocViewerOpen}
@@ -819,16 +827,16 @@ const AppIP = () => {
               <div className="space-y-4">
                 <div className="bg-muted/20 border border-white/10 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
                   <div className="prose prose-invert max-w-none">
-                    {ndaDocument ? (
-                      // We're using DOMPurify to sanitize the HTML before rendering
-                      // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with DOMPurify
-                      <div dangerouslySetInnerHTML={{ __html: ndaDocument }} />
+                    {markdownContent ? (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {markdownContent}
+                      </ReactMarkdown>
                     ) : (
                       <p className="text-white/90">Loading document...</p>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end">
                   <Button
                     onClick={() => setIsDocViewerOpen(false)}
