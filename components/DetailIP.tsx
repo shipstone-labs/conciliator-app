@@ -18,7 +18,7 @@ import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { cidAsURL } from '@/lib/internalTypes'
 import { useSession } from '@/hooks/useSession'
-import Markdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import Loading from './Loading'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '@/app/authLayout'
@@ -304,7 +304,7 @@ const DetailIP = ({
             </CardHeader>
             <CardContent className="pt-6 space-y-5">
               {viewed ? (
-                <Markdown>{viewed}</Markdown>
+                <ReactMarkdown>{viewed}</ReactMarkdown>
               ) : (
                 <Loading text="Decrypting Content" />
               )}
