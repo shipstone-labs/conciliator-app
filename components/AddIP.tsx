@@ -21,20 +21,15 @@ import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import { formatNumber, type IPAudit } from '@/lib/types'
 import { useConfig } from '@/app/authLayout'
-import { type Price, type Product, useProducts } from '@/hooks/useProducts'
+import {
+  getSortedPrices,
+  type Price,
+  type Product,
+  useProducts,
+} from '@/hooks/useProducts'
 import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-
-const getSortedPrices = (prices: Record<string, Price>) => {
-  const sorted = Object.values(prices).sort((a, b) => {
-    if (a.unit_amount === b.unit_amount) {
-      return a.id.localeCompare(b.id)
-    }
-    return a.unit_amount - b.unit_amount
-  })
-  return [...sorted]
-}
 
 const SortedProducts = ({
   products,

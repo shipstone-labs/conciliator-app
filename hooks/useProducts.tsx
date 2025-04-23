@@ -41,6 +41,16 @@ export type Product = {
   prices: Record<string, Price>
 }
 
+export function getSortedPrices(prices: Record<string, Price>) {
+  const sorted = Object.values(prices).sort((a, b) => {
+    if (a.unit_amount === b.unit_amount) {
+      return a.id.localeCompare(b.id)
+    }
+    return a.unit_amount - b.unit_amount
+  })
+  return [...sorted]
+}
+
 export function useProducts(): Record<string, Product> {
   const [products, setProducts] = useState<Record<string, Product>>({})
   useEffect(() => {

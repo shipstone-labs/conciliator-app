@@ -32,7 +32,12 @@ import {
   onSnapshot,
 } from 'firebase/firestore'
 import { type Address, zeroAddress } from 'viem'
-import { type Price, type Product, useProducts } from '@/hooks/useProducts'
+import {
+  getSortedPrices,
+  type Price,
+  type Product,
+  useProducts,
+} from '@/hooks/useProducts'
 
 type AmendedProduct = Product & {
   price: Price
@@ -84,10 +89,27 @@ const DetailIP = ({
       })
       .filter(Boolean) as Array<AmendedProduct>
     const orders = ['day', 'week', 'month', 'year']
+    if (prices.length === 0) {
+      // Ignore them if they are empty for now
+      console.log('No prices found for this idea, so defaulting to first ones.')
+      for (const product of Object.values(products)) {
+        if (
+          product.metadata?.duration &&
+          orders.indexOf(product.metadata?.duration) !== -1
+        ) {
+          prices.push({
+            ...product,
+            price: getSortedPrices(product.prices)[0],
+            id: product.id,
+            index: 0,
+            duration: product.metadata?.duration,
+          } as AmendedProduct)
+        }
+      }
+    }
     prices.sort(
       (a, b) => orders.indexOf(a.duration) - orders.indexOf(b.duration)
     )
-    console.log('Prices:', prices)
     return prices
   }, [products, ideaData])
 
