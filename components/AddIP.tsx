@@ -376,27 +376,28 @@ const AppIP = () => {
           return encryptedContent
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
-      const pricing =
-        selectedPrices?.reduce(
-          (acc, price, index) => {
-            acc[products[price.product].id] = {
-              product: price.product,
-              duration: products[price.product].metadata?.duration,
-              price: price.id,
-              index,
-            }
-            return acc
-          },
-          {} as Record<
-            string,
-            {
-              product: string
-              price: string
-              index: number
-              duration: string
-            }
-          >
-        ) || {}
+      const pricing: Record<
+        string,
+        {
+          product: string
+          price: string
+          index: number
+          duration: string
+        }
+      > = {}
+      for (
+        let index = 0;
+        selectedPrices && index < selectedPrices.length;
+        index++
+      ) {
+        const price = selectedPrices[index]
+        pricing[products[price.product].id] = {
+          product: price.product,
+          duration: products[price.product].metadata?.duration,
+          price: price.id,
+          index,
+        }
+      }
       const body = {
         id,
         to: address,

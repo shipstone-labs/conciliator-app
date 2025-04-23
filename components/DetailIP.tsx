@@ -34,6 +34,12 @@ import {
 import { type Address, zeroAddress } from 'viem'
 import { type Price, type Product, useProducts } from '@/hooks/useProducts'
 
+type AmendedProduct = Product & {
+  price: Price
+  index: number
+  duration: string
+}
+
 const DetailIP = ({
   docId,
   view = false,
@@ -54,42 +60,45 @@ const DetailIP = ({
   const config = useConfig()
   const router = useRouter()
   const ideaData = useIP(docId)
-  const prices = useMemo(() => {
+  const prices = useMemo<Array<AmendedProduct>>(() => {
     const {
-      terms: { pricing } = {},
+      terms: { pricing = {} } = {},
     } = ideaData || {}
-    const orders = ['day', 'week', 'month']
-    const prices = []
-    for (const product of Object.values(products)) {
-      if (product) {
-        const order = orders.indexOf(product.metadata?.duration)
-        if (order === -1) {
-          continue
+    const prices: Array<AmendedProduct> = Object.values(pricing)
+      .map(({ product, price, index, ...rest }) => {
+        const productData = products[product]
+        if (!productData) {
+          return null
         }
-        let price = product.prices?.[pricing?.[product.id].price || '']
-        if (!price) {
-          const sortedPrices = Object.values(product.prices).sort(
-            (a, b) => a.unit_amount - b.unit_amount
-          )
-          price = sortedPrices[0]
+        const priceData = productData.prices?.[price]
+        if (!priceData) {
+          return null
         }
-        if (price) {
-          prices.push({ ...product, price, order })
-        }
-      }
-    }
-    return prices.sort((a, b) => a.order - b.order)
+        return {
+          ...rest,
+          ...productData,
+          price: priceData,
+          id: price,
+          index,
+        } as Product & { price: Price; index: number }
+      })
+      .filter(Boolean) as Array<AmendedProduct>
+    const orders = ['day', 'week', 'month', 'year']
+    prices.sort(
+      (a, b) => orders.indexOf(a.duration) - orders.indexOf(b.duration)
+    )
+    console.log('Prices:', prices)
+    return prices
   }, [products, ideaData])
+
   const audit = useIPAudit(docId)
   const { user } = useStytchUser()
 
   const buy = useCallback(
-    async (
-      options: Record<string, unknown> & {
-        metadata: Record<string, unknown>
-        price: Price
+    async (options: AmendedProduct) => {
+      if (!ideaData) {
+        return
       }
-    ) => {
       await litPromise
       if (!litClient) {
         throw new Error('No litClient')
@@ -110,11 +119,15 @@ const DetailIP = ({
           duration = 30 * 24 * 3600 * 1000 // 30 days
           break
       }
-      const {
-        metadata: { tokenId } = {},
-      } = ideaData || {}
+      const { metadata } = ideaData
+      const { tokenId } = metadata
       const to = (originalSessionSigs?.address || zeroAddress) as Address
-      const { contract, ...docMetadata } = options.metadata
+      const docMetadata = {
+        ...metadata,
+        contract_address: metadata?.contract?.address || '',
+        contract_name: metadata?.contract?.name || '',
+        duration: options.duration,
+      }
       const docRef = await addDoc(
         collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
         {
@@ -423,7 +436,7 @@ const DetailIP = ({
                       Access Options:
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                      {prices?.map((item: Product & { price: Price }) => (
+                      {prices?.map((item: AmendedProduct) => (
                         <button
                           key={item.id}
                           type="button"
@@ -433,24 +446,11 @@ const DetailIP = ({
                               : 'border-white/10 bg-muted/20 opacity-50'
                           }`}
                           disabled={!ndaChecked}
-                          onClick={() =>
-                            ndaChecked &&
-                            buy({
-                              metadata: {
-                                ...ideaData.metadata,
-                                contract_address:
-                                  ideaData.metadata?.contract?.address || '',
-                                contract_name:
-                                  ideaData.metadata?.contract?.name || '',
-                                duration: item.metadata?.duration,
-                              },
-                              price: item.price,
-                            })
-                          }
+                          onClick={() => ndaChecked && buy(item)}
                           role={ndaChecked ? 'button' : ''}
                           tabIndex={ndaChecked ? 0 : -1}
                         >
-                          <p className="text-white/70 text-xs">One Day</p>
+                          <p className="text-white/70 text-xs">{item.name}</p>
                           <p className="text-primary font-medium mt-1">
                             {item.price != null && item.price?.id !== ''
                               ? formatNumber(

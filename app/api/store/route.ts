@@ -25,7 +25,7 @@ function clean(obj: unknown): unknown {
     return obj.map(clean)
   }
   if (
-    obj &&
+    obj != null &&
     typeof obj === 'object' &&
     !(obj instanceof FieldValue) &&
     !(obj instanceof Timestamp)

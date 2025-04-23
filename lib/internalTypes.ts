@@ -24,7 +24,7 @@ export type IPDocJSON = {
     evaluationPeriod: string
     // ProductID=PriceID
     pricing: {
-      [key: string]: {
+      [product: string]: {
         product: string
         price: string
         duration: string
