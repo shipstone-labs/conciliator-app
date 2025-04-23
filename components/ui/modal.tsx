@@ -21,14 +21,12 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
-      // Prevent scrolling when modal is open
-      document.body.style.overflow = 'hidden'
+      // We're no longer preventing page scrolling here
+      // This allows scrolling the main page while modal is open
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape)
-      // Restore scrolling when modal is closed
-      document.body.style.overflow = 'auto'
     }
   }, [isOpen, onClose])
   // Close when clicking on backdrop (outside of modal content) if not prevented
@@ -43,7 +41,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-auto"
+      className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center p-4 overflow-y-auto"
+      style={{ paddingTop: '2rem', paddingBottom: '2rem' }}
       onClick={handleBackdropClick}
     >
       <div
@@ -65,7 +64,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             </button>
           )}
         </div>
-        <div className="p-6 overflow-y-auto">{children}</div>
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-6rem)]">
+          {children}
+        </div>
       </div>
     </div>
   )
