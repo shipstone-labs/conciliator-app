@@ -5,9 +5,9 @@ import { initAPIConfig } from '@/lib/apiUtils'
 export const runtime = 'nodejs'
 
 /**
- * MCP API Route Handler with basic ping support
+ * MCP API Route Handler with ping and initialize support
  *
- * This implements a minimal Model Context Protocol endpoint
+ * This implements a Model Context Protocol endpoint
  * following the JSON-RPC 2.0 specification
  */
 export const POST = withTracing(async (req: NextRequest) => {
@@ -39,6 +39,30 @@ export const POST = withTracing(async (req: NextRequest) => {
           status: 'ok',
           timestamp: Date.now(),
           version: '0.1.0',
+        },
+      })
+    }
+
+    // Handle initialize method
+    if (request.method === 'initialize') {
+      return NextResponse.json({
+        jsonrpc: '2.0',
+        id: request.id,
+        result: {
+          name: 'Conciliator MCP',
+          version: '0.1.0',
+          vendor: 'SafeIdea',
+          capabilities: {
+            methods: ['ping', 'initialize'],
+            protocols: ['json-rpc-2.0'],
+            contentTypes: ['application/json'],
+            compression: ['none'],
+          },
+          extensions: [],
+          environment: {
+            runtime: 'Next.js',
+          },
+          timestamp: Date.now(),
         },
       })
     }
