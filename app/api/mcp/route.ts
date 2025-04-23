@@ -10,7 +10,7 @@ import {
 
 export const runtime = 'nodejs'
 
-// Placeholder tools - to be replaced with actual implementations
+// MCP tools with implementation
 const tools: Record<string, MCPTool> = {
   search_ideas: {
     description: 'Search for ideas',
@@ -36,7 +36,7 @@ const tools: Record<string, MCPTool> = {
   },
 }
 
-// Placeholder resources - to be replaced with actual implementations
+// MCP resources with implementation
 const resources: Record<string, MCPResource> = {
   idea_catalog: {
     description: 'Catalog of available IP ideas',
@@ -179,7 +179,76 @@ export const POST = withTracing(async (req: NextRequest) => {
           )
         }
 
-        // Return placeholder response for now
+        // Handle search_ideas tool
+        if (toolName === 'search_ideas') {
+          try {
+            // Get the search query if provided
+            const query = request.params.arguments?.query || ''
+
+            // First get all ideas from the list API
+            const listResponse = await fetch(
+              new URL('/api/list', request.url),
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+              }
+            )
+
+            if (!listResponse.ok) {
+              throw new Error(
+                `Error fetching ideas: ${listResponse.statusText}`
+              )
+            }
+
+            const allIdeas = await listResponse.json()
+
+            // If no query, return all ideas
+            if (!query) {
+              return NextResponse.json({
+                jsonrpc: '2.0',
+                id: request.id,
+                result: {
+                  result: allIdeas,
+                },
+              })
+            }
+
+            // Simple filtering on client side
+            const filteredIdeas = allIdeas.filter((idea: any) => {
+              const name = idea.name || ''
+              const description = idea.description || ''
+              const searchTerms = query.toLowerCase()
+
+              return (
+                name.toLowerCase().includes(searchTerms) ||
+                description.toLowerCase().includes(searchTerms)
+              )
+            })
+
+            return NextResponse.json({
+              jsonrpc: '2.0',
+              id: request.id,
+              result: {
+                result: filteredIdeas,
+              },
+            })
+          } catch (error) {
+            console.error('Error in search_ideas tool:', error)
+            return NextResponse.json(
+              {
+                jsonrpc: '2.0',
+                error: {
+                  code: JsonRpcErrorCode.INTERNAL_ERROR,
+                  message: 'Error searching ideas',
+                },
+                id: request.id,
+              },
+              { status: 500 }
+            )
+          }
+        }
+
+        // For other tools, return placeholder response
         return NextResponse.json({
           jsonrpc: '2.0',
           id: request.id,
@@ -219,7 +288,52 @@ export const POST = withTracing(async (req: NextRequest) => {
           )
         }
 
-        // For now, return a placeholder response
+        // Handle idea_catalog resource - fetch real data
+        if (request.params.resource === 'idea_catalog') {
+          try {
+            // Make a request to the existing list API
+            const listResponse = await fetch(
+              new URL('/api/list', request.url),
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+              }
+            )
+
+            if (!listResponse.ok) {
+              throw new Error(
+                `Error fetching idea catalog: ${listResponse.statusText}`
+              )
+            }
+
+            const ideas = await listResponse.json()
+
+            // Return the list of ideas
+            return NextResponse.json({
+              jsonrpc: '2.0',
+              id: request.id,
+              result: {
+                content: ideas,
+                mime_type: 'application/json',
+              },
+            })
+          } catch (error) {
+            console.error('Error accessing idea_catalog:', error)
+            return NextResponse.json(
+              {
+                jsonrpc: '2.0',
+                error: {
+                  code: JsonRpcErrorCode.INTERNAL_ERROR,
+                  message: 'Error accessing idea catalog',
+                },
+                id: request.id,
+              },
+              { status: 500 }
+            )
+          }
+        }
+
+        // For other resources, return a placeholder response for now
         return NextResponse.json({
           jsonrpc: '2.0',
           id: request.id,
