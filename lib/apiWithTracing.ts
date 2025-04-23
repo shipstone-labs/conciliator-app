@@ -2,7 +2,7 @@ import { tracingMiddleware } from './tracing'
 import { type NextRequest, NextResponse } from 'next/server'
 
 // Higher-order function to wrap API route handlers with tracing
-export function withTracing(
+export function withAPITracing(
   handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
 ) {
   return async (req: NextRequest): Promise<NextResponse> => {

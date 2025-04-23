@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { withTracing } from '@/lib/apiWithTracing'
+import { withAPITracing } from '@/lib/apiWithTracing'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { getFirestore } from '../firebase'
 import type { IPDoc } from '@/lib/types'
@@ -130,7 +130,7 @@ async function getAllIdeas() {
  * This implements a Model Context Protocol endpoint
  * following the JSON-RPC 2.0 specification
  */
-export const POST = withTracing(async (req: NextRequest) => {
+export const POST = withAPITracing(async (req: NextRequest) => {
   try {
     // Initialize API configuration
     await initAPIConfig()
