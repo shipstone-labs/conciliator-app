@@ -8,7 +8,7 @@ export function withAPITracing<T>(
     context: T
   ) => Promise<NextResponse> | NextResponse
 ) {
-  return async (req: NextRequest, context?: T): Promise<NextResponse> => {
+  return async (req: NextRequest, context: T): Promise<NextResponse> => {
     try {
       return (await tracingMiddleware<T>(
         req,
