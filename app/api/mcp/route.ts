@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { withTracing } from '@/lib/apiWithTracing'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { getFirestore } from '../firebase'
 import {
   JsonRpcErrorCode,
   type MCPTool,
@@ -182,25 +183,44 @@ export const POST = withTracing(async (req: NextRequest) => {
         // Handle search_ideas tool
         if (toolName === 'search_ideas') {
           try {
+            console.log('MCP: Processing search_ideas tool request')
+
             // Get the search query if provided
             const query = request.params.arguments?.query || ''
 
-            // First get all ideas from the list API
-            const listResponse = await fetch(
-              new URL('/api/list', request.url),
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            // Access Firestore directly following the app's existing pattern
+            // This matches the implementation in /app/doc/[id]/route.ts which
+            // successfully accesses Firestore without authentication
+            console.log('MCP: Getting Firestore reference')
+            const fb = getFirestore()
+
+            console.log('MCP: Querying ip collection')
+            const doc = await fb
+              .collection('ip')
+              .orderBy('createdAt', 'desc')
+              .get()
+              .catch((error) => {
+                console.error('MCP: Firestore query error', error)
+                throw error
+              })
+
+            console.log(`MCP: Retrieved ${doc.docs.length} documents`)
+
+            const docs = doc.docs.map((d) => {
+              const data = d.data()
+              return { id: data.tokenId || d.id, ...data }
+            })
+
+            // Process the documents similar to how list API does it
+            const seenTokenIds = new Map()
+            docs.forEach((item) => {
+              if (!seenTokenIds.has(item.id)) {
+                seenTokenIds.set(item.id, item)
               }
-            )
+            })
 
-            if (!listResponse.ok) {
-              throw new Error(
-                `Error fetching ideas: ${listResponse.statusText}`
-              )
-            }
-
-            const allIdeas = await listResponse.json()
+            console.log(`MCP: Processed ${seenTokenIds.size} unique ideas`)
+            const allIdeas = Array.from(seenTokenIds.values())
 
             // If no query, return all ideas
             if (!query) {
@@ -234,12 +254,19 @@ export const POST = withTracing(async (req: NextRequest) => {
             })
           } catch (error) {
             console.error('Error in search_ideas tool:', error)
+            // Log detailed error information
+            if (error instanceof Error) {
+              console.error('Error name:', error.name)
+              console.error('Error message:', error.message)
+              console.error('Error stack:', error.stack)
+            }
+
             return NextResponse.json(
               {
                 jsonrpc: '2.0',
                 error: {
                   code: JsonRpcErrorCode.INTERNAL_ERROR,
-                  message: 'Error searching ideas',
+                  message: `Error searching ideas: ${error instanceof Error ? error.message : 'Unknown error'}`,
                 },
                 id: request.id,
               },
@@ -291,22 +318,35 @@ export const POST = withTracing(async (req: NextRequest) => {
         // Handle idea_catalog resource - fetch real data
         if (request.params.resource === 'idea_catalog') {
           try {
-            // Make a request to the existing list API
-            const listResponse = await fetch(
-              new URL('/api/list', request.url),
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-              }
-            )
+            console.log('MCP: Processing idea_catalog resource request')
 
-            if (!listResponse.ok) {
-              throw new Error(
-                `Error fetching idea catalog: ${listResponse.statusText}`
-              )
-            }
+            // Access Firestore directly following the app's existing pattern
+            // This matches the implementation in /app/doc/[id]/route.ts which
+            // successfully accesses Firestore without authentication
+            console.log('MCP: Getting Firestore reference')
+            const fb = getFirestore()
 
-            const ideas = await listResponse.json()
+            console.log('MCP: Querying ip collection')
+            const doc = await fb
+              .collection('ip')
+              .orderBy('createdAt', 'desc')
+              .get()
+              .catch((error) => {
+                console.error('MCP: Firestore query error', error)
+                throw error
+              })
+
+            console.log(`MCP: Retrieved ${doc.docs.length} documents`)
+
+            const docs = doc.docs.map((d) => {
+              const data = d.data()
+              const key = [data.tokenId || d.id, data]
+              return key
+            }) as [number, Record<string, unknown>][]
+
+            const seenTokenIds = new Map<number, Record<string, unknown>>(docs)
+            console.log(`MCP: Processed ${seenTokenIds.size} unique ideas`)
+            const ideas = Array.from(seenTokenIds.values())
 
             // Return the list of ideas
             return NextResponse.json({
@@ -319,12 +359,19 @@ export const POST = withTracing(async (req: NextRequest) => {
             })
           } catch (error) {
             console.error('Error accessing idea_catalog:', error)
+            // Log detailed error information
+            if (error instanceof Error) {
+              console.error('Error name:', error.name)
+              console.error('Error message:', error.message)
+              console.error('Error stack:', error.stack)
+            }
+
             return NextResponse.json(
               {
                 jsonrpc: '2.0',
                 error: {
                   code: JsonRpcErrorCode.INTERNAL_ERROR,
-                  message: 'Error accessing idea catalog',
+                  message: `Error accessing idea catalog: ${error instanceof Error ? error.message : 'Unknown error'}`,
                 },
                 id: request.id,
               },
