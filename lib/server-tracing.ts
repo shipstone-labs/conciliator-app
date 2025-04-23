@@ -80,7 +80,9 @@ export async function initServerTracing() {
   // Then in your initialization code:
   // Choose the appropriate exporter based on environment
   const exporter = isGCP
-    ? new TraceExporter()
+    ? new TraceExporter({
+        resourceFilter: /^service\..*/,
+      })
     : new OTLPTraceExporter({
         url:
           process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
@@ -158,9 +160,11 @@ export async function initServerTracing() {
 
     // Create a span processor that adds key attributes before exporting
     const spanProcessor = new BatchSpanProcessor(exporter, {
-      // Optional config: adjust based on your needs
-      maxExportBatchSize: 512,
+      // Use a batch span processor for better performance
+      maxQueueSize: 1000,
       scheduledDelayMillis: 5000,
+      exportTimeoutMillis: 30000,
+      maxExportBatchSize: 100,
     })
     // Create a new SDK instance
     sdk = new NodeSDK({
