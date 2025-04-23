@@ -817,7 +817,7 @@ const AppIP = () => {
             {/* Button moved below the note */}
             <div className="relative">
               {!termsAccepted && content && name && description ? (
-                <div className="absolute -top-8 w-full text-center text-amber-300 text-sm animate-pulse">
+                <div className="w-full text-center text-amber-300 text-sm mb-2">
                   ⚠️ Please set terms first
                 </div>
               ) : null}
