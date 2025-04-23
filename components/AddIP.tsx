@@ -135,7 +135,6 @@ const AppIP = () => {
   const [localStatus, setLocalStatus] = useState('')
   const { litClient, fbPromise, litPromise, sessionSigs } = useSession()
   const products = useProducts()
-  console.log(products)
   const config = useConfig()
   useEffect(() => {
     if (docId) {

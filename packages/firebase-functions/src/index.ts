@@ -27,6 +27,8 @@ import { cert, deleteApp, initializeApp } from 'firebase-admin/app'
 import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { getDatabase } from 'firebase-admin/database'
 import Stripe from 'stripe'
+import { onDocumentUpdated } from 'firebase-functions/v2/firestore'
+import { onSchedule } from 'firebase-functions/v2/scheduler'
 
 // Export secrets functions
 export { loadSecrets } from './secrets'
@@ -188,6 +190,169 @@ async function transferToken(
   })
 }
 
+const pathTemplate = 'cutomers/{customerId}/checkout_sessions/{sessionId}'
+export const stripeStarted = onDocumentUpdated(
+  pathTemplate,
+  async (snapshot) => {
+    // Handle extension event here.
+    const record = snapshot.data?.after?.data?.() || {}
+    if ('url' in record && 'price' in record) {
+      const { FIREBASE_SA, STRIPE_RK, FIREBASE_DB } = await loadSecrets([
+        'FIREBASE_SA',
+        'STRIPE_RK',
+        'FIREBASE_DB',
+      ])
+      const credential = cert(JSON.parse(FIREBASE_SA))
+      const app = initializeApp(
+        {
+          credential,
+          databaseURL: FIREBASE_DB,
+        },
+        `checkout${Date.now()}`
+      )
+      try {
+        const apiVersion = '2022-11-15'
+        const stripe = new Stripe(STRIPE_RK || '', {
+          apiVersion,
+          // Register extension as a Stripe plugin
+          // https://stripe.com/docs/building-plugins#setappinfo
+          appInfo: {
+            name: 'Firebase Invertase firestore-stripe-payments',
+            version: '0.3.5',
+          },
+        })
+        const fs = getFirestore(app)
+        const { metadata, price: priceId } = record
+        const price = priceId
+          ? await stripe.prices.retrieve(priceId as string)
+          : undefined
+        if (!price) {
+          error('No price found in event', priceId)
+          throw new Error('No price found')
+        }
+        const { product: product_id } = price
+        const product = await stripe.products.retrieve(product_id as string)
+        if (!product) {
+          error('No product found', product_id)
+          throw new Error(`No product found ${product_id}`)
+        }
+        const {
+          metadata: { duration: _duration } = {},
+        } = product
+        const durations:
+          | Record<'day' | 'week' | 'month', number>
+          | { [key: string]: number } = {
+          day: 60 * 60 * 24 * 1000, // Times in ms.
+          week: 60 * 60 * 24 * 7 * 1000,
+          month: 60 * 60 * 24 * 30 * 1000,
+        }
+        if (!_duration || !(_duration in durations)) {
+          error('No or invalid duration found', _duration)
+          throw new Error('No or invalid duration found')
+        }
+        const duration = _duration as 'day' | 'week' | 'month'
+        const {
+          contract_name: __contract_name,
+          contract_address: __contract_address,
+          contract: { address: _contract_address, name: _contract_name } = {},
+          docId,
+          to,
+          tokenId,
+          expiration: _expiration,
+          owner,
+        } = metadata || {}
+        const ipDoc = await fs.collection('ip').doc(docId).get()
+        const { creator, from } = ipDoc.data() || {}
+        if (!creator && !from) {
+          error('No creator or from found', metadata)
+          throw new Error('No creator or from found')
+        }
+        const contract_name = __contract_name || _contract_name
+        const contract_address = __contract_address || _contract_address
+        const expiration = durations[duration] + Date.now()
+        if (!contract_address || !contract_name || !tokenId) {
+          error('No contract name or address found', metadata)
+          throw new Error('No contract name or address found')
+        }
+        const now = new Date()
+        const deal = {
+          status: 'pending',
+          metadata: {
+            tokenId,
+            ...(from ? { from } : {}),
+            creator,
+            contract: {
+              address: contract_address,
+              name: contract_name,
+            },
+          },
+          to,
+          owner,
+          ...(expiration
+            ? { expiresAt: Timestamp.fromMillis(expiration) }
+            : {}),
+          createdAt: Timestamp.fromDate(now),
+          updatedAt: Timestamp.fromDate(now),
+        }
+        await fs.runTransaction(async () => {
+          const docRef = fs
+            .collection('ip')
+            .doc(docId)
+            .collection('deals')
+            .doc(snapshot.id)
+          const docSnap = await docRef.get()
+          if (docSnap.exists) {
+            const previous = docSnap.data() || {}
+            if (previous.status && previous.status !== 'pending') {
+              return
+            }
+          }
+          await docRef.set(deal)
+        })
+      } finally {
+        await deleteApp(app)
+      }
+    }
+  }
+)
+
+export const cron = onSchedule('every 12 hours', async () => {
+  // Handle extension event here.
+  const { FIREBASE_SA } = await loadSecrets(['FIREBASE_SA'])
+  const credential = cert(JSON.parse(FIREBASE_SA))
+  const app = initializeApp(
+    {
+      credential,
+    },
+    `checkout${Date.now()}`
+  )
+  try {
+    const fs = getFirestore(app)
+    const docsSnap = await fs
+      .collectionGroup('deals')
+      .where('expiresAt', '<=', Timestamp.fromDate(new Date()))
+      .get()
+    let batch = fs.batch()
+    let count = 0
+    for (const docSnap of docsSnap.docs) {
+      batch.update(docSnap.ref, {
+        status: 'expired',
+      })
+      count++
+      if (count > 200) {
+        await batch.commit()
+        count = 0
+        batch = fs.batch()
+      }
+    }
+    if (count > 0) {
+      await batch.commit()
+    }
+  } finally {
+    await deleteApp(app)
+  }
+})
+
 export const stripeCheckoutCompleted = onCustomEventPublished(
   {
     eventType: 'com.stripe.v1.checkout.session.completed',
@@ -229,7 +394,20 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       throw new Error('No id found')
     }
     debug('Found records', records.docs.length, records.docs[0].ref.path)
-    const record = records.docs[0].data()
+    const record = { ...records.docs[0].data(), id: records.docs[0].id } as {
+      metadata: {
+        contract_name?: string
+        contract_address?: string
+        contract?: { address: string; name: string }
+        docId: string
+        to: `0x${string}`
+        tokenId: number
+        expiration: number
+        owner: string
+      }
+      price: string
+      id: string
+    }
     debug('Found record', Object.keys(record), JSON.stringify(record))
     const { metadata, price: priceId } = record
     debug('Found metadata', JSON.stringify(metadata))
@@ -266,7 +444,6 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       contract_address: __contract_address,
       contract: { address: _contract_address, name: _contract_name } = {},
       docId,
-      signature,
       to,
       tokenId,
       expiration: _expiration,
@@ -279,16 +456,13 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
       error('No contract name or address found', metadata)
       throw new Error('No contract name or address found')
     }
-    info(
-      'Transfer token',
-      JSON.stringify({ contract_address, tokenId, to, signature })
-    )
+    info('Transfer token', JSON.stringify({ contract_address, tokenId, to }))
     await transferToken(
       app,
       contract_address as `0x${string}`,
       tokenId,
       to as `0x${string}`,
-      signature as `0x${string}`,
+      '0x' as `0x${string}`,
       expiration // expiration in ms
     ).then(async (hash) => {
       const db = getFirestore(app)
@@ -314,13 +488,13 @@ export const stripeCheckoutCompleted = onCustomEventPublished(
         createdAt: Timestamp.fromDate(now),
         updatedAt: Timestamp.fromDate(now),
       }
-      const dealDoc = await docRef.collection('deals').add(deal)
+      await docRef.collection('deals').doc(record.id).set(deal)
       if (creator) {
         await db
           .collection('users')
           .doc(owner)
           .collection('deals')
-          .doc(dealDoc.id)
+          .doc(record.id)
           .set(deal)
       }
       return hash

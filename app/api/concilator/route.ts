@@ -130,7 +130,7 @@ ${data.description}`,
       let contentPromise = contentCache.get(data.downSampled.cid)
       if (!contentPromise) {
         const getContent = async () => {
-          const url = cidAsURL()
+          const url = cidAsURL(data.downSampled.cid)
           const downSampledArray = url
             ? await fetch(url).then((res) => {
                 if (!res.ok) {
@@ -148,24 +148,35 @@ ${data.description}`,
             if (!downSampledArray) {
               throw new Error('No data')
             }
-            const [
-              tag,
-              ,
-              ,
-              ,
-              dataToEncryptHash,
-              unifiedAccessControlConditions,
-              _ciphertext,
-            ] = await decodeAll(downSampledArray)
+            const decodedData = await decodeAll(downSampledArray)
+            const [tag, network] = decodedData
+            if (!tag) {
+              throw new Error('No tag')
+            }
             if (tag !== 'LIT-ENCRYPTED') {
               throw new Error('Invalid tag')
             }
+            if (decodedData.length !== 8 && decodedData.length !== 7) {
+              throw new Error('Invalid content length')
+            }
+            if (
+              decodedData.length === 8 &&
+              network !== 'filecoinCalibrationTestnet'
+            ) {
+              throw new Error('Invalid network')
+            }
+            const [
+              dataToEncryptHash,
+              unifiedAccessControlConditions,
+              _ciphertext,
+            ] = decodedData.slice(-3)
             downSampled = {
               dataToEncryptHash,
               unifiedAccessControlConditions,
               ciphertext: _ciphertext.toString('base64'),
             }
-          } catch {
+          } catch (error) {
+            console.log(error)
             downSampled = JSON.parse(
               new TextDecoder().decode(downSampledArray || new Uint8Array())
             ) as {
