@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { withTracing } from '@/lib/apiWithTracing'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { getFirestore } from '../firebase'
-import { castToUIDoc, type IPDoc } from '@/lib/types'
+import type { IPDoc } from '@/lib/types'
 import {
   JsonRpcErrorCode,
   type MCPTool,
@@ -64,6 +64,35 @@ const prompts: Record<string, MCPPrompt> = {
   },
 }
 
+async function getOneIdea(docId: string): Promise<IPDoc | undefined> {
+  console.log('MCP: Getting Firestore reference')
+  const fb = getFirestore()
+
+  console.log(`MCP: Fetching document ip/${docId}`)
+  // Use the native Firestore from admin SDK
+  const docRef = fb.collection('ip').doc(docId)
+  const snapshot = await docRef.get()
+
+  if (!snapshot.exists) {
+    return undefined
+  }
+  const data = snapshot.data()
+  if (!data) {
+    return undefined
+  }
+  return {
+    id: snapshot.id,
+    ...Object.fromEntries(
+      Object.entries(data).filter(([key]) =>
+        ['name', 'description', 'metadata', 'terms', 'tags', 'image'].includes(
+          key
+        )
+      )
+    ),
+    createdAt: data.createdAt.toDate().toISOString(),
+  } as IPDoc
+}
+
 async function getAllIdeas() {
   const fb = getFirestore()
   console.log('MCP: Querying ip collection')
@@ -84,11 +113,14 @@ async function getAllIdeas() {
       console.error('MCP: Firestore query error', error)
       throw error
     })
-
   console.log(`MCP: Retrieved ${doc.docs.length} documents`)
-
   return doc.docs.map((d) => {
-    return { id: d.id, ...d.data() }
+    const data = d.data()
+    return {
+      id: d.id,
+      ...data,
+      createdAt: data.createdAt.toDate().toISOString(),
+    }
   })
 }
 
@@ -364,15 +396,9 @@ export const POST = withTracing(async (req: NextRequest) => {
 
             console.log(`MCP: Processing idea/${actualDocId} resource request`)
 
-            console.log('MCP: Getting Firestore reference')
-            const fb = getFirestore()
+            const ideaData = await getOneIdea(actualDocId)
 
-            console.log(`MCP: Fetching document ip/${actualDocId}`)
-            // Use the native Firestore from admin SDK
-            const docRef = fb.collection('ip').doc(actualDocId)
-            const snapshot = await docRef.get()
-
-            if (!snapshot.exists) {
+            if (!ideaData) {
               console.log(`MCP: Document not found for id=${actualDocId}`)
               return NextResponse.json(
                 {
@@ -388,12 +414,6 @@ export const POST = withTracing(async (req: NextRequest) => {
             }
 
             // Format data using same casting function used in the app
-            const data = snapshot.data()
-            const ideaData = castToUIDoc({
-              ...data,
-              id: snapshot.id,
-            } as IPDoc)
-
             console.log(`MCP: Successfully retrieved idea/${actualDocId}`)
 
             // Return the idea data
