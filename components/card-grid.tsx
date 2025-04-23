@@ -10,7 +10,7 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip'
 import Link from 'next/link'
-import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
+// No need to import enhancedCidAsURL
 import { useIPs } from '@/hooks/useIP'
 import CachedImage from '@/components/CachedImage'
 
@@ -88,7 +88,11 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
             {/* Image */}
             <CardContent className="flex justify-center p-4">
               <CachedImage
-                src={enhancedCidAsURL(item?.image?.cid)}
+                src={
+                  item?.image?.cid
+                    ? `/api/cached-image/${item.image.cid}`
+                    : undefined
+                }
                 fallbackSrc="/images/placeholder.png"
                 alt={item.name}
                 width={imageWidth}

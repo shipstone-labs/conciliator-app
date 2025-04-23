@@ -14,7 +14,6 @@ import Image from 'next/image'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
-import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { cidAsURL } from '@/lib/internalTypes'
 import { useSession } from '@/hooks/useSession'
@@ -311,7 +310,7 @@ const DetailIP = ({
             <CachedImage
               src={
                 ideaData.image?.cid
-                  ? enhancedCidAsURL(ideaData.image.cid) ||
+                  ? `/api/cached-image/${ideaData.image.cid}` ||
                     '/svg/Black+Yellow.svg'
                   : '/svg/Black+Yellow.svg'
               }
