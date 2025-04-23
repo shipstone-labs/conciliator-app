@@ -83,7 +83,6 @@ const DetailIP = ({
           ...rest,
           ...productData,
           price: priceData,
-          id: price,
           index,
         } as Product & { price: Price; index: number }
       })
