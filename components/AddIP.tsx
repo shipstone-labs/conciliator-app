@@ -955,26 +955,6 @@ const AppIP = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2 mt-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="nda-confirmed"
-                      checked={ndaConfirmed}
-                      onChange={() => setNdaConfirmed(!ndaConfirmed)}
-                      className="rounded border-white/20 bg-muted/30 text-primary"
-                      data-testid="nda-checkbox"
-                    />
-                    <label
-                      htmlFor="nda-confirmed"
-                      className="text-white/90 cursor-pointer"
-                    >
-                      I understand that transactions will require a signed NDA
-                      with purchaser
-                    </label>
-                  </div>
-                </div>
-
                 {/* Price is now automatically set based on the evaluation period */}
 
                 <div className="flex justify-between space-x-3 mt-6">
@@ -996,16 +976,11 @@ const AppIP = () => {
                   </Button>
                   <Button
                     onClick={() => {
-                      if (!ndaConfirmed) {
-                        alert('Please review the NDA options first')
-                        return
-                      }
                       // Save terms logic would go here
                       setTermsAccepted(true)
                       setIsTermsModalOpen(false)
                     }}
                     className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
-                    disabled={!ndaConfirmed}
                     data-testid="terms-accept-button"
                   >
                     Accept
