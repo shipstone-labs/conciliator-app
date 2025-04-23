@@ -66,7 +66,7 @@ const DetailIP = ({
         if (order === -1) {
           continue
         }
-        let price = product.prices?.[pricing?.[product.id] || '']
+        let price = product.prices?.[pricing?.[product.id].price || '']
         if (!price) {
           const sortedPrices = Object.values(product.prices).sort(
             (a, b) => a.unit_amount - b.unit_amount
