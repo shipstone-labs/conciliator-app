@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { withTracing } from '@/lib/apiWithTracing'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { getFirestore } from '../firebase'
-import { bytesToString, numberToBytes } from 'viem'
 import { castToUIDoc, type IPDoc } from '@/lib/types'
 import {
   JsonRpcErrorCode,
@@ -63,6 +62,34 @@ const prompts: Record<string, MCPPrompt> = {
       domain: { type: 'string', description: 'Domain area' },
     },
   },
+}
+
+async function getAllIdeas() {
+  const fb = getFirestore()
+  console.log('MCP: Querying ip collection')
+  const doc = await fb
+    .collection('ip')
+    .orderBy('createdAt', 'desc')
+    .select(
+      'name',
+      'description',
+      'createdAt',
+      'metadata',
+      'terms',
+      'tags',
+      'image'
+    )
+    .get()
+    .catch((error) => {
+      console.error('MCP: Firestore query error', error)
+      throw error
+    })
+
+  console.log(`MCP: Retrieved ${doc.docs.length} documents`)
+
+  return doc.docs.map((d) => {
+    return { id: d.id, ...d.data() }
+  })
 }
 
 /**
@@ -194,35 +221,8 @@ export const POST = withTracing(async (req: NextRequest) => {
             // This matches the implementation in /app/doc/[id]/route.ts which
             // successfully accesses Firestore without authentication
             console.log('MCP: Getting Firestore reference')
-            const fb = getFirestore()
 
-            console.log('MCP: Querying ip collection')
-            const doc = await fb
-              .collection('ip')
-              .orderBy('createdAt', 'desc')
-              .get()
-              .catch((error) => {
-                console.error('MCP: Firestore query error', error)
-                throw error
-              })
-
-            console.log(`MCP: Retrieved ${doc.docs.length} documents`)
-
-            const docs = doc.docs.map((d) => {
-              const data = d.data()
-              return { id: data.tokenId || d.id, ...data }
-            })
-
-            // Process the documents similar to how list API does it
-            const seenTokenIds = new Map()
-            docs.forEach((item) => {
-              if (!seenTokenIds.has(item.id)) {
-                seenTokenIds.set(item.id, item)
-              }
-            })
-
-            console.log(`MCP: Processed ${seenTokenIds.size} unique ideas`)
-            const allIdeas = Array.from(seenTokenIds.values())
+            const allIdeas = await getAllIdeas()
 
             // If no query, return all ideas
             if (!query) {
@@ -236,10 +236,10 @@ export const POST = withTracing(async (req: NextRequest) => {
             }
 
             // Simple filtering on client side
+            const searchTerms = query.toLowerCase()
             const filteredIdeas = allIdeas.filter((idea: any) => {
               const name = idea.name || ''
               const description = idea.description || ''
-              const searchTerms = query.toLowerCase()
 
               return (
                 name.toLowerCase().includes(searchTerms) ||
@@ -322,33 +322,7 @@ export const POST = withTracing(async (req: NextRequest) => {
           try {
             console.log('MCP: Processing idea_catalog resource request')
 
-            // Access Firestore directly following the app's existing pattern
-            // This matches the implementation in /app/doc/[id]/route.ts which
-            // successfully accesses Firestore without authentication
-            console.log('MCP: Getting Firestore reference')
-            const fb = getFirestore()
-
-            console.log('MCP: Querying ip collection')
-            const doc = await fb
-              .collection('ip')
-              .orderBy('createdAt', 'desc')
-              .get()
-              .catch((error) => {
-                console.error('MCP: Firestore query error', error)
-                throw error
-              })
-
-            console.log(`MCP: Retrieved ${doc.docs.length} documents`)
-
-            const docs = doc.docs.map((d) => {
-              const data = d.data()
-              const key = [data.tokenId || d.id, data]
-              return key
-            }) as [number, Record<string, unknown>][]
-
-            const seenTokenIds = new Map<number, Record<string, unknown>>(docs)
-            console.log(`MCP: Processed ${seenTokenIds.size} unique ideas`)
-            const ideas = Array.from(seenTokenIds.values())
+            const ideas = await getAllIdeas()
 
             // Return the list of ideas
             return NextResponse.json({
@@ -386,15 +360,9 @@ export const POST = withTracing(async (req: NextRequest) => {
         if (request.params.resource.startsWith('idea/')) {
           try {
             // Extract the idea ID
-            const ideaId = request.params.resource.substring(5) // Remove 'idea/' prefix
+            const actualDocId = request.params.resource.split('/')[1]
 
-            console.log(`MCP: Processing idea/${ideaId} resource request`)
-
-            // Handle tokenId conversion if needed (like in useIP hook)
-            const actualDocId =
-              ideaId.startsWith('0x') || /^\d+$/.test(ideaId)
-                ? bytesToString(numberToBytes(BigInt(ideaId)))
-                : ideaId
+            console.log(`MCP: Processing idea/${actualDocId} resource request`)
 
             console.log('MCP: Getting Firestore reference')
             const fb = getFirestore()
@@ -411,7 +379,7 @@ export const POST = withTracing(async (req: NextRequest) => {
                   jsonrpc: '2.0',
                   error: {
                     code: JsonRpcErrorCode.INVALID_PARAMS,
-                    message: `Idea not found: ${ideaId}`,
+                    message: `Idea not found: ${actualDocId}`,
                   },
                   id: request.id,
                 },
@@ -426,7 +394,7 @@ export const POST = withTracing(async (req: NextRequest) => {
               id: snapshot.id,
             } as IPDoc)
 
-            console.log(`MCP: Successfully retrieved idea/${ideaId}`)
+            console.log(`MCP: Successfully retrieved idea/${actualDocId}`)
 
             // Return the idea data
             return NextResponse.json({
