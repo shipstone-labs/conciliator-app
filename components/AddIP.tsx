@@ -21,21 +21,15 @@ import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import { formatNumber, type IPAudit } from '@/lib/types'
 import { useConfig } from '@/app/authLayout'
-import { type Price, type Product, useProducts } from '@/hooks/useProducts'
+import {
+  getSortedPrices,
+  type Price,
+  type Product,
+  useProducts,
+} from '@/hooks/useProducts'
 import { Select, SelectContent, SelectItem, SelectTrigger } from './ui/select'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-
-const getSortedPrices = (prices: Record<string, Price>) => {
-  const sorted = Object.values(prices).sort((a, b) => {
-    if (a.unit_amount === b.unit_amount) {
-      return a.id.localeCompare(b.id)
-    }
-    return a.unit_amount - b.unit_amount
-  })
-  const first = { id: '', active: false, product: sorted[0].product } as Price
-  return [first, ...sorted]
-}
 
 const SortedProducts = ({
   products,
@@ -80,6 +74,7 @@ const SortedProducts = ({
               )
               const newPrices: Price[] = value ? [...value] : [...defaultPrices]
               newPrices[index] = newPrice as Price
+              console.log('newPrices', newPrices)
               onSelect(newPrices)
             }}
           >
@@ -376,6 +371,28 @@ const AppIP = () => {
           return encryptedContent
         })
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
+      const pricing: Record<
+        string,
+        {
+          product: string
+          price: string
+          index: number
+          duration: string
+        }
+      > = {}
+      for (
+        let index = 0;
+        selectedPrices && index < selectedPrices.length;
+        index++
+      ) {
+        const price = selectedPrices[index]
+        pricing[products[price.product].id] = {
+          product: price.product,
+          duration: products[price.product].metadata?.duration,
+          price: price.id,
+          index,
+        }
+      }
       const body = {
         id,
         to: address,
@@ -400,15 +417,7 @@ const AppIP = () => {
         // Include all terms information
         terms: {
           businessModel,
-          pricing:
-            selectedPrices?.reduce(
-              (acc, price) => {
-                acc[products[price.product].metadata?.duration || 'unknown'] =
-                  price.unit_amount
-                return acc
-              },
-              {} as Record<string, number>
-            ) || {},
+          pricing,
           ndaRequired: ndaConfirmed,
         },
       }
@@ -576,7 +585,7 @@ const AppIP = () => {
     if (!formStepComplete[1]) return 2
     if (!formStepComplete[2]) return 3
     return 4
-  }, [formStepComplete])
+  }, [formStepComplete[0], formStepComplete[1], formStepComplete[2]])
 
   // Track create button readiness and update global readiness API
   useEffect(() => {
@@ -598,7 +607,13 @@ const AppIP = () => {
         )
       }
     }
-  }, [readyToCreate, currentStep, formStepComplete])
+  }, [
+    readyToCreate,
+    currentStep,
+    formStepComplete[0],
+    formStepComplete[1],
+    formStepComplete[2],
+  ])
 
   // Function to load document content
   const loadDocumentContent = useCallback(async (docId: string) => {

@@ -23,7 +23,14 @@ export type IPDocJSON = {
     businessModel: string
     evaluationPeriod: string
     // ProductID=PriceID
-    pricing: Record<string, string>
+    pricing: {
+      [product: string]: {
+        product: string
+        price: string
+        duration: string
+        index: number
+      }
+    }
     ndaRequired: boolean
   }
   image?: { cid: string; width: number; height: number; mimeType: string }

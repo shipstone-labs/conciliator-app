@@ -126,7 +126,6 @@ ${data.description}`,
       const account = privateKeyToAccount(
         (process.env.FILCOIN_PK || '') as `0x${string}`
       )
-      const litClient = await getLit()
       let contentPromise = contentCache.get(data.downSampled.cid)
       if (!contentPromise) {
         const getContent = async () => {
@@ -200,6 +199,7 @@ ${data.description}`,
               data.downSampled.hash
             )
 
+          const litClient = await getLit()
           const sessionSigs = await genSession(account, litClient, [
             {
               resource: new LitActionResource('*'),

@@ -19,6 +19,7 @@ import { filecoinCalibration } from 'viem/chains'
 import { getFirebase } from './firebase'
 import { estimateFeesPerGas, waitForTransactionReceipt } from 'viem/actions'
 import { initAPIConfig } from '@/lib/apiUtils'
+import { withTracing } from '@/lib/tracing'
 
 const NAMES = [
   {
@@ -288,13 +289,20 @@ export async function getLit() {
     return await litClient
   }
   litClient = (async () => {
-    const litClient = await createLitClient({
-      litNetwork: LIT_NETWORK.Datil,
-      debug: false,
-    })
-    global.document = { dispatchEvent: (_event: Event) => true } as Document
-    await litClient.connect()
-    return litClient
+    return await withTracing(
+      'litClient',
+      async () => {
+        const litClient = await createLitClient({
+          litNetwork: LIT_NETWORK.Datil,
+          debug: false,
+        })
+        global.document = { dispatchEvent: (_event: Event) => true } as Document
+        await litClient.connect()
+        return litClient
+      },
+      {},
+      { root: true }
+    )
   })()
   return await litClient
 }
