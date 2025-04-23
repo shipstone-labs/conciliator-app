@@ -1039,7 +1039,7 @@ const AppIP = () => {
                           }}
                           className="text-primary hover:text-primary/80 hover:bg-muted/30"
                         >
-                          View Document
+                          Select Document
                         </Button>
                       </div>
                     ))}
@@ -1068,6 +1068,11 @@ const AppIP = () => {
                     Idea.
                   </label>
                 </div>
+                {!noNdaSelected && !selectedDoc && (
+                  <div className="w-full text-center text-amber-300 text-sm mb-2 mt-2">
+                    ⚠️ Select the NDA Document you want to use
+                  </div>
+                )}
 
                 <div className="flex justify-end space-x-3 mt-6">
                   <Button
