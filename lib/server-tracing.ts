@@ -2,7 +2,7 @@
 import { NodeSDK } from '@opentelemetry/sdk-node'
 // Use the HTTP exporter instead of the gRPC (proto) exporter to avoid protocol mismatches
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
 import {
@@ -115,6 +115,12 @@ export async function initServerTracing() {
         process.env.K_SERVICE || tracingServiceName,
       'g.co/r/generic_node/node_id':
         process.env.K_REVISION || tracingServiceVersion,
+      // Add the GCP standard monitored resource labels
+      // These are required for proper service identification in Cloud Trace
+      'cloud.provider': 'gcp',
+      'service.namespace': `${tracingServiceName}:${tracingServiceVersion}`,
+      'telemetry.sdk.name': 'opentelemetry',
+      'telemetry.sdk.language': 'nodejs',
     })
 
     // Extract attributes from detected resources and create a new resource
@@ -150,10 +156,16 @@ export async function initServerTracing() {
       console.log('OpenTelemetry: Added gRPC instrumentation')
     }
 
+    // Create a span processor that adds key attributes before exporting
+    const spanProcessor = new BatchSpanProcessor(exporter, {
+      // Optional config: adjust based on your needs
+      maxExportBatchSize: 512,
+      scheduledDelayMillis: 5000,
+    })
     // Create a new SDK instance
     sdk = new NodeSDK({
       resource: combinedResource,
-      spanProcessor: new SimpleSpanProcessor(exporter),
+      spanProcessor,
       instrumentations,
     })
 
