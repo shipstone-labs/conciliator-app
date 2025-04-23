@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { withTracing } from '@/lib/apiWithTracing'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { getFirestore } from '../firebase'
+import { bytesToString, numberToBytes } from 'viem'
+import { castToUIDoc, type IPDoc } from '@/lib/types'
 import {
   JsonRpcErrorCode,
   type MCPTool,
@@ -372,6 +374,84 @@ export const POST = withTracing(async (req: NextRequest) => {
                 error: {
                   code: JsonRpcErrorCode.INTERNAL_ERROR,
                   message: `Error accessing idea catalog: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                },
+                id: request.id,
+              },
+              { status: 500 }
+            )
+          }
+        }
+
+        // Handle idea/{id} resource pattern
+        if (request.params.resource.startsWith('idea/')) {
+          try {
+            // Extract the idea ID
+            const ideaId = request.params.resource.substring(5) // Remove 'idea/' prefix
+
+            console.log(`MCP: Processing idea/${ideaId} resource request`)
+
+            // Handle tokenId conversion if needed (like in useIP hook)
+            const actualDocId =
+              ideaId.startsWith('0x') || /^\d+$/.test(ideaId)
+                ? bytesToString(numberToBytes(BigInt(ideaId)))
+                : ideaId
+
+            console.log('MCP: Getting Firestore reference')
+            const fb = getFirestore()
+
+            console.log(`MCP: Fetching document ip/${actualDocId}`)
+            // Use the native Firestore from admin SDK
+            const docRef = fb.collection('ip').doc(actualDocId)
+            const snapshot = await docRef.get()
+
+            if (!snapshot.exists) {
+              console.log(`MCP: Document not found for id=${actualDocId}`)
+              return NextResponse.json(
+                {
+                  jsonrpc: '2.0',
+                  error: {
+                    code: JsonRpcErrorCode.INVALID_PARAMS,
+                    message: `Idea not found: ${ideaId}`,
+                  },
+                  id: request.id,
+                },
+                { status: 404 }
+              )
+            }
+
+            // Format data using same casting function used in the app
+            const data = snapshot.data()
+            const ideaData = castToUIDoc({
+              ...data,
+              id: snapshot.id,
+            } as IPDoc)
+
+            console.log(`MCP: Successfully retrieved idea/${ideaId}`)
+
+            // Return the idea data
+            return NextResponse.json({
+              jsonrpc: '2.0',
+              id: request.id,
+              result: {
+                content: ideaData,
+                mime_type: 'application/json',
+              },
+            })
+          } catch (error) {
+            console.error('MCP: Error fetching idea details:', error)
+            // Log detailed error information
+            if (error instanceof Error) {
+              console.error('Error name:', error.name)
+              console.error('Error message:', error.message)
+              console.error('Error stack:', error.stack)
+            }
+
+            return NextResponse.json(
+              {
+                jsonrpc: '2.0',
+                error: {
+                  code: JsonRpcErrorCode.INTERNAL_ERROR,
+                  message: `Error accessing idea details: ${error instanceof Error ? error.message : 'Unknown error'}`,
                 },
                 id: request.id,
               },
