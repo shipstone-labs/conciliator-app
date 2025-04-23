@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MCP API Test Client</title>
+  <title>MCP Ping Test</title>
   <style>
     body { 
       font-family: system-ui, -apple-system, sans-serif; 
@@ -48,24 +48,29 @@
   </style>
 </head>
 <body>
-  <h1>MCP API Test Client</h1>
+  <h1>MCP Ping Test</h1>
+  <p>
+    This is a simple test client for the Model Context Protocol (MCP) ping endpoint.
+  </p>
 
   <div class="test-section">
-    <h2>Test MCP Methods</h2>
-    <p>Click the buttons below to test various MCP methods:</p>
-    
-    <button onclick="testMethod('initialize')">Initialize</button>
-    <button onclick="testMethod('ping')">Ping</button>
+    <h2>Test MCP Ping</h2>
+    <button onclick="testPing()">Ping</button>
     
     <div>
       <h3>Response:</h3>
-      <pre id="response">Click a button above to test an MCP method</pre>
+      <pre id="response">Click the Ping button to test the MCP endpoint</pre>
     </div>
   </div>
 
+  <div class="test-section">
+    <h2>Test Invalid Method</h2>
+    <button onclick="testInvalidMethod()">Send Invalid Method</button>
+  </div>
+
   <script>
-    // Function to test MCP methods
-    async function testMethod(method) {
+    // Function to test MCP ping
+    async function testPing() {
       const response = document.getElementById('response');
       response.textContent = 'Loading...';
       
@@ -77,7 +82,32 @@
           },
           body: JSON.stringify({
             jsonrpc: '2.0',
-            method: method,
+            method: 'ping',
+            id: Date.now()
+          })
+        });
+        
+        const data = await res.json();
+        response.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        response.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    // Function to test invalid method
+    async function testInvalidMethod() {
+      const response = document.getElementById('response');
+      response.textContent = 'Loading...';
+      
+      try {
+        const res = await fetch('/api/mcp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'nonexistent_method',
             id: Date.now()
           })
         });
