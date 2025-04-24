@@ -73,10 +73,12 @@ export async function tracedFetch(
 ): Promise<{ response: Response; span: ReturnType<typeof trace.getSpan> }> {
   const actualSpanName = spanName || `fetch ${new URL(url).pathname}`
 
-  // Set up span attributes
+  // Set up span attributes with service identification
   const attributes: Record<string, string | number | boolean> = {
     'http.url': url,
     'http.method': options?.method || 'GET',
+    'service.name': process.env.SERVICE_NAME?.split(':')[0] || 'conciliate-app',
+    'service.version': process.env.SERVICE_NAME?.split(':')[1] || '1.0.0',
   }
 
   return (await tracer.startActiveSpan(

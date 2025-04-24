@@ -13,7 +13,7 @@ import { cidAsURL, type IPDocJSON } from '@/lib/internalTypes'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { encode } from 'cbor'
-import { withTracing } from '@/lib/apiWithTracing'
+import { withAPITracing } from '@/lib/apiWithTracing'
 
 export const runtime = 'nodejs'
 
@@ -123,7 +123,7 @@ async function cleanupTable() {
   return false
 }
 
-export const POST = withTracing(async function POST(req: NextRequest) {
+export const POST = withAPITracing(async function POST(req: NextRequest) {
   try {
     await initAPIConfig()
 

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getServerConfig } from '@/lib/getServerConfig'
 import { initAPIConfig } from '@/lib/apiUtils'
-import { withTracing } from '@/lib/apiWithTracing'
+import { withAPITracing } from '@/lib/apiWithTracing'
 import { logger } from '@/lib/tracing'
 
 // Set runtime to nodejs for this API route
@@ -16,7 +16,7 @@ export const runtime = 'nodejs'
  */
 
 // OPTIONS handler for the client to check if config has changed
-export const OPTIONS = withTracing(async (_request: NextRequest) => {
+export const OPTIONS = withAPITracing(async (_request: NextRequest) => {
   // Get cached hash or generate a new one
   await initAPIConfig()
   const config = await getServerConfig()
@@ -33,7 +33,7 @@ export const OPTIONS = withTracing(async (_request: NextRequest) => {
   })
 })
 
-export const GET = withTracing(async (request: NextRequest) => {
+export const GET = withAPITracing(async (request: NextRequest) => {
   await initAPIConfig()
 
   try {

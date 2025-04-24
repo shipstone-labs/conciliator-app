@@ -31,14 +31,15 @@ import { getUser } from '../stytch'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { LRUCache } from 'next/dist/server/lib/lru-cache'
 import { decodeAll } from 'cbor'
-import { withTracing } from '@/lib/apiWithTracing'
+import { withAPITracing } from '@/lib/apiWithTracing'
+import { withTracing } from '@/lib/tracing'
 const templateText = templateFile.toString()
 
 export const runtime = 'nodejs'
 
 const contentCache = new LRUCache<Promise<string>>(100)
 
-export const POST = withTracing(async (req: NextRequest) => {
+export const POST = withAPITracing(async (req: NextRequest) => {
   try {
     await initAPIConfig()
 
@@ -199,30 +200,31 @@ ${data.description}`,
               data.downSampled.hash
             )
 
-          const litClient = await getLit()
-          const sessionSigs = await genSession(account, litClient, [
-            {
-              resource: new LitActionResource('*'),
-              ability: LIT_ABILITY.LitActionExecution,
-            },
-            {
-              resource: new LitAccessControlConditionResource(accsInput),
-              ability: LIT_ABILITY.AccessControlConditionDecryption,
-            },
-          ])
+          return withTracing('lit.decrypt', async () => {
+            const litClient = await getLit()
+            const sessionSigs = await genSession(account, litClient, [
+              {
+                resource: new LitActionResource('*'),
+                ability: LIT_ABILITY.LitActionExecution,
+              },
+              {
+                resource: new LitAccessControlConditionResource(accsInput),
+                ability: LIT_ABILITY.AccessControlConditionDecryption,
+              },
+            ])
 
-          const _decrypted = await litClient.decrypt({
-            accessControlConditions:
-              downSampled.unifiedAccessControlConditions as Parameters<
-                typeof litClient.decrypt
-              >[0]['accessControlConditions'],
-            ciphertext: downSampled.ciphertext,
-            dataToEncryptHash: downSampled.dataToEncryptHash,
-            chain: 'filecoinCalibrationTestnet',
-            sessionSigs,
+            const _decrypted = await litClient.decrypt({
+              accessControlConditions:
+                downSampled.unifiedAccessControlConditions as Parameters<
+                  typeof litClient.decrypt
+                >[0]['accessControlConditions'],
+              ciphertext: downSampled.ciphertext,
+              dataToEncryptHash: downSampled.dataToEncryptHash,
+              chain: 'filecoinCalibrationTestnet',
+              sessionSigs,
+            })
+            return new TextDecoder().decode(_decrypted.decryptedData)
           })
-
-          return new TextDecoder().decode(_decrypted.decryptedData)
         }
         contentPromise = getContent()
         contentCache.set(data.downSampled.cid, contentPromise)

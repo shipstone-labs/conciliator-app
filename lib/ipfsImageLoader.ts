@@ -11,6 +11,7 @@ export default function ipfsImageLoader({
   width,
   quality,
 }: ImageLoaderProps) {
+  console.log('IPFS Image Loader:', src, width, quality)
   // Check if this is an IPFS URL
   if (src.includes('w3s.link/ipfs/')) {
     // Extract the CID from the IPFS URL
@@ -25,31 +26,20 @@ export default function ipfsImageLoader({
 
   // If it's already our cached image path
   if (src.startsWith('/api/cached-image/')) {
-    // Just add width and quality params
-    const params = new URLSearchParams()
-    params.set('width', width.toString())
-    params.set('quality', (quality || 75).toString())
-    params.set('format', 'webp')
+    // Create a proper URL object to handle existing query parameters correctly
+    const url = new URL(src, window.location.origin)
 
-    return `${src}${src.includes('?') ? '&' : '?'}${params.toString()}`
+    // Update or add our parameters
+    url.searchParams.set('width', width.toString())
+    url.searchParams.set('quality', (quality || 75).toString())
+    url.searchParams.set('format', 'webp')
+
+    // Return the full URL string - this will handle query parameters correctly
+    return url.toString().replace(window.location.origin, '')
   }
 
   // For non-IPFS sources, return the original URL with width and quality
   return `${src}?w=${width}&q=${quality || 75}`
 }
 
-/**
- * Enhanced version of the cidAsURL function that returns the cached version URL
- * @param cid The IPFS content identifier
- * @param width Optional width for the image (default: 800)
- * @param format Optional format for the image (default: webp)
- * @returns URL to the cached image
- */
-export function enhancedCidAsURL(cid?: string, width = 800, format = 'webp') {
-  if (!cid) {
-    return undefined
-  }
-
-  // Return the URL to our cached image API with optimized defaults
-  return `/api/cached-image/${cid}?width=${width}&quality=80&format=${format}`
-}
+// Removed enhancedCidAsURL function to avoid issues with default width parameter

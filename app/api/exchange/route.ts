@@ -4,7 +4,7 @@ import { getUser } from '@/app/api/stytch'
 import { getToken } from '../firebase'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { LRUCache } from 'typescript-lru-cache'
-import { withTracing } from '@/lib/apiWithTracing'
+import { withAPITracing } from '@/lib/apiWithTracing'
 
 export const runtime = 'nodejs'
 
@@ -13,7 +13,7 @@ const validated = new LRUCache<string, Promise<string>>({
   entryExpirationTimeInMS: 1000 * 60 * 30,
 })
 
-export const GET = withTracing(async (req: NextRequest) => {
+export const GET = withAPITracing(async (req: NextRequest) => {
   try {
     const authorization = req.headers
       .get('authorization')

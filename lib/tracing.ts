@@ -5,8 +5,14 @@ import {
   ROOT_CONTEXT,
 } from '@opentelemetry/api'
 
+// Get service name/version from environment or use defaults
+const [serviceName, serviceVersion] = process.env.SERVICE_NAME?.split(':') || [
+  'conciliate-app',
+  '1.0.0',
+]
+
 // Create a tracer for our application
-export const tracer = trace.getTracer('conciliate-app')
+export const tracer = trace.getTracer(serviceName, serviceVersion)
 
 // Export OpenTelemetry constants for convenience
 export { SpanStatusCode, ROOT_CONTEXT }
@@ -20,8 +26,15 @@ export async function withTracing<T>(
     root?: boolean // If true, creates a root span not connected to current context
   }
 ): Promise<T> {
+  // Add service identification to all spans
+  const spanAttributes = {
+    'service.name': serviceName,
+    'service.version': serviceVersion,
+    ...attributes,
+  }
+
   const spanOptions = {
-    attributes: attributes,
+    attributes: spanAttributes,
   }
 
   // Use the specified context or the current context
@@ -29,9 +42,11 @@ export async function withTracing<T>(
 
   return tracer.startActiveSpan(name, spanOptions, ctx, async (span) => {
     try {
-      // Add attributes to the span
+      // Add any additional attributes to the span (service ones already added above)
       Object.entries(attributes).forEach(([key, value]) => {
-        span.setAttribute(key, value)
+        if (!['service.name', 'service.version'].includes(key)) {
+          span.setAttribute(key, value)
+        }
       })
 
       const result = await operation()
@@ -101,14 +116,15 @@ export const logger = {
 }
 
 // Create a middleware for API routes to add tracing
-export const tracingMiddleware = async (
+export async function tracingMiddleware<T>(
   req: Request,
-  handler: (req: Request) => Promise<Response>
-): Promise<Response> => {
+  callContext: T | undefined,
+  handler: (req: Request, callContext?: T) => Promise<Response>
+): Promise<Response> {
   const url = new URL(req.url)
   const spanName = `HTTP ${req.method} ${url.pathname}`
 
-  return withTracing(spanName, () => handler(req), {
+  return withTracing(spanName, () => handler(req, callContext), {
     'http.method': req.method,
     'http.url': url.pathname,
     'http.host': url.host,
@@ -349,7 +365,14 @@ export function createRootSpan(
   name: string,
   attributes: Record<string, string | number | boolean> = {}
 ) {
-  return tracer.startSpan(name, { attributes }, ROOT_CONTEXT)
+  // Always add service identification to root spans
+  const spanAttributes = {
+    'service.name': serviceName,
+    'service.version': serviceVersion,
+    ...attributes,
+  }
+
+  return tracer.startSpan(name, { attributes: spanAttributes }, ROOT_CONTEXT)
 }
 
 export default tracer

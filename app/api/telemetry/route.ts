@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { withTracing } from '@/lib/apiWithTracing'
+import { withAPITracing } from '@/lib/apiWithTracing'
 import { logger } from '@/lib/tracing'
 
 export const runtime = 'nodejs'
 
 // This endpoint collects browser telemetry and forwards it to Google Cloud Trace
 // It acts as a proxy to avoid CORS issues with direct browser-to-trace submissions
-export const POST = withTracing(async (request: NextRequest) => {
+export const POST = withAPITracing(async (request: NextRequest) => {
   try {
     // Extract the telemetry data from the request body
     const telemetryData = await request.json()

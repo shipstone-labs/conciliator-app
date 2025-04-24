@@ -13,11 +13,11 @@ import {
   type SignableMessage,
 } from 'viem'
 import { initAPIConfig } from '@/lib/apiUtils'
-import { withTracing } from '@/lib/apiWithTracing'
+import { withAPITracing } from '@/lib/apiWithTracing'
 
 export const runtime = 'nodejs'
 
-export const POST = withTracing(async (req: NextRequest) => {
+export const POST = withAPITracing(async (req: NextRequest) => {
   try {
     await initAPIConfig()
 
