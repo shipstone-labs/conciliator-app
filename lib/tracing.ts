@@ -116,14 +116,15 @@ export const logger = {
 }
 
 // Create a middleware for API routes to add tracing
-export const tracingMiddleware = async (
+export async function tracingMiddleware<T>(
   req: Request,
-  handler: (req: Request) => Promise<Response>
-): Promise<Response> => {
+  callContext: T | undefined,
+  handler: (req: Request, callContext?: T) => Promise<Response>
+): Promise<Response> {
   const url = new URL(req.url)
   const spanName = `HTTP ${req.method} ${url.pathname}`
 
-  return withTracing(spanName, () => handler(req), {
+  return withTracing(spanName, () => handler(req, callContext), {
     'http.method': req.method,
     'http.url': url.pathname,
     'http.host': url.host,

@@ -19,6 +19,9 @@ import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
 let GrpcInstrumentation: any
 
 async function isRunningInGCP() {
+  if (process.env.FORCE_GCP_FOR_TESTING) {
+    return true
+  }
   try {
     const response = await fetch(
       'http://metadata.google.internal/computeMetadata/v1/instance/id',
@@ -111,18 +114,7 @@ export async function initServerTracing() {
       [ATTR_SERVICE_NAME]: tracingServiceName,
       [ATTR_SERVICE_VERSION]: tracingServiceVersion,
       [ATTR_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
-      'g.co/agent':
-        'opentelemetry-js ^2.0.0; google-cloud-trace-exporter ^2.4.1',
-      'g.co/r/generic_node/namespace':
-        process.env.K_SERVICE || tracingServiceName,
-      'g.co/r/generic_node/node_id':
-        process.env.K_REVISION || tracingServiceVersion,
-      // Add the GCP standard monitored resource labels
-      // These are required for proper service identification in Cloud Trace
-      'cloud.provider': 'gcp',
       'service.namespace': `${tracingServiceName}:${tracingServiceVersion}`,
-      'telemetry.sdk.name': 'opentelemetry',
-      'telemetry.sdk.language': 'nodejs',
     })
 
     // Extract attributes from detected resources and create a new resource
@@ -166,15 +158,18 @@ export async function initServerTracing() {
       exportTimeoutMillis: 30000,
       maxExportBatchSize: 100,
     })
+
     // Create a new SDK instance
     sdk = new NodeSDK({
       resource: combinedResource,
-      spanProcessor,
+      serviceName: `${tracingServiceName}:${tracingServiceVersion}`,
+      spanProcessors: [spanProcessor],
+      traceExporter: exporter,
       instrumentations,
     })
 
     // Initialize the SDK
-    await sdk.start()
+    sdk.start()
     console.log(
       'OpenTelemetry: Server tracing initialized with attributes:',
       Object.fromEntries(
