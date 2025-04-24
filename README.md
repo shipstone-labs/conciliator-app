@@ -2,21 +2,17 @@
 
 SafeIdea (formerly Conciliator) is an open-source platform for creators to securely store, share and monetize their digital intellectual property.
 
-## About Filecoin Hackathon
+**AVAILABLE NOW (ALPHA test mode): Add, Share, Sell Access to, and Create Agents for your Ideas! Try It at SafeIdea.net**
 
-Hi hackathon people - here's the status of this project:
+No wallet required, Web2 friendly web services built on blockchain tools from Filecoin, Storacha, Lilypad and LIT Protocol
 
-**What Works:** add IP, explore IP, discover IP modules work.
+**Available This Weekend**  Model Control Protocol (MCP) is in testing with Agents for your Ideas. Starting this weekend, agents from Anthropic and OpenAI will be able to discover your Ideas and quiz agents about their needs.  
 
-**What doesn't:** transact IP module is in testing. MCP for local AI agent is on hold until we complete MCP testing - we're doing that here: https://github.com/shipstone-labs/mcp-test - and the associated site is https://mcp.safeidea.net. 
-
-**Issues:** add IP is faster but still slow. view IP is better. The agent response is still slow. 
-
-You can test the current version of SafeIdea at https://safeidea.net 
+**What We're Working On:** Working toward a beta release next month, lots of optimization going on right now.  
 
 ## AI Blueprints with Filecoin Challenges
 
-### Filecoin Challenge
+### THANKS SO MUCH! FILECOIN, STORACHA, LILYPAD, LIT == FANTASTIC SUPPORT, THANK YOU!
 
 **Privacy-Preserving AI**: Tools that prioritize privacy of sensitive data, including examples such as training LLMs on datasets with differential privacy, homomorphic encrypted computation, ZK proofs for model outputs and more. 
 **Decentralized AI Infrastructure**: Platform for decentralized AI computation with Filecoin data storage  
