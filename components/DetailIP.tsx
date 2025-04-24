@@ -14,7 +14,6 @@ import Image from 'next/image'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIP, useIPAudit } from '@/hooks/useIP'
 import { formatDate, formatNumber } from '@/lib/types'
-import { enhancedCidAsURL } from '@/lib/ipfsImageLoader'
 import CachedImage from '@/components/CachedImage'
 import { cidAsURL } from '@/lib/internalTypes'
 import { useSession } from '@/hooks/useSession'
@@ -141,10 +140,11 @@ const DetailIP = ({
           break
       }
       const { metadata } = ideaData
-      const { tokenId } = metadata
+      const { tokenId, contract, ...rest } = metadata
       const to = (originalSessionSigs?.address || zeroAddress) as Address
       const docMetadata = {
-        ...metadata,
+        tokenId,
+        ...rest,
         contract_address: metadata?.contract?.address || '',
         contract_name: metadata?.contract?.name || '',
         duration: options.duration,
@@ -311,7 +311,7 @@ const DetailIP = ({
             <CachedImage
               src={
                 ideaData.image?.cid
-                  ? enhancedCidAsURL(ideaData.image.cid) ||
+                  ? `/api/cached-image/${ideaData.image.cid}` ||
                     '/svg/Black+Yellow.svg'
                   : '/svg/Black+Yellow.svg'
               }
