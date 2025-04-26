@@ -4,83 +4,83 @@
 
 @layer base {
   :root {
-    /* Updated SafeIdea.ai theme */
-    --background: 240 14% 13%; /* #1A1B25 */
-    --foreground: 215 26% 76%; /* #B4BCD0 - softer text */
+    /* Crisp, high-contrast light theme - v2 */
+    --background: 0 0% 100%; /* Pure white background */
+    --foreground: 222 47% 11%; /* Much darker text for contrast */
 
-    --card: 240 14% 13%;
-    --card-foreground: 215 26% 76%;
+    --card: 220 14% 96%; /* Very light gray-blue cards */
+    --card-foreground: 222 47% 11%; /* Dark text on cards */
 
-    --popover: 240 14% 13%;
-    --popover-foreground: 215 26% 76%;
+    --popover: 0 0% 100%; /* White popovers */
+    --popover-foreground: 222 47% 11%; /* Dark text on popovers */
 
-    --primary: 198 94% 67%; /* #5CC3FA - bright blue */
-    --primary-foreground: 0 0% 0%;
+    --primary: 202 80% 44%; /* Deeper, more saturated blue for better visibility */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    --secondary: 348 100% 78%; /* #FF91A5 - pink accent */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 340 82% 52%; /* More saturated pink for buttons/accents */
+    --secondary-foreground: 0 0% 100%; /* White text on secondary */
 
-    --muted: 240 14% 25%;
-    --muted-foreground: 210 40% 90%;
+    --muted: 220 14% 94%; /* Very light background for muted areas */
+    --muted-foreground: 220 14% 46%; /* Medium contrast for secondary text */
 
-    --accent: 280 38% 78%; /* #CDB4DB - lavender accent */
-    --accent-foreground: 0 0% 0%;
+    --accent: 262 83% 58%; /* Stronger purple accent */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
 
-    /* Updated yellow accent for branding */
-    --brand: 51 100% 50%; /* gold */
-    --brand-foreground: 0 0% 0%;
+    /* Bold yellow brand color */
+    --brand: 45 93% 47%;
+    --brand-foreground: 0 0% 0%; /* Black text on yellow */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 91% 48%; /* Bright red */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
 
-    --border: 0 0% 100% / 0.1; /* More subtle white borders */
-    --input: 0 0% 100% / 0.1;
-    --ring: 198 94% 67%;
+    --border: 220 13% 85%; /* Visible light gray borders */
+    --input: 220 13% 85%; /* Same for input borders */
+    --ring: 202 80% 44%; /* Matches primary */
 
     --radius: 0.75rem;
 
-    /* Gradient background variables */
-    --gradient-start: 203 47% 36%; /* #2B5B75 */
-    --gradient-end: 240 14% 13%; /* #1A1B25 */
+    /* Gradient background variables - cleaner gradient */
+    --gradient-start: 220 14% 96%; /* Very light blue-gray */
+    --gradient-end: 0 0% 100%; /* Pure white */
   }
 
   .dark {
-    /* Already using dark theme by default */
-    --background: 240 14% 13%; /* #1A1B25 */
-    --foreground: 215 26% 76%; /* #B4BCD0 - softer text */
+    /* Dark theme - Closer to original app style but with better contrast */
+    --background: 240 10% 10%; /* #1A1B25 - Original dark color */
+    --foreground: 210 40% 98%; /* Soft white for better readability */
 
-    --card: 240 14% 13%;
-    --card-foreground: 215 26% 76%;
+    --card: 240 10% 13%; /* #1E1F2C - Slightly lighter than background */
+    --card-foreground: 210 40% 98%; /* Soft white */
 
-    --popover: 240 14% 13%;
-    --popover-foreground: 215 26% 76%;
+    --popover: 240 10% 13%; /* Same as card */
+    --popover-foreground: 210 40% 98%; /* Soft white */
 
-    --primary: 198 94% 67%; /* #5CC3FA - bright blue */
-    --primary-foreground: 0 0% 0%;
+    --primary: 198 94% 67%; /* #5CC3FA - Original bright blue */
+    --primary-foreground: 222.2 47.4% 11.2%; /* Dark text on primary */
 
-    --secondary: 348 100% 78%; /* #FF91A5 - pink accent */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 348 100% 78%; /* #FF91A5 - Original pink accent */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* Dark text on secondary */
 
-    --muted: 240 14% 25%;
-    --muted-foreground: 210 40% 90%;
+    --muted: 240 10% 18%; /* Subtle background */
+    --muted-foreground: 215 20.2% 75.1%; /* Subtle but readable text */
 
-    --accent: 280 38% 78%; /* #CDB4DB - lavender accent */
-    --accent-foreground: 0 0% 0%;
+    --accent: 280 38% 78%; /* #CDB4DB - Original lavender accent */
+    --accent-foreground: 222.2 47.4% 11.2%; /* Dark text on accent */
 
-    /* Updated yellow accent for branding */
+    /* Original yellow accent for branding */
     --brand: 51 100% 50%; /* gold */
-    --brand-foreground: 0 0% 0%;
+    --brand-foreground: 222.2 47.4% 11.2%; /* Dark text on brand */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 210 40% 98%; /* Soft white */
 
-    --border: 0 0% 100% / 0.1; /* More subtle white borders */
-    --input: 0 0% 100% / 0.1;
-    --ring: 198 94% 67%;
+    --border: 217.2 32.6% 30%; /* Subtle border that's visible but not harsh */
+    --input: 217.2 32.6% 30%; /* Same as border */
+    --ring: 198 94% 67%; /* Same as primary */
 
-    /* Gradient background variables */
+    /* Gradient background variables - matches original */
     --gradient-start: 203 47% 36%; /* #2B5B75 */
-    --gradient-end: 240 14% 13%; /* #1A1B25 */
+    --gradient-end: 240 10% 10%; /* #1A1B25 */
   }
 }
 
@@ -93,7 +93,7 @@
   }
 }
 
-/* Markdown styles */
+/* Markdown styles with proper theming support */
 .markdown-content p {
   margin-bottom: 1em;
 }
@@ -103,7 +103,7 @@
 }
 
 .markdown-content strong {
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .markdown-content em {
@@ -123,29 +123,51 @@
 }
 
 .markdown-content a {
-  color: #3b82f6;
+  @apply text-primary;
   text-decoration: underline;
 }
 
+.markdown-content a:hover {
+  @apply text-primary/80;
+}
+
 .markdown-content code {
-  background-color: #f3f4f6;
-  padding: 0.2em 0.4em;
-  border-radius: 0.25em;
-  font-family: monospace;
+  @apply bg-muted text-foreground px-1.5 py-0.5 rounded-md;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
 }
 
 .markdown-content pre {
-  background-color: #f3f4f6;
-  padding: 1em;
-  border-radius: 0.25em;
-  overflow-x: auto;
-  margin-bottom: 1em;
+  @apply bg-muted p-4 rounded-md overflow-x-auto mb-4;
+  position: relative;
+}
+
+.markdown-content pre > code {
+  @apply bg-transparent p-0 text-sm;
+  display: block;
+  counter-reset: line;
 }
 
 .markdown-content blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1em;
-  margin-left: 0;
-  margin-bottom: 1em;
-  color: #6b7280;
+  @apply border-l-4 border-muted pl-4 italic text-muted-foreground;
+  margin: 0 0 1em 0;
+}
+
+/* Better handling for images in markdown */
+.markdown-content img {
+  @apply max-w-full h-auto rounded-md;
+  margin: 1em 0;
+}
+
+/* Better table styling */
+.markdown-content table {
+  @apply w-full border-collapse mb-4;
+}
+
+.markdown-content table th {
+  @apply bg-muted text-foreground font-semibold p-2 text-left border border-border;
+}
+
+.markdown-content table td {
+  @apply p-2 border border-border;
 }

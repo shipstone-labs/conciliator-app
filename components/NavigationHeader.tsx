@@ -15,6 +15,7 @@ import {
 import { AccountModal } from './AccountModal'
 import { useClientTracing } from '@/hooks/useClientTracing'
 import { useSession } from './AuthLayout'
+import { ModeToggle } from './mode-toggle'
 
 export default function NavigationHeader() {
   const router = useRouter()
@@ -101,7 +102,7 @@ export default function NavigationHeader() {
         )}
         <Link
           href="/list-ip"
-          className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+          className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
           onClick={() =>
             traceAction('Navigate', undefined, { destination: '/list-ip' })
           }
@@ -109,6 +110,11 @@ export default function NavigationHeader() {
           Explore Ideas
         </Link>
       </nav>
+
+      {/* Theme toggle */}
+      <div className="flex items-center ml-3">
+        <ModeToggle />
+      </div>
 
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}
       <div className="ml-4">
