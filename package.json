@@ -137,9 +137,11 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@biomejs/biome",
+      "@firebase/util",
       "esbuild",
       "protobufjs",
       "sharp",
+      "unrs-resolver",
       "utf-8-validate"
     ]
   },

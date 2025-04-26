@@ -83,7 +83,7 @@ export async function initServerTracing() {
   // Choose the appropriate exporter based on environment
   const exporter = isGCP
     ? new TraceExporter({
-        resourceFilter: /^(service\.|g.co\/)/,
+        resourceFilter: /^(service\.|g.co\/).*/,
       })
     : new OTLPTraceExporter({
         url:
