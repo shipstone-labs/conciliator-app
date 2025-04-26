@@ -28,6 +28,7 @@ COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 COPY packages/lit-wrapper/package.json ./packages/lit-wrapper/
 COPY packages/web-storage-wrapper/package.json ./packages/web-storage-wrapper/
 COPY packages/lilypad-wrapper/package.json ./packages/lilypad-wrapper/
+COPY patches ./patches
 
 RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
