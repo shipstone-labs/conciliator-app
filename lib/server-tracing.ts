@@ -22,7 +22,9 @@ async function isRunningInGCP(): Promise<false | string> {
       { headers: { 'Metadata-Flavor': 'Google' } }
     )
     if (response.ok) {
-      return response.text()
+      const result = await response.text()
+      console.log('OpenTelemetry: Detected GCP environment, region:', result)
+      return result
     }
     return false
   } catch {
