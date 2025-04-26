@@ -10,14 +10,21 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Modal } from '@/components/ui/modal'
 import { useClientTracing } from '@/hooks/useClientTracing'
 import { useSession } from './AuthLayout'
+import type { AuthPromise } from '@/lib/session'
 
 interface AuthModalProps {
   isOpen: boolean
+  authPromise?: AuthPromise
   onClose?: () => void
   onSuccess?: () => void
 }
 
-export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
+export const AuthModal = ({
+  authPromise,
+  isOpen,
+  onClose,
+  onSuccess,
+}: AuthModalProps) => {
   const stytch = useStytch()
   const { isLoggingOff } = useSession()
   const { traceComponent, traceAction } = useClientTracing()
@@ -147,7 +154,9 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           await stytch?.otps.authenticate(code, methodId, {
             session_duration_minutes: 60,
           })
-
+          if (authPromise) {
+            authPromise.close()
+          }
           // Authentication successful
           setError(null)
 
@@ -177,6 +186,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     handleClose,
     traceAction,
     rememberDevice,
+    authPromise,
   ])
 
   // Reset form to try a different method

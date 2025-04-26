@@ -140,6 +140,7 @@ export default function AuthLayout({
                 isOpen={
                   session.authPromise != null && !session.authPromise.closed
                 }
+                authPromise={session.authPromise}
                 onSuccess={handleAuthSuccess}
               />
             </ClientProviders>

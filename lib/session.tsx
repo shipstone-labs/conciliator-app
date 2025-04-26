@@ -57,6 +57,7 @@ export type Session = Injected & {
   _didNotify: boolean
   _loggingOff?: Promise<void>
   authPromise?: AuthPromise
+  stytchStartup?: Promise<void>
   litClient: SuspendPromise<LitNodeClient>
   setState?: (state: SessionState) => void
   login?: (showAuthModal: boolean) => void
@@ -202,23 +203,34 @@ function constructSession(inject: Partial<Injected>) {
           fromCache: false,
           isInitialized: session.stytchClient != null,
         } as ReturnType<typeof useStytchUser>
-        session.stytchClient.onStateChange((state) => {
+        session.stytchStartup = (async () => {
+          const user = await session.stytchClient.user.get().catch(() => null)
           session._stytchUser = {
-            user: state.user || null,
+            user: user || null,
             fromCache: false,
             isInitialized: session.stytchClient != null,
           } as ReturnType<typeof useStytchUser>
-          notify('isStytchLoggedIn', state.user != null)
-          if (state.user && session.authPromise) {
-            session.authPromise.closed = true
-            session.authPromise.resolve(session._stytchUser?.user)
-            session.authPromise = undefined
+          if (user) {
+            notify('isStytchLoggedIn', user != null)
           }
-          if (!state.user) {
-            session.logout()
-            notify('isStytchLoggedIn', false)
-          }
-        })
+          session.stytchClient.user.onChange((user) => {
+            session._stytchUser = {
+              user: user || null,
+              fromCache: false,
+              isInitialized: session.stytchClient != null,
+            } as ReturnType<typeof useStytchUser>
+            notify('isStytchLoggedIn', user != null)
+            if (user && session.authPromise) {
+              session.authPromise.closed = true
+              session.authPromise.resolve(session._stytchUser?.user)
+              session.authPromise = undefined
+            }
+            if (!user) {
+              session.logout()
+              notify('isStytchLoggedIn', false)
+            }
+          })
+        })()
       }
       if (session._stytchUser?.isInitialized) {
         if (!session._stytchUser?.user) {
@@ -497,6 +509,10 @@ function constructSession(inject: Partial<Injected>) {
       const stytchClient = session.stytchClient
       if (!stytchClient) {
         throw new Error('Stytch client is not initialized')
+      }
+      if (session.stytchStartup) {
+        await session.stytchStartup
+        session.stytchStartup = undefined
       }
       const stytchUser = session._stytchUser
       if (!stytchUser?.isInitialized) {
