@@ -9,6 +9,12 @@ overrides:
   react-dom: ^19.0.0
   '@walletconnect/types': 2.9.2
   '@noble/ed25519': 2.1.0
+  '@google-cloud/opentelemetry-cloud-trace-exporter': ^2.4.1
+
+patchedDependencies:
+  '@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1':
+    hash: 5a8b6051c7fbfeaf29fc36f2f77c942056a58a65521f46934c142b67506517bb
+    path: patches/@google-cloud__opentelemetry-cloud-trace-exporter.patch
 
 importers:
 
@@ -19,7 +25,7 @@ importers:
         version: 5.0.1
       '@google-cloud/opentelemetry-cloud-trace-exporter':
         specifier: ^2.4.1
-        version: 2.4.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/resources@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)
+        version: 2.4.1(patch_hash=5a8b6051c7fbfeaf29fc36f2f77c942056a58a65521f46934c142b67506517bb)(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/resources@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)
       '@google-cloud/opentelemetry-resource-util':
         specifier: ^2.4.0
         version: 2.4.0(@opentelemetry/resources@2.0.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)
@@ -9707,7 +9713,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@google-cloud/opentelemetry-cloud-trace-exporter@2.4.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/resources@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)':
+  '@google-cloud/opentelemetry-cloud-trace-exporter@2.4.1(patch_hash=5a8b6051c7fbfeaf29fc36f2f77c942056a58a65521f46934c142b67506517bb)(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/resources@2.0.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)':
     dependencies:
       '@google-cloud/opentelemetry-resource-util': 2.4.0(@opentelemetry/resources@2.0.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)
       '@grpc/grpc-js': 1.13.3

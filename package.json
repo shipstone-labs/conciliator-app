@@ -143,13 +143,17 @@
       "sharp",
       "unrs-resolver",
       "utf-8-validate"
-    ]
+    ],
+    "patchedDependencies": {
+      "@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1": "patches/@google-cloud__opentelemetry-cloud-trace-exporter.patch"
+    }
   },
   "resolutions": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@walletconnect/types": "2.9.2",
-    "@noble/ed25519": "2.1.0"
+    "@noble/ed25519": "2.1.0",
+    "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.4.1"
   },
   "packageManager": "pnpm@10.7.1",
   "lint-staged": {
