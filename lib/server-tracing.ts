@@ -5,11 +5,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
-import {
-  resourceFromAttributes,
-  processDetector,
-  osDetector,
-} from '@opentelemetry/resources'
+import { resourceFromAttributes } from '@opentelemetry/resources'
 // Import the GCP trace exporter
 import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
 // We need to do a try/catch import for the gRPC instrumentation
@@ -82,7 +78,7 @@ export async function initServerTracing() {
   // Choose the appropriate exporter based on environment
   const exporter = isGCP
     ? new TraceExporter({
-        resourceFilter: /^(service\.)/,
+        resourceFilter: /^(service\.|g.co\/)/,
       })
     : new OTLPTraceExporter({
         url:
@@ -109,6 +105,10 @@ export async function initServerTracing() {
       [ATTR_SERVICE_VERSION]: tracingServiceVersion,
       [ATTR_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
       'service.namespace': `${tracingServiceName}:${tracingServiceVersion}`,
+      'g.co/agent': 'opentelemetry-js 2.0.0; google-cloud-trace-exporter 2.4.1',
+      'g.co/r/generic_node/location': isGCP || 'localhost',
+      'g.co/r/generic_node/namespace': `${tracingServiceName}:${tracingServiceVersion}`,
+      'g.co/r/generic_node/node_id': process.env.K_SERVICE || 'unknown',
     })
 
     // Create the instrumentations array
@@ -144,7 +144,7 @@ export async function initServerTracing() {
     // Create a new SDK instance
     sdk = new NodeSDK({
       resource,
-      resourceDetectors: [processDetector, osDetector],
+      resourceDetectors: [],
       serviceName: `${tracingServiceName}:${tracingServiceVersion}`,
       spanProcessors: [spanProcessor],
       traceExporter: exporter,

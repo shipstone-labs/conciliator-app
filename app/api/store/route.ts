@@ -266,6 +266,9 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
         n: 1,
       })
       .then(async (response) => {
+        if (!response?.data) {
+          return undefined
+        }
         const { url } = response.data[0]
         if (url) {
           const buffer = await fetch(url).then((res) => {
@@ -279,7 +282,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
           return await w3Client.uploadFile(blob)
         }
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error('Errornect generating image:', error)
       })
     const now = new Date()
@@ -332,7 +335,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
           args: [to, tokenId, 1, '0x'],
           nonce,
         })
-        .then(async (hash) => {
+        .then(async (hash: `0x${string}`) => {
           await waitForTransactionReceipt(wallet, {
             hash,
           })
@@ -376,7 +379,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
           args: [tokenId, cidAsURL(metadataCid.toString())],
           nonce,
         })
-        .then(async (hash) => {
+        .then(async (hash: `0x${string}`) => {
           await waitForTransactionReceipt(wallet, {
             hash,
           })
