@@ -14,8 +14,7 @@ import { Button } from '../ui/button'
 import { Loader2 } from 'lucide-react'
 import { Modal } from '../ui/modal'
 import { SortedProducts } from './SortedProducts'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import { ViewNDA } from '../ViewNDA'
 
 type AddStepTermsProps = {
   isLoading: boolean
@@ -47,41 +46,10 @@ export const AddStepTerms = memo(
   }: AddStepTermsProps) => {
     const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
     const [isNdaModalOpen, setIsNdaModalOpen] = useState(false)
-    const [isDocViewerOpen, setIsDocViewerOpen] = useState(false)
     const [selectedDoc, setSelectedDoc] = useState('protected-eval')
-    const [markdownContent, setMarkdownContent] = useState('')
     const [termsAccepted, setTermsAccepted] = useState(false)
     const products = useProducts()
     const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
-
-    // Function to load document content
-    const loadDocumentContent = useCallback(
-      async (docId: string) => {
-        try {
-          const doc = legalDocuments.find((d) => d.id === docId)
-          if (!doc) return
-
-          const response = await fetch(doc.path)
-          if (response.ok) {
-            const markdown = await response.text()
-            setMarkdownContent(markdown)
-          } else {
-            console.error('Failed to load document:', response.statusText)
-            setIPDoc((prev) => ({
-              ...prev,
-              error: `Failed to load document: ${response.statusText}`,
-            }))
-          }
-        } catch (err) {
-          console.error('Error loading document:', err)
-          setIPDoc((prev) => ({
-            ...prev,
-            error: 'Error loading document. Please try again.',
-          }))
-        }
-      },
-      [setIPDoc]
-    )
 
     const handleBusinessModelChange = useCallback(
       (e: ChangeEvent<HTMLSelectElement>) => {
@@ -362,22 +330,17 @@ export const AddStepTerms = memo(
                     className={`flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-muted/40 transition-colors ${selectedDoc === doc.id ? 'border border-primary/50 bg-muted/40' : 'border border-white/20'}`}
                     onClick={() => {
                       setSelectedDoc(doc.id)
-                      loadDocumentContent(doc.id)
                     }}
                   >
                     <span className="text-white/90">{doc.name}</span>
-                    <Button
+                    <ViewNDA
                       size="sm"
                       variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        loadDocumentContent(doc.id)
-                        setIsDocViewerOpen(true)
-                      }}
+                      businessModel={doc.id}
                       className="text-primary hover:text-primary/80 hover:bg-muted/30"
                     >
                       Select Document
-                    </Button>
+                    </ViewNDA>
                   </div>
                 ))}
               </div>
@@ -427,35 +390,6 @@ export const AddStepTerms = memo(
                 disabled={!selectedDoc}
               >
                 OK
-              </Button>
-            </div>
-          </div>
-        </Modal>
-        {/* Document Viewer Modal */}
-        <Modal
-          isOpen={isDocViewerOpen}
-          onClose={() => setIsDocViewerOpen(false)}
-          title="Document Viewer"
-        >
-          <div className="space-y-4">
-            <div className="bg-muted/20 border border-white/10 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
-              <div className="prose prose-invert max-w-none">
-                {markdownContent ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {markdownContent}
-                  </ReactMarkdown>
-                ) : (
-                  <p className="text-white/90">Loading document...</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button
-                onClick={() => setIsDocViewerOpen(false)}
-                className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
-              >
-                Close Document
               </Button>
             </div>
           </div>

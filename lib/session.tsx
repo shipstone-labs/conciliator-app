@@ -155,7 +155,7 @@ export class AuthPromise extends Promise<
     _result: ReturnType<typeof useStytchUser>['user'] | undefined
   ) => {}
   reject = (_error: unknown) => {}
-  constructor() {
+  constructor(private _close?: () => void) {
     let resolve: (
       result: ReturnType<typeof useStytchUser>['user'] | undefined
     ) => void = () => {}
@@ -169,7 +169,9 @@ export class AuthPromise extends Promise<
   }
   close() {
     this.closed = true
-    this.resolve(undefined)
+    if (this._close) {
+      this._close()
+    }
   }
 }
 
@@ -234,7 +236,9 @@ function constructSession(inject: Partial<Injected>) {
         oldSetState !== session.setState &&
         !session._didNotify
       ) {
-        session.setState(session.state)
+        setTimeout(() => {
+          session.setState(session.state)
+        })
       }
     },
     async logout() {
@@ -267,7 +271,9 @@ function constructSession(inject: Partial<Injected>) {
     }
     if (session.setState) {
       session._didNotify = true
-      session.setState(session.state)
+      setTimeout(() => {
+        session.setState(session.state)
+      })
     }
   }
 
@@ -498,9 +504,13 @@ function constructSession(inject: Partial<Injected>) {
       }
       if (!stytchUser?.user) {
         if (!session.authPromise) {
-          session.authPromise = new AuthPromise()
+          session.authPromise = new AuthPromise(() => {
+            notify('isStytchLoggedIn', false)
+          })
+          notify('isStytchLoggedIn', true)
           return session.authPromise.finally(() => {
             session.authPromise = undefined
+            notify('isStytchLoggedIn', true)
           })
         }
         return session.authPromise

@@ -51,19 +51,15 @@ export function handleError(
 export function useIP(
   docId: string
 ): (IPDoc & { deals?: IPDeal[]; canView?: boolean }) | undefined {
-  const { fbPromise, fbUser } = useSession()
-  if (!fbUser && fbPromise) {
-    throw fbPromise
-  }
   const [ideaData, setIdeaData] = useState<
     (IPDoc & { deals?: IPDeal[]; canView?: boolean }) | undefined
   >()
   const { user } = useStytchUser()
+  const session = useSession()
+  if (user != null) {
+    session.fbUser.value()
+  }
   useEffect(() => {
-    if (!user) {
-      setIdeaData(undefined)
-      return
-    }
     const snapshots: (() => void)[] = []
     let deals: Array<IPDeal & { id: string }> = []
     const fs = getFirestore()
@@ -83,10 +79,10 @@ export function useIP(
 
             setIdeaData((prev) => {
               const hasAccess =
-                prev?.creator === user.user_id ||
+                prev?.creator === user?.user_id ||
                 deals.filter(
                   (doc) =>
-                    doc.owner === user.user_id &&
+                    doc.owner === user?.user_id &&
                     (doc.expiresAt == null ||
                       doc.expiresAt.toDate() > new Date()) &&
                     doc.status === 'completed'
@@ -96,10 +92,10 @@ export function useIP(
                 ...casted,
                 deals: deals
                   .filter((doc) => {
-                    if (prev?.creator === user.user_id) {
+                    if (prev?.creator === user?.user_id) {
                       return true
                     }
-                    return doc.owner === user.user_id
+                    return doc.owner === user?.user_id
                   })
                   .map((doc) => {
                     if (doc.expiresAt && doc.expiresAt.toDate() < new Date()) {
@@ -136,10 +132,10 @@ export function useIP(
           })
           setIdeaData((prev) => {
             const hasAccess =
-              prev?.creator === user.user_id ||
+              prev?.creator === user?.user_id ||
               deals.filter(
                 (doc) =>
-                  doc.owner === user.user_id &&
+                  doc.owner === user?.user_id &&
                   (doc.expiresAt == null ||
                     doc.expiresAt.toDate() > new Date()) &&
                   doc.status === 'completed'
@@ -151,10 +147,10 @@ export function useIP(
               dealsCount,
               deals: deals
                 .filter((doc) => {
-                  if (prev?.creator === user.user_id) {
+                  if (prev?.creator === user?.user_id) {
                     return true
                   }
-                  return doc.owner === user.user_id
+                  return doc.owner === user?.user_id
                 })
                 .map((doc) => {
                   if (doc.expiresAt && doc.expiresAt.toDate() < new Date()) {
