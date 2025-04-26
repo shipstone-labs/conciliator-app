@@ -21,7 +21,10 @@ async function isRunningInGCP(): Promise<false | string> {
       'http://metadata.google.internal/computeMetadata/v1/instance/region',
       { headers: { 'Metadata-Flavor': 'Google' } }
     )
-    return response.json()
+    if (response.ok) {
+      return response.text()
+    }
+    return false
   } catch {
     return false
   }
