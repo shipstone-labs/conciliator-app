@@ -82,6 +82,7 @@ export default function NavigationHeader() {
             onClick={() =>
               traceAction('Navigate', undefined, { destination: '/add-ip' })
             }
+            data-testid="nav-add-idea-link"
           >
             Add Idea
           </Link>
