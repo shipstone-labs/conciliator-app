@@ -7,10 +7,8 @@ import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
 import {
   resourceFromAttributes,
-  envDetector,
   processDetector,
   osDetector,
-  defaultResource,
 } from '@opentelemetry/resources'
 // Import the GCP trace exporter
 import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
@@ -83,9 +81,7 @@ export async function initServerTracing() {
   // Then in your initialization code:
   // Choose the appropriate exporter based on environment
   const exporter = isGCP
-    ? new TraceExporter({
-        resourceFilter: /service\..*/,
-      })
+    ? new TraceExporter()
     : new OTLPTraceExporter({
         url:
           process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
@@ -96,38 +92,18 @@ export async function initServerTracing() {
       })
 
   try {
-    // Create resources by detecting and merging
-    const baseResource = defaultResource()
-
-    // The detectors are already instantiated - just call detect() directly
-    const envResource = await envDetector.detect()
-    const processResource = await processDetector.detect()
-    const osResource = await osDetector.detect()
-
     const [tracingServiceName, tracingServiceVersion] =
       process.env.SERVICE_NAME?.split(':') || [
         'conciliate-app-backend',
         'unknown',
       ]
     // Create our custom resource with the service attributes
-    const customResource = resourceFromAttributes({
+    const resource = resourceFromAttributes({
       [ATTR_SERVICE_NAME]: `${tracingServiceName}:${tracingServiceVersion}`,
       [ATTR_SERVICE_VERSION]: tracingServiceVersion,
       [ATTR_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
       'service.namespace': `${tracingServiceName}:${tracingServiceVersion}`,
     })
-
-    // Extract attributes from detected resources and create a new resource
-    const allAttributes = {
-      ...baseResource.attributes,
-      ...envResource.attributes,
-      ...processResource.attributes,
-      ...osResource.attributes,
-      ...customResource.attributes,
-    }
-
-    // Create a combined resource from all attributes
-    const combinedResource = resourceFromAttributes(allAttributes)
 
     // Create the instrumentations array
     const instrumentations = [
@@ -161,7 +137,8 @@ export async function initServerTracing() {
 
     // Create a new SDK instance
     sdk = new NodeSDK({
-      resource: combinedResource,
+      resource,
+      resourceDetectors: [processDetector, osDetector],
       serviceName: `${tracingServiceName}:${tracingServiceVersion}`,
       spanProcessors: [spanProcessor],
       traceExporter: exporter,
@@ -172,11 +149,7 @@ export async function initServerTracing() {
     sdk.start()
     console.log(
       'OpenTelemetry: Server tracing initialized with attributes:',
-      Object.fromEntries(
-        Object.entries(combinedResource.attributes).filter(
-          ([key]) => key.startsWith('service.') || key.startsWith('deployment.')
-        )
-      )
+      resource.attributes
     )
 
     // Add shutdown hook to clean up resources
