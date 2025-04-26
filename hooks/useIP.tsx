@@ -16,6 +16,7 @@ import {
   doc,
   documentId,
   type DocumentReference,
+  type DocumentSnapshot,
   getFirestore,
   limit,
   onSnapshot,
@@ -219,7 +220,7 @@ export function useIPs({
     pages: number
   }>()
   const [pages, setPages] = useState<
-    Record<number, DocumentReference | undefined>
+    Record<number, DocumentSnapshot | undefined>
   >({ 1: undefined })
   const [additionalDocs, setAdditionalDocs] = useState<string[]>()
   useEffect(() => {
@@ -243,7 +244,7 @@ export function useIPs({
       qry = query(qry, startAfter(_startAfter))
     }
     qry = query(qry, limit(_limit))
-    let last: DocumentReference | undefined = undefined
+    let last: DocumentSnapshot | undefined = undefined
     const snapshots: (() => void)[] = []
     if (owner) {
       snapshots.push(
@@ -285,7 +286,7 @@ export function useIPs({
         (docsSnap) => {
           last = undefined
           const data = docsSnap.docs.map((doc) => {
-            last = doc.ref
+            last = doc
             return castToUIDoc({ ...doc.data(), id: doc.id } as IPDoc)
           })
           const _pages = pages
