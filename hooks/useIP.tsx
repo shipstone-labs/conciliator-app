@@ -284,10 +284,6 @@ export function useIPs({
         qry,
         (docsSnap) => {
           last = undefined
-          console.log(
-            'RetrievedDocs',
-            docsSnap.docs.map((doc) => doc.id)
-          )
           const data = docsSnap.docs.map((doc) => {
             last = doc.ref
             return castToUIDoc({ ...doc.data(), id: doc.id } as IPDoc)

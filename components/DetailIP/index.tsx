@@ -117,16 +117,17 @@ const DetailIP = ({
     if (isViewLoading.current) {
       return
     }
+    if (!ipDoc?.canView || !view) {
+      return
+    }
+    fbUser.value()
     const doFetch = async () => {
       if (
         ipDoc?.canView &&
         !viewed &&
-        !isViewLoading.current &&
-        view &&
         ipDoc?.encrypted?.cid &&
         delegatedSessionSigs
       ) {
-        await fbUser.wait()
         isViewLoading.current = true
         const url = cidAsURL(ipDoc.encrypted.cid)
         if (!url) {
