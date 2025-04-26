@@ -83,9 +83,7 @@ export async function initServerTracing() {
   // Then in your initialization code:
   // Choose the appropriate exporter based on environment
   const exporter = isGCP
-    ? new TraceExporter({
-        resourceFilter: /^service\..*/,
-      })
+    ? new TraceExporter()
     : new OTLPTraceExporter({
         url:
           process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
