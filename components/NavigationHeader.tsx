@@ -79,7 +79,7 @@ export default function NavigationHeader() {
         {isAuthenticated && (
           <Link
             href="/add-ip"
-            className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+            className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
             onClick={() =>
               traceAction('Navigate', undefined, { destination: '/add-ip' })
             }
@@ -90,7 +90,7 @@ export default function NavigationHeader() {
         )}
         <Link
           href="/list-ip"
-          className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+          className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
           onClick={() =>
             traceAction('Navigate', undefined, { destination: '/list-ip' })
           }
