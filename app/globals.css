@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Crisp, high-contrast light theme */
+    /* Crisp, high-contrast light theme - v2 */
     --background: 0 0% 100%; /* Pure white background */
     --foreground: 222 47% 11%; /* Much darker text for contrast */
 

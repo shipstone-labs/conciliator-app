@@ -42,7 +42,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <div className="flex flex-col min-h-screen">
             <AuthLayout appConfig={appConfig}>{children}</AuthLayout>
           </div>

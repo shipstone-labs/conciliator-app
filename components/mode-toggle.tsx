@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
@@ -11,7 +12,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function ModeToggle() {
-  const { setTheme } = useTheme()
+  const { setTheme, theme } = useTheme()
+  
+  // Force light theme on initial component mount
+  // This ensures the component's effect runs client-side
+  React.useEffect(() => {
+    if (theme !== 'light' && theme !== 'dark') {
+      setTheme('light')
+    }
+  }, [setTheme, theme])
 
   return (
     <DropdownMenu>
