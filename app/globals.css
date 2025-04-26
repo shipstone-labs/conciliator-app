@@ -4,44 +4,44 @@
 
 @layer base {
   :root {
-    /* Light theme - Based on Radix Colors */
-    --background: 0 0% 100%; /* Pure white */
-    --foreground: 222.2 47.4% 11.2%; /* Slate 12 */
+    /* Crisp, high-contrast light theme */
+    --background: 0 0% 100%; /* Pure white background */
+    --foreground: 222 47% 11%; /* Much darker text for contrast */
 
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 222.2 47.4% 11.2%; /* Slate 12 */
+    --card: 220 14% 96%; /* Very light gray-blue cards */
+    --card-foreground: 222 47% 11%; /* Dark text on cards */
 
-    --popover: 0 0% 100%; /* White */
-    --popover-foreground: 222.2 47.4% 11.2%; /* Slate 12 */
+    --popover: 0 0% 100%; /* White popovers */
+    --popover-foreground: 222 47% 11%; /* Dark text on popovers */
 
-    --primary: 198 93% 60%; /* Brand blue - slightly adjusted */
-    --primary-foreground: 210 40% 98%; /* White text on primary */
+    --primary: 202 80% 44%; /* Deeper, more saturated blue for better visibility */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    --secondary: 348 100% 76%; /* Brand pink - slightly adjusted */
-    --secondary-foreground: 210 40% 98%; /* White text on secondary */
+    --secondary: 340 82% 52%; /* More saturated pink for buttons/accents */
+    --secondary-foreground: 0 0% 100%; /* White text on secondary */
 
-    --muted: 210 40% 96.1%; /* Slate 3 - subtle background */
-    --muted-foreground: 215.4 16.3% 46.9%; /* Slate 11 - subtle text */
+    --muted: 220 14% 94%; /* Very light background for muted areas */
+    --muted-foreground: 220 14% 46%; /* Medium contrast for secondary text */
 
-    --accent: 280 42% 74%; /* Brand lavender - slightly adjusted */
-    --accent-foreground: 222.2 47.4% 11.2%; /* Slate 12 - dark text on accent */
+    --accent: 262 83% 58%; /* Stronger purple accent */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
 
-    /* Brand yellow */
-    --brand: 47 95% 50%;
-    --brand-foreground: 222.2 47.4% 11.2%; /* Slate 12 - dark text on yellow */
+    /* Bold yellow brand color */
+    --brand: 45 93% 47%;
+    --brand-foreground: 0 0% 0%; /* Black text on yellow */
 
-    --destructive: 0 84.2% 60.2%; /* Red 9 */
-    --destructive-foreground: 210 40% 98%; /* White text on destructive */
+    --destructive: 0 91% 48%; /* Bright red */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
 
-    --border: 214.3 31.8% 91.4%; /* Slate 6 */
-    --input: 214.3 31.8% 91.4%; /* Slate 6 */
-    --ring: 198 93% 60%; /* Same as primary */
+    --border: 220 13% 85%; /* Visible light gray borders */
+    --input: 220 13% 85%; /* Same for input borders */
+    --ring: 202 80% 44%; /* Matches primary */
 
     --radius: 0.75rem;
 
-    /* Gradient background variables */
-    --gradient-start: 210 30% 95.9%; /* Light blue-gray */
-    --gradient-end: 0 0% 100%; /* White */
+    /* Gradient background variables - cleaner gradient */
+    --gradient-start: 220 14% 96%; /* Very light blue-gray */
+    --gradient-end: 0 0% 100%; /* Pure white */
   }
 
   .dark {
