@@ -145,7 +145,7 @@
       "utf-8-validate"
     ],
     "patchedDependencies": {
-      "@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1": "patches/@google-cloud__opentelemetry-cloud-trace-exporter.patch"
+      "@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1": "/Users/andy/Development/my-conciliate-app/patches/@google-cloud__opentelemetry-cloud-trace-exporter.patch"
     }
   },
   "resolutions": {

@@ -1,0 +1,45 @@
+diff --git a/build/src/trace.js b/build/src/trace.js
+index 2610e885a8a47f71c098bf91fa66875207c4db01..db967d1ef90b79539a2862e28eece2acec8d9ebb 100644
+--- a/build/src/trace.js
++++ b/build/src/trace.js
+@@ -60,7 +60,7 @@ class TraceExporter {
+      * @param spans The list of spans to transmit to Google Cloud Trace
+      */
+     async export(spans, resultCallback) {
+-        if (this._projectId instanceof Promise) {
++        if (this._projectId && typeof this._projectId === 'object' && 'then' in this._projectId) {
+             this._projectId = await this._projectId;
+         }
+         if (!this._projectId) {
+diff --git a/build/src/transform.js b/build/src/transform.js
+index 958d1313026c1882b14e798241c49623f3140383..13e147728479ec8245038879f4510cab6f683ae1 100644
+--- a/build/src/transform.js
++++ b/build/src/transform.js
+@@ -145,7 +145,7 @@ function mergeAttributes(...attributeList) {
+     return attributesOut;
+ }
+ function transformResourceToAttributes(resource, projectId, resourceFilter, stringifyArrayAttributes) {
+-    const monitoredResource = (0, opentelemetry_resource_util_1.mapOtelResourceToMonitoredResource)(resource);
++    // const monitoredResource = (0, opentelemetry_resource_util_1.mapOtelResourceToMonitoredResource)(resource);
+     const attributes = {};
+     if (resourceFilter) {
+         Object.keys(resource.attributes)
+@@ -155,12 +155,12 @@ function transformResourceToAttributes(resource, projectId, resourceFilter, stri
+         });
+     }
+     // global is the "default" so just skip
+-    if (monitoredResource.type !== 'global') {
+-        Object.keys(monitoredResource.labels).forEach(labelKey => {
+-            const key = `g.co/r/${monitoredResource.type}/${labelKey}`;
+-            attributes[key] = monitoredResource.labels[labelKey];
+-        });
+-    }
++    // if (monitoredResource.type !== 'global') {
++    //     Object.keys(monitoredResource.labels).forEach(labelKey => {
++    //         const key = `g.co/r/${monitoredResource.type}/${labelKey}`;
++    //         attributes[key] = monitoredResource.labels[labelKey];
++    //     });
++    // }
+     return spanAttributesToGCTAttributes(attributes, stringifyArrayAttributes);
+ }
+ function transformAttributeValues(attributes, stringifyArrayAttributes) {
