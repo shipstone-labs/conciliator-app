@@ -11,6 +11,8 @@ import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
+import type { AppConfig } from './session'
+import { useConfig } from '@/components/AuthLayout'
 
 // Define attribute keys (standard, not deprecated)
 const ATTR_SERVICE_NAME = 'service.name'
@@ -19,7 +21,7 @@ const ATTR_DEPLOYMENT_ENVIRONMENT = 'deployment.environment'
 
 let isInitialized = false
 
-export function initBrowserTracing() {
+export function initBrowserTracing(config: AppConfig) {
   // Only run in browser and only initialize once
   if (typeof window === 'undefined' || isInitialized) {
     return
@@ -28,7 +30,8 @@ export function initBrowserTracing() {
   try {
     console.log('Initializing browser tracing')
 
-    const serviceName = 'conciliate-app-frontend'
+    const serviceName =
+      (config.SERVICE_NAME as string) || 'conciliate-app:unknown'
 
     // Create a custom resource with the service attributes
     const customResource = resourceFromAttributes({
@@ -136,8 +139,9 @@ export function createClientSpan(
 
 // Export a hook for React components
 export function useTracing() {
+  const config = useConfig()
   if (!isInitialized && typeof window !== 'undefined') {
-    initBrowserTracing()
+    initBrowserTracing(config)
   }
 
   return {

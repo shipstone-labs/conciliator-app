@@ -96,10 +96,7 @@ export async function initServerTracing() {
 
   try {
     const [tracingServiceName, tracingServiceVersion] =
-      process.env.SERVICE_NAME?.split(':') || [
-        'conciliate-app-backend',
-        'unknown',
-      ]
+      process.env.SERVICE_NAME?.split(':') || ['conciliate-app', 'unknown']
     // Create our custom resource with the service attributes
     const resource = resourceFromAttributes({
       'cloud.platform': 'cloudrun-ignore',
