@@ -33,7 +33,7 @@ interface ViewNDAProps {
 }
 
 export function ViewNDA({
-  businessModel = 'Protected Evaluation',
+  businessModel = 'protected-eval',
   variant = 'outline',
   className = '',
   size = 'default',
