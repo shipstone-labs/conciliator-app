@@ -11,7 +11,6 @@ export default function ipfsImageLoader({
   width,
   quality,
 }: ImageLoaderProps) {
-  console.log('IPFS Image Loader:', src, width, quality)
   // Check if this is an IPFS URL
   if (src.includes('w3s.link/ipfs/')) {
     // Extract the CID from the IPFS URL

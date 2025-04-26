@@ -37,7 +37,7 @@ const DetailIP = ({
     litClient: _litClient,
     delegatedSessionSigs,
     sessionSigs,
-    state,
+    fbUser,
   } = useSession()
   const ipDoc = useIP(docId)
 
@@ -49,31 +49,34 @@ const DetailIP = ({
       if (!ipDoc) {
         return
       }
+      await fbUser.wait()
       const db = getFirestore()
       let duration = 0
       switch (options.duration) {
         case 'day':
-          duration = 24 * 3600 * 1000 // 1 day
+          duration = 24 * 3600 * 1000000 // 1 day
           break
         case 'week':
-          duration = 7 * 24 * 3600 * 1000 // 7 days
+          duration = 7 * 24 * 3600 * 1000000 // 7 days
           break
         case 'year':
-          duration = 365 * 24 * 3600 * 1000 // 1 year
+          duration = 365 * 24 * 3600 * 1000000 // 1 year
           break
         case 'month':
-          duration = 30 * 24 * 3600 * 1000 // 30 days
+          duration = 30 * 24 * 3600 * 1000000 // 30 days
           break
       }
       const { metadata } = ipDoc
-      const { tokenId } = metadata
+      const { tokenId, contract, ...rest } = metadata
       const originalSessionSigs = await sessionSigs.wait()
       const to = (originalSessionSigs?.address || zeroAddress) as Address
       const docMetadata = {
-        ...metadata,
-        contract_address: metadata?.contract?.address || '',
-        contract_name: metadata?.contract?.name || '',
+        ...rest,
+        contract_address: contract?.address || '',
+        contract_name: contract?.name || '',
         duration: options.duration,
+        docId,
+        tokenId,
       }
       const docRef = await addDoc(
         collection(db, 'customers', user?.user_id || '', 'checkout_sessions'),
@@ -81,16 +84,11 @@ const DetailIP = ({
           mode: 'payment',
           success_url: window.location.href,
           cancel_url: window.location.href,
-          ...options,
           price: options.price.id,
           metadata: {
             ...docMetadata,
             owner: user?.user_id,
-            tokenId,
             to,
-            contract_name: ipDoc?.metadata?.contract?.name || '',
-            contract_address: ipDoc?.metadata?.contract?.address || '',
-            docId,
             duration,
             expiration: Date.now() + duration,
           },
@@ -113,7 +111,7 @@ const DetailIP = ({
         handleError(docRef)
       )
     },
-    [user?.user_id, docId, ipDoc, sessionSigs]
+    [user?.user_id, docId, ipDoc, sessionSigs, fbUser]
   )
   useEffect(() => {
     if (isViewLoading.current) {
@@ -122,13 +120,13 @@ const DetailIP = ({
     const doFetch = async () => {
       if (
         ipDoc?.canView &&
-        state.isFirebaseLoggedIn &&
         !viewed &&
         !isViewLoading.current &&
         view &&
         ipDoc?.encrypted?.cid &&
         delegatedSessionSigs
       ) {
+        await fbUser.wait()
         isViewLoading.current = true
         const url = cidAsURL(ipDoc.encrypted.cid)
         if (!url) {
@@ -216,15 +214,7 @@ const DetailIP = ({
       }
     }
     doFetch()
-  }, [
-    ipDoc,
-    view,
-    viewed,
-    _litClient,
-    delegatedSessionSigs,
-    docId,
-    state.isFirebaseLoggedIn,
-  ])
+  }, [ipDoc, view, viewed, fbUser, _litClient, delegatedSessionSigs, docId])
   if (!ipDoc) {
     return (
       <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden p-8">

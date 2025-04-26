@@ -81,14 +81,15 @@ export function useIP(
             } as IPDoc)
 
             setIdeaData((prev) => {
-              const hasAccess = prev?.creator === user.user_id
-              deals.filter(
-                (doc) =>
-                  doc.owner === user.user_id &&
-                  (doc.expiresAt == null ||
-                    doc.expiresAt.toDate() > new Date()) &&
-                  doc.status === 'active'
-              ).length > 0
+              const hasAccess =
+                prev?.creator === user.user_id ||
+                deals.filter(
+                  (doc) =>
+                    doc.owner === user.user_id &&
+                    (doc.expiresAt == null ||
+                      doc.expiresAt.toDate() > new Date()) &&
+                    doc.status === 'completed'
+                ).length > 0
               return {
                 ...prev,
                 ...casted,
@@ -108,7 +109,7 @@ export function useIP(
                     }
                     return doc
                   }),
-                canView: hasAccess || prev?.creator === user.user_id,
+                canView: hasAccess,
               } as IPDoc & { deals?: IPDeal[]; canView?: boolean }
             })
           }
@@ -133,14 +134,15 @@ export function useIP(
             } as IPDealJSON & { id: string })
           })
           setIdeaData((prev) => {
-            const hasAccess = prev?.creator === user.user_id
-            deals.filter(
-              (doc) =>
-                doc.owner === user.user_id &&
-                (doc.expiresAt == null ||
-                  doc.expiresAt.toDate() > new Date()) &&
-                doc.status === 'active'
-            ).length > 0
+            const hasAccess =
+              prev?.creator === user.user_id ||
+              deals.filter(
+                (doc) =>
+                  doc.owner === user.user_id &&
+                  (doc.expiresAt == null ||
+                    doc.expiresAt.toDate() > new Date()) &&
+                  doc.status === 'completed'
+              ).length > 0
             const dealsCount = deals.length
             return {
               id: actualDocId,
@@ -162,7 +164,7 @@ export function useIP(
                   }
                   return doc
                 }),
-              canView: hasAccess || prev?.creator === user.user_id,
+              canView: hasAccess,
             } as IPDoc
           })
         },

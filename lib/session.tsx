@@ -212,6 +212,10 @@ function constructSession(inject: Partial<Injected>) {
             session.authPromise.resolve(session._stytchUser?.user)
             session.authPromise = undefined
           }
+          if (!state.user) {
+            session.logout()
+            notify('isStytchLoggedIn', false)
+          }
         })
       }
       if (session._stytchUser?.isInitialized) {

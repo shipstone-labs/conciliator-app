@@ -5,7 +5,6 @@ import { getUser } from '../stytch'
 import { filecoinCalibration } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 import { getLit } from '../utils'
-import type { Timestamp } from 'firebase-admin/firestore'
 import {
   createWalletClient,
   getAddress,
@@ -14,6 +13,7 @@ import {
 } from 'viem'
 import { initAPIConfig } from '@/lib/apiUtils'
 import { withAPITracing } from '@/lib/apiWithTracing'
+import type { IPDeal } from '@/lib/types'
 
 export const runtime = 'nodejs'
 
@@ -28,30 +28,28 @@ export const POST = withAPITracing(async (req: NextRequest) => {
     }
     const fs = getFirestore()
     const doc = await fs.collection('ip').doc(id).get()
-    const deals =
-      doc.exists &&
-      (doc.data() as { creator?: string }).creator === user.user.user_id
-        ? [{ expiresAt: undefined }]
-        : await fs
+    const deals: IPDeal[] = doc.exists
+      ? (doc.data() as { creator?: string }).creator === user.user.user_id
+        ? [{ id: '', status: 'complete' } as IPDeal]
+        : ((await fs
             .collection('ip')
             .doc(id)
             .collection('deals')
-            .where('to', '==', user.user.user_id)
-            .orderBy('createdAt', 'desc')
+            .where('owner', '==', user.user.user_id)
             .get()
             .then((snapshot) =>
-              snapshot.docs.map(
-                (doc) =>
-                  ({
-                    ...doc.data(),
-                    id: doc.id,
-                  }) as { id: string; expiresAt?: Timestamp }
-              )
+              snapshot.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id,
+              }))
             )
-            .catch(() => [])
+            .catch(() => [])) as IPDeal[])
+      : ([] as IPDeal[])
     const now = new Date()
     const hasAccess = deals.some(
-      (deal) => deal.expiresAt === undefined || deal.expiresAt.toDate() > now
+      (deal) =>
+        (deal.expiresAt === undefined || deal.expiresAt.toDate() > now) &&
+        deal.status === 'completed'
     )
     if (!hasAccess) {
       return new NextResponse(

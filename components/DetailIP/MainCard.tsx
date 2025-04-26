@@ -48,7 +48,6 @@ export const MainCard = ({ ipDoc, onBuy }: MainCardProps) => {
     const orders = ['day', 'week', 'month', 'year']
     if (prices.length === 0) {
       // Ignore them if they are empty for now
-      console.log('No prices found for this idea, so defaulting to first ones.')
       for (const product of Object.values(products)) {
         if (
           product.metadata?.duration &&
