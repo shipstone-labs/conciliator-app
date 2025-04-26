@@ -13,7 +13,7 @@ import {
 
 export function ModeToggle() {
   const { setTheme, theme } = useTheme()
-  
+
   // Force light theme on initial component mount
   // This ensures the component's effect runs client-side
   React.useEffect(() => {
