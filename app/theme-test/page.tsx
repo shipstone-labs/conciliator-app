@@ -19,9 +19,9 @@ export default function ThemeTestPage() {
             should appear in the top right.
           </p>
           <p>
-            Note: Since we haven&apos;t yet integrated the ThemeProvider in the
-            root layout, the toggle won&apos;t actually change the theme yet.
-            This is just to verify the components render correctly.
+            Click the toggle button to switch between light, dark, and system
+            themes. The icon in the button will update to reflect the current
+            theme.
           </p>
         </CardContent>
       </Card>

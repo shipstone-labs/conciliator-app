@@ -4,6 +4,7 @@ import './globals.css'
 import { appConfig } from './config.mjs'
 import { getServerConfig } from '@/lib/getServerConfig'
 import nextDynamic from 'next/dynamic'
+import { ThemeProvider } from '@/components/theme-provider'
 
 export const runtime = 'nodejs'
 
@@ -39,11 +40,13 @@ export default async function RootLayout({
   const appConfig = await getServerConfig()
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <div className="flex flex-col min-h-screen">
-          <AuthLayout appConfig={appConfig}>{children}</AuthLayout>
-        </div>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <div className="flex flex-col min-h-screen">
+            <AuthLayout appConfig={appConfig}>{children}</AuthLayout>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   )
