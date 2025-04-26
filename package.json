@@ -94,6 +94,7 @@
     "tailwind-merge": "^3.1.0",
     "typescript-lru-cache": "^2.0.0",
     "undici": "^7.8.0",
+    "use-debounce": "^10.0.4",
     "utf-8-validate": "^6.0.5",
     "uuid": "^11.1.0",
     "viem": "^2.25.0",

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 
 interface ModalProps {
@@ -39,9 +40,10 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   if (!isOpen) return null
 
-  return (
+  // The modal content
+  const modalContent = (
     <div
-      className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
       style={{ paddingTop: '2rem', paddingBottom: '2rem' }}
       onClick={handleBackdropClick}
     >
@@ -70,4 +72,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       </div>
     </div>
   )
+
+  // Use createPortal to render the modal at the document body level
+  return typeof document === 'undefined'
+    ? null
+    : createPortal(modalContent, document.body)
 }

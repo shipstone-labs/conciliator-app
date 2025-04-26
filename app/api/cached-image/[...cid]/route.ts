@@ -24,13 +24,17 @@ const RESIZABLE_FORMATS = [
   'image/gif',
 ]
 
-export const GET = withAPITracing(
+export const GET = withAPITracing<{ params: Promise<{ cid: string[] }> }>(
   async (
     request: NextRequest,
-    { params: _params }: { params: Promise<{ cid: string[] }> }
+    context: { params: Promise<{ cid: string[] }> }
   ) => {
     await initAPIConfig()
 
+    const { params: _params } = context || {}
+    if (!_params) {
+      throw new Error('Missing context params')
+    }
     // Handle splat route - join all segments
     const params = await _params
     const cidPath = params.cid.join('/')

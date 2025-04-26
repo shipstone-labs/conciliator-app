@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AccountModal } from './AccountModal'
-import { useSession } from '@/hooks/useSession'
 import { useClientTracing } from '@/hooks/useClientTracing'
+import { useSession } from './AuthLayout'
 
 export default function NavigationHeader() {
   const router = useRouter()
@@ -46,6 +46,7 @@ export default function NavigationHeader() {
           await stytchClient.session.revoke()
           router.replace('/')
         } catch (error) {
+          router.replace('/')
           console.error('Logout error:', error)
           alert('Unable to log out, try again later')
           setLoggingOff(false)

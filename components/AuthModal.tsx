@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useStytch } from '@stytch/nextjs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Modal } from '@/components/ui/modal'
-import { sessionContext } from './Authenticated'
 import { useClientTracing } from '@/hooks/useClientTracing'
+import { useSession } from './AuthLayout'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -19,7 +19,7 @@ interface AuthModalProps {
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const stytch = useStytch()
-  const { isLoggingOff } = useContext(sessionContext)
+  const { isLoggingOff } = useSession()
   const { traceComponent, traceAction } = useClientTracing()
 
   // Trace component lifecycle
