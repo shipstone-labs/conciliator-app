@@ -15,6 +15,7 @@ import {
 import { AccountModal } from './AccountModal'
 import { useClientTracing } from '@/hooks/useClientTracing'
 import { useSession } from './AuthLayout'
+import { ModeToggle } from './mode-toggle'
 
 export default function NavigationHeader() {
   const router = useRouter()
@@ -97,6 +98,11 @@ export default function NavigationHeader() {
           Explore Ideas
         </Link>
       </nav>
+
+      {/* Theme toggle */}
+      <div className="flex items-center ml-3">
+        <ModeToggle />
+      </div>
 
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}
       <div className="ml-4">
