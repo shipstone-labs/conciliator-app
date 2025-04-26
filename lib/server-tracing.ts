@@ -84,7 +84,7 @@ export async function initServerTracing() {
   // Choose the appropriate exporter based on environment
   const exporter = isGCP
     ? new TraceExporter({
-        resourceFilter: /^service\..*/,
+        resourceFilter: /service\..*/,
       })
     : new OTLPTraceExporter({
         url:
@@ -111,7 +111,7 @@ export async function initServerTracing() {
       ]
     // Create our custom resource with the service attributes
     const customResource = resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: tracingServiceName,
+      [ATTR_SERVICE_NAME]: `${tracingServiceName}:${tracingServiceVersion}`,
       [ATTR_SERVICE_VERSION]: tracingServiceVersion,
       [ATTR_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
       'service.namespace': `${tracingServiceName}:${tracingServiceVersion}`,

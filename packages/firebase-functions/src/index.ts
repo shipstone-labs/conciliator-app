@@ -242,9 +242,9 @@ export const stripeStarted = onDocumentUpdated(
         const durations:
           | Record<'day' | 'week' | 'month', number>
           | { [key: string]: number } = {
-          day: 60 * 60 * 24 * 1000, // Times in ms.
-          week: 60 * 60 * 24 * 7 * 1000,
-          month: 60 * 60 * 24 * 30 * 1000,
+          day: 60 * 60 * 24 * 1000000, // Times in ms.
+          week: 60 * 60 * 24 * 7 * 1000000,
+          month: 60 * 60 * 24 * 30 * 1000000,
         }
         if (!_duration || !(_duration in durations)) {
           error('No or invalid duration found', _duration)

@@ -2,7 +2,7 @@ import { useStytch, useStytchUser } from '@stytch/nextjs'
 import { type PropsWithChildren, useCallback } from 'react'
 import { Button } from './ui/button'
 import { useRouter } from 'next/navigation'
-import { useSession } from '@/hooks/useSession'
+import { useSession } from './AuthLayout'
 
 export default function LogoffButton({
   children,

@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AccountModal } from './AccountModal'
-import { useSession } from '@/hooks/useSession'
 import { useClientTracing } from '@/hooks/useClientTracing'
+import { useSession } from './AuthLayout'
 
 export default function NavigationHeader() {
   const router = useRouter()
@@ -46,6 +46,7 @@ export default function NavigationHeader() {
           await stytchClient.session.revoke()
           router.replace('/')
         } catch (error) {
+          router.replace('/')
           console.error('Logout error:', error)
           alert('Unable to log out, try again later')
           setLoggingOff(false)
@@ -75,15 +76,28 @@ export default function NavigationHeader() {
       {/* Main menu items - simplified without Menubar */}
       <nav className="flex items-center space-x-6 flex-grow">
         {isAuthenticated && (
-          <Link
-            href="/add-ip"
-            className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
-            onClick={() =>
-              traceAction('Navigate', undefined, { destination: '/add-ip' })
-            }
-          >
-            Add Idea
-          </Link>
+          <>
+            <Link
+              href="/add-ip"
+              className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+              onClick={() =>
+                traceAction('Navigate', undefined, { destination: '/add-ip' })
+              }
+            >
+              Add Idea
+            </Link>
+            <Link
+              href="/list-ip/mine"
+              className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+              onClick={() =>
+                traceAction('Navigate', undefined, {
+                  destination: '/list-ip/mine',
+                })
+              }
+            >
+              My Ideas
+            </Link>
+          </>
         )}
         <Link
           href="/list-ip"

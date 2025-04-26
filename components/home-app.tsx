@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Logo } from './Logo'
-import AuthenticatedLayout from '@/app/authLayout'
 import { AuthButton } from './AuthButton'
 import { useStytchUser } from '@stytch/nextjs'
 // LogoffButton import removed
@@ -108,11 +107,7 @@ function HomeApp() {
 }
 
 function RootHomeApp() {
-  return (
-    <AuthenticatedLayout>
-      <HomeApp />
-    </AuthenticatedLayout>
-  )
+  return <HomeApp />
 }
 
 export default RootHomeApp
