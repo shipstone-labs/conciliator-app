@@ -14,7 +14,7 @@ import { Button } from '../ui/button'
 import { Loader2 } from 'lucide-react'
 import { Modal } from '../ui/modal'
 import { SortedProducts } from './SortedProducts'
-import { ViewNDA } from '../ViewNDA'
+import { legalDocuments, ViewNDA } from '../ViewNDA'
 
 type AddStepTermsProps = {
   isLoading: boolean
@@ -25,15 +25,6 @@ type AddStepTermsProps = {
   status: IPAudit | undefined
   setLocalStatus: Dispatch<SetStateAction<string>>
 }
-
-// Available legal documents
-const legalDocuments = [
-  {
-    id: 'protected-eval',
-    name: 'SafeIdea Protected Evaluation Agreement',
-    path: '/legal-docs/protected-eval.md',
-  },
-]
 
 export const AddStepTerms = memo(
   ({
@@ -54,7 +45,7 @@ export const AddStepTerms = memo(
     const handleBusinessModelChange = useCallback(
       (e: ChangeEvent<HTMLSelectElement>) => {
         const { value: _value } = e.target
-        const value = _value || 'Intellectual Property'
+        const value = _value || ''
         setIPDoc((prev) => ({
           ...prev,
           category: value,
@@ -232,18 +223,15 @@ export const AddStepTerms = memo(
                 className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
                 data-testid="business-model-select"
               >
-                <option
-                  value="Protected Evaluation"
-                  data-testid="ip-protected-eval-option"
-                >
-                  Protected Evaluation
-                </option>
-                <option value="Provisional Patent" disabled>
-                  Provisional Patent
-                </option>
-                <option value="One Year Subscription" disabled>
-                  One Year Subscription
-                </option>
+                {legalDocuments.map((doc) => (
+                  <option
+                    key={doc.id}
+                    value={doc.id}
+                    data-testid={`ip-business-model-option-${doc.id}`}
+                  >
+                    {doc.name}
+                  </option>
+                ))}
               </select>
               <p className="text-xs text-white/60 mt-1">
                 Additional business models coming soon
