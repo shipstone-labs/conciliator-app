@@ -10,7 +10,7 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { trace } from '@opentelemetry/api'
+import { SpanStatusCode, trace } from '@opentelemetry/api'
 
 // Define attribute keys (standard, not deprecated)
 const ATTR_SERVICE_NAME = 'service.name'
@@ -118,10 +118,16 @@ export function createClientSpan(
 
       // Execute the function
       const result = fn?.()
+      // Explicitly mark span as successful
+      span.setStatus({ code: SpanStatusCode.OK })
       span.end()
       return result
     } catch (error) {
       span.recordException(error as Error)
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: error instanceof Error ? error.message : String(error),
+      })
       span.end()
       throw error
     }
@@ -152,10 +158,16 @@ export function useTracing() {
 
           // Execute the function
           const result = await fn?.()
+          // Explicitly mark span as successful
+          span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return result
         } catch (error) {
           span.recordException(error as Error)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error instanceof Error ? error.message : String(error),
+          })
           span.end()
           throw error
         }
