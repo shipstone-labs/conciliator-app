@@ -4,83 +4,83 @@
 
 @layer base {
   :root {
-    /* Light theme */
-    --background: 0 0% 100%; /* #FFFFFF */
-    --foreground: 240 10% 30%; /* #424453 - dark text */
+    /* Light theme - Based on Radix Colors */
+    --background: 0 0% 100%; /* Pure white */
+    --foreground: 222.2 47.4% 11.2%; /* Slate 12 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 30%;
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 222.2 47.4% 11.2%; /* Slate 12 */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 30%;
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 222.2 47.4% 11.2%; /* Slate 12 */
 
-    --primary: 198 94% 67%; /* #5CC3FA - bright blue (same as dark) */
-    --primary-foreground: 0 0% 0%;
+    --primary: 198 93% 60%; /* Brand blue - slightly adjusted */
+    --primary-foreground: 210 40% 98%; /* White text on primary */
 
-    --secondary: 348 100% 78%; /* #FF91A5 - pink accent (same as dark) */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 348 100% 76%; /* Brand pink - slightly adjusted */
+    --secondary-foreground: 210 40% 98%; /* White text on secondary */
 
-    --muted: 210 20% 90%; /* Light gray */
-    --muted-foreground: 240 10% 40%;
+    --muted: 210 40% 96.1%; /* Slate 3 - subtle background */
+    --muted-foreground: 215.4 16.3% 46.9%; /* Slate 11 - subtle text */
 
-    --accent: 280 38% 78%; /* #CDB4DB - lavender accent (same as dark) */
-    --accent-foreground: 0 0% 0%;
+    --accent: 280 42% 74%; /* Brand lavender - slightly adjusted */
+    --accent-foreground: 222.2 47.4% 11.2%; /* Slate 12 - dark text on accent */
 
-    /* Updated yellow accent for branding */
-    --brand: 51 100% 50%; /* gold (same as dark) */
-    --brand-foreground: 0 0% 0%;
+    /* Brand yellow */
+    --brand: 47 95% 50%;
+    --brand-foreground: 222.2 47.4% 11.2%; /* Slate 12 - dark text on yellow */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%; /* Red 9 */
+    --destructive-foreground: 210 40% 98%; /* White text on destructive */
 
-    --border: 240 10% 50% / 0.1; /* Subtle gray borders */
-    --input: 240 10% 50% / 0.1;
-    --ring: 198 94% 67%;
+    --border: 214.3 31.8% 91.4%; /* Slate 6 */
+    --input: 214.3 31.8% 91.4%; /* Slate 6 */
+    --ring: 198 93% 60%; /* Same as primary */
 
     --radius: 0.75rem;
 
     /* Gradient background variables */
-    --gradient-start: 210 30% 90%; /* Light blue-gray */
+    --gradient-start: 210 30% 95.9%; /* Light blue-gray */
     --gradient-end: 0 0% 100%; /* White */
   }
 
   .dark {
-    /* Dark theme (original app style) */
-    --background: 240 14% 13%; /* #1A1B25 */
-    --foreground: 215 26% 76%; /* #B4BCD0 - softer text */
+    /* Dark theme - Closer to original app style but with better contrast */
+    --background: 240 10% 10%; /* #1A1B25 - Original dark color */
+    --foreground: 210 40% 98%; /* Soft white for better readability */
 
-    --card: 240 14% 13%;
-    --card-foreground: 215 26% 76%;
+    --card: 240 10% 13%; /* #1E1F2C - Slightly lighter than background */
+    --card-foreground: 210 40% 98%; /* Soft white */
 
-    --popover: 240 14% 13%;
-    --popover-foreground: 215 26% 76%;
+    --popover: 240 10% 13%; /* Same as card */
+    --popover-foreground: 210 40% 98%; /* Soft white */
 
-    --primary: 198 94% 67%; /* #5CC3FA - bright blue */
-    --primary-foreground: 0 0% 0%;
+    --primary: 198 94% 67%; /* #5CC3FA - Original bright blue */
+    --primary-foreground: 222.2 47.4% 11.2%; /* Dark text on primary */
 
-    --secondary: 348 100% 78%; /* #FF91A5 - pink accent */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 348 100% 78%; /* #FF91A5 - Original pink accent */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* Dark text on secondary */
 
-    --muted: 240 14% 25%;
-    --muted-foreground: 210 40% 90%;
+    --muted: 240 10% 18%; /* Subtle background */
+    --muted-foreground: 215 20.2% 75.1%; /* Subtle but readable text */
 
-    --accent: 280 38% 78%; /* #CDB4DB - lavender accent */
-    --accent-foreground: 0 0% 0%;
+    --accent: 280 38% 78%; /* #CDB4DB - Original lavender accent */
+    --accent-foreground: 222.2 47.4% 11.2%; /* Dark text on accent */
 
-    /* Updated yellow accent for branding */
+    /* Original yellow accent for branding */
     --brand: 51 100% 50%; /* gold */
-    --brand-foreground: 0 0% 0%;
+    --brand-foreground: 222.2 47.4% 11.2%; /* Dark text on brand */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 210 40% 98%; /* Soft white */
 
-    --border: 0 0% 100% / 0.1; /* More subtle white borders */
-    --input: 0 0% 100% / 0.1;
-    --ring: 198 94% 67%;
+    --border: 217.2 32.6% 30%; /* Subtle border that's visible but not harsh */
+    --input: 217.2 32.6% 30%; /* Same as border */
+    --ring: 198 94% 67%; /* Same as primary */
 
-    /* Gradient background variables */
+    /* Gradient background variables - matches original */
     --gradient-start: 203 47% 36%; /* #2B5B75 */
-    --gradient-end: 240 14% 13%; /* #1A1B25 */
+    --gradient-end: 240 10% 10%; /* #1A1B25 */
   }
 }
 
@@ -93,7 +93,7 @@
   }
 }
 
-/* Markdown styles */
+/* Markdown styles with proper theming support */
 .markdown-content p {
   margin-bottom: 1em;
 }
@@ -103,7 +103,7 @@
 }
 
 .markdown-content strong {
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .markdown-content em {
@@ -127,26 +127,47 @@
   text-decoration: underline;
 }
 
-/* Light theme markdown code blocks */
+.markdown-content a:hover {
+  @apply text-primary/80;
+}
+
 .markdown-content code {
-  @apply bg-muted text-foreground;
-  padding: 0.2em 0.4em;
-  border-radius: 0.25em;
-  font-family: monospace;
+  @apply bg-muted text-foreground px-1.5 py-0.5 rounded-md;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
 }
 
 .markdown-content pre {
-  @apply bg-muted;
-  padding: 1em;
-  border-radius: 0.25em;
-  overflow-x: auto;
-  margin-bottom: 1em;
+  @apply bg-muted p-4 rounded-md overflow-x-auto mb-4;
+  position: relative;
+}
+
+.markdown-content pre > code {
+  @apply bg-transparent p-0 text-sm;
+  display: block;
+  counter-reset: line;
 }
 
 .markdown-content blockquote {
-  @apply border-muted text-muted-foreground;
-  border-left-width: 4px;
-  padding-left: 1em;
-  margin-left: 0;
-  margin-bottom: 1em;
+  @apply border-l-4 border-muted pl-4 italic text-muted-foreground;
+  margin: 0 0 1em 0;
+}
+
+/* Better handling for images in markdown */
+.markdown-content img {
+  @apply max-w-full h-auto rounded-md;
+  margin: 1em 0;
+}
+
+/* Better table styling */
+.markdown-content table {
+  @apply w-full border-collapse mb-4;
+}
+
+.markdown-content table th {
+  @apply bg-muted text-foreground font-semibold p-2 text-left border border-border;
+}
+
+.markdown-content table td {
+  @apply p-2 border border-border;
 }
