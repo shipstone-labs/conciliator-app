@@ -16,16 +16,16 @@ import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter'
 // to handle cases where the module can't be loaded
 let GrpcInstrumentation: any
 
-async function isRunningInGCP() {
+async function isRunningInGCP(): Promise<false | string> {
   if (process.env.FORCE_GCP_FOR_TESTING) {
-    return true
+    return 'localhost'
   }
   try {
     const response = await fetch(
-      'http://metadata.google.internal/computeMetadata/v1/instance/id',
+      'http://metadata.google.internal/computeMetadata/v1/instance/region',
       { headers: { 'Metadata-Flavor': 'Google' } }
     )
-    return response.ok
+    return response.json()
   } catch {
     return false
   }
@@ -101,6 +101,10 @@ export async function initServerTracing() {
       ]
     // Create our custom resource with the service attributes
     const resource = resourceFromAttributes({
+      'cloud.platform': 'cloudrun-ignore',
+      'cloud.region': isGCP || 'localhost',
+      'host.name': process.env.K_SERVICE || 'unknown',
+      'host.id': process.env.K_REVISION || 'unknown',
       [ATTR_SERVICE_NAME]: `${tracingServiceName}:${tracingServiceVersion}`,
       [ATTR_SERVICE_VERSION]: tracingServiceVersion,
       [ATTR_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
