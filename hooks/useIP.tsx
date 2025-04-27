@@ -195,16 +195,20 @@ export function useIPs({
     if (!myItems) {
       return {}
     }
-    const creator = where(
-      'creator',
-      '==',
-      user?.user_id
-    ) as unknown as QueryCompositeFilterConstraint
-    const owner = where(
-      'owner',
-      '==',
-      user?.user_id
-    ) as unknown as QueryCompositeFilterConstraint
+    const creator = user?.user_id
+      ? (where(
+          'creator',
+          '==',
+          user?.user_id
+        ) as unknown as QueryCompositeFilterConstraint)
+      : undefined
+    const owner = user?.user_id
+      ? (where(
+          'owner',
+          '==',
+          user?.user_id
+        ) as unknown as QueryCompositeFilterConstraint)
+      : undefined
     return { creator, owner }
   }, [user?.user_id, myItems])
   const { fbPromise, fbUser } = useSession()
