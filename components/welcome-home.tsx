@@ -3,12 +3,7 @@
 import Link from 'next/link'
 import { Logo } from './Logo'
 import { AuthButton } from './AuthButton'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 // This is the logged-out version of the home page
 function WelcomeHome() {
@@ -22,8 +17,8 @@ function WelcomeHome() {
         />
       </div>
       
-      <div className="flex flex-col items-center min-h-screen">
-        <Logo className="mt-16" />
+      <div className="flex flex-col items-center min-h-screen pt-16">
+        <Logo />
         
         {/* Hero Section */}
         <section className="w-full py-12 md:py-24 lg:py-32">
