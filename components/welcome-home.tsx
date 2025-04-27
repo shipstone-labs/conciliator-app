@@ -163,12 +163,12 @@ function WelcomeHome() {
                   Sign up in seconds with our passwordless authentication
                   system.
                 </p>
-                <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-2 h-48 mx-auto">
-                  <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-primary/10">
+                <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-3 h-64 mx-auto max-w-xs">
+                  <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors">
                     <img
-                      src="/svg/Black+Yellow.svg"
+                      src="/safeidea_cycle/1_protecting_ideas.png"
                       alt="Create Account"
-                      className="w-1/2 h-1/2 object-contain"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 </div>
@@ -184,12 +184,12 @@ function WelcomeHome() {
                   Upload your documents, describe your idea, and set visibility
                   preferences.
                 </p>
-                <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-2 h-48 mx-auto">
-                  <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-secondary/10">
+                <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-3 h-64 mx-auto max-w-xs">
+                  <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors">
                     <img
-                      src="/file.svg"
+                      src="/safeidea_cycle/2_sharing_ideas.png"
                       alt="Upload Idea"
-                      className="w-1/2 h-1/2 object-contain"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 </div>
@@ -207,12 +207,12 @@ function WelcomeHome() {
                   Your idea is timestamped, encrypted, and ready for safe
                   sharing and collaboration.
                 </p>
-                <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-2 h-48 mx-auto">
-                  <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-accent/10">
+                <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-3 h-64 mx-auto max-w-xs">
+                  <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors">
                     <img
-                      src="/globe.svg"
+                      src="/safeidea_cycle/3_sales_agent.png"
                       alt="Share Ideas"
-                      className="w-1/2 h-1/2 object-contain"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 </div>
