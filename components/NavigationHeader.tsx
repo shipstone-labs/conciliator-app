@@ -58,7 +58,10 @@ export default function NavigationHeader() {
   }
 
   return (
-    <div className="flex w-full items-center justify-between" data-testid="nav-container">
+    <div
+      className="flex w-full items-center justify-between"
+      data-testid="nav-container"
+    >
       {/* Logo on left */}
       <Link
         href="/"
@@ -76,7 +79,10 @@ export default function NavigationHeader() {
       </Link>
 
       {/* Main menu items - simplified without Menubar */}
-      <nav className="flex items-center space-x-6 flex-grow" data-testid="nav-main-menu">
+      <nav
+        className="flex items-center space-x-6 flex-grow"
+        data-testid="nav-main-menu"
+      >
         {isAuthenticated && (
           <>
             <Link
@@ -123,7 +129,10 @@ export default function NavigationHeader() {
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}
       <div className="ml-4" data-testid="nav-account-menu">
         <DropdownMenu>
-          <DropdownMenuTrigger className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30" data-testid="nav-dropdown-trigger">
+          <DropdownMenuTrigger
+            className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30"
+            data-testid="nav-dropdown-trigger"
+          >
             <Menu className="h-5 w-5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -151,7 +160,10 @@ export default function NavigationHeader() {
             )}
             {!isAuthenticated && (
               <Link href="/" className="block">
-                <DropdownMenuItem className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer" data-testid="nav-dropdown-signin">
+                <DropdownMenuItem
+                  className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer"
+                  data-testid="nav-dropdown-signin"
+                >
                   Sign In
                 </DropdownMenuItem>
               </Link>
