@@ -16,7 +16,6 @@ type CachedImageProps = {
   className?: string
   fallbackSrc?: string
   priority?: boolean
-  responsive?: boolean
   [key: string]: unknown
 }
 
@@ -34,7 +33,6 @@ const CachedImage = React.memo(function CachedImage({
   className = '',
   fallbackSrc = '/svg/Black+Yellow.svg',
   priority = false,
-  responsive = false,
   ...props
 }: CachedImageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -96,6 +94,8 @@ const CachedImage = React.memo(function CachedImage({
       className="relative overflow-hidden"
       style={
         {
+          width: typeof width === 'number' ? `${width}px` : width,
+          height: typeof height === 'number' ? `${height}px` : height,
           '--loader-opacity': priority ? '0' : '1',
           '--image-opacity': priority ? '1' : '0',
         } as React.CSSProperties
@@ -131,7 +131,6 @@ const CachedImage = React.memo(function CachedImage({
           priority={priority}
           onLoad={handleLoadComplete}
           onError={handleError}
-          style={responsive ? undefined : { width: 'auto', height: 'auto' }}
           {...props}
         />
       </div>

@@ -26,6 +26,8 @@ export type SessionState = {
   isFirebaseLoggedIn: boolean
   isLitActivated: boolean
   isLoggingOff?: boolean
+  isVisible?: boolean
+  isFocused?: boolean
 }
 
 export const DefaultState: SessionState = {
@@ -37,6 +39,11 @@ export const DefaultState: SessionState = {
   isLitDeletegated: undefined,
   isFirebaseLoggedIn: false,
   isLoggingOff: false,
+  isVisible:
+    typeof document !== 'undefined'
+      ? document.visibilityState === 'visible'
+      : true,
+  isFocused: true,
 } as const
 
 type Injected = {
@@ -235,18 +242,34 @@ function constructSession(inject: Partial<Injected>) {
           isInitialized: session.stytchClient != null,
         } as ReturnType<typeof useStytchUser>
         session.stytchStartup = (async () => {
-          if (typeof window === 'undefined') {
+          if (
+            typeof window === 'undefined' ||
+            typeof document === 'undefined'
+          ) {
             return
           }
-          const user = await session.stytchClient.user.get().catch(() => null)
-          session._stytchUser = {
-            user: user || null,
-            fromCache: false,
-            isInitialized: session.stytchClient != null,
-          } as ReturnType<typeof useStytchUser>
-          if (user) {
-            session.notify('isStytchLoggedIn', user != null)
+          let detectingSession: Promise<void> | undefined
+          const detectSession = async (force = false) => {
+            if (session.state.isStytchLoggedIn && !force) {
+              return
+            }
+            if (detectingSession) {
+              return detectingSession
+            }
+            detectingSession = (async () => {
+              const user = await session.stytchClient.user
+                .get()
+                .catch(() => null)
+              session._stytchUser = {
+                user: user || null,
+                fromCache: false,
+                isInitialized: session.stytchClient != null,
+              } as ReturnType<typeof useStytchUser>
+              session.notify('isStytchLoggedIn', user != null)
+            })()
+            return await detectingSession
           }
+          await detectSession(true)
           session.stytchClient.user.onChange((user) => {
             session._stytchUser = {
               user: user || null,
@@ -263,6 +286,26 @@ function constructSession(inject: Partial<Injected>) {
               session.logout()
               session.notify('isStytchLoggedIn', false)
             }
+          })
+          // Add event listener                                                                                                                                                                                                                                                                                                                        │ │
+          document.addEventListener('visibilitychange', () => {
+            if (
+              document.visibilityState === 'visible' &&
+              !session.state.isVisible
+            ) {
+              detectSession()
+            }
+            session.notify('isVisible', document.visibilityState === 'visible')
+          })
+          // Bonus: Also handle when window gets focus or loses focus                                                                                                                                                                                                                                                                                  │ │
+          window.addEventListener('focus', () => {
+            if (!session.state.isFocused) {
+              detectSession()
+            }
+            session.notify('isFocused', true)
+          })
+          window.addEventListener('blur', () => {
+            session.notify('isFocused', false)
           })
         })()
       }
