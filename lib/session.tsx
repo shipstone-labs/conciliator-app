@@ -249,7 +249,7 @@ function constructSession(inject: Partial<Injected>) {
         !session._didNotify
       ) {
         setTimeout(() => {
-          session.setState(session.state)
+          session.setState?.(session.state)
         })
       }
     },
@@ -284,7 +284,7 @@ function constructSession(inject: Partial<Injected>) {
     if (session.setState) {
       session._didNotify = true
       setTimeout(() => {
-        session.setState(session.state)
+        session.setState?.(session.state)
       })
     }
   }
