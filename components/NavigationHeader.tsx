@@ -76,7 +76,7 @@ export default function NavigationHeader() {
 
       {/* Main menu items - simplified without Menubar */}
       <nav className="flex items-center space-x-6 flex-grow">
-        {isAuthenticated && (
+        {isInitialized && (
           <>
             <Link
               href="/add-ip"

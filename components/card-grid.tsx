@@ -13,6 +13,7 @@ import Link from 'next/link'
 // No need to import enhancedCidAsURL
 import { useIPs } from '@/hooks/useIP'
 import CachedImage from '@/components/CachedImage'
+import { useSession } from './AuthLayout'
 
 function getImageWidth() {
   const screenWidth = typeof window === 'undefined' ? 640 : window.innerWidth
@@ -33,6 +34,7 @@ type CardGridProps = {
 function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
   const [imageWidth, setImageWidth] = useState(getImageWidth()) // Default width
   const [currentPage, setCurrentPage] = useState(1)
+  useSession(myItems ? ['stytchUser', 'fbUser'] : [])
   const { data: visibleItems, pages: totalPages } = useIPs({
     orderBy: 'createdAt',
     orderDirection: 'desc',

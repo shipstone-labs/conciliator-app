@@ -42,14 +42,16 @@ export function useConfig() {
 export function useSession(
   items: ('stytchUser' | 'fbUser' | 'sessionSigs')[] = []
 ) {
-  const session = useSyncExternalStore(
+  const session = globalSession as Session
+  useSyncExternalStore(
     globalSession?.subscribe ||
       ((_onStoreChange: () => void) => {
         return () => {}
       }),
-    () => globalSession as Session,
-    () => globalSession as Session
+    () => (globalSession as Session).state,
+    () => (globalSession as Session).state
   )
+  console.log('useSession', session.state)
   if (typeof window !== 'undefined') {
     for (const key of items) {
       const result = (
@@ -76,6 +78,7 @@ export default function AuthLayout({
   initializeConfig(appConfig)
 
   const session = useSession()
+  console.log('useSession', session.state, session.authPromise)
   // Handle successful authentication
   const handleAuthSuccess = useCallback(() => {
     if (session?.authPromise) {
@@ -120,6 +123,14 @@ export default function AuthLayout({
         <StytchProvider stytch={session.stytchClient}>
           <TooltipProvider>
             <ClientProviders>
+              <AuthModal
+                onClose={onClose}
+                isOpen={
+                  session.authPromise != null && !session.authPromise.closed
+                }
+                authPromise={session.authPromise}
+                onSuccess={handleAuthSuccess}
+              />
               <Suspense fallback={<Loading />}>
                 {/* Wrap with ConfigProvider to make config available to all components */}
                 <header className="fixed top-0 left-0 right-0 z-10 bg-[#2B5B75] border-b border-border/40 h-16 flex items-center px-4">
@@ -130,14 +141,6 @@ export default function AuthLayout({
                 </main>
               </Suspense>
               <Footer />
-              <AuthModal
-                onClose={onClose}
-                isOpen={
-                  session.authPromise != null && !session.authPromise.closed
-                }
-                authPromise={session.authPromise}
-                onSuccess={handleAuthSuccess}
-              />
             </ClientProviders>
           </TooltipProvider>
         </StytchProvider>
