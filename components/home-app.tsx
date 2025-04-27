@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Logo } from './Logo'
-import { AuthButton } from './AuthButton'
 import { useStytchUser } from '@stytch/nextjs'
 // LogoffButton import removed
 import {
