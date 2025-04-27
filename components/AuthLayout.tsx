@@ -9,6 +9,7 @@ import {
   useEffect,
   type PropsWithChildren,
   useMemo,
+  useSyncExternalStore,
 } from 'react'
 import { useState } from 'react'
 import Loading from '@/components/Loading'
@@ -43,11 +44,13 @@ export function useConfig() {
 }
 
 export function useSession() {
-  const context = useContext(sessionContext)
-  if (context == null) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
+  return useSyncExternalStore(
+    globalSession?.subscribe ||
+      ((_onStoreChange: () => void) => {
+        return () => {}
+      }),
+    () => globalSession as Session
+  )
 }
 
 /**

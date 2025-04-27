@@ -19,6 +19,7 @@ export const revalidate = 3600
 
 export type SessionState = {
   isStytchLoggedIn: boolean
+  isStytchDialogOpen: boolean
   isInitialized: boolean
   isLitLoggedIn: boolean
   isLitDeletegated?: string
@@ -29,6 +30,7 @@ export type SessionState = {
 
 export const DefaultState: SessionState = {
   isStytchLoggedIn: false,
+  isStytchDialogOpen: false,
   isInitialized: false,
   isLitActivated: false,
   isLitLoggedIn: false,
@@ -56,6 +58,7 @@ type Injected = {
 export type Session = Injected & {
   _didNotify: boolean
   _loggingOff?: Promise<void>
+  _listeners?: Array<() => void>
   authPromise?: AuthPromise
   stytchStartup?: Promise<void>
   litClient: SuspendPromise<LitNodeClient>
@@ -81,6 +84,11 @@ export type Session = Injected & {
   >
   inject: (inject: Partial<Injected>) => void
   logout: () => Promise<void>
+  subscribe: (listener: () => void) => () => void
+  notify: (
+    name: keyof SessionState,
+    value: string | boolean | undefined
+  ) => void
 }
 
 export class SuspendPromise<T, A extends unknown[] = []> {
@@ -180,6 +188,27 @@ function constructSession(inject: Partial<Injected>) {
   const session: Session = {
     _didNotify: false,
     state: Object.assign({}, DefaultState),
+    notify(name: keyof SessionState, value: string | boolean | undefined) {
+      if (session.state[name] === value) {
+        return
+      }
+      session.state = {
+        ...session.state,
+        [name]: value,
+      }
+      for (const listener of session._listeners || []) {
+        listener()
+      }
+    },
+    subscribe(listener: () => void) {
+      if (!session._listeners) {
+        session._listeners = []
+      }
+      session._listeners.push(listener)
+      return () => {
+        session._listeners = session._listeners?.filter((l) => l !== listener)
+      }
+    },
     inject(inject: Partial<Injected>) {
       const oldSetState = session.setState
       session._didNotify = false
@@ -195,7 +224,7 @@ function constructSession(inject: Partial<Injected>) {
             session._stytchUser?.isInitialized &&
             session._stytchUser?.user
           ) {
-            notify('isFirebaseLoggedIn', true)
+            session.notify('isFirebaseLoggedIn', true)
           }
         })
         session._stytchUser = {
@@ -211,7 +240,7 @@ function constructSession(inject: Partial<Injected>) {
             isInitialized: session.stytchClient != null,
           } as ReturnType<typeof useStytchUser>
           if (user) {
-            notify('isStytchLoggedIn', user != null)
+            session.notify('isStytchLoggedIn', user != null)
           }
           session.stytchClient.user.onChange((user) => {
             session._stytchUser = {
@@ -219,7 +248,7 @@ function constructSession(inject: Partial<Injected>) {
               fromCache: false,
               isInitialized: session.stytchClient != null,
             } as ReturnType<typeof useStytchUser>
-            notify('isStytchLoggedIn', user != null)
+            session.notify('isStytchLoggedIn', user != null)
             if (user && session.authPromise) {
               session.authPromise.closed = true
               session.authPromise.resolve(session._stytchUser?.user)
@@ -227,7 +256,7 @@ function constructSession(inject: Partial<Injected>) {
             }
             if (!user) {
               session.logout()
-              notify('isStytchLoggedIn', false)
+              session.notify('isStytchLoggedIn', false)
             }
           })
         })()
@@ -235,12 +264,12 @@ function constructSession(inject: Partial<Injected>) {
       if (session._stytchUser?.isInitialized) {
         if (!session._stytchUser?.user) {
           if (!session._fbUser) {
-            notify('isFirebaseLoggedIn', false)
+            session.notify('isFirebaseLoggedIn', false)
             signOut(getAuth())
           }
-          notify('isStytchLoggedIn', false)
+          session.notify('isStytchLoggedIn', false)
         } else {
-          notify('isStytchLoggedIn', true)
+          session.notify('isStytchLoggedIn', true)
         }
       }
       if (
@@ -257,37 +286,18 @@ function constructSession(inject: Partial<Injected>) {
       if (session._loggingOff) {
         return await session._loggingOff
       }
-      notify('isLoggingOff', true)
+      session.notify('isLoggingOff', true)
       this._loggingOff = (async () => {
         await this.delegatedSessionSigs.clear()
         await this.sessionSigs.clear()
         await this.litClient.clear()
         await this.fbUser.clear()
         await this.stytchUser.clear()
-        notify('isLoggingOff', false)
+        session.notify('isLoggingOff', false)
       })()
       await this._loggingOff
     },
   } as Session
-
-  const notify = (
-    name: keyof SessionState,
-    value: string | boolean | undefined
-  ) => {
-    if (session.state[name] === value) {
-      return
-    }
-    session.state = {
-      ...session.state,
-      [name]: value,
-    }
-    if (session.setState) {
-      session._didNotify = true
-      setTimeout(() => {
-        session.setState?.(session.state)
-      })
-    }
-  }
 
   session.litClient = new SuspendPromise<LitNodeClient>(
     session,
@@ -298,7 +308,7 @@ function constructSession(inject: Partial<Injected>) {
         litNetwork: litModule.LIT_NETWORK.Datil,
       })
       await litClient.connect()
-      notify('isLitActivated', true)
+      session.notify('isLitActivated', true)
       return litClient
     },
     async () => {
@@ -362,7 +372,7 @@ function constructSession(inject: Partial<Injected>) {
       session._sessionSigsTimeout = setTimeout(() => {
         session.sessionSigs.clear()
       }, duration - 5000)
-      notify('isLitLoggedIn', true)
+      session.notify('isLitLoggedIn', true)
       return {
         authMethod,
         address: pkp.ethAddress as `0x${string}`,
@@ -375,7 +385,7 @@ function constructSession(inject: Partial<Injected>) {
         clearTimeout(session._sessionSigsTimeout)
         session._sessionSigsTimeout = undefined
       }
-      notify('isLitLoggedIn', false)
+      session.notify('isLitLoggedIn', false)
     }
   )
 
@@ -453,7 +463,7 @@ function constructSession(inject: Partial<Injected>) {
         clearTimeout(session._delegatedSessionSigsTimeout)
         session._delegatedSessionSigsTimeout = undefined
       }
-      notify('isLitDeletegated', undefined)
+      session.notify('isLitDeletegated', undefined)
     }
   )
 
@@ -494,7 +504,7 @@ function constructSession(inject: Partial<Injected>) {
       if (session._fbUser) {
         await signOut(getAuth())
       }
-      notify('isFirebaseLoggedIn', false)
+      session.notify('isFirebaseLoggedIn', false)
     }
   )
 
@@ -520,14 +530,24 @@ function constructSession(inject: Partial<Injected>) {
       }
       if (!stytchUser?.user) {
         if (!session.authPromise) {
+          session.notify('isStytchDialogOpen', true)
           session.authPromise = new AuthPromise(() => {
-            notify('isStytchLoggedIn', false)
+            session.notify('isStytchDialogOpen', false)
           })
-          notify('isStytchLoggedIn', true)
-          return session.authPromise.finally(() => {
-            session.authPromise = undefined
-            notify('isStytchLoggedIn', true)
-          })
+          session.notify('isStytchLoggedIn', true)
+          return session.authPromise
+            .then((user) => {
+              session.authPromise = undefined
+              session.notify('isStytchDialogOpen', false)
+              session.notify('isStytchLoggedIn', true)
+              return user
+            })
+            .catch((error) => {
+              session.authPromise = undefined
+              session.notify('isStytchDialogOpen', false)
+              session.notify('isStytchLoggedIn', false)
+              throw error
+            })
         }
         return session.authPromise
       }
@@ -537,7 +557,7 @@ function constructSession(inject: Partial<Injected>) {
       if (session._stytchUser?.user) {
         await session.stytchClient.session.revoke()
       }
-      notify('isStytchLoggedIn', false)
+      session.notify('isStytchLoggedIn', false)
     }
   )
   session.inject(inject)
