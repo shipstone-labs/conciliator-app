@@ -84,7 +84,7 @@ export function initBrowserTracing(config: AppConfig) {
       instrumentations: [
         // Instrument fetch requests
         new FetchInstrumentation({
-          ignoreUrls: [/localhost:3000\/api\/telemetry/],
+          ignoreUrls: [/\/api\/telemetry/],
           propagateTraceHeaderCorsUrls: [
             new RegExp(`${window.location.origin}.*`, 'g'),
           ],

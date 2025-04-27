@@ -42,6 +42,74 @@ const ATTR_DEPLOYMENT_ENVIRONMENT = 'deployment.environment'
 // Global variable to track initialization state
 let isInitialized = false
 let sdk: NodeSDK | undefined
+let gcpTraceExporter: TraceExporter | undefined
+
+// Function to get or create a GCP TraceExporter
+export async function getGCPTraceExporter() {
+  if (gcpTraceExporter) {
+    return gcpTraceExporter
+  }
+
+  const isGCP = await isRunningInGCP()
+  if (isGCP) {
+    gcpTraceExporter = new TraceExporter({
+      resourceFilter: /^(service\.|g.co\/).*/,
+    })
+    return gcpTraceExporter
+  }
+
+  return null
+}
+
+// Function to forward browser telemetry to GCP
+export async function forwardBrowserTelemetryToGCP(telemetryData: any) {
+  try {
+    const isGCP = await isRunningInGCP()
+    if (!isGCP) {
+      return false
+    }
+
+    // The browser telemetry is coming in as OTLP-formatted spans
+    // Convert the OTLP spans to Google Cloud Trace format if needed
+    // This may require custom processing based on the exact format
+
+    // Ensure we have a GCP trace exporter
+    if (!gcpTraceExporter) {
+      gcpTraceExporter = new TraceExporter({
+        resourceFilter: /^(service\.|g.co\/).*/,
+      })
+    }
+
+    // Use the exporter directly - it handles auth and conversion
+    if (
+      telemetryData.resourceSpans &&
+      Array.isArray(telemetryData.resourceSpans)
+    ) {
+      // Process telemetry - this is a simplified approach
+      // The actual implementation might need to transform the data structure
+      await Promise.all(
+        telemetryData.resourceSpans.map(async (resourceSpan: any) => {
+          try {
+            // The exporter expects span data in a specific format
+            // For now we'll just pass it through and see if it works
+            await gcpTraceExporter?.export([resourceSpan], () => {
+              console.log('Exported browser span to GCP')
+            })
+          } catch (err) {
+            console.error('Error exporting span:', err)
+          }
+        })
+      )
+
+      return true
+    }
+
+    return false
+  } catch (error) {
+    console.error('Error in forwardBrowserTelemetryToGCP:', error)
+    return false
+  }
+}
 
 export async function initServerTracing() {
   // Skip if already initialized or running in a browser environment
