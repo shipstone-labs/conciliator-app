@@ -19,7 +19,6 @@ function HomeApp() {
 
   return (
     <>
-      {' '}
       {/* Logout button removed - now in hamburger menu */}
       {/* Top-right Auth Button (below menubar) */}
       {!user ? (
