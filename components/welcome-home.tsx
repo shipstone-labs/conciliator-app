@@ -26,25 +26,28 @@ function WelcomeHome() {
             <div className="grid gap-6 lg:grid-cols-[1fr_600px] items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <h1 className="text-3xl md:text-5xl font-bold tracking-tighter text-foreground">
-                    Protect & Share Your Intellectual Property
+                  <h1 className="text-4xl tracking-tight font-extrabold text-foreground sm:text-5xl md:text-6xl">
+                    <span className="block">Secure, Share, and</span>
+                    <span className="block text-primary">
+                      Sell Your Digital Assets
+                    </span>
                   </h1>
-                  <p className="text-lg md:text-xl text-muted-foreground max-w-[600px]">
-                    Your ideas deserve protection. SafeIdea offers decentralized
-                    storage, legal timestamps, and AI-powered discovery for
-                    creators and inventors.
+                  <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                    Protect your intellectual property with advanced encryption,
+                    share it securely with partners, and monetize your digital
+                    assets with our AI-powered sales agent.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-6">
                   <AuthButton
-                    text="Get Started - It's Free"
+                    text="Start Protecting Your Ideas"
                     className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center text-base md:text-lg"
                   />
                   <Link
-                    href="/list-ip"
-                    className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center text-base md:text-lg"
+                    href="#how-it-works"
+                    className="px-8 py-4 bg-card hover:bg-card/80 text-primary font-bold rounded-xl transition-all shadow-lg hover:shadow-border border border-border text-center text-base md:text-lg"
                   >
-                    Explore Ideas
+                    Learn More
                   </Link>
                 </div>
               </div>
@@ -66,37 +69,64 @@ function WelcomeHome() {
         </section>
 
         {/* Features Section */}
-        <section className="w-full py-12 md:py-24 bg-card border-y border-border">
+        <section
+          id="how-it-works"
+          className="w-full py-12 md:py-24 bg-card border-y border-border"
+        >
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center space-y-3 mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                Powerful Protection Features
+              <h2 className="text-base text-primary font-semibold tracking-wide uppercase">
+                Our Services
               </h2>
-              <p className="text-base md:text-lg text-muted-foreground max-w-[800px] mx-auto">
-                Our platform combines cutting-edge technologies to safeguard
-                your intellectual property
+              <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-foreground sm:text-4xl">
+                Complete Protection for Your Intellectual Property
+              </p>
+              <p className="mt-4 max-w-2xl text-xl text-muted-foreground lg:mx-auto">
+                <span className="font-semibold text-primary">Now in Beta:</span>{' '}
+                From protecting trade secrets to monetizing patents, we're
+                developing tools to secure, prove ownership, and profit from
+                your intellectual property.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Feature 1 */}
+              {/* Feature 1 - Protection */}
               <Card className="bg-card border-border">
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-3">
                     <img src="/secure.svg" alt="Secure" className="w-8 h-8" />
                   </div>
                   <CardTitle className="text-card-foreground text-xl">
-                    Encrypted Storage
+                    Secure Protection
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">
-                    Your ideas are secured with military-grade encryption and
-                    stored on decentralized networks for maximum security.
+                  <p className="text-muted-foreground mb-4">
+                    Upload your trade secrets, provisional patents, and other IP
+                    to our platform and get immediate protection with immutable
+                    proof of ownership.
                   </p>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-start">
+                      <span className="h-5 w-5 rounded-full flex items-center justify-center bg-primary/20 text-primary mr-2 mt-0.5">
+                        ✓
+                      </span>
+                      <span className="text-foreground text-sm">
+                        Free for first year
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="h-5 w-5 rounded-full flex items-center justify-center bg-primary/20 text-primary mr-2 mt-0.5">
+                        ✓
+                      </span>
+                      <span className="text-foreground text-sm">
+                        Immutable storage on Filecoin/IPFS
+                      </span>
+                    </li>
+                  </ul>
                 </CardContent>
               </Card>
 
-              {/* Feature 2 */}
+              {/* Feature 2 - Sharing */}
               <Card className="bg-card border-border">
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-secondary/20 flex items-center justify-center mb-3">
@@ -107,32 +137,70 @@ function WelcomeHome() {
                     />
                   </div>
                   <CardTitle className="text-card-foreground text-xl">
-                    Blockchain Timestamping
+                    Secured Sharing
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">
-                    Immutable verification of your idea's existence at a
-                    specific point in time, providing legal protection.
+                  <p className="text-muted-foreground mb-4">
+                    Share your intellectual property with potential partners or
+                    investors under controlled conditions with time-limited
+                    access.
                   </p>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-start">
+                      <span className="h-5 w-5 rounded-full flex items-center justify-center bg-secondary/20 text-secondary mr-2 mt-0.5">
+                        ✓
+                      </span>
+                      <span className="text-foreground text-sm">
+                        $100 per year
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="h-5 w-5 rounded-full flex items-center justify-center bg-secondary/20 text-secondary mr-2 mt-0.5">
+                        ✓
+                      </span>
+                      <span className="text-foreground text-sm">
+                        NDA integration and tracking
+                      </span>
+                    </li>
+                  </ul>
                 </CardContent>
               </Card>
 
-              {/* Feature 3 */}
+              {/* Feature 3 - Sales Agent */}
               <Card className="bg-card border-border">
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-3">
                     <img src="/chatbot.svg" alt="AI" className="w-8 h-8" />
                   </div>
                   <CardTitle className="text-card-foreground text-xl">
-                    AI-Powered Insights
+                    AI-Powered Sales Agent
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">
-                    Advanced AI agents help analyze, enhance, and maximize the
-                    potential of your intellectual property.
+                  <p className="text-muted-foreground mb-4">
+                    Turn your digital assets into revenue. Our AI Sales Agent
+                    optimizes visibility and handles transactions with multiple
+                    pricing models.
                   </p>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-start">
+                      <span className="h-5 w-5 rounded-full flex items-center justify-center bg-accent/20 text-accent mr-2 mt-0.5">
+                        ✓
+                      </span>
+                      <span className="text-foreground text-sm">
+                        Custom pricing (contact us)
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="h-5 w-5 rounded-full flex items-center justify-center bg-accent/20 text-accent mr-2 mt-0.5">
+                        ✓
+                      </span>
+                      <span className="text-foreground text-sm">
+                        Fixed, subscription, or royalty models
+                      </span>
+                    </li>
+                  </ul>
                 </CardContent>
               </Card>
             </div>
@@ -230,81 +298,109 @@ function WelcomeHome() {
         </section>
 
         {/* Testimonial Section */}
-        <section className="w-full py-12 md:py-24 bg-card border-y border-border">
+        <section className="w-full py-12 md:py-24 bg-muted">
           <div className="container px-4 md:px-6 mx-auto">
-            <div className="grid gap-6 lg:grid-cols-2 items-center">
-              <div className="order-2 lg:order-1">
-                <Card className="bg-card/70 border-border">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <blockquote className="text-lg text-card-foreground italic">
-                        "SafeIdea has completely transformed how I protect my
-                        creative work. The blockchain timestamping and AI
-                        analysis tools have been invaluable for my projects. I
-                        can now share my ideas with confidence."
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-extrabold text-foreground sm:text-4xl">
+                Trusted by Industry Advisors
+              </h2>
+              <p className="mt-3 max-w-2xl mx-auto text-xl text-muted-foreground sm:mt-4">
+                See what our advisors say about SafeIdea.ai's beta program
+              </p>
+            </div>
+            <div className="grid gap-8 lg:grid-cols-2 max-w-6xl mx-auto">
+              {/* Testimonial 1 */}
+              <Card className="bg-card border-border">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <p className="text-sm font-medium text-primary">
+                      Advisor, Partner at Upright
+                    </p>
+                    <div className="block mt-2">
+                      <p className="text-foreground font-semibold">
+                        Mark Chandler
+                      </p>
+                      <blockquote className="mt-3 text-base text-muted-foreground italic">
+                        "SafeIdea.ai solves a fundamental problem for creators
+                        and inventors: how do you prove that you own your IP and
+                        that a potential customer has had access to it. Doing it
+                        immutably changes the game."
                       </blockquote>
-                      <div className="flex items-center space-x-4">
-                        <div className="rounded-full overflow-hidden bg-primary/20 w-12 h-12 flex items-center justify-center">
-                          <span className="text-card-foreground font-bold">
-                            JD
-                          </span>
-                        </div>
-                        <div>
-                          <div className="font-medium text-card-foreground">
-                            Jane Doe
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Software Inventor
-                          </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                          MC
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="space-y-4 order-1 lg:order-2">
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                  Trusted by Creators Worldwide
-                </h2>
-                <p className="text-base md:text-lg text-muted-foreground">
-                  Join hundreds of innovators who secure their intellectual
-                  property with SafeIdea. Our platform provides the tools and
-                  protection inventors need in today's digital world.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <AuthButton
-                    text="Join SafeIdea Today"
-                    className="px-6 py-3 bg-primary hover:bg-primary/80 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
-                  />
-                </div>
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 2 */}
+              <Card className="bg-card border-border">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <p className="text-sm font-medium text-secondary">
+                      Advisor, Partner, Bramson & Pressman
+                    </p>
+                    <div className="block mt-2">
+                      <p className="text-foreground font-semibold">
+                        Rob Pressman
+                      </p>
+                      <blockquote className="mt-3 text-base text-muted-foreground italic">
+                        "This is something that clients with trade secrets need
+                        right now."
+                      </blockquote>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground">
+                          RP
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="mt-12 text-center">
+              <AuthButton
+                text="Join SafeIdea Today"
+                className="px-6 py-3 bg-primary hover:bg-primary/80 text-primary-foreground font-bold rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
+              />
             </div>
           </div>
         </section>
 
         {/* Final CTA Section */}
-        <section className="w-full py-12 md:py-24">
+        <section className="w-full py-12 md:py-24 bg-gradient-from">
           <div className="container px-4 md:px-6 mx-auto">
-            <div className="max-w-3xl mx-auto text-center space-y-8">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-foreground">
-                Ready to Protect Your Ideas?
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-[600px] mx-auto">
-                Join SafeIdea today and take the first step toward securing your
-                intellectual property. Our platform is designed for creators, by
-                creators.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <AuthButton
-                  text="Create Free Account"
-                  className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center text-lg"
-                />
-                <Link
-                  href="/list-ip"
-                  className="px-8 py-4 bg-card hover:bg-card/80 text-card-foreground font-bold rounded-xl transition-all shadow-lg hover:shadow-card/30 hover:scale-105 text-center text-lg border border-border"
-                >
-                  Browse Examples
-                </Link>
+            <div className="lg:flex lg:items-center lg:justify-between max-w-6xl mx-auto">
+              <div>
+                <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+                  <span className="block">Ready to protect your ideas?</span>
+                  <span className="block text-primary">
+                    Start with a free year of protection today.
+                  </span>
+                </h2>
+              </div>
+              <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-4">
+                <div className="inline-flex rounded-md shadow">
+                  <AuthButton
+                    text="Get Started"
+                    className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
+                  />
+                </div>
+                <div className="inline-flex rounded-md shadow">
+                  <Link
+                    href="/list-ip"
+                    className="inline-flex items-center justify-center px-5 py-3 border border-border text-base font-medium rounded-md text-foreground bg-card hover:bg-card/80"
+                  >
+                    Explore Options
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
