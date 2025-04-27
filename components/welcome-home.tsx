@@ -16,10 +16,10 @@ function WelcomeHome() {
           className="bg-primary hover:bg-primary/80 text-black font-medium rounded-xl shadow-lg hover:shadow-xl hover:scale-105"
         />
       </div>
-      
+
       <div className="flex flex-col items-center min-h-screen pt-16">
         <Logo />
-        
+
         {/* Hero Section */}
         <section className="w-full py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6 mx-auto">
@@ -30,8 +30,9 @@ function WelcomeHome() {
                     Protect & Share Your Intellectual Property
                   </h1>
                   <p className="text-lg md:text-xl text-white/80 max-w-[600px]">
-                    Your ideas deserve protection. SafeIdea offers decentralized storage, 
-                    legal timestamps, and AI-powered discovery for creators and inventors.
+                    Your ideas deserve protection. SafeIdea offers decentralized
+                    storage, legal timestamps, and AI-powered discovery for
+                    creators and inventors.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-6">
@@ -51,10 +52,10 @@ function WelcomeHome() {
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-2">
                   <div className="aspect-video rounded-lg overflow-hidden bg-accent/20">
                     <div className="w-full h-full flex items-center justify-center">
-                      <img 
-                        src="/assets/Black+Yellow.svg" 
-                        alt="SafeIdea Platform" 
-                        className="w-3/4 h-3/4 object-contain" 
+                      <img
+                        src="/assets/Black+Yellow.svg"
+                        alt="SafeIdea Platform"
+                        className="w-3/4 h-3/4 object-contain"
                       />
                     </div>
                   </div>
@@ -63,7 +64,7 @@ function WelcomeHome() {
             </div>
           </div>
         </section>
-        
+
         {/* Features Section */}
         <section className="w-full py-12 md:py-24 bg-background/30 backdrop-blur-sm border-y border-white/10">
           <div className="container px-4 md:px-6 mx-auto">
@@ -72,7 +73,8 @@ function WelcomeHome() {
                 Powerful Protection Features
               </h2>
               <p className="text-base md:text-lg text-white/80 max-w-[800px] mx-auto">
-                Our platform combines cutting-edge technologies to safeguard your intellectual property
+                Our platform combines cutting-edge technologies to safeguard
+                your intellectual property
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -82,48 +84,61 @@ function WelcomeHome() {
                   <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-3">
                     <img src="/secure.svg" alt="Secure" className="w-8 h-8" />
                   </div>
-                  <CardTitle className="text-white text-xl">Encrypted Storage</CardTitle>
+                  <CardTitle className="text-white text-xl">
+                    Encrypted Storage
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-white/80">
-                    Your ideas are secured with military-grade encryption and stored on decentralized networks for maximum security.
+                    Your ideas are secured with military-grade encryption and
+                    stored on decentralized networks for maximum security.
                   </p>
                 </CardContent>
               </Card>
-              
+
               {/* Feature 2 */}
               <Card className="bg-background/30 backdrop-blur-sm border-white/10">
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-secondary/20 flex items-center justify-center mb-3">
-                    <img src="/patent-law.svg" alt="Legal" className="w-8 h-8" />
+                    <img
+                      src="/patent-law.svg"
+                      alt="Legal"
+                      className="w-8 h-8"
+                    />
                   </div>
-                  <CardTitle className="text-white text-xl">Blockchain Timestamping</CardTitle>
+                  <CardTitle className="text-white text-xl">
+                    Blockchain Timestamping
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-white/80">
-                    Immutable verification of your idea's existence at a specific point in time, providing legal protection.
+                    Immutable verification of your idea's existence at a
+                    specific point in time, providing legal protection.
                   </p>
                 </CardContent>
               </Card>
-              
+
               {/* Feature 3 */}
               <Card className="bg-background/30 backdrop-blur-sm border-white/10">
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-3">
                     <img src="/chatbot.svg" alt="AI" className="w-8 h-8" />
                   </div>
-                  <CardTitle className="text-white text-xl">AI-Powered Insights</CardTitle>
+                  <CardTitle className="text-white text-xl">
+                    AI-Powered Insights
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-white/80">
-                    Advanced AI agents help analyze, enhance, and maximize the potential of your intellectual property.
+                    Advanced AI agents help analyze, enhance, and maximize the
+                    potential of your intellectual property.
                   </p>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
-        
+
         {/* How It Works Section */}
         <section className="w-full py-12 md:py-24">
           <div className="container px-4 md:px-6 mx-auto">
@@ -141,21 +156,24 @@ function WelcomeHome() {
                 <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto">
                   <span className="text-2xl font-bold text-background">1</span>
                 </div>
-                <h3 className="text-xl font-medium text-white">Create Account</h3>
+                <h3 className="text-xl font-medium text-white">
+                  Create Account
+                </h3>
                 <p className="text-white/80">
-                  Sign up in seconds with our passwordless authentication system.
+                  Sign up in seconds with our passwordless authentication
+                  system.
                 </p>
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-2 h-48 mx-auto">
                   <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-primary/10">
-                    <img 
-                      src="/svg/Black+Yellow.svg" 
-                      alt="Create Account" 
-                      className="w-1/2 h-1/2 object-contain" 
+                    <img
+                      src="/svg/Black+Yellow.svg"
+                      alt="Create Account"
+                      className="w-1/2 h-1/2 object-contain"
                     />
                   </div>
                 </div>
               </div>
-              
+
               {/* Step 2 */}
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto">
@@ -163,34 +181,38 @@ function WelcomeHome() {
                 </div>
                 <h3 className="text-xl font-medium text-white">Upload Idea</h3>
                 <p className="text-white/80">
-                  Upload your documents, describe your idea, and set visibility preferences.
+                  Upload your documents, describe your idea, and set visibility
+                  preferences.
                 </p>
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-2 h-48 mx-auto">
                   <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-secondary/10">
-                    <img 
-                      src="/file.svg" 
-                      alt="Upload Idea" 
-                      className="w-1/2 h-1/2 object-contain" 
+                    <img
+                      src="/file.svg"
+                      alt="Upload Idea"
+                      className="w-1/2 h-1/2 object-contain"
                     />
                   </div>
                 </div>
               </div>
-              
+
               {/* Step 3 */}
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center mx-auto">
                   <span className="text-2xl font-bold text-background">3</span>
                 </div>
-                <h3 className="text-xl font-medium text-white">Secure & Share</h3>
+                <h3 className="text-xl font-medium text-white">
+                  Secure & Share
+                </h3>
                 <p className="text-white/80">
-                  Your idea is timestamped, encrypted, and ready for safe sharing and collaboration.
+                  Your idea is timestamped, encrypted, and ready for safe
+                  sharing and collaboration.
                 </p>
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card/30 backdrop-blur-sm border border-white/10 p-2 h-48 mx-auto">
                   <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-accent/10">
-                    <img 
-                      src="/globe.svg" 
-                      alt="Share Ideas" 
-                      className="w-1/2 h-1/2 object-contain" 
+                    <img
+                      src="/globe.svg"
+                      alt="Share Ideas"
+                      className="w-1/2 h-1/2 object-contain"
                     />
                   </div>
                 </div>
@@ -198,7 +220,7 @@ function WelcomeHome() {
             </div>
           </div>
         </section>
-        
+
         {/* Testimonial Section */}
         <section className="w-full py-12 md:py-24 bg-background/30 backdrop-blur-sm border-y border-white/10">
           <div className="container px-4 md:px-6 mx-auto">
@@ -208,9 +230,10 @@ function WelcomeHome() {
                   <CardContent className="p-6">
                     <div className="space-y-4">
                       <blockquote className="text-lg text-white italic">
-                        "SafeIdea has completely transformed how I protect my creative work. 
-                        The blockchain timestamping and AI analysis tools have been invaluable 
-                        for my projects. I can now share my ideas with confidence."
+                        "SafeIdea has completely transformed how I protect my
+                        creative work. The blockchain timestamping and AI
+                        analysis tools have been invaluable for my projects. I
+                        can now share my ideas with confidence."
                       </blockquote>
                       <div className="flex items-center space-x-4">
                         <div className="rounded-full overflow-hidden bg-primary/20 w-12 h-12 flex items-center justify-center">
@@ -218,7 +241,9 @@ function WelcomeHome() {
                         </div>
                         <div>
                           <div className="font-medium text-white">Jane Doe</div>
-                          <div className="text-sm text-white/70">Software Inventor</div>
+                          <div className="text-sm text-white/70">
+                            Software Inventor
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -230,8 +255,9 @@ function WelcomeHome() {
                   Trusted by Creators Worldwide
                 </h2>
                 <p className="text-base md:text-lg text-white/80">
-                  Join hundreds of innovators who secure their intellectual property with SafeIdea. 
-                  Our platform provides the tools and protection inventors need in today's digital world.
+                  Join hundreds of innovators who secure their intellectual
+                  property with SafeIdea. Our platform provides the tools and
+                  protection inventors need in today's digital world.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <AuthButton
@@ -243,7 +269,7 @@ function WelcomeHome() {
             </div>
           </div>
         </section>
-        
+
         {/* Final CTA Section */}
         <section className="w-full py-12 md:py-24">
           <div className="container px-4 md:px-6 mx-auto">
@@ -252,8 +278,9 @@ function WelcomeHome() {
                 Ready to Protect Your Ideas?
               </h2>
               <p className="text-lg text-white/80 max-w-[600px] mx-auto">
-                Join SafeIdea today and take the first step toward securing your intellectual property.
-                Our platform is designed for creators, by creators.
+                Join SafeIdea today and take the first step toward securing your
+                intellectual property. Our platform is designed for creators, by
+                creators.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <AuthButton
