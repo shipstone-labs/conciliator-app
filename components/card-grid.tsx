@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import Loading from '@/components/Loading'
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -14,24 +14,12 @@ import Link from 'next/link'
 import { useIPs } from '@/hooks/useIP'
 import CachedImage from '@/components/CachedImage'
 
-function getImageWidth() {
-  const screenWidth = window.innerWidth
-  if (screenWidth < 640) {
-    return 150 // Mobile
-  }
-  if (screenWidth < 1024) {
-    return 180 // Tablet
-  }
-  return 250 // Desktop
-}
-
 type CardGridProps = {
   myItems?: boolean
   itemsPerPage?: number
 }
 
 function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
-  const [imageWidth, setImageWidth] = useState(getImageWidth()) // Default width
   const [currentPage, setCurrentPage] = useState(1)
   const { data: visibleItems, pages: totalPages } = useIPs({
     orderBy: 'createdAt',
@@ -40,16 +28,6 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
     currentPage,
     myItems,
   }) || { pages: 1 }
-
-  // Responsive image size calculation
-  useEffect(() => {
-    const updateImageWidth = () => {
-      const newWidth = getImageWidth()
-      setImageWidth(newWidth)
-    }
-    window.addEventListener('resize', updateImageWidth)
-    return () => window.removeEventListener('resize', updateImageWidth)
-  }, [])
 
   const goToPage = useCallback((page: number) => {
     setCurrentPage(page)
@@ -95,11 +73,12 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
                 }
                 fallbackSrc="/images/placeholder.png"
                 alt={item.name}
-                width={imageWidth}
-                height={imageWidth}
+                width={160}
+                height={160}
+                responsive
                 // Add priority to images that are likely to be above the fold (first 4 items)
                 priority={index < 4}
-                className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all"
+                className="w-lg sm:w-sm rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all"
               />
             </CardContent>
 

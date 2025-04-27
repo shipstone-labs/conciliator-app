@@ -6,12 +6,10 @@ import {
   Suspense,
   useCallback,
   useContext,
-  useEffect,
   type PropsWithChildren,
   useMemo,
   useSyncExternalStore,
 } from 'react'
-import { useState } from 'react'
 import Loading from '@/components/Loading'
 import ClientProviders from '@/app/client-provider'
 import NavigationHeader from './NavigationHeader'
@@ -22,9 +20,7 @@ import {
   type AppConfig,
   globalSession,
   globalInstance,
-  type SessionState,
   initializeConfig,
-  DefaultState,
   type SuspendPromise,
 } from '@/lib/session'
 import { StytchProvider } from '@stytch/nextjs'
@@ -43,14 +39,30 @@ export function useConfig() {
   return config
 }
 
-export function useSession() {
-  return useSyncExternalStore(
+export function useSession(
+  items: ('stytchUser' | 'fbUser' | 'sessionSigs')[] = []
+) {
+  const session = useSyncExternalStore(
     globalSession?.subscribe ||
       ((_onStoreChange: () => void) => {
         return () => {}
       }),
+    () => globalSession as Session,
     () => globalSession as Session
   )
+  if (typeof window !== 'undefined') {
+    for (const key of items) {
+      const result = (
+        session[key] as SuspendPromise<Promise<any> | undefined>
+      ).value()
+      if (result && 'then' in result) {
+        if (key === 'stytchUser') {
+          throw result
+        }
+      }
+    }
+  }
+  return session
 }
 
 /**
@@ -61,29 +73,9 @@ export default function AuthLayout({
   children,
   appConfig,
 }: PropsWithChildren<{ appConfig: RawAppConfig }>) {
-  const [{ session, config }, setInfo] = useState<{
-    config?: AppConfig
-    session?: Session
-  }>({})
-  useEffect(() => {
-    initializeConfig(appConfig)
-    setInfo({ session: globalSession, config: globalInstance })
-  }, [appConfig])
-  const [, setState] = useState<SessionState>(session?.state || DefaultState)
-  useEffect(() => {
-    if (!session) {
-      return
-    }
-    session.inject({
-      setState,
-      config: globalInstance,
-    })
-    return () => {
-      session.inject({
-        setState: null,
-      })
-    }
-  }, [session])
+  initializeConfig(appConfig)
+
+  const session = useSession()
   // Handle successful authentication
   const handleAuthSuccess = useCallback(() => {
     if (session?.authPromise) {
@@ -118,12 +110,12 @@ export default function AuthLayout({
     [pathname, session?.authPromise]
   )
 
-  if (!session || !config) {
+  if (!session) {
     return <Loading />
   }
   // Render the config provider and StytchProvider
   return (
-    <configContext.Provider value={config}>
+    <configContext.Provider value={globalInstance}>
       <sessionContext.Provider value={session}>
         <StytchProvider stytch={session.stytchClient}>
           <TooltipProvider>
@@ -152,21 +144,4 @@ export default function AuthLayout({
       </sessionContext.Provider>
     </configContext.Provider>
   )
-}
-
-// Helper function to create and throw a login request promise
-export function useRequire(
-  items: ('stytchUser' | 'fbUser' | 'sessionSigs')[] = []
-) {
-  const session = useSession()
-  for (const key of items) {
-    const result = (
-      session[key] as SuspendPromise<Promise<any> | undefined>
-    ).value()
-    if (result && 'then' in result) {
-      if (key === 'stytchUser') {
-        throw result
-      }
-    }
-  }
 }

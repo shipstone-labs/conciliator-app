@@ -217,22 +217,27 @@ function constructSession(inject: Partial<Injected>) {
         session[key] = inject[key] || undefined // This allow set or unset
       }
       if (!hadStytchClient && session.stytchClient) {
-        getAuth().onIdTokenChanged((user) => {
-          session._fbUser = user || undefined
-          if (
-            session._fbUser &&
-            session._stytchUser?.isInitialized &&
-            session._stytchUser?.user
-          ) {
-            session.notify('isFirebaseLoggedIn', true)
-          }
-        })
+        if (typeof window !== 'undefined') {
+          getAuth().onIdTokenChanged((user) => {
+            session._fbUser = user || undefined
+            if (
+              session._fbUser &&
+              session._stytchUser?.isInitialized &&
+              session._stytchUser?.user
+            ) {
+              session.notify('isFirebaseLoggedIn', true)
+            }
+          })
+        }
         session._stytchUser = {
           user: null,
           fromCache: false,
           isInitialized: session.stytchClient != null,
         } as ReturnType<typeof useStytchUser>
         session.stytchStartup = (async () => {
+          if (typeof window === 'undefined') {
+            return
+          }
           const user = await session.stytchClient.user.get().catch(() => null)
           session._stytchUser = {
             user: user || null,
@@ -590,32 +595,32 @@ export function initializeConfig(appConfig: RawAppConfig) {
   if (globalInstance) {
     return globalInstance as AppConfig
   }
-  if (typeof window !== 'undefined') {
-    globalSession = constructSession({})
+  globalSession = constructSession({})
+  const { FIREBASE_CONFIG, STYTCH_PUBLIC_TOKEN, ...rest } = appConfig
 
-    const { FIREBASE_CONFIG, STYTCH_PUBLIC_TOKEN, ...rest } = appConfig
+  // Initialize Firebase
+  const app = initializeApp(FIREBASE_CONFIG)
 
-    // Initialize Firebase
-    const app = initializeApp(FIREBASE_CONFIG)
+  // Initialize Stripe Payments
+  const payments =
+    typeof window !== 'undefined'
+      ? getStripePayments(app, {
+          customersCollection: 'customers',
+          productsCollection: 'products',
+        })
+      : undefined
 
-    // Initialize Stripe Payments
-    const payments = getStripePayments(app, {
-      customersCollection: 'customers',
-      productsCollection: 'products',
-    })
+  // Initialize Stytch client with public token
+  const stytchClient = createStytchUIClient(
+    (STYTCH_PUBLIC_TOKEN as string) || '',
+    stytchOptions
+  )
 
-    // Initialize Stytch client with public token
-    const stytchClient = createStytchUIClient(
-      (STYTCH_PUBLIC_TOKEN as string) || '',
-      stytchOptions
-    )
-
-    // Store the instances both in ref and global variable
-    globalInstance = { ...rest, app, payments, stytchClient } as AppConfig
-    globalSession.inject({
-      config: globalInstance,
-      stytchClient,
-    })
-  }
+  // Store the instances both in ref and global variable
+  globalInstance = { ...rest, app, payments, stytchClient } as AppConfig
+  globalSession.inject({
+    config: globalInstance,
+    stytchClient,
+  })
   return globalInstance
 }

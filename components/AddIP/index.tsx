@@ -13,7 +13,7 @@ import { downsample } from '@/lib/downsample'
 import { useStytch } from '@stytch/nextjs'
 import { collection, doc, getFirestore, onSnapshot } from 'firebase/firestore'
 import type { IPDoc, IPAudit } from '@/lib/types'
-import { useConfig, useRequire, useSession } from '../AuthLayout'
+import { useConfig, useSession } from '../AuthLayout'
 import { useCallback, useEffect, useState } from 'react'
 import { AddStepPublic } from './AddStepPublic'
 import { AddStepContent } from './AddStepContent'
@@ -25,8 +25,10 @@ export type AddDoc = Omit<IPDoc, 'id'> & { content?: string; error?: string }
 const AppIP = () => {
   const fb = getFirestore()
   // Removed user authentication check since it's handled by the main navigation
-  const { litClient: _litClient, sessionSigs: _sessionSigs } = useSession()
-  useRequire(['stytchUser', 'fbUser'])
+  const { litClient: _litClient, sessionSigs: _sessionSigs } = useSession([
+    'stytchUser',
+    'fbUser',
+  ])
   const [ipDoc, setIPDoc] = useState<AddDoc>({} as AddDoc)
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState<IPAudit>()
