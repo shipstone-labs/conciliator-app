@@ -45,7 +45,6 @@ export default function NavigationHeader() {
         setLoggingOff?.(true)
         try {
           await stytchClient.session.revoke()
-          router.replace('/')
         } catch (error) {
           router.replace('/')
           console.error('Logout error:', error)

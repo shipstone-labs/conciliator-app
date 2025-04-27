@@ -2,7 +2,6 @@
 
 import {
   createContext,
-  type MouseEvent,
   Suspense,
   useCallback,
   useContext,
@@ -51,7 +50,6 @@ export function useSession(
     () => (globalSession as Session).state,
     () => (globalSession as Session).state
   )
-  console.log('useSession', session.state)
   if (typeof window !== 'undefined') {
     for (const key of items) {
       const result = (
@@ -78,7 +76,6 @@ export default function AuthLayout({
   initializeConfig(appConfig)
 
   const session = useSession()
-  console.log('useSession', session.state, session.authPromise)
   // Handle successful authentication
   const handleAuthSuccess = useCallback(() => {
     if (session?.authPromise) {
@@ -87,31 +84,21 @@ export default function AuthLayout({
   }, [session])
 
   const pathname = usePathname()
-  const onClose = useMemo(
-    (event?: MouseEvent<HTMLElement>) => {
-      if (!event) {
-        return () => {
-          if (session?.authPromise) {
-            session.authPromise.close()
-          }
-        }
-      }
-      if (pathname === '/') {
-        return () => {
-          if (session?.authPromise) {
-            session.authPromise.close()
-          }
-        }
-      }
+  const onClose = useMemo(() => {
+    if (pathname === '/') {
       return () => {
-        window.location.href = '/'
         if (session?.authPromise) {
           session.authPromise.close()
         }
       }
-    },
-    [pathname, session?.authPromise]
-  )
+    }
+    return () => {
+      window.location.href = '/'
+      if (session?.authPromise) {
+        session.authPromise.close()
+      }
+    }
+  }, [pathname, session?.authPromise])
 
   if (!session) {
     return <Loading />
