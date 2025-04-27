@@ -58,11 +58,12 @@ export default function NavigationHeader() {
   }
 
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className="flex w-full items-center justify-between" data-testid="nav-container">
       {/* Logo on left */}
       <Link
         href="/"
         className="mr-4"
+        data-testid="nav-home-link"
         onClick={() => traceAction('Navigate', undefined, { destination: '/' })}
       >
         <Image
@@ -75,12 +76,13 @@ export default function NavigationHeader() {
       </Link>
 
       {/* Main menu items - simplified without Menubar */}
-      <nav className="flex items-center space-x-6 flex-grow">
+      <nav className="flex items-center space-x-6 flex-grow" data-testid="nav-main-menu">
         {isAuthenticated && (
           <>
             <Link
               href="/add-ip"
               className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+              data-testid="nav-add-idea-link"
               onClick={() =>
                 traceAction('Navigate', undefined, { destination: '/add-ip' })
               }
@@ -90,6 +92,7 @@ export default function NavigationHeader() {
             <Link
               href="/list-ip/mine"
               className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
+              data-testid="nav-my-ideas-link"
               onClick={() =>
                 traceAction('Navigate', undefined, {
                   destination: '/list-ip/mine',
@@ -103,6 +106,7 @@ export default function NavigationHeader() {
         <Link
           href="/list-ip"
           className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
+          data-testid="nav-explore-ideas-link"
           onClick={() =>
             traceAction('Navigate', undefined, { destination: '/list-ip' })
           }
@@ -112,14 +116,14 @@ export default function NavigationHeader() {
       </nav>
 
       {/* Theme toggle */}
-      <div className="flex items-center ml-3">
+      <div className="flex items-center ml-3" data-testid="nav-theme-container">
         <ModeToggle />
       </div>
 
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}
-      <div className="ml-4">
+      <div className="ml-4" data-testid="nav-account-menu">
         <DropdownMenu>
-          <DropdownMenuTrigger className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30">
+          <DropdownMenuTrigger className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30" data-testid="nav-dropdown-trigger">
             <Menu className="h-5 w-5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -130,12 +134,14 @@ export default function NavigationHeader() {
               <>
                 <DropdownMenuItem
                   className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer"
+                  data-testid="nav-dropdown-account"
                   onClick={() => setIsAccountModalOpen(true)}
                 >
                   Account
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer"
+                  data-testid="nav-dropdown-signout"
                   onClick={handleLogout}
                   disabled={isLoggingOff}
                 >
@@ -145,7 +151,7 @@ export default function NavigationHeader() {
             )}
             {!isAuthenticated && (
               <Link href="/" className="block">
-                <DropdownMenuItem className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer">
+                <DropdownMenuItem className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer" data-testid="nav-dropdown-signin">
                   Sign In
                 </DropdownMenuItem>
               </Link>
