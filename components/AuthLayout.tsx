@@ -6,7 +6,6 @@ import {
   useCallback,
   useContext,
   type PropsWithChildren,
-  useMemo,
   useSyncExternalStore,
 } from 'react'
 import Loading from '@/components/Loading'
@@ -25,7 +24,6 @@ import {
 import { StytchProvider } from '@stytch/nextjs'
 import type { RawAppConfig } from '@/lib/ConfigContext'
 import { AuthModal } from './AuthModal'
-import { usePathname } from 'next/navigation'
 
 const sessionContext = createContext<Session | undefined>(globalSession)
 const configContext = createContext<AppConfig | undefined>(globalInstance)
@@ -53,8 +51,8 @@ export function useSession(
   if (typeof window !== 'undefined') {
     for (const key of items) {
       const result = (
-        session[key] as SuspendPromise<Promise<any> | undefined>
-      ).value()
+        session[key] as SuspendPromise<Promise<any> | undefined, any>
+      ).value(...(key === 'stytchUser' ? [true] : []))
       if (result && 'then' in result) {
         if (key === 'stytchUser') {
           throw result
@@ -83,22 +81,11 @@ export default function AuthLayout({
     }
   }, [session])
 
-  const pathname = usePathname()
-  const onClose = useMemo(() => {
-    if (pathname === '/') {
-      return () => {
-        if (session?.authPromise) {
-          session.authPromise.close()
-        }
-      }
+  const onClose = useCallback(() => {
+    if (session?.authPromise) {
+      session.authPromise.close()
     }
-    return () => {
-      window.location.href = '/'
-      if (session?.authPromise) {
-        session.authPromise.close()
-      }
-    }
-  }, [pathname, session?.authPromise])
+  }, [session?.authPromise])
 
   if (!session) {
     return <Loading />
@@ -111,7 +98,7 @@ export default function AuthLayout({
           <TooltipProvider>
             <ClientProviders>
               <AuthModal
-                onClose={onClose}
+                onClose={!session.authPromise?.required ? onClose : undefined}
                 isOpen={
                   session.authPromise != null && !session.authPromise.closed
                 }

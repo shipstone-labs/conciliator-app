@@ -87,7 +87,8 @@ export type Session = Injected & {
   >
   fbUser: SuspendPromise<FirebaseUser>
   stytchUser: SuspendPromise<
-    ReturnType<typeof useStytchUser>['user'] | AuthPromise
+    ReturnType<typeof useStytchUser>['user'] | AuthPromise,
+    [required: boolean]
   >
   inject: (inject: Partial<Injected>) => void
   logout: () => Promise<void>
@@ -168,7 +169,10 @@ export class AuthPromise extends Promise<
     _result: ReturnType<typeof useStytchUser>['user'] | undefined
   ) => {}
   reject = (_error: unknown) => {}
-  constructor(private _close?: () => void) {
+  constructor(
+    private _close?: () => void,
+    public required = false
+  ) {
     let resolve: (
       result: ReturnType<typeof useStytchUser>['user'] | undefined
     ) => void = () => {}
@@ -394,7 +398,7 @@ function constructSession(inject: Partial<Injected>) {
       }
       const litModule = await import('lit-wrapper')
       const litClient = await session.litClient.wait()
-      const stytchUser = await session.stytchUser.wait()
+      const stytchUser = await session.stytchUser.wait(true)
       if (!stytchUser?.user_id) {
         throw new Error('Stytch user not logged in')
       }
@@ -465,7 +469,7 @@ function constructSession(inject: Partial<Injected>) {
       const litClient = await session.litClient.wait()
       const { address, pkpPublicKey, authMethod } =
         await session.sessionSigs.wait()
-      await session.stytchUser.wait()
+      await session.stytchUser.wait(true)
       const stytchClient = session.stytchClient
       if (!stytchClient || !stytchClient.session.getTokens()?.session_jwt) {
         throw new Error('Stytch client is not initialized')
@@ -530,7 +534,7 @@ function constructSession(inject: Partial<Injected>) {
     '_fbUser',
     async () => {
       const fbUser = getAuth().currentUser
-      const stytchUser = await session.stytchUser.wait()
+      const stytchUser = await session.stytchUser.wait(true)
       if (!stytchUser || !stytchUser.user_id) {
         throw new Error('Stytch user not logged in')
       }
@@ -567,13 +571,14 @@ function constructSession(inject: Partial<Injected>) {
   )
 
   session.stytchUser = new SuspendPromise<
-    ReturnType<typeof useStytchUser>['user'] | AuthPromise
+    ReturnType<typeof useStytchUser>['user'] | AuthPromise,
+    [required: boolean]
   >(
     session,
     '__stytchUser',
-    async (): Promise<
-      ReturnType<typeof useStytchUser>['user'] | AuthPromise
-    > => {
+    async (
+      required: boolean
+    ): Promise<ReturnType<typeof useStytchUser>['user'] | AuthPromise> => {
       const stytchClient = session.stytchClient
       if (!stytchClient) {
         throw new Error('Stytch client is not initialized')
@@ -590,7 +595,7 @@ function constructSession(inject: Partial<Injected>) {
         if (!session.authPromise) {
           session.authPromise = new AuthPromise(() => {
             session.notify({ isStytchDialogOpen: false })
-          })
+          }, required)
           session.notify({ isStytchDialogOpen: true })
           return session.authPromise
             .then((user) => {
