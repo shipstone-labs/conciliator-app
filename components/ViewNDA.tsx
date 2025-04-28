@@ -94,10 +94,10 @@ export function ViewNDA({
         title="Non-Disclosure Agreement"
       >
         <div className="space-y-4">
-          <div className="bg-muted/20 border border-white/10 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+          <div className="bg-muted/20 border border-border rounded-lg p-4 max-h-[60vh] overflow-y-auto">
             <div className="prose prose-invert max-w-none">
               {isLoading ? (
-                <p className="text-white/90">Loading document...</p>
+                <p className="text-foreground/90">Loading document...</p>
               ) : (
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {markdownContent}

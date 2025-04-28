@@ -180,7 +180,7 @@ export function Footer() {
             We may share information about you as follows or as otherwise
             described in this Privacy Policy:
           </p>
-          <ul className="list-disc pl-6 space-y-2 text-white/80">
+          <ul className="list-disc pl-6 space-y-2 text-foreground/80">
             <li>
               With vendors, consultants, and other service providers who need
               access to such information to carry out work on our behalf

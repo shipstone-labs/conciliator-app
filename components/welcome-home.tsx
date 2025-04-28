@@ -17,6 +17,11 @@ function WelcomeHome() {
         />
       </div>
 
+      {/* Alpha Banner */}
+      <div className="fixed top-4 right-4 z-30 bg-warning text-black font-medium py-2 px-4 rounded-lg shadow-lg transform rotate-2 border-2 border-warning/50">
+        Work in progress: Try us out, but don&apos;t put real secrets in yet
+      </div>
+
       <div className="flex flex-col items-center min-h-screen pt-16">
         <Logo />
 
