@@ -21,23 +21,23 @@ function LoggedInHome() {
         <Logo />
 
         {/* Description Section */}
-        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-white/10 mt-8">
+        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border mt-8">
           <CardHeader>
-            <CardTitle className="text-2xl text-white">
+            <CardTitle className="text-2xl text-foreground">
               Welcome to{' '}
               <span className="text-primary font-semibold">SafeIdea.net</span>
             </CardTitle>
-            <CardDescription className="text-lg text-white/90">
+            <CardDescription className="text-lg text-foreground/90">
               The alpha version of our IP protection platform
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-lg leading-relaxed text-white/90">
+            <p className="text-lg leading-relaxed text-foreground/90">
               SafeIdea is a new decentralized service designed to help creators
               and inventors securely store, share and benefit from their digital
               creations.
             </p>
-            <div className="mt-6 text-lg leading-relaxed text-white/90">
+            <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
                 This alpha version was launched as part of the{' '}
                 <a
@@ -53,7 +53,7 @@ function LoggedInHome() {
                 collaboration.
               </p>
             </div>
-            <div className="mt-6 text-lg leading-relaxed text-white/90">
+            <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
                 To get started, log in with our passwordless access, add a new
                 secret document, or learn more about the ideas in our database!
