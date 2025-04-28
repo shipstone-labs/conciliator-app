@@ -33,7 +33,7 @@ export const MainCard = ({ ipDoc, onBuy }: MainCardProps) => {
     if (stytchUser.user) {
       return
     }
-    await session.stytchUser.wait()
+    await session.stytchUser.wait(true)
   }, [session, stytchUser.user])
   const ndaValid = useMemo(() => {
     return ndaChecked || !ipDoc.terms?.ndaRequired

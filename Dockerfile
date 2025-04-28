@@ -18,6 +18,7 @@ ENV STYTCH_ENV=test
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
+ENV NEXT_COMPILE_CACHE_PATH="/tmp/.next/cache/webpack" 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DISABLE_ANALYZER=1
 ENV NODE_NO_WARNINGS=1

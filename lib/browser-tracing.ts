@@ -10,7 +10,9 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { trace } from '@opentelemetry/api'
+import { SpanStatusCode, trace } from '@opentelemetry/api'
+import type { AppConfig } from './session'
+import { useConfig } from '@/components/AuthLayout'
 
 // Define attribute keys (standard, not deprecated)
 const ATTR_SERVICE_NAME = 'service.name'
@@ -19,7 +21,7 @@ const ATTR_DEPLOYMENT_ENVIRONMENT = 'deployment.environment'
 
 let isInitialized = false
 
-export function initBrowserTracing() {
+export function initBrowserTracing(config: AppConfig) {
   // Only run in browser and only initialize once
   if (typeof window === 'undefined' || isInitialized) {
     return
@@ -28,7 +30,8 @@ export function initBrowserTracing() {
   try {
     console.log('Initializing browser tracing')
 
-    const serviceName = 'conciliate-app-frontend'
+    const serviceName =
+      (config.SERVICE_NAME as string) || 'conciliate-app:unknown'
 
     // Create a custom resource with the service attributes
     const customResource = resourceFromAttributes({
@@ -81,7 +84,7 @@ export function initBrowserTracing() {
       instrumentations: [
         // Instrument fetch requests
         new FetchInstrumentation({
-          ignoreUrls: [/localhost:3000\/api\/telemetry/],
+          ignoreUrls: [/\/api\/telemetry/],
           propagateTraceHeaderCorsUrls: [
             new RegExp(`${window.location.origin}.*`, 'g'),
           ],
@@ -118,10 +121,16 @@ export function createClientSpan(
 
       // Execute the function
       const result = fn?.()
+      // Explicitly mark span as successful
+      span.setStatus({ code: SpanStatusCode.OK })
       span.end()
       return result
     } catch (error) {
       span.recordException(error as Error)
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: error instanceof Error ? error.message : String(error),
+      })
       span.end()
       throw error
     }
@@ -130,8 +139,9 @@ export function createClientSpan(
 
 // Export a hook for React components
 export function useTracing() {
+  const config = useConfig()
   if (!isInitialized && typeof window !== 'undefined') {
-    initBrowserTracing()
+    initBrowserTracing(config)
   }
 
   return {
@@ -152,10 +162,16 @@ export function useTracing() {
 
           // Execute the function
           const result = await fn?.()
+          // Explicitly mark span as successful
+          span.setStatus({ code: SpanStatusCode.OK })
           span.end()
           return result
         } catch (error) {
           span.recordException(error as Error)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error instanceof Error ? error.message : String(error),
+          })
           span.end()
           throw error
         }

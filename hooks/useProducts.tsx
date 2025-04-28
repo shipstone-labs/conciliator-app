@@ -84,7 +84,6 @@ export function useProducts(): Record<string, Product> {
                 } as Record<string, Price>,
               } as Product,
             }
-            // console.log('Product data', data)
             return data
           })
           const parentRef = priceDoc.ref.parent?.parent
@@ -110,7 +109,6 @@ export function useProducts(): Record<string, Product> {
                     ...data,
                   } as Product,
                 }
-                // console.log('Product data', output)
                 return output
               })
             },

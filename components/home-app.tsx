@@ -15,13 +15,13 @@ import {
 
 // This is a placeholder for the actual login detection logic
 function HomeApp() {
-  const { user, isInitialized } = useStytchUser()
+  const { user } = useStytchUser()
+
   return (
     <>
-      {' '}
       {/* Logout button removed - now in hamburger menu */}
       {/* Top-right Auth Button (below menubar) */}
-      {!isInitialized ? null : !user ? (
+      {!user ? (
         <div className="fixed top-20 right-4 z-20">
           <AuthButton
             text="Sign In / Register"
@@ -76,30 +76,24 @@ function HomeApp() {
 
         {/* Button Section */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
-          {
-            !isInitialized ? null : isInitialized && user ? (
-              <>
-                <Link
-                  href="/add-ip"
-                  className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
-                >
-                  Add Idea
-                </Link>
-                <Link
-                  href="/list-ip/mine"
-                  className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
-                >
-                  My Ideas
-                </Link>
-                <Link
-                  href="/list-ip"
-                  className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
-                >
-                  Explore Ideas
-                </Link>
-              </>
-            ) : null /* Removed AuthButton from here */
-          }
+          <Link
+            href="/add-ip"
+            className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
+          >
+            Add Idea
+          </Link>
+          <Link
+            href="/list-ip/mine"
+            className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
+          >
+            My Ideas
+          </Link>
+          <Link
+            href="/list-ip"
+            className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
+          >
+            Explore Ideas
+          </Link>
         </div>
       </div>
     </>

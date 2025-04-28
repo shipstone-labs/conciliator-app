@@ -13,11 +13,12 @@ import Link from 'next/link'
 // No need to import enhancedCidAsURL
 import { useIPs } from '@/hooks/useIP'
 import CachedImage from '@/components/CachedImage'
+import { useSession } from './AuthLayout'
 
 function getImageWidth() {
-  const screenWidth = window.innerWidth
-  if (screenWidth < 640) {
-    return 150 // Mobile
+  const screenWidth = typeof window === 'undefined' ? 640 : window.innerWidth
+  if (screenWidth <= 500) {
+    return 500 * 0.8 // Mobile on mobile the card is one per screen so it actually need to be larger.
   }
   if (screenWidth < 1024) {
     return 180 // Tablet
@@ -33,6 +34,7 @@ type CardGridProps = {
 function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
   const [imageWidth, setImageWidth] = useState(getImageWidth()) // Default width
   const [currentPage, setCurrentPage] = useState(1)
+  useSession(myItems ? ['stytchUser', 'fbUser'] : [])
   const { data: visibleItems, pages: totalPages } = useIPs({
     orderBy: 'createdAt',
     orderDirection: 'desc',
@@ -86,7 +88,7 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
             </CardHeader>
 
             {/* Image */}
-            <CardContent className="flex justify-center p-4">
+            <CardContent className="flex justify-center p-4 w-full">
               <CachedImage
                 src={
                   item?.image?.cid

@@ -19,22 +19,31 @@ export const revalidate = 3600
 
 export type SessionState = {
   isStytchLoggedIn: boolean
+  isStytchDialogOpen: boolean
   isInitialized: boolean
   isLitLoggedIn: boolean
   isLitDeletegated?: string
   isFirebaseLoggedIn: boolean
   isLitActivated: boolean
   isLoggingOff?: boolean
+  isVisible?: boolean
+  isFocused?: boolean
 }
 
 export const DefaultState: SessionState = {
   isStytchLoggedIn: false,
+  isStytchDialogOpen: false,
   isInitialized: false,
   isLitActivated: false,
   isLitLoggedIn: false,
   isLitDeletegated: undefined,
   isFirebaseLoggedIn: false,
   isLoggingOff: false,
+  isVisible:
+    typeof document !== 'undefined'
+      ? document.visibilityState === 'visible'
+      : true,
+  isFocused: true,
 } as const
 
 type Injected = {
@@ -56,7 +65,9 @@ type Injected = {
 export type Session = Injected & {
   _didNotify: boolean
   _loggingOff?: Promise<void>
+  _listeners?: Array<() => void>
   authPromise?: AuthPromise
+  stytchStartup?: Promise<void>
   litClient: SuspendPromise<LitNodeClient>
   setState?: (state: SessionState) => void
   login?: (showAuthModal: boolean) => void
@@ -76,10 +87,13 @@ export type Session = Injected & {
   >
   fbUser: SuspendPromise<FirebaseUser>
   stytchUser: SuspendPromise<
-    ReturnType<typeof useStytchUser>['user'] | AuthPromise
+    ReturnType<typeof useStytchUser>['user'] | AuthPromise,
+    [required: boolean]
   >
   inject: (inject: Partial<Injected>) => void
   logout: () => Promise<void>
+  subscribe: (listener: () => void) => () => void
+  notify: (update: Partial<SessionState>) => void
 }
 
 export class SuspendPromise<T, A extends unknown[] = []> {
@@ -155,7 +169,10 @@ export class AuthPromise extends Promise<
     _result: ReturnType<typeof useStytchUser>['user'] | undefined
   ) => {}
   reject = (_error: unknown) => {}
-  constructor(private _close?: () => void) {
+  constructor(
+    private _close?: () => void,
+    public required = false
+  ) {
     let resolve: (
       result: ReturnType<typeof useStytchUser>['user'] | undefined
     ) => void = () => {}
@@ -179,6 +196,34 @@ function constructSession(inject: Partial<Injected>) {
   const session: Session = {
     _didNotify: false,
     state: Object.assign({}, DefaultState),
+    notify(updates: Partial<SessionState>) {
+      const lastState = session.state
+      for (const [key, value] of Object.entries(updates)) {
+        if ((session.state as Record<string, unknown>)[key] !== value) {
+          session.state = {
+            ...session.state,
+            [key]: value,
+          }
+        }
+      }
+      if (session.state === lastState) {
+        return
+      }
+      for (const listener of session._listeners || []) {
+        setTimeout(() => {
+          listener()
+        })
+      }
+    },
+    subscribe(listener: () => void) {
+      if (!session._listeners) {
+        session._listeners = []
+      }
+      session._listeners.push(listener)
+      return () => {
+        session._listeners = session._listeners?.filter((l) => l !== listener)
+      }
+    },
     inject(inject: Partial<Injected>) {
       const oldSetState = session.setState
       session._didNotify = false
@@ -187,48 +232,106 @@ function constructSession(inject: Partial<Injected>) {
         session[key] = inject[key] || undefined // This allow set or unset
       }
       if (!hadStytchClient && session.stytchClient) {
-        getAuth().onIdTokenChanged((user) => {
-          session._fbUser = user || undefined
-          if (
-            session._fbUser &&
-            session._stytchUser?.isInitialized &&
-            session._stytchUser?.user
-          ) {
-            notify('isFirebaseLoggedIn', true)
-          }
-        })
+        if (typeof window !== 'undefined') {
+          getAuth().onIdTokenChanged((user) => {
+            session._fbUser = user || undefined
+            if (
+              session._fbUser &&
+              session._stytchUser?.isInitialized &&
+              session._stytchUser?.user
+            ) {
+              session.notify({ isFirebaseLoggedIn: true })
+            }
+          })
+        }
         session._stytchUser = {
           user: null,
           fromCache: false,
           isInitialized: session.stytchClient != null,
         } as ReturnType<typeof useStytchUser>
-        session.stytchClient.onStateChange((state) => {
-          session._stytchUser = {
-            user: state.user || null,
-            fromCache: false,
-            isInitialized: session.stytchClient != null,
-          } as ReturnType<typeof useStytchUser>
-          notify('isStytchLoggedIn', state.user != null)
-          if (state.user && session.authPromise) {
-            session.authPromise.closed = true
-            session.authPromise.resolve(session._stytchUser?.user)
-            session.authPromise = undefined
+        session.stytchStartup = (async () => {
+          if (
+            typeof window === 'undefined' ||
+            typeof document === 'undefined'
+          ) {
+            return
           }
-          if (!state.user) {
-            session.logout()
-            notify('isStytchLoggedIn', false)
+          let detectingSession: Promise<void> | undefined
+          const detectSession = async (force = false) => {
+            if (session.state.isStytchLoggedIn && !force) {
+              return
+            }
+            if (detectingSession) {
+              return detectingSession
+            }
+            detectingSession = (async () => {
+              const user = await session.stytchClient.user
+                .get()
+                .catch(() => null)
+              session._stytchUser = {
+                user: user || null,
+                fromCache: false,
+                isInitialized: session.stytchClient != null,
+              } as ReturnType<typeof useStytchUser>
+              session.notify({ isStytchLoggedIn: user != null })
+            })()
+            return await detectingSession
           }
-        })
+          await detectSession(true)
+          session.stytchClient.user.onChange((user) => {
+            session._stytchUser = {
+              user: user || null,
+              fromCache: false,
+              isInitialized: session.stytchClient != null,
+            } as ReturnType<typeof useStytchUser>
+            session.notify({ isStytchLoggedIn: user != null })
+            if (user && session.authPromise) {
+              session.authPromise.closed = true
+              session.authPromise.resolve(session._stytchUser?.user)
+              session.authPromise = undefined
+              this.notify({
+                isStytchDialogOpen: false,
+                isStytchLoggedIn: true,
+              })
+            }
+            if (!user) {
+              session.logout()
+              session.notify({ isStytchLoggedIn: false })
+            }
+          })
+          // Add event listener                                                                                                                                                                                                                                                                                                                        │ │
+          document.addEventListener('visibilitychange', () => {
+            if (
+              document.visibilityState === 'visible' &&
+              !session.state.isVisible
+            ) {
+              detectSession()
+            }
+            session.notify({
+              isVisible: document.visibilityState === 'visible',
+            })
+          })
+          // Bonus: Also handle when window gets focus or loses focus                                                                                                                                                                                                                                                                                  │ │
+          window.addEventListener('focus', () => {
+            if (!session.state.isFocused) {
+              detectSession()
+            }
+            session.notify({ isFocused: true })
+          })
+          window.addEventListener('blur', () => {
+            session.notify({ isFocused: false })
+          })
+        })()
       }
       if (session._stytchUser?.isInitialized) {
         if (!session._stytchUser?.user) {
           if (!session._fbUser) {
-            notify('isFirebaseLoggedIn', false)
+            session.notify({ isFirebaseLoggedIn: false })
             signOut(getAuth())
           }
-          notify('isStytchLoggedIn', false)
+          session.notify({ isStytchLoggedIn: false })
         } else {
-          notify('isStytchLoggedIn', true)
+          session.notify({ isStytchLoggedIn: true })
         }
       }
       if (
@@ -237,7 +340,7 @@ function constructSession(inject: Partial<Injected>) {
         !session._didNotify
       ) {
         setTimeout(() => {
-          session.setState(session.state)
+          session.setState?.(session.state)
         })
       }
     },
@@ -245,37 +348,18 @@ function constructSession(inject: Partial<Injected>) {
       if (session._loggingOff) {
         return await session._loggingOff
       }
-      notify('isLoggingOff', true)
+      session.notify({ isLoggingOff: true })
       this._loggingOff = (async () => {
         await this.delegatedSessionSigs.clear()
         await this.sessionSigs.clear()
         await this.litClient.clear()
         await this.fbUser.clear()
         await this.stytchUser.clear()
-        notify('isLoggingOff', false)
+        session.notify({ isLoggingOff: false })
       })()
       await this._loggingOff
     },
   } as Session
-
-  const notify = (
-    name: keyof SessionState,
-    value: string | boolean | undefined
-  ) => {
-    if (session.state[name] === value) {
-      return
-    }
-    session.state = {
-      ...session.state,
-      [name]: value,
-    }
-    if (session.setState) {
-      session._didNotify = true
-      setTimeout(() => {
-        session.setState(session.state)
-      })
-    }
-  }
 
   session.litClient = new SuspendPromise<LitNodeClient>(
     session,
@@ -286,7 +370,7 @@ function constructSession(inject: Partial<Injected>) {
         litNetwork: litModule.LIT_NETWORK.Datil,
       })
       await litClient.connect()
-      notify('isLitActivated', true)
+      session.notify({ isLitActivated: true })
       return litClient
     },
     async () => {
@@ -314,7 +398,7 @@ function constructSession(inject: Partial<Injected>) {
       }
       const litModule = await import('lit-wrapper')
       const litClient = await session.litClient.wait()
-      const stytchUser = await session.stytchUser.wait()
+      const stytchUser = await session.stytchUser.wait(true)
       if (!stytchUser?.user_id) {
         throw new Error('Stytch user not logged in')
       }
@@ -350,7 +434,7 @@ function constructSession(inject: Partial<Injected>) {
       session._sessionSigsTimeout = setTimeout(() => {
         session.sessionSigs.clear()
       }, duration - 5000)
-      notify('isLitLoggedIn', true)
+      session.notify({ isLitLoggedIn: true })
       return {
         authMethod,
         address: pkp.ethAddress as `0x${string}`,
@@ -363,7 +447,7 @@ function constructSession(inject: Partial<Injected>) {
         clearTimeout(session._sessionSigsTimeout)
         session._sessionSigsTimeout = undefined
       }
-      notify('isLitLoggedIn', false)
+      session.notify({ isLitLoggedIn: false })
     }
   )
 
@@ -385,7 +469,7 @@ function constructSession(inject: Partial<Injected>) {
       const litClient = await session.litClient.wait()
       const { address, pkpPublicKey, authMethod } =
         await session.sessionSigs.wait()
-      await session.stytchUser.wait()
+      await session.stytchUser.wait(true)
       const stytchClient = session.stytchClient
       if (!stytchClient || !stytchClient.session.getTokens()?.session_jwt) {
         throw new Error('Stytch client is not initialized')
@@ -441,7 +525,7 @@ function constructSession(inject: Partial<Injected>) {
         clearTimeout(session._delegatedSessionSigsTimeout)
         session._delegatedSessionSigsTimeout = undefined
       }
-      notify('isLitDeletegated', undefined)
+      session.notify({ isLitDeletegated: undefined })
     }
   )
 
@@ -450,7 +534,7 @@ function constructSession(inject: Partial<Injected>) {
     '_fbUser',
     async () => {
       const fbUser = getAuth().currentUser
-      const stytchUser = await session.stytchUser.wait()
+      const stytchUser = await session.stytchUser.wait(true)
       if (!stytchUser || !stytchUser.user_id) {
         throw new Error('Stytch user not logged in')
       }
@@ -482,21 +566,26 @@ function constructSession(inject: Partial<Injected>) {
       if (session._fbUser) {
         await signOut(getAuth())
       }
-      notify('isFirebaseLoggedIn', false)
+      session.notify({ isFirebaseLoggedIn: false })
     }
   )
 
   session.stytchUser = new SuspendPromise<
-    ReturnType<typeof useStytchUser>['user'] | AuthPromise
+    ReturnType<typeof useStytchUser>['user'] | AuthPromise,
+    [required: boolean]
   >(
     session,
     '__stytchUser',
-    async (): Promise<
-      ReturnType<typeof useStytchUser>['user'] | AuthPromise
-    > => {
+    async (
+      required: boolean
+    ): Promise<ReturnType<typeof useStytchUser>['user'] | AuthPromise> => {
       const stytchClient = session.stytchClient
       if (!stytchClient) {
         throw new Error('Stytch client is not initialized')
+      }
+      if (session.stytchStartup) {
+        await session.stytchStartup
+        session.stytchStartup = undefined
       }
       const stytchUser = session._stytchUser
       if (!stytchUser?.isInitialized) {
@@ -505,13 +594,26 @@ function constructSession(inject: Partial<Injected>) {
       if (!stytchUser?.user) {
         if (!session.authPromise) {
           session.authPromise = new AuthPromise(() => {
-            notify('isStytchLoggedIn', false)
-          })
-          notify('isStytchLoggedIn', true)
-          return session.authPromise.finally(() => {
-            session.authPromise = undefined
-            notify('isStytchLoggedIn', true)
-          })
+            session.notify({ isStytchDialogOpen: false })
+          }, required)
+          session.notify({ isStytchDialogOpen: true })
+          return session.authPromise
+            .then((user) => {
+              session.authPromise = undefined
+              session.notify({
+                isStytchDialogOpen: false,
+                isStytchLoggedIn: true,
+              })
+              return user
+            })
+            .catch((error) => {
+              session.authPromise = undefined
+              session.notify({
+                isStytchDialogOpen: false,
+                isStytchLoggedIn: false,
+              })
+              throw error
+            })
         }
         return session.authPromise
       }
@@ -521,7 +623,7 @@ function constructSession(inject: Partial<Injected>) {
       if (session._stytchUser?.user) {
         await session.stytchClient.session.revoke()
       }
-      notify('isStytchLoggedIn', false)
+      session.notify({ isStytchLoggedIn: false })
     }
   )
   session.inject(inject)
@@ -554,32 +656,32 @@ export function initializeConfig(appConfig: RawAppConfig) {
   if (globalInstance) {
     return globalInstance as AppConfig
   }
-  if (typeof window !== 'undefined') {
-    globalSession = constructSession({})
+  globalSession = constructSession({})
+  const { FIREBASE_CONFIG, STYTCH_PUBLIC_TOKEN, ...rest } = appConfig
 
-    const { FIREBASE_CONFIG, STYTCH_PUBLIC_TOKEN, ...rest } = appConfig
+  // Initialize Firebase
+  const app = initializeApp(FIREBASE_CONFIG)
 
-    // Initialize Firebase
-    const app = initializeApp(FIREBASE_CONFIG)
+  // Initialize Stripe Payments
+  const payments =
+    typeof window !== 'undefined'
+      ? getStripePayments(app, {
+          customersCollection: 'customers',
+          productsCollection: 'products',
+        })
+      : undefined
 
-    // Initialize Stripe Payments
-    const payments = getStripePayments(app, {
-      customersCollection: 'customers',
-      productsCollection: 'products',
-    })
+  // Initialize Stytch client with public token
+  const stytchClient = createStytchUIClient(
+    (STYTCH_PUBLIC_TOKEN as string) || '',
+    stytchOptions
+  )
 
-    // Initialize Stytch client with public token
-    const stytchClient = createStytchUIClient(
-      (STYTCH_PUBLIC_TOKEN as string) || '',
-      stytchOptions
-    )
-
-    // Store the instances both in ref and global variable
-    globalInstance = { ...rest, app, payments, stytchClient } as AppConfig
-    globalSession.inject({
-      config: globalInstance,
-      stytchClient,
-    })
-  }
+  // Store the instances both in ref and global variable
+  globalInstance = { ...rest, app, payments, stytchClient } as AppConfig
+  globalSession.inject({
+    config: globalInstance,
+    stytchClient,
+  })
   return globalInstance
 }

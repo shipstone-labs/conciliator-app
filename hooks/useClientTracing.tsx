@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from 'react'
 import { useTracing, browserTracer } from '@/lib/browser-tracing'
+import { SpanStatusCode } from '@opentelemetry/api'
 
 export function useClientTracing() {
   const { traceFunction, tracePromise } = useTracing()
@@ -50,6 +51,8 @@ export function useClientTracing() {
           span.setAttributes({
             'lifecycle.event': 'unmount',
           })
+          // Mark component lifecycle as successful
+          span.setStatus({ code: SpanStatusCode.OK })
           span.end()
         }
       }, [componentName, Object.values(props)]) // eslint-disable-line react-hooks/exhaustive-deps
