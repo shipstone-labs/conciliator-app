@@ -25,7 +25,7 @@ export const Logo: FC<LogoProps> = ({ showText = true }) => {
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
             SafeIdea
           </h1>
-          <p className="mt-2 text-base text-white/70">
+          <p className="mt-2 text-base text-foreground/70">
             Securely Store, Share and Monetize Digital Assets
           </p>
         </div>

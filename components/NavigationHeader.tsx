@@ -76,26 +76,30 @@ export default function NavigationHeader() {
 
       {/* Main menu items - simplified without Menubar */}
       <nav className="flex items-center space-x-6 flex-grow">
-        <Link
-          href="/add-ip"
-          className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
-          onClick={() =>
-            traceAction('Navigate', undefined, { destination: '/add-ip' })
-          }
-        >
-          Add Idea
-        </Link>
-        <Link
-          href="/list-ip/mine"
-          className="px-3 py-2 text-sm font-medium text-white hover:text-primary/90 cursor-pointer transition-colors"
-          onClick={() =>
-            traceAction('Navigate', undefined, {
-              destination: '/list-ip/mine',
-            })
-          }
-        >
-          My Ideas
-        </Link>
+        {isAuthenticated && (
+          <>
+            <Link
+              href="/add-ip"
+              className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
+              onClick={() =>
+                traceAction('Navigate', undefined, { destination: '/add-ip' })
+              }
+            >
+              Add Idea
+            </Link>
+            <Link
+              href="/list-ip/mine"
+              className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
+              onClick={() =>
+                traceAction('Navigate', undefined, {
+                  destination: '/list-ip/mine',
+                })
+              }
+            >
+              My Ideas
+            </Link>
+          </>
+        )}
         <Link
           href="/list-ip"
           className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
@@ -120,18 +124,18 @@ export default function NavigationHeader() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="bg-background/95 border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]"
+            className="bg-background/95 border border-border rounded-xl shadow-lg p-2 min-w-[180px]"
           >
             {isAuthenticated && (
               <>
                 <DropdownMenuItem
-                  className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer"
+                  className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
                   onClick={() => setIsAccountModalOpen(true)}
                 >
                   Account
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer"
+                  className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
                   onClick={handleLogout}
                   disabled={isLoggingOff}
                 >
@@ -141,7 +145,7 @@ export default function NavigationHeader() {
             )}
             {!isAuthenticated && (
               <Link href="/" className="block">
-                <DropdownMenuItem className="px-3 py-2 hover:bg-white/10 rounded-lg cursor-pointer">
+                <DropdownMenuItem className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer">
                   Sign In
                 </DropdownMenuItem>
               </Link>
