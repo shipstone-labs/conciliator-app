@@ -62,6 +62,7 @@ export default function NavigationHeader() {
       <Link
         href="/"
         className="mr-4"
+        data-testid="nav-logo"
         onClick={() => traceAction('Navigate', undefined, { destination: '/' })}
       >
         <Image
