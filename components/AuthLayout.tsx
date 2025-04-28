@@ -107,10 +107,10 @@ export default function AuthLayout({
               />
               <Suspense fallback={<Loading />}>
                 {/* Wrap with ConfigProvider to make config available to all components */}
-                <header className="fixed top-0 left-0 right-0 z-10 bg-[#2B5B75] border-b border-border/40 h-16 flex items-center px-4">
+                <header className="fixed top-0 left-0 right-0 z-10 bg-gradient-from border-b border-border/40 h-16 flex items-center px-4">
                   <NavigationHeader />
                 </header>
-                <main className="flex-grow bg-gradient-to-b from-[#2B5B75] to-background pt-16">
+                <main className="flex-grow bg-gradient-to-b from-gradient-from to-background pt-16">
                   {children}
                 </main>
               </Suspense>

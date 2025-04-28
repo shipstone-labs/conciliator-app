@@ -523,7 +523,7 @@ export default function ChatUI({
   return (
     <Card
       ref={cardRef}
-      className="w-full mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl"
+      className="w-full mx-auto backdrop-blur-lg bg-background/30 border border-border shadow-xl"
     >
       <CardHeader>
         <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -604,8 +604,8 @@ export default function ChatUI({
                       message.role === 'user'
                         ? 'bg-primary/10 border border-primary/30'
                         : message.role === 'assistant'
-                          ? 'bg-background/40 border border-white/10'
-                          : 'bg-muted/30 text-sm italic border border-white/5'
+                          ? 'bg-background/40 border border-border'
+                          : 'bg-muted/30 text-sm italic border border-muted/50'
                     }`}
                   >
                     <div className="whitespace-pre-wrap break-words markdown-content">
@@ -644,7 +644,7 @@ export default function ChatUI({
                 disabled={loading !== 'none' || hasStop}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
-                className="resize-none bg-background/40 border-white/10 focus:ring-primary focus:border-primary w-full h-[120px] pr-16 rounded-lg backdrop-blur-sm text-white placeholder:text-white/50" // Adjust height and padding for the button
+                className="resize-none bg-background/40 border-border focus:ring-primary focus:border-primary w-full h-[120px] pr-16 rounded-lg backdrop-blur-sm text-foreground placeholder:text-foreground/50" // Adjust height and padding for the button
               />
               {!autoCompleting ? (
                 <button
@@ -691,7 +691,7 @@ export default function ChatUI({
             <div className="flex items-center space-x-2 mt-2">
               <div className="flex items-center space-x-2">
                 {/* API state indicator for debugging */}
-                <span className="ml-4 text-xs text-white/50 bg-background/30 px-2 py-1 rounded-full border border-white/10">
+                <span className="ml-4 text-xs text-foreground/50 bg-background/30 px-2 py-1 rounded-full border border-border">
                   {cycleInProgress ? 'Processing' : 'Ready'}
                 </span>
               </div>
@@ -733,11 +733,11 @@ export default function ChatUI({
                     autoCompleting ||
                     isStopping
                   }
-                  className="bg-background/40 text-white/80 px-6 py-2 rounded-lg transition
-      backdrop-blur-sm border border-white/10
+                  className="bg-background/40 text-foreground/80 px-6 py-2 rounded-lg transition
+      backdrop-blur-sm border border-border
       focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-opacity-50 
       hover:bg-background/60
-      disabled:bg-background/20 disabled:text-white/30 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
+      disabled:bg-background/20 disabled:text-foreground/30 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:focus:ring-0"
                 >
                   Save Chat Snapshot
                 </button>
@@ -747,8 +747,8 @@ export default function ChatUI({
           </div>
           <div className="w-full">
             {downloads.length > 0 && (
-              <div className="mt-4 p-4 rounded-lg border border-white/20 bg-background/40 backdrop-blur-lg shadow-md">
-                <h3 className="text-lg font-bold text-white/90 mb-3 flex items-center">
+              <div className="mt-4 p-4 rounded-lg border border-border bg-background/40 backdrop-blur-lg shadow-md">
+                <h3 className="text-lg font-bold text-foreground/90 mb-3 flex items-center">
                   <span className="mr-2">📦</span> Saved Snapshots
                 </h3>
                 <ul className="space-y-3">

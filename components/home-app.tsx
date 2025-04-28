@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Logo } from './Logo'
-import { AuthButton } from './AuthButton'
 import { useStytchUser } from '@stytch/nextjs'
 // LogoffButton import removed
 import {
@@ -12,44 +11,33 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
+import WelcomeHome from './welcome-home'
 
-// This is a placeholder for the actual login detection logic
-function HomeApp() {
-  const { user } = useStytchUser()
-
+// Logged in version of the home page
+function LoggedInHome() {
   return (
     <>
-      {/* Logout button removed - now in hamburger menu */}
-      {/* Top-right Auth Button (below menubar) */}
-      {!user ? (
-        <div className="fixed top-20 right-4 z-20">
-          <AuthButton
-            text="Sign In / Register"
-            className="bg-primary hover:bg-primary/80 text-black font-medium rounded-xl shadow-lg hover:shadow-xl hover:scale-105"
-          />
-        </div>
-      ) : null}
       <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
         <Logo />
 
         {/* Description Section */}
-        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-white/10 mt-8">
+        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border mt-8">
           <CardHeader>
-            <CardTitle className="text-2xl text-white">
+            <CardTitle className="text-2xl text-foreground">
               Welcome to{' '}
               <span className="text-primary font-semibold">SafeIdea.net</span>
             </CardTitle>
-            <CardDescription className="text-lg text-white/90">
+            <CardDescription className="text-lg text-foreground/90">
               The alpha version of our IP protection platform
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-lg leading-relaxed text-white/90">
+            <p className="text-lg leading-relaxed text-foreground/90">
               SafeIdea is a new decentralized service designed to help creators
               and inventors securely store, share and benefit from their digital
               creations.
             </p>
-            <div className="mt-6 text-lg leading-relaxed text-white/90">
+            <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
                 This alpha version was launched as part of the{' '}
                 <a
@@ -65,7 +53,7 @@ function HomeApp() {
                 collaboration.
               </p>
             </div>
-            <div className="mt-6 text-lg leading-relaxed text-white/90">
+            <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
                 To get started, log in with our passwordless access, add a new
                 secret document, or learn more about the ideas in our database!
@@ -98,6 +86,23 @@ function HomeApp() {
       </div>
     </>
   )
+}
+
+// This is the main component that decides which version to show
+function HomeApp() {
+  const { user, isInitialized } = useStytchUser()
+
+  // If not initialized, show nothing
+  if (!isInitialized) {
+    return null
+  }
+
+  // Show the appropriate version based on login status
+  if (user) {
+    return <LoggedInHome />
+  }
+
+  return <WelcomeHome />
 }
 
 function RootHomeApp() {

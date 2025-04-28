@@ -81,7 +81,7 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
                     {item.name}
                   </CardTitle>
                 </TooltipTrigger>
-                <TooltipContent className="bg-background/80 backdrop-blur-md text-white p-3 rounded-xl max-w-xs border border-white/10 shadow-lg">
+                <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-xs border border-border shadow-lg">
                   {item.name}
                 </TooltipContent>
               </Tooltip>
@@ -101,7 +101,7 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
                 height={imageWidth}
                 // Add priority to images that are likely to be above the fold (first 4 items)
                 priority={index < 4}
-                className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all"
+                className="rounded-xl object-cover shadow-md border border-border hover:border-primary/30 transition-all"
               />
             </CardContent>
 
@@ -109,11 +109,11 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
             <CardContent className="p-4 h-32 overflow-hidden">
               <Tooltip>
                 <TooltipTrigger className="block w-full">
-                  <p className="text-white/80 text-sm line-clamp-5 text-ellipsis">
+                  <p className="text-foreground/80 text-sm line-clamp-5 text-ellipsis">
                     {item.description}
                   </p>
                 </TooltipTrigger>
-                <TooltipContent className="bg-background/80 backdrop-blur-md text-white p-3 rounded-xl max-w-sm border border-white/10 shadow-lg">
+                <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-sm border border-border shadow-lg">
                   {item.description}
                 </TooltipContent>
               </Tooltip>
@@ -141,7 +141,7 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
           type="button"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-border rounded-xl text-foreground/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
         >
           Prev
         </button>
@@ -155,7 +155,7 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
             className={`px-4 py-2 h-11 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all ${
               currentPage === i + 1
                 ? 'bg-primary text-black font-medium'
-                : 'bg-background/50 backdrop-blur-sm border border-white/10 text-white/90 hover:bg-background/70'
+                : 'bg-background/50 backdrop-blur-sm border border-border text-foreground/90 hover:bg-background/70'
             }`}
           >
             {i + 1}
@@ -165,7 +165,7 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
         <button
           type="button"
           onClick={() => goToPage(currentPage + 1)}
-          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-white/10 rounded-xl text-white/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-border rounded-xl text-foreground/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
         >
           Next
         </button>

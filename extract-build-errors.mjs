@@ -38,7 +38,7 @@ function processLog(logContent, outputFile) {
   // Find build section
   const buildSection = extractSection(
     lines,
-    (line) => line.includes('next build'),
+    (line) => line.includes('pnpm run build:plain'),
     (line) => line.includes('END')
   )
 

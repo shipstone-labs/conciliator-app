@@ -144,10 +144,12 @@ const QuestionIP = ({
 
   if (appState === AppStates.LOADING || !ipDoc) {
     return (
-      <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden p-8">
+      <Card className="w-full backdrop-blur-lg bg-background/30 border border-border shadow-xl overflow-hidden p-8">
         <div className="flex flex-col items-center justify-center py-8">
           <Loading />
-          <p className="text-white/70 mt-4">Loading discovery session...</p>
+          <p className="text-foreground/70 mt-4">
+            Loading discovery session...
+          </p>
         </div>
       </Card>
     )
@@ -160,7 +162,7 @@ const QuestionIP = ({
         <Button
           onClick={goToDetails}
           variant="outline"
-          className="text-white/90 hover:bg-white/10 flex items-center gap-2"
+          className="text-foreground/90 hover:bg-muted/20 flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" /> Return to Details
         </Button>
@@ -177,12 +179,12 @@ const QuestionIP = ({
   )
 
   const renderEvaluationState = () => (
-    <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
-      <CardHeader className="pb-4 border-b border-white/10">
+    <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-border shadow-xl">
+      <CardHeader className="pb-4 border-b border-border">
         <CardTitle className="text-2xl font-bold text-primary">
           Value Assessment
         </CardTitle>
-        <CardDescription className="text-white/90 mt-2">
+        <CardDescription className="text-foreground/90 mt-2">
           Based on the information exchanged, evaluate the potential value
         </CardDescription>
       </CardHeader>
@@ -191,7 +193,7 @@ const QuestionIP = ({
           <Button
             onClick={() => setAppState(AppStates.END)}
             variant="outline"
-            className="flex-1 border-white/20 text-white/90 hover:bg-muted/30 py-3"
+            className="flex-1 border-border text-foreground/90 hover:bg-muted/30 py-3"
           >
             Insufficient Value
           </Button>
@@ -207,12 +209,12 @@ const QuestionIP = ({
   )
 
   const renderEndState = () => (
-    <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl">
-      <CardHeader className="pb-4 border-b border-white/10">
+    <Card className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-border shadow-xl">
+      <CardHeader className="pb-4 border-b border-border">
         <CardTitle className="text-2xl font-bold text-primary">
           Session Complete
         </CardTitle>
-        <CardDescription className="text-white/90 mt-2">
+        <CardDescription className="text-foreground/90 mt-2">
           Thank you for using the Discovery Session
         </CardDescription>
       </CardHeader>
@@ -240,26 +242,28 @@ const QuestionIP = ({
           </h1>
           {ideaData && (
             <div className="mt-1 mb-4">
-              <h2 className="text-xl font-medium text-white/90">Agent View</h2>
+              <h2 className="text-xl font-medium text-foreground/90">
+                Agent View
+              </h2>
               <div className="flex justify-center mt-2 gap-2">
                 {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (
                   ideaData.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 text-xs font-medium bg-white/10 text-white/80 rounded-full"
+                      className="px-3 py-1 text-xs font-medium bg-muted/30 text-foreground/80 rounded-full"
                     >
                       {tag}
                     </span>
                   ))
                 ) : (
-                  <span className="px-3 py-1 text-xs font-medium bg-white/10 text-white/60 rounded-full">
+                  <span className="px-3 py-1 text-xs font-medium bg-muted/30 text-foreground/60 rounded-full">
                     {ideaData.category || 'Intellectual Property'}
                   </span>
                 )}
               </div>
             </div>
           )}
-          <p className="text-white/70">
+          <p className="text-foreground/70">
             Ask the SafeIdea agent questions about this Idea
           </p>
         </div>
