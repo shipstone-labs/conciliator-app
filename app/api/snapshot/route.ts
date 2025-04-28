@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       // } as any
       blob
     )
-    return new Response(JSON.stringify(upload.toString()), {
+    return new Response(JSON.stringify({ cid: upload.toString() }), {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {

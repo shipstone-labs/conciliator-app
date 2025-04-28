@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "predev": "pnpm run build-wrappers",
-    "dev": "bash -c 'trap \"kill 0\" SIGINT; cross-env ENV NODE_NO_WARNINGS=1 next dev | grep --color=always -v \"nextjs_original-stack-frames\"'",
+    "dev": "bash -c 'set -e pipefail; trap \"kill 0\" SIGINT; cross-env ENV NODE_NO_WARNINGS=1 next dev | grep --color=always -v \"nextjs_original-stack-frames\"'",
     "dev:trace": "bash -c 'source .env.development && trap \"kill 0\" SIGINT; cross-env ENV NODE_NO_WARNINGS=1 next dev | grep --color=always -v \"nextjs_original-stack-frames\"'",
     "trace:start": "./start-local-tracing.sh",
     "trace:stop": "docker-compose down",
