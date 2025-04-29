@@ -24,6 +24,7 @@ import {
 // import Link from 'next/link' - removed unused import
 import type { IPDoc } from '@/lib/types'
 import { useStytch } from '@stytch/nextjs'
+import type { MessageType } from './QuestionIP'
 
 // Skeleton loader component for messages
 const MessageSkeleton = ({
@@ -73,7 +74,7 @@ export default function ChatUI({
   onSave,
 }: {
   doc: IPDoc
-  messages: { role: 'user' | 'assistant' | 'system'; content: string }[]
+  messages: MessageType[]
   onSend: (message: string) => Promise<void>
   onSave?: (
     event: MouseEvent<HTMLButtonElement>
@@ -278,7 +279,8 @@ export default function ChatUI({
       setLoading('assistant')
 
       try {
-        await onSend(question)
+        // Tag this question as coming from the Lilypad module (AI search)
+        await onSend(`${question}|||lilypad`)
       } catch {
         // Force stop auto-discovery completely on API error
         isAutoDiscoveryActive.current = false
@@ -507,19 +509,18 @@ export default function ChatUI({
     }
   }, [messages, downloads, loading]) // Dependencies to trigger the effect
 
-  const messageWithIndex: { role: string; content: string; index?: number }[] =
-    useMemo(() => {
-      let index = 1
-      return (messages || []).map((message, _index) => {
-        if (message.role === 'assistant' && _index !== 0) {
-          return {
-            ...message,
-            index: index++,
-          }
+  const messageWithIndex: (MessageType & { index?: number })[] = useMemo(() => {
+    let index = 1
+    return (messages || []).map((message, _index) => {
+      if (message.role === 'assistant' && _index !== 0) {
+        return {
+          ...message,
+          index: index++,
         }
-        return message
-      })
-    }, [messages])
+      }
+      return message
+    })
+  }, [messages])
   return (
     <Card
       ref={cardRef}
@@ -559,10 +560,10 @@ export default function ChatUI({
                   {/* Avatar for Assistant */}
                   {message.role === 'assistant' && (
                     <div className="flex flex-row items-center space-x-2 mr-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#1A1B25] border-2 border-[#FFD700] text-white flex items-center justify-center text-lg font-semibold">
                         {message.index || ''}
                       </div>
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center overflow-hidden">
+                      <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
                         <Image
                           src="/chatbot.svg"
                           alt="AI Sales Agent Logo"
@@ -586,12 +587,38 @@ export default function ChatUI({
                 </div>
               ) : (
                 <div className="flex items-start space-x-4">
-                  {/* Optional Avatar for Assistant */}
+                  {/* Avatar for Assistant */}
                   {message.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center overflow-hidden">
+                    <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
                       <Image
                         src="/chatbot.svg"
                         alt="AI Sales Agent Logo"
+                        width={32}
+                        height={32}
+                      />
+                    </div>
+                  )}
+
+                  {/* Avatar for User - with different icons based on source */}
+                  {message.role === 'user' && (
+                    <div
+                      className={`p-3 rounded-full shrink-0 flex items-center justify-center ${
+                        message.source === 'lilypad'
+                          ? 'bg-secondary/20'
+                          : 'bg-muted/30'
+                      }`}
+                    >
+                      <Image
+                        src={
+                          message.source === 'lilypad'
+                            ? '/006-research.svg'
+                            : '/007-mind.svg'
+                        }
+                        alt={
+                          message.source === 'lilypad'
+                            ? 'AI Search'
+                            : 'Human User'
+                        }
                         width={32}
                         height={32}
                       />
@@ -602,7 +629,9 @@ export default function ChatUI({
                   <div
                     className={`p-4 rounded-lg max-w-3xl backdrop-blur-sm ${
                       message.role === 'user'
-                        ? 'bg-primary/10 border border-primary/30'
+                        ? message.source === 'lilypad'
+                          ? 'bg-secondary/10 border border-secondary/30'
+                          : 'bg-primary/10 border border-primary/30'
                         : message.role === 'assistant'
                           ? 'bg-background/40 border border-border'
                           : 'bg-muted/30 text-sm italic border border-muted/50'

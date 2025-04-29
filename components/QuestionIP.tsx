@@ -17,6 +17,13 @@ import { useStytch } from '@stytch/nextjs'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 
+// Define message type interface to avoid repetition
+export interface MessageType {
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  source?: 'human' | 'lilypad'
+}
+
 const AppStates = {
   LOADING: 'loading',
   START: 'start',
@@ -34,9 +41,7 @@ const QuestionIP = ({
   const ideaData = useIP(docId) // Get idea data for context
   const [appState, setAppState] = useState(AppStates.LOADING)
   const [isLoading, setIsLoading] = useState(false)
-  const [messages, setMessages] = useState<
-    { role: 'user' | 'assistant' | 'system'; content: string }[]
-  >([])
+  const [messages, setMessages] = useState<MessageType[]>([])
   const ipDoc = useIP(docId)
   const stytchClient = useStytch()
 
@@ -63,7 +68,19 @@ const QuestionIP = ({
             }
             return res.json()
           })
-          setMessages(_resultMessages)
+          // Add source information to messages
+          const processedMessages = _resultMessages.map((msg: MessageType) => {
+            if (msg.role === 'user' && !msg.source) {
+              // If this is a message returned from the API without source info,
+              // check if we can determine it's from lilypad based on content
+              return {
+                ...msg,
+                source: msg.content.includes('lilypad') ? 'lilypad' : 'human',
+              }
+            }
+            return msg
+          })
+          setMessages(processedMessages)
           setIsLoading(false)
           setAppState(AppStates.DISCUSSION)
         })()
@@ -77,8 +94,22 @@ const QuestionIP = ({
     async (question: string) => {
       setIsLoading(true)
       try {
+        // Check if the question has a source tag
+        let messageContent = question
+        let messageSource: 'human' | 'lilypad' = 'human'
+
+        // Parse out the source tag if present
+        if (question.includes('|||lilypad')) {
+          messageContent = question.replace('|||lilypad', '')
+          messageSource = 'lilypad'
+        }
+
         // First update the messages array with the user's question so it's visible immediately
-        const userMessage = { role: 'user' as const, content: question }
+        const userMessage = {
+          role: 'user' as const,
+          content: messageContent,
+          source: messageSource,
+        }
         setMessages((prevMessages) => [...prevMessages, userMessage])
 
         // Then make the API request
@@ -92,7 +123,13 @@ const QuestionIP = ({
           },
           body: JSON.stringify({
             id: docId,
-            messages: [...messages, userMessage],
+            messages: [
+              ...messages,
+              {
+                role: userMessage.role,
+                content: messageContent, // Use the cleaned content without the source tag
+              },
+            ],
           }),
         }).then((res) => {
           if (!res.ok) {
@@ -101,7 +138,25 @@ const QuestionIP = ({
           return res.json()
         })
 
-        setMessages(_resultMessages)
+        // Add source information to messages
+        const processedMessages = _resultMessages.map((msg: MessageType) => {
+          if (msg.role === 'user' && !msg.source) {
+            // Preserve source information for existing messages
+            const existingMsg = messages.find(
+              (m) => m.role === msg.role && m.content === msg.content
+            )
+            if (existingMsg?.source) {
+              return { ...msg, source: existingMsg.source }
+            }
+            // Otherwise try to determine source from content
+            return {
+              ...msg,
+              source: msg.content.includes('lilypad') ? 'lilypad' : 'human',
+            }
+          }
+          return msg
+        })
+        setMessages(processedMessages)
       } catch (error) {
         console.error('Error processing request:', error)
       } finally {
@@ -164,7 +219,7 @@ const QuestionIP = ({
           variant="outline"
           className="text-foreground/90 hover:bg-muted/20 flex items-center gap-2"
         >
-          <ArrowLeft className="h-4 w-4" /> Return to Details
+          <ArrowLeft className="h-4 w-4" /> Return to Idea Page
         </Button>
       </div>
 
