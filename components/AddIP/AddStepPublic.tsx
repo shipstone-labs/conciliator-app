@@ -55,7 +55,7 @@ export const AddStepPublic = memo(
               Public Information
             </h3>
           </div>
-          <p className="text-sm text-white/90 ml-8">
+          <p className="text-sm text-foreground/90 ml-8">
             First enter the publicly available information you want to use to
             describe your idea. This information can be seen by others on the
             Internet.
@@ -64,7 +64,7 @@ export const AddStepPublic = memo(
         <div className="space-y-2">
           <label
             htmlFor="public-title"
-            className="text-sm font-medium text-white/90 block"
+            className="text-sm font-medium text-foreground/90 block"
           >
             Public Title
           </label>
@@ -76,14 +76,14 @@ export const AddStepPublic = memo(
             value={name}
             onChange={handleNameChange}
             disabled={isLoading}
-            className="border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary rounded-xl h-11"
+            className="border-border/30 bg-muted/50 text-foreground placeholder:text-foreground/60 focus:border-primary rounded-xl h-11"
           />
         </div>
 
         <div className="space-y-2">
           <label
             htmlFor="public-description"
-            className="text-sm font-medium text-white/90 block"
+            className="text-sm font-medium text-foreground/90 block"
           >
             Public Description
           </label>
@@ -95,7 +95,7 @@ export const AddStepPublic = memo(
             value={description}
             onChange={handleDescriptionChange}
             disabled={isLoading}
-            className="min-h-24 border-white/20 bg-muted/50 text-white placeholder:text-white/60 focus:border-primary rounded-xl"
+            className="min-h-24 border-border/30 bg-muted/50 text-foreground placeholder:text-foreground/60 focus:border-primary rounded-xl"
           />
         </div>
       </>

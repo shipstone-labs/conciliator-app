@@ -124,7 +124,7 @@ export const AddStepTerms = memo(
               Share Your Idea
             </h3>
           </div>
-          <p className="text-sm text-white/90 ml-8">
+          <p className="text-sm text-foreground/90 ml-8">
             Now, you can choose how you want to share it. Click
             <strong> Set Terms </strong> to configure sharing options.
           </p>
@@ -133,7 +133,7 @@ export const AddStepTerms = memo(
         <Button
           onClick={handleCloseTermsModal}
           variant="outline"
-          className="w-full border border-white/20 text-white/90 hover:bg-muted/30 py-3 px-4 rounded-xl transition-all h-12"
+          className="w-full border border-border/30 text-foreground/90 hover:bg-muted/30 py-3 px-4 rounded-xl transition-all h-12"
           disabled={isLoading || !ipDoc.content}
           data-testid="set-terms-button"
         >
@@ -141,7 +141,7 @@ export const AddStepTerms = memo(
         </Button>
         {/* Create Page explanation */}
         <div className="p-4 mb-2 mt-4">
-          <p className="text-sm text-white/90">
+          <p className="text-sm text-foreground/90">
             Clicking <strong>Create Idea Page</strong> submits your idea and
             takes you to your new idea page. You can share this page address
             with others to explore your secure idea.
@@ -179,7 +179,7 @@ export const AddStepTerms = memo(
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                <span className="text-white/90">
+                <span className="text-foreground/90">
                   {status?.status ||
                     localStatus ||
                     'Creating a site for your Idea. This may take a minute or two.'}
@@ -190,10 +190,10 @@ export const AddStepTerms = memo(
             )}
           </Button>
           {status?.status || localStatus ? (
-            <div className="p-4 rounded-lg border border-white/20 bg-muted/30 mb-2 mt-4">
+            <div className="p-4 rounded-lg border border-border/30 bg-muted/30 mb-2 mt-4">
               <div className="flex items-center">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                <span className="text-white/90">
+                <span className="text-foreground/90">
                   {status?.status || localStatus || ''}
                 </span>
               </div>
@@ -212,7 +212,7 @@ export const AddStepTerms = memo(
             <div className="space-y-2">
               <label
                 htmlFor="business-model"
-                className="text-sm font-medium text-white/90 block"
+                className="text-sm font-medium text-foreground/90 block"
               >
                 Business Model
               </label>
@@ -220,7 +220,7 @@ export const AddStepTerms = memo(
                 id="business-model"
                 value={ipDoc.terms?.businessModel || ''}
                 onChange={handleBusinessModelChange}
-                className="w-full p-3 border border-white/20 bg-muted/30 text-white rounded-xl h-11"
+                className="w-full p-3 border border-border/30 bg-muted/30 text-foreground rounded-xl h-11"
                 data-testid="business-model-select"
               >
                 {legalDocuments.map((doc) => (
@@ -233,7 +233,7 @@ export const AddStepTerms = memo(
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-white/60 mt-1">
+              <p className="text-xs text-foreground/60 mt-1">
                 Additional business models coming soon
               </p>
             </div>
@@ -242,7 +242,7 @@ export const AddStepTerms = memo(
               <div className="space-y-2">
                 <label
                   htmlFor="evaluation-period"
-                  className="text-sm font-medium text-white/90 block"
+                  className="text-sm font-medium text-foreground/90 block"
                 >
                   Evaluation Period
                 </label>
@@ -253,7 +253,7 @@ export const AddStepTerms = memo(
                     onSelect={handleSelectedPrices}
                   />
                 </div>
-                <p className="text-xs text-white/60 mt-1">
+                <p className="text-xs text-foreground/60 mt-1">
                   Period begins after transaction is completed
                 </p>
               </div>
@@ -265,7 +265,7 @@ export const AddStepTerms = memo(
               <Button
                 variant="ghost"
                 onClick={() => setIsTermsModalOpen(false)}
-                className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                className="text-foreground/90 hover:bg-muted/50 rounded-xl h-11"
               >
                 Cancel
               </Button>
@@ -274,7 +274,7 @@ export const AddStepTerms = memo(
                   setIsNdaModalOpen(true)
                 }}
                 variant="outline"
-                className="bg-muted/30 border-white/20 text-white hover:bg-muted/50 rounded-xl h-11"
+                className="bg-muted/30 border-border/30 text-foreground hover:bg-muted/50 rounded-xl h-11"
               >
                 Review NDA
               </Button>
@@ -299,14 +299,14 @@ export const AddStepTerms = memo(
           title="Select Sharing Agreement"
         >
           <div className="space-y-5">
-            <p className="text-white/90">
+            <p className="text-foreground/90">
               Select the digital NDA sharing agreement and click OK. If you
               don&apos;t want to use an agreement within this system click the
               checkbox below.
             </p>
 
             {/* Document Selection Area */}
-            <div className="space-y-3 p-4 rounded-lg border border-white/20 bg-muted/30">
+            <div className="space-y-3 p-4 rounded-lg border border-border/30 bg-muted/30">
               <h3 className="font-semibold text-primary text-sm">
                 Available Documents
               </h3>
@@ -315,12 +315,12 @@ export const AddStepTerms = memo(
                 {legalDocuments.map((doc) => (
                   <div
                     key={doc.id}
-                    className={`flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-muted/40 transition-colors ${selectedDoc === doc.id ? 'border border-primary/50 bg-muted/40' : 'border border-white/20'}`}
+                    className={`flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-muted/40 transition-colors ${selectedDoc === doc.id ? 'border border-primary/50 bg-muted/40' : 'border border-border/30'}`}
                     onClick={() => {
                       setSelectedDoc(doc.id)
                     }}
                   >
-                    <span className="text-white/90">{doc.name}</span>
+                    <span className="text-foreground/90">{doc.name}</span>
                     <ViewNDA
                       size="sm"
                       variant="ghost"
@@ -341,9 +341,12 @@ export const AddStepTerms = memo(
                 id="no-nda"
                 checked={!ipDoc.terms?.ndaRequired}
                 onChange={handleNdaSelected}
-                className="rounded border-white/20 bg-muted/30 text-primary"
+                className="rounded border-border/30 bg-muted/30 text-primary"
               />
-              <label htmlFor="no-nda" className="text-white/90 cursor-pointer">
+              <label
+                htmlFor="no-nda"
+                className="text-foreground/90 cursor-pointer"
+              >
                 I choose to not include a SafeIdea sharing agreement for my
                 Idea.
               </label>
@@ -358,7 +361,7 @@ export const AddStepTerms = memo(
               <Button
                 variant="ghost"
                 onClick={() => setIsNdaModalOpen(false)}
-                className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                className="text-foreground/90 hover:bg-muted/50 rounded-xl h-11"
               >
                 Cancel
               </Button>
