@@ -71,11 +71,10 @@ const QuestionIP = ({
           // Add source information to messages
           const processedMessages = _resultMessages.map((msg: MessageType) => {
             if (msg.role === 'user' && !msg.source) {
-              // If this is a message returned from the API without source info,
-              // check if we can determine it's from lilypad based on content
+              // All initial user messages are from Lilypad since no human has interacted yet
               return {
                 ...msg,
-                source: msg.content.includes('lilypad') ? 'lilypad' : 'human',
+                source: 'lilypad',
               }
             }
             return msg
@@ -94,11 +93,14 @@ const QuestionIP = ({
     async (question: string) => {
       setIsLoading(true)
       try {
-        // Check if the question has a source tag
-        let messageContent = question
-        let messageSource: 'human' | 'lilypad' = 'human'
+        // We need to handle two sources for messages:
+        // 1. Human messages - typed directly by user (default)
+        // 2. Lilypad messages - from the AI seeker (marked with |||lilypad)
 
-        // Parse out the source tag if present
+        let messageContent = question
+        let messageSource: 'human' | 'lilypad' = 'human' // Default is human for direct input
+
+        // If this is from auto-discovery, it will have the Lilypad marker
         if (question.includes('|||lilypad')) {
           messageContent = question.replace('|||lilypad', '')
           messageSource = 'lilypad'
@@ -138,21 +140,11 @@ const QuestionIP = ({
           return res.json()
         })
 
-        // Add source information to messages
+        // Simply tag all user messages without a source as 'lilypad'
+        // Since we know all human messages are already tagged at creation time
         const processedMessages = _resultMessages.map((msg: MessageType) => {
           if (msg.role === 'user' && !msg.source) {
-            // Preserve source information for existing messages
-            const existingMsg = messages.find(
-              (m) => m.role === msg.role && m.content === msg.content
-            )
-            if (existingMsg?.source) {
-              return { ...msg, source: existingMsg.source }
-            }
-            // Otherwise try to determine source from content
-            return {
-              ...msg,
-              source: msg.content.includes('lilypad') ? 'lilypad' : 'human',
-            }
+            return { ...msg, source: 'lilypad' }
           }
           return msg
         })
