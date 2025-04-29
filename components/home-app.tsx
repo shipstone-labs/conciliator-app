@@ -17,21 +17,23 @@ import WelcomeHome from './welcome-home'
 function LoggedInHome() {
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
+      <div className="flex flex-col items-center min-h-screen px-6 pt-12 pb-16">
+        {/* Logo Section */}
+        <div className="mb-8">
+          <Logo showText={false} />
+        </div>
+
         {/* Description Section */}
         <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border">
-          <CardHeader className="relative">
+          <CardHeader>
             <CardTitle className="text-2xl text-foreground">
               Welcome to Your SafeIdea Account
             </CardTitle>
             <CardDescription className="text-lg text-foreground/90">
               We're excited you're here!
             </CardDescription>
-            <div className="absolute -bottom-24 right-6">
-              <Logo showText={false} />
-            </div>
           </CardHeader>
-          <CardContent className="mt-8">
+          <CardContent>
             <p className="text-lg leading-relaxed text-foreground/90">
               SafeIdea is an open source, decentralized platform where creators
               and thinkers can safeguard their ideas and digital assets. Our

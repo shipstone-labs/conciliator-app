@@ -28,9 +28,8 @@ function WelcomeHome() {
             <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
               <div className="space-y-4">
                 <h1 className="text-4xl tracking-tight font-extrabold text-foreground sm:text-5xl md:text-6xl">
-                  <span className="block">Secure, Share, and</span>
                   <span className="block text-primary">
-                    Sell Your Digital Assets
+                    Because They're Your Ideas
                   </span>
                 </h1>
                 <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
@@ -379,11 +378,11 @@ function WelcomeHome() {
               <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-4">
                 <AuthButton
                   text="Get Started"
-                  className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
+                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 />
                 <Link
                   href="/list-ip"
-                  className="inline-flex items-center justify-center px-5 py-3 border border-border text-base font-medium rounded-md text-foreground bg-card hover:bg-card/80"
+                  className="inline-flex items-center justify-center px-6 py-3 border border-border text-base font-medium rounded-md text-foreground bg-card hover:bg-card/80"
                 >
                   Explore Options
                 </Link>
