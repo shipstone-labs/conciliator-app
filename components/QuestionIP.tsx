@@ -243,7 +243,7 @@ const QuestionIP = ({
           {ideaData && (
             <div className="mt-1 mb-4">
               <h2 className="text-xl font-medium text-foreground/90">
-                Agent View
+                AI Sales Agent View
               </h2>
               <div className="flex justify-center mt-2 gap-2">
                 {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (
@@ -264,7 +264,7 @@ const QuestionIP = ({
             </div>
           )}
           <p className="text-foreground/70">
-            Ask the SafeIdea agent questions about this Idea
+            Chat with the AI Sales Agent about this Idea
           </p>
         </div>
 

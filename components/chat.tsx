@@ -562,10 +562,10 @@ export default function ChatUI({
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center">
                         {message.index || ''}
                       </div>
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center overflow-hidden">
                         <Image
-                          src="/svg/Black+Yellow.svg"
-                          alt="Conciliator Logo"
+                          src="/chatbot.svg"
+                          alt="AI Sales Agent Logo"
                           width={32}
                           height={32}
                         />
@@ -588,10 +588,10 @@ export default function ChatUI({
                 <div className="flex items-start space-x-4">
                   {/* Optional Avatar for Assistant */}
                   {message.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700] text-white flex items-center justify-center overflow-hidden">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center overflow-hidden">
                       <Image
-                        src="/svg/Black+Yellow.svg"
-                        alt="Conciliator Logo"
+                        src="/chatbot.svg"
+                        alt="AI Sales Agent Logo"
                         width={32}
                         height={32}
                       />
@@ -721,7 +721,7 @@ export default function ChatUI({
                     ? 'Stop'
                     : isStopping
                       ? 'Stopping...'
-                      : 'Test Your Agent'}
+                      : 'Test Your AI Sales Agent'}
               </button>
               {onSave ? (
                 <button

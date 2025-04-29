@@ -67,7 +67,7 @@ export const POST = withAPITracing(async (req: NextRequest) => {
           messages: [
             {
               role: 'assistant',
-              content: `Welcome to the ${data.name} session! I am ready to answer questions about this invention with the following description
+              content: `Welcome to the ${data.name} session! I'm looking forward to chatting about this idea with people and AIs that follow the Model Context Protocol (MCP). Here's the public description for this idea:
 
 ${data.description}`,
             },
