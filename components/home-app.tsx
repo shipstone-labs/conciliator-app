@@ -18,11 +18,9 @@ function LoggedInHome() {
   return (
     <>
       <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
-        <Logo />
-
         {/* Description Section */}
-        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border mt-8">
-          <CardHeader>
+        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border">
+          <CardHeader className="relative">
             <CardTitle className="text-2xl text-foreground">
               Welcome to{' '}
               <span className="text-primary font-semibold">SafeIdea.net</span>
@@ -30,8 +28,11 @@ function LoggedInHome() {
             <CardDescription className="text-lg text-foreground/90">
               The alpha version of our IP protection platform
             </CardDescription>
+            <div className="absolute -bottom-24 right-6">
+              <Logo showText={false} />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="mt-8">
             <p className="text-lg leading-relaxed text-foreground/90">
               SafeIdea is a new decentralized service designed to help creators
               and inventors securely store, share and benefit from their digital

@@ -8,11 +8,13 @@ interface LogoProps {
 
 export const Logo: FC<LogoProps> = ({ showText = true }) => {
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto mb-10">
+    <div
+      className={`flex flex-col items-center justify-center ${showText ? 'w-full max-w-md mx-auto mb-10' : 'w-auto'}`}
+    >
       {/* Logo Image */}
       <Image
-        width={192}
-        height={192}
+        width={showText ? 192 : 120}
+        height={showText ? 192 : 120}
         className="rounded-full shadow-lg border-2 border-primary/30"
         priority
         src="/svg/Black+Yellow.svg"
