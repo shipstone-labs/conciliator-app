@@ -24,11 +24,6 @@ type AddStepTermsProps = {
   localStatus: string
   status: IPAudit | undefined
   setLocalStatus: Dispatch<SetStateAction<string>>
-  stepsCompleted?: {
-    step1: boolean
-    step2: boolean
-    step3: boolean
-  }
 }
 
 export const AddStepTerms = memo(
@@ -39,14 +34,10 @@ export const AddStepTerms = memo(
     onStore,
     localStatus,
     status,
-    // Using underscore in variable name to indicate intentional unused parameter
-    stepsCompleted,
   }: AddStepTermsProps) => {
     const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
     const [isNdaModalOpen, setIsNdaModalOpen] = useState(false)
     const [selectedDoc, setSelectedDoc] = useState('protected-eval')
-    // Using underscore to mark variable as intentionally unused
-    const [_termsAccepted, setTermsAccepted] = useState(false)
     const products = useProducts()
     const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
 
@@ -275,8 +266,7 @@ export const AddStepTerms = memo(
               </Button>
               <Button
                 onClick={() => {
-                  // Save terms logic would go here
-                  setTermsAccepted(true)
+                  // Just close the modal since terms are now optional
                   setIsTermsModalOpen(false)
                 }}
                 className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"

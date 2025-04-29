@@ -418,7 +418,6 @@ const AppIP = () => {
               setLocalStatus={setLocalStatus}
               onStore={handleStore}
               localStatus={localStatus}
-              stepsCompleted={stepsCompleted}
             />
           </CardContent>
         </Card>
