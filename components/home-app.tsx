@@ -17,47 +17,43 @@ import WelcomeHome from './welcome-home'
 function LoggedInHome() {
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-16">
+      <div className="flex flex-col items-center min-h-screen px-6 pt-12 pb-16">
+        {/* Logo Section */}
+        <div className="mb-8">
+          <Logo showText={false} />
+        </div>
+
         {/* Description Section */}
         <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border">
-          <CardHeader className="relative">
+          <CardHeader>
             <CardTitle className="text-2xl text-foreground">
-              Welcome to{' '}
-              <span className="text-primary font-semibold">SafeIdea.net</span>
+              Welcome to Your SafeIdea Account
             </CardTitle>
             <CardDescription className="text-lg text-foreground/90">
-              The alpha version of our IP protection platform
+              We're excited you're here!
             </CardDescription>
-            <div className="absolute -bottom-24 right-6">
-              <Logo showText={false} />
-            </div>
           </CardHeader>
-          <CardContent className="mt-8">
+          <CardContent>
             <p className="text-lg leading-relaxed text-foreground/90">
-              SafeIdea is a new decentralized service designed to help creators
-              and inventors securely store, share and benefit from their digital
-              creations.
+              SafeIdea is an open source, decentralized platform where creators
+              and thinkers can safeguard their ideas and digital assets. Our
+              technology is built on the Protocol Labs ecosystem—Filecoin, IPFS,
+              Storacha, and Lilypad—with encryption powered by LIT Protocol's
+              threshold cryptography.
             </p>
             <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
-                This alpha version was launched as part of the{' '}
-                <a
-                  href="https://www.encode.club/ai-blueprints"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Filecoin AI Blueprints
-                </a>{' '}
-                hackathon, and incorporates Storacha and Lilypad to support
-                encrypted digital asset sharing and monetization using agentic
-                collaboration.
+                While we prepare for our commercial launch later this year, we
+                invite you to explore what we've built. Since we're still in
+                testing mode, please experiment freely but save your truly
+                valuable ideas for our full release.
               </p>
             </div>
             <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
-                To get started, log in with our passwordless access, add a new
-                secret document, or learn more about the ideas in our database!
+                Getting started is simple with our passwordless,
+                no-wallet-required access. Register a new idea, browse existing
+                assets, or dive right in!
               </p>
             </div>
           </CardContent>
