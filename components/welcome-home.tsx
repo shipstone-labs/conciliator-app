@@ -17,10 +17,7 @@ function WelcomeHome() {
         />
       </div>
 
-      {/* Alpha Banner */}
-      <div className="fixed top-4 right-4 z-30 bg-warning text-black font-medium py-2 px-4 rounded-lg shadow-lg transform rotate-2 border-2 border-warning/50">
-        Work in progress: Try us out, but don&apos;t put real secrets in yet
-      </div>
+      {/* Banner removed as requested */}
 
       <div className="flex flex-col items-center min-h-screen pt-16">
         <Logo />
@@ -28,45 +25,29 @@ function WelcomeHome() {
         {/* Hero Section */}
         <section className="w-full py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6 mx-auto">
-            <div className="grid gap-6 lg:grid-cols-[1fr_600px] items-center">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h1 className="text-4xl tracking-tight font-extrabold text-foreground sm:text-5xl md:text-6xl">
-                    <span className="block">Secure, Share, and</span>
-                    <span className="block text-primary">
-                      Sell Your Digital Assets
-                    </span>
-                  </h1>
-                  <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                    Protect your intellectual property with advanced encryption,
-                    share it securely with partners, and monetize your digital
-                    assets with our AI-powered sales agent.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-6">
+            <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
+              <div className="space-y-4">
+                <h1 className="text-4xl tracking-tight font-extrabold text-foreground sm:text-5xl md:text-6xl">
+                  <span className="block text-primary">
+                    Because They're Your Ideas
+                  </span>
+                </h1>
+                <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
+                  Protect your intellectual property with advanced encryption,
+                  share it securely with partners, and monetize your digital
+                  assets with our AI-powered sales agent.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-6 justify-center mt-6">
                   <AuthButton
                     text="Start Protecting Your Ideas"
-                    className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center text-base md:text-lg"
+                    className="px-6 py-3 bg-primary hover:bg-primary/80 text-black font-medium rounded-md transition-all shadow-lg hover:shadow-primary/30 text-center text-base"
                   />
                   <Link
                     href="#how-it-works"
-                    className="px-8 py-4 bg-card hover:bg-card/80 text-primary font-bold rounded-xl transition-all shadow-lg hover:shadow-border border border-border text-center text-base md:text-lg"
+                    className="px-6 py-3 bg-card hover:bg-card/80 text-primary font-medium rounded-md transition-all shadow-lg hover:shadow-border border border-border text-center text-base"
                   >
                     Learn More
                   </Link>
-                </div>
-              </div>
-              <div className="mx-auto max-w-[500px] lg:ml-auto">
-                <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border p-2">
-                  <div className="aspect-video rounded-lg overflow-hidden bg-accent/20">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <img
-                        src="/assets/Black+Yellow.svg"
-                        alt="SafeIdea Platform"
-                        className="w-3/4 h-3/4 object-contain"
-                      />
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -87,7 +68,6 @@ function WelcomeHome() {
                 Complete Protection for Your Intellectual Property
               </p>
               <p className="mt-4 max-w-2xl text-xl text-muted-foreground lg:mx-auto">
-                <span className="font-semibold text-primary">Now in Beta:</span>{' '}
                 From protecting trade secrets to monetizing patents, we're
                 developing tools to secure, prove ownership, and profit from
                 your intellectual property.
@@ -184,9 +164,11 @@ function WelcomeHome() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Turn your digital assets into revenue. Our AI Sales Agent
-                    optimizes visibility and handles transactions with multiple
-                    pricing models.
+                    Turn your digital assets into revenue. Get your own AI Sales
+                    Agents that we train on your intellectual property. These
+                    agents talk to people and other AI seekers online to present
+                    your idea and offer them customized transactions agreed by
+                    you.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start">
@@ -232,11 +214,11 @@ function WelcomeHome() {
                   </span>
                 </div>
                 <h3 className="text-xl font-medium text-foreground">
-                  Create Account
+                  Secure Your IP
                 </h3>
                 <p className="text-muted-foreground">
-                  Sign up in seconds with our passwordless authentication
-                  system.
+                  Sign up in seconds and upload and encrypt your IP to set the
+                  record straight.
                 </p>
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border p-3 h-64 mx-auto max-w-xs">
                   <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
@@ -260,8 +242,8 @@ function WelcomeHome() {
                   Upload Idea
                 </h3>
                 <p className="text-muted-foreground">
-                  Upload your documents, describe your idea, and set visibility
-                  preferences.
+                  If desired, add the ability to securely share your secret with
+                  potential investors or partners. Give your NDA some teeth.
                 </p>
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border p-3 h-64 mx-auto max-w-xs">
                   <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
@@ -282,11 +264,12 @@ function WelcomeHome() {
                   </span>
                 </div>
                 <h3 className="text-xl font-medium text-foreground">
-                  Secure & Share
+                  Get Yourself An Agent
                 </h3>
                 <p className="text-muted-foreground">
-                  Your idea is timestamped, encrypted, and ready for safe
-                  sharing and collaboration.
+                  SafeIdeas AI Agents work for you to set up royalty or
+                  subscriptions systems for your digital content. Get visibility
+                  directly with AI agents from Anthropic, OpenAI and Google.
                 </p>
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border p-3 h-64 mx-auto max-w-xs">
                   <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
@@ -310,7 +293,8 @@ function WelcomeHome() {
                 Trusted by Industry Advisors
               </h2>
               <p className="mt-3 max-w-2xl mx-auto text-xl text-muted-foreground sm:mt-4">
-                See what our advisors say about SafeIdea.ai's beta program
+                See what our advisors say about SafeIdea.ai's digital asset
+                services
               </p>
             </div>
             <div className="grid gap-8 lg:grid-cols-2 max-w-6xl mx-auto">
@@ -323,7 +307,7 @@ function WelcomeHome() {
                     </p>
                     <div className="block mt-2">
                       <p className="text-foreground font-semibold">
-                        Mark Chandler
+                        Drew Bandler
                       </p>
                       <blockquote className="mt-3 text-base text-muted-foreground italic">
                         "SafeIdea.ai solves a fundamental problem for creators
@@ -335,7 +319,7 @@ function WelcomeHome() {
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
                         <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                          MC
+                          DB
                         </div>
                       </div>
                     </div>
@@ -348,21 +332,21 @@ function WelcomeHome() {
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <p className="text-sm font-medium text-secondary">
-                      Advisor, Partner, Bramson & Pressman
+                      Advisor, Partner, Simpson & Young
                     </p>
                     <div className="block mt-2">
                       <p className="text-foreground font-semibold">
-                        Rob Pressman
+                        Lia Simpson
                       </p>
                       <blockquote className="mt-3 text-base text-muted-foreground italic">
-                        "This is something that clients with trade secrets need
-                        right now."
+                        "This is something that my clients with trade secrets
+                        need right now."
                       </blockquote>
                     </div>
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
                         <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground">
-                          RP
+                          LS
                         </div>
                       </div>
                     </div>
@@ -392,20 +376,16 @@ function WelcomeHome() {
                 </h2>
               </div>
               <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-4">
-                <div className="inline-flex rounded-md shadow">
-                  <AuthButton
-                    text="Get Started"
-                    className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
-                  />
-                </div>
-                <div className="inline-flex rounded-md shadow">
-                  <Link
-                    href="/list-ip"
-                    className="inline-flex items-center justify-center px-5 py-3 border border-border text-base font-medium rounded-md text-foreground bg-card hover:bg-card/80"
-                  >
-                    Explore Options
-                  </Link>
-                </div>
+                <AuthButton
+                  text="Get Started"
+                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
+                />
+                <Link
+                  href="/list-ip"
+                  className="inline-flex items-center justify-center px-6 py-3 border border-border text-base font-medium rounded-md text-foreground bg-card hover:bg-card/80"
+                >
+                  Explore Options
+                </Link>
               </div>
             </div>
           </div>

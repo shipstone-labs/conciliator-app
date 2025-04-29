@@ -33,7 +33,7 @@ export const ViewStatus = ({ view, ipDoc }: ViewDocProps) => {
               View Encrypted Idea{' '}
               <ArrowRight className="w-4 h-4 inline-block" aria-hidden="true" />
             </h3>
-            <p className="text-white/80 text-sm">
+            <p className="text-foreground/80 text-sm">
               Since you either own or have purchased the content you can now
               view it.
             </p>

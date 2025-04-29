@@ -226,14 +226,14 @@ const AppIP = () => {
     <div className="w-full py-8">
       <div className="max-w-6xl mx-auto space-y-8 px-4">
         <Card
-          className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl add-idea-form"
+          className="w-full max-w-2xl mx-auto backdrop-blur-lg bg-background/30 border border-border/30 shadow-xl add-idea-form"
           data-form-ready="false"
         >
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">
               Add Your Idea
             </CardTitle>
-            <CardDescription className="text-white/90 mt-2 text-base">
+            <CardDescription className="text-foreground/90 mt-2 text-base">
               Complete all three steps below to create your secure idea page.
             </CardDescription>
           </CardHeader>
@@ -255,7 +255,7 @@ const AppIP = () => {
                 variant="destructive"
                 className="border-red-300 bg-red-500/20"
               >
-                <AlertDescription className="text-white">
+                <AlertDescription className="text-foreground">
                   {ipDoc.error}
                 </AlertDescription>
               </Alert>
@@ -267,7 +267,7 @@ const AppIP = () => {
                 <p className="text-sm font-semibold text-primary mb-1">
                   ✓ Document Encrypted
                 </p>
-                <p className="text-sm text-white/90">
+                <p className="text-sm text-foreground/90">
                   Your Idea is safely encrypted.
                 </p>
               </div>

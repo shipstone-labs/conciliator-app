@@ -62,7 +62,7 @@ export const SortedProducts = memo(
                       value[index]?.currency?.toUpperCase?.() || 'USD'
                     )
                   : '-- NA --'}
-                <div className="text-xs text-white/60">{product.name}</div>
+                <div className="text-xs text-foreground/60">{product.name}</div>
               </SelectTrigger>
               <SelectContent>
                 {sortedPrices.map((price) => (

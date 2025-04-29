@@ -93,7 +93,7 @@ export const AddStepContent = memo(
               Private Document
             </h3>
           </div>
-          <p className="text-sm text-white/90 ml-8">
+          <p className="text-sm text-foreground/90 ml-8">
             Now you need to add a text or markdown file that contains the
             details about your idea. The file will be encrypted so that only you
             can access it.
@@ -103,7 +103,7 @@ export const AddStepContent = memo(
         {ipDoc.content ? (
           <div className="p-4 rounded-lg border border-primary/30 bg-muted/30">
             <div className="flex justify-between items-center">
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-foreground">
                 File uploaded successfully
               </p>
               <Button
@@ -120,7 +120,7 @@ export const AddStepContent = memo(
           <Button
             onClick={handleOpenFileDialog}
             variant="outline"
-            className="w-full border border-white/20 bg-muted/30 text-white hover:bg-muted/50 py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 h-12"
+            className="w-full border border-border/30 bg-muted/30 text-foreground hover:bg-muted/50 py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 h-12"
             disabled={isLoading || !ipDoc.name || !ipDoc.description}
             data-testid="add-encrypt-button"
           >
@@ -143,7 +143,7 @@ export const AddStepContent = memo(
           title="Upload Your Idea"
         >
           <div className="space-y-4">
-            <p className="text-white/90">
+            <p className="text-foreground/90">
               Select a text or markdown file containing your idea description.
               This file will be encrypted and stored securely.
             </p>
@@ -151,7 +151,7 @@ export const AddStepContent = memo(
               <Button
                 variant="ghost"
                 onClick={() => setIsModalOpen(false)}
-                className="text-white/90 hover:bg-muted/50 rounded-xl h-11"
+                className="text-foreground/90 hover:bg-muted/50 rounded-xl h-11"
               >
                 Cancel
               </Button>
