@@ -77,7 +77,7 @@ export default function ChatUI({
   onSend: (message: string) => Promise<void>
   onSave?: (
     event: MouseEvent<HTMLButtonElement>
-  ) => Promise<{ IpfsHash: string } | undefined>
+  ) => Promise<{ cid: string } | undefined>
   isLoading?: boolean
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -445,9 +445,9 @@ export default function ChatUI({
           return
         }
 
-        const { IpfsHash } = result
+        const { cid } = result
 
-        if (downloads.find((file) => file.title === IpfsHash)) {
+        if (downloads.find((file) => file.title === cid)) {
           alert('This snapshot has already been saved.')
           return
         }
@@ -455,8 +455,8 @@ export default function ChatUI({
         setDownloads([
           ...downloads,
           {
-            title: IpfsHash,
-            url: `/api/download/${IpfsHash}`,
+            title: cid,
+            url: `/api/download/${cid}`,
           },
         ])
       } finally {

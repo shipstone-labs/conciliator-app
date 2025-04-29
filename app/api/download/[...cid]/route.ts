@@ -1,19 +1,20 @@
 import { initAPIConfig } from '@/lib/apiUtils'
+import { cidAsURL } from '@/lib/internalTypes'
 import type { NextRequest } from 'next/server'
 
 export const runtime = 'nodejs'
 
-export async function GET(req: NextRequest) {
+export async function GET(
+  _req: NextRequest,
+  context: { params: Promise<{ cid: string[] }> }
+) {
   await initAPIConfig()
 
-  const url = `${
-    process.env.PINATA_GATEWAY
-  }/ipfs/${req.nextUrl.pathname.replace(
-    '/api/download/',
-    ''
-  )}?pinataGatewayToken=${process.env.PINATA_TOKEN}${
-    req.nextUrl.search ? `&${req.nextUrl.search.slice(1)}` : ''
-  }`
+  const { cid } = await context.params
+  const url = cidAsURL(cid.join('/'))
+  if (!url) {
+    return new Response('Invalid CID', { status: 400 })
+  }
   const response = await fetch(url, { cache: 'no-store' })
 
   // Get a reader to read the response body as a stream
