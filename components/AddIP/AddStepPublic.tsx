@@ -48,14 +48,11 @@ export const AddStepPublic = memo(
       <>
         <div className="p-4 mb-2">
           <div className="flex items-center mb-1">
-            <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
-              1
-            </div>
             <h3 className="font-semibold text-primary text-sm">
               Public Information
             </h3>
           </div>
-          <p className="text-sm text-foreground/90 ml-8">
+          <p className="text-sm text-foreground/90">
             First enter the publicly available information you want to use to
             describe your idea. This information can be seen by others on the
             Internet.
@@ -70,7 +67,7 @@ export const AddStepPublic = memo(
           </label>
           <Input
             id="public-title"
-            placeholder="Enter the title that will appear in public listings"
+            placeholder="Enter public title for your Idea here"
             data-testid="idea-title-input"
             data-ready="false"
             value={name}
@@ -89,7 +86,7 @@ export const AddStepPublic = memo(
           </label>
           <Textarea
             id="public-description"
-            placeholder="Enter a description that will be visible to the public"
+            placeholder="Enter public description of your Idea here"
             data-testid="idea-description-input"
             data-ready="false"
             value={description}

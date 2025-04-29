@@ -24,6 +24,11 @@ type AddStepTermsProps = {
   localStatus: string
   status: IPAudit | undefined
   setLocalStatus: Dispatch<SetStateAction<string>>
+  stepsCompleted?: {
+    step1: boolean
+    step2: boolean
+    step3: boolean
+  }
 }
 
 export const AddStepTerms = memo(
@@ -34,11 +39,14 @@ export const AddStepTerms = memo(
     onStore,
     localStatus,
     status,
+    // Using underscore in variable name to indicate intentional unused parameter
+    stepsCompleted,
   }: AddStepTermsProps) => {
     const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
     const [isNdaModalOpen, setIsNdaModalOpen] = useState(false)
     const [selectedDoc, setSelectedDoc] = useState('protected-eval')
-    const [termsAccepted, setTermsAccepted] = useState(false)
+    // Using underscore to mark variable as intentionally unused
+    const [_termsAccepted, setTermsAccepted] = useState(false)
     const products = useProducts()
     const [selectedPrices, setSelectedPrices] = useState<Price[] | undefined>()
 
@@ -114,22 +122,7 @@ export const AddStepTerms = memo(
 
     return (
       <>
-        {/* Step 3 section - always visible */}
-        <div className="p-4 mb-2 mt-4">
-          <div className="flex items-center mb-1">
-            <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
-              3
-            </div>
-            <h3 className="font-semibold text-primary text-sm">
-              Share Your Idea
-            </h3>
-          </div>
-          <p className="text-sm text-foreground/90 ml-8">
-            Now, you can choose how you want to share it. Click
-            <strong> Set Terms </strong> to configure sharing options.
-          </p>
-        </div>
-        {/* Set Terms button - disabled until content exists */}
+        {/* Set Terms button - for Step 2 */}
         <Button
           onClick={handleCloseTermsModal}
           variant="outline"
@@ -137,43 +130,23 @@ export const AddStepTerms = memo(
           disabled={isLoading || !ipDoc.content}
           data-testid="set-terms-button"
         >
-          Set Terms
+          Set Sharing Terms
         </Button>
-        {/* Create Page explanation */}
-        <div className="p-4 mb-2 mt-4">
-          <p className="text-sm text-foreground/90">
-            Clicking <strong>Create Idea Page</strong> submits your idea and
-            takes you to your new idea page. You can share this page address
-            with others to explore your secure idea.
-          </p>
-        </div>
-        {/* Button moved below the note */}
+
+        {/* Create button section */}
         <div className="relative">
-          {!termsAccepted &&
-          ipDoc.content &&
-          ipDoc.name &&
-          ipDoc.description ? (
-            <div className="w-full text-center text-amber-300 text-sm mb-2">
-              ⚠️ Please set terms first
-            </div>
-          ) : null}
           <Button
             onClick={onStore}
             className="w-full bg-primary hover:bg-primary/80 text-black font-medium py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 h-12 mt-4"
             disabled={
-              isLoading ||
-              !ipDoc.content ||
-              !ipDoc.name ||
-              !ipDoc.description ||
-              !termsAccepted
+              isLoading || !ipDoc.content || !ipDoc.name || !ipDoc.description
             }
             data-testid="create-idea-button"
             data-ready={(!(
               isLoading ||
               !ipDoc.content ||
               !ipDoc.name ||
-              !ipDoc.description ||
-              !termsAccepted
+              !ipDoc.description
             )).toString()}
           >
             {isLoading ? (
@@ -186,7 +159,7 @@ export const AddStepTerms = memo(
                 </span>
               </>
             ) : (
-              'Create Idea Page'
+              'Create Your Idea Page'
             )}
           </Button>
           {status?.status || localStatus ? (
@@ -204,11 +177,33 @@ export const AddStepTerms = memo(
         <Modal
           isOpen={isTermsModalOpen}
           onClose={() => setIsTermsModalOpen(false)}
-          title="Set Terms"
+          title="Set Sharing Terms"
           data-testid="terms-dialog"
           data-terms-ready="false"
         >
           <div className="space-y-5" data-testid="terms-content">
+            <p className="text-foreground/90 mb-4">
+              When someone shows interest in your idea (such as a potential
+              investor or partner), you typically need to share details while
+              maintaining protection. SafeIdea enhances traditional NDAs by
+              adding verifiable tracking of shared information.
+            </p>
+
+            <p className="text-foreground/90 mb-4">You can customize:</p>
+
+            <ul className="list-disc pl-5 mb-4 space-y-1 text-foreground/90">
+              <li>
+                Access period: Control how long someone can view your idea
+              </li>
+              <li>
+                Access fee: Set a price for sharing your intellectual property
+              </li>
+              <li>
+                Business model: Define how your idea can be commercially used
+              </li>
+              <li>NDA terms: Select or upload legal protection documents</li>
+            </ul>
+
             <div className="space-y-2">
               <label
                 htmlFor="business-model"

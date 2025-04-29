@@ -20,7 +20,11 @@ import { AddStepContent } from './AddStepContent'
 import { AddStepTerms } from './AddStepTerms'
 import { handleError } from '@/hooks/useIP'
 
-export type AddDoc = Omit<IPDoc, 'id'> & { content?: string; error?: string }
+export type AddDoc = Omit<IPDoc, 'id'> & {
+  content?: string
+  error?: string
+  useAIAgent?: boolean
+}
 
 const AppIP = () => {
   const fb = getFirestore()
@@ -33,6 +37,11 @@ const AppIP = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState<IPAudit>()
   const [localStatus, setLocalStatus] = useState('')
+  const [stepsCompleted, setStepsCompleted] = useState({
+    step1: false,
+    step2: false,
+    step3: false,
+  })
 
   const stytchClient = useStytch()
   const [docId, setDocId] = useState('')
@@ -49,6 +58,21 @@ const AppIP = () => {
       )
     }
   }, [docId, fb])
+
+  // Update completion status when relevant fields change
+  useEffect(() => {
+    setStepsCompleted((prev) => ({
+      ...prev,
+      step1: Boolean(ipDoc.content),
+      step2: Boolean(ipDoc.terms?.businessModel || ipDoc.terms?.pricing),
+      step3: Boolean(ipDoc.useAIAgent !== undefined),
+    }))
+  }, [
+    ipDoc.content,
+    ipDoc.terms?.businessModel,
+    ipDoc.terms?.pricing,
+    ipDoc.useAIAgent,
+  ])
 
   const handleStore = useCallback(async () => {
     if (!ipDoc.content) {
@@ -180,6 +204,8 @@ const AppIP = () => {
         terms: {
           ...internalDoc.terms,
         },
+        // Include AI Agent preference
+        useAIAgent: internalDoc.useAIAgent || false,
       }
       setLocalStatus('Uploading encrypted content')
       await fetch('/api/store', {
@@ -238,11 +264,33 @@ const AppIP = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
+            {/* Public Information Section */}
             <AddStepPublic
               isLoading={isLoading}
               ipDoc={ipDoc}
               setIPDoc={setIPDoc}
             />
+
+            {/* Step 1: Securely Save Your Idea (Required) */}
+            <div className="p-4 mb-2 mt-4">
+              <div className="flex items-center mb-1">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
+                  1
+                </div>
+                <h3 className="font-semibold text-primary text-sm">
+                  Securely Save Your Idea
+                  {stepsCompleted.step1 && (
+                    <span className="ml-2 text-green-500">✓</span>
+                  )}
+                </h3>
+              </div>
+              <p className="text-sm text-foreground/90 ml-8">
+                Now you need to add the secret document that describes your idea
+                in detail. This is the core of your intellectual property
+                protection. The file will be encrypted using advanced security
+                so that only you can access it.
+              </p>
+            </div>
 
             <AddStepContent
               isLoading={isLoading}
@@ -268,10 +316,99 @@ const AppIP = () => {
                   ✓ Document Encrypted
                 </p>
                 <p className="text-sm text-foreground/90">
-                  Your Idea is safely encrypted.
+                  Your document is now ready to be saved in the SafeIdea
+                  database, an immutable decentralized system that timestamps
+                  your Idea. This timestamp serves as proof of when you created
+                  your idea, which can be valuable for intellectual property
+                  claims.
+                </p>
+                <p className="text-sm text-foreground/90 mt-2">
+                  Before finalizing, consider if you want to set up secure
+                  sharing options (Step 2) or create an AI Sales Agent (Step 3).
                 </p>
               </div>
             )}
+
+            {/* Step 2: Securely Share Your Idea (Optional) */}
+            <div className="p-4 mb-2 mt-4">
+              <div className="flex items-center mb-1">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
+                  2
+                </div>
+                <h3 className="font-semibold text-primary text-sm">
+                  Securely Share Your Idea
+                  <span className="ml-2 text-foreground/60 font-normal">
+                    (Optional)
+                  </span>
+                  {stepsCompleted.step2 && (
+                    <span className="ml-2 text-green-500">✓</span>
+                  )}
+                </h3>
+              </div>
+              <p className="text-sm text-foreground/90 ml-8">
+                When someone shows interest in your idea (such as a potential
+                investor or partner), you typically need to share details while
+                maintaining protection. SafeIdea enhances traditional NDAs by
+                adding verifiable tracking of shared information.
+              </p>
+            </div>
+
+            {/* Step 3: Get Your Own AI Sales Agent (Optional) */}
+            <div className="p-4 mb-2 mt-4">
+              <div className="flex items-center mb-1">
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
+                  3
+                </div>
+                <h3 className="font-semibold text-primary text-sm">
+                  Get Your Own AI Sales Agent
+                  <span className="ml-2 text-foreground/60 font-normal">
+                    (Optional)
+                  </span>
+                  {stepsCompleted.step3 && (
+                    <span className="ml-2 text-green-500">✓</span>
+                  )}
+                </h3>
+              </div>
+              <p className="text-sm text-foreground/90 ml-8">
+                SafeIdea offers a unique opportunity to actively promote your
+                idea. Your AI Sales Agent will be trained on your idea details
+                and your sharing terms, then work on your behalf to find
+                interested parties.
+              </p>
+              <div className="ml-8 mt-3 flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="ai-agent-checkbox"
+                  checked={ipDoc.useAIAgent || false}
+                  onChange={(e) =>
+                    setIPDoc((prev) => ({
+                      ...prev,
+                      useAIAgent: e.target.checked,
+                    }))
+                  }
+                  disabled={isLoading}
+                  className="rounded border-border/30 bg-muted/30 text-primary"
+                  data-testid="ai-agent-checkbox"
+                />
+                <label
+                  htmlFor="ai-agent-checkbox"
+                  className="text-foreground/90 cursor-pointer"
+                >
+                  I want my own AI Sales Agent
+                </label>
+              </div>
+            </div>
+
+            {/* Finalize section */}
+            <div className="p-4 mb-2 mt-4">
+              <h3 className="font-semibold text-primary text-sm mb-2">
+                Finalize Your Submission
+              </h3>
+              <p className="text-sm text-foreground/90">
+                You're all done! Click the button below to save your Idea in the
+                SafeIdea database.
+              </p>
+            </div>
 
             <AddStepTerms
               isLoading={isLoading}
@@ -281,6 +418,7 @@ const AppIP = () => {
               setLocalStatus={setLocalStatus}
               onStore={handleStore}
               localStatus={localStatus}
+              stepsCompleted={stepsCompleted}
             />
           </CardContent>
         </Card>
