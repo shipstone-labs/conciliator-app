@@ -218,10 +218,10 @@ const DetailIP = ({
   }, [ipDoc, view, viewed, fbUser, _litClient, delegatedSessionSigs, docId])
   if (!ipDoc) {
     return (
-      <Card className="w-full backdrop-blur-lg bg-background/30 border border-white/10 shadow-xl overflow-hidden p-8">
+      <Card className="w-full backdrop-blur-lg bg-background/30 border border-border/30 shadow-xl overflow-hidden p-8">
         <div className="flex flex-col items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-          <p className="text-white/70">Loading idea details...</p>
+          <p className="text-foreground/70">Loading idea details...</p>
         </div>
       </Card>
     )
@@ -242,7 +242,7 @@ const DetailIP = ({
               alt={ipDoc.name || 'Idea Image'}
               width={160}
               height={160}
-              className="rounded-xl object-cover shadow-md border border-white/10 hover:border-primary/30 transition-all mb-4"
+              className="rounded-xl object-cover shadow-md border border-border/30 hover:border-primary/30 transition-all mb-4"
             />
             <h1 className="text-3xl font-bold text-primary mb-2">
               {ipDoc.name}

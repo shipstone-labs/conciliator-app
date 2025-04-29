@@ -19,17 +19,21 @@ export const Deals = ({ ipDoc }: DealsProps) => {
         {ipDoc.deals?.map((deal) => (
           <Fragment key={deal.id}>
             <div
-              className="p-3 border border-white/10 rounded-xl bg-muted/20 grid gap-3"
+              className="p-3 border border-border/30 rounded-xl bg-muted/20 grid gap-3"
               style={{ gridTemplateColumns: '12em 1fr' }}
             >
-              <div className="text-white font-bold text-sm">Status</div>
-              <div className="text-white/80 text-sm">{deal.status}</div>
-              <div className="text-white font-bold text-sm">Expires On</div>
-              <div className="text-white/80 text-sm">
+              <div className="text-foreground font-bold text-sm">Status</div>
+              <div className="text-foreground/80 text-sm">{deal.status}</div>
+              <div className="text-foreground font-bold text-sm">
+                Expires On
+              </div>
+              <div className="text-foreground/80 text-sm">
                 {formatDate(deal.expiresAt)}
               </div>
-              <div className="text-white font-bold text-sm">Status</div>
-              <div className="text-white/80 text-sm">{deal.status}</div>{' '}
+              <div className="text-foreground font-bold text-sm">Status</div>
+              <div className="text-foreground/80 text-sm">
+                {deal.status}
+              </div>{' '}
             </div>
 
             <Button

@@ -47,7 +47,7 @@ export const MyAgent = ({ ipDoc }: MyAgentProps) => {
                   aria-hidden="true"
                 />
               </h3>
-              <p className="text-white/80 text-sm">
+              <p className="text-foreground/80 text-sm">
                 With My Agent, you can see how your AI agent works on your
                 behalf to best represent your idea on the web.
               </p>
