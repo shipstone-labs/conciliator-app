@@ -486,7 +486,7 @@ function constructSession(inject: Partial<Injected>) {
         }),
       }).then((res) => {
         if (!res.ok) {
-          throw new Error('Failed to fetch token')
+          throw new Error('Failed to fetch lit delegation signature')
         }
         return res.json()
       })
@@ -550,7 +550,7 @@ function constructSession(inject: Partial<Injected>) {
         },
       })
       if (!reponse.ok) {
-        throw new Error('Failed to fetch token')
+        throw new Error('Failed to fetch firebase token')
       }
       const { token } = await reponse.json()
       const signedInUser = await signInWithCustomToken(getAuth(), token)
