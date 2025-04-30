@@ -84,22 +84,6 @@ export const AddStepContent = memo(
     )
     return (
       <>
-        <div className="p-4 mb-2 mt-4">
-          <div className="flex items-center mb-1">
-            <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-2">
-              2
-            </div>
-            <h3 className="font-semibold text-primary text-sm">
-              Private Document
-            </h3>
-          </div>
-          <p className="text-sm text-foreground/90 ml-8">
-            Now you need to add a text or markdown file that contains the
-            details about your idea. The file will be encrypted so that only you
-            can access it.
-          </p>
-        </div>
-
         {ipDoc.content ? (
           <div className="p-4 rounded-lg border border-primary/30 bg-muted/30">
             <div className="flex justify-between items-center">
@@ -124,7 +108,7 @@ export const AddStepContent = memo(
             disabled={isLoading || !ipDoc.name || !ipDoc.description}
             data-testid="add-encrypt-button"
           >
-            Add and Encrypt your Idea
+            Upload File
           </Button>
         )}
         {/* Hidden file input for the Select File button to reference */}

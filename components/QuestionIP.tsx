@@ -16,6 +16,14 @@ import { useIP } from '@/hooks/useIP'
 import { useStytch } from '@stytch/nextjs'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { useSession } from './AuthLayout'
+
+// Define message type interface to avoid repetition
+export interface MessageType {
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  source?: 'human' | 'lilypad'
+}
 
 const AppStates = {
   LOADING: 'loading',
@@ -31,12 +39,11 @@ const QuestionIP = ({
   docId: string
 }) => {
   const router = useRouter()
+  useSession(['stytchUser', 'fbUser']) // Ensure user is authenticated
   const ideaData = useIP(docId) // Get idea data for context
   const [appState, setAppState] = useState(AppStates.LOADING)
   const [isLoading, setIsLoading] = useState(false)
-  const [messages, setMessages] = useState<
-    { role: 'user' | 'assistant' | 'system'; content: string }[]
-  >([])
+  const [messages, setMessages] = useState<MessageType[]>([])
   const ipDoc = useIP(docId)
   const stytchClient = useStytch()
 
@@ -63,7 +70,18 @@ const QuestionIP = ({
             }
             return res.json()
           })
-          setMessages(_resultMessages)
+          // Add source information to messages
+          const processedMessages = _resultMessages.map((msg: MessageType) => {
+            if (msg.role === 'user' && !msg.source) {
+              // All initial user messages are from Lilypad since no human has interacted yet
+              return {
+                ...msg,
+                source: 'lilypad',
+              }
+            }
+            return msg
+          })
+          setMessages(processedMessages)
           setIsLoading(false)
           setAppState(AppStates.DISCUSSION)
         })()
@@ -74,11 +92,19 @@ const QuestionIP = ({
   }, [docId, messages, stytchClient?.session])
 
   const handleAskQuestion = useCallback(
-    async (question: string) => {
+    async (question: string, source: 'human' | 'lilypad' = 'human') => {
       setIsLoading(true)
       try {
+        // We need to handle two sources for messages:
+        // 1. Human messages - typed directly by user (default)
+        // 2. Lilypad messages - from the AI seeker (marked with |||lilypad)
+
         // First update the messages array with the user's question so it's visible immediately
-        const userMessage = { role: 'user' as const, content: question }
+        const userMessage = {
+          role: 'user' as const,
+          content: question,
+          source,
+        }
         setMessages((prevMessages) => [...prevMessages, userMessage])
 
         // Then make the API request
@@ -92,7 +118,14 @@ const QuestionIP = ({
           },
           body: JSON.stringify({
             id: docId,
-            messages: [...messages, userMessage],
+            messages: [
+              ...messages,
+              {
+                role: userMessage.role,
+                content: question, // Use the cleaned content without the source tag
+                source,
+              },
+            ],
           }),
         }).then((res) => {
           if (!res.ok) {
@@ -101,7 +134,15 @@ const QuestionIP = ({
           return res.json()
         })
 
-        setMessages(_resultMessages)
+        // Simply tag all user messages without a source as 'lilypad'
+        // Since we know all human messages are already tagged at creation time
+        const processedMessages = _resultMessages.map((msg: MessageType) => {
+          if (msg.role === 'user' && !msg.source) {
+            return { ...msg, source: 'lilypad' }
+          }
+          return msg
+        })
+        setMessages(processedMessages)
       } catch (error) {
         console.error('Error processing request:', error)
       } finally {
@@ -164,7 +205,7 @@ const QuestionIP = ({
           variant="outline"
           className="text-foreground/90 hover:bg-muted/20 flex items-center gap-2"
         >
-          <ArrowLeft className="h-4 w-4" /> Return to Details
+          <ArrowLeft className="h-4 w-4" /> Return to Idea Page
         </Button>
       </div>
 
@@ -243,7 +284,7 @@ const QuestionIP = ({
           {ideaData && (
             <div className="mt-1 mb-4">
               <h2 className="text-xl font-medium text-foreground/90">
-                Agent View
+                AI Sales Agent View
               </h2>
               <div className="flex justify-center mt-2 gap-2">
                 {Array.isArray(ideaData.tags) && ideaData.tags.length > 0 ? (
@@ -264,7 +305,7 @@ const QuestionIP = ({
             </div>
           )}
           <p className="text-foreground/70">
-            Ask the SafeIdea agent questions about this Idea
+            Chat with the AI Sales Agent about this Idea
           </p>
         </div>
 
