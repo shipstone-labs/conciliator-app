@@ -36,25 +36,25 @@ const MessageSkeleton = ({
   return (
     <div className="flex items-start space-x-4 animate-pulse">
       {isAssistant && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1A1B25] border border-[#FFD700]/50 flex items-center justify-center">
-          <div className="w-6 h-6 bg-muted/20 rounded-full" />
+        <div className="bg-primary/20 p-3 rounded-full shrink-0 flex items-center justify-center">
+          <div className="w-6 h-6 bg-background/60 rounded-full animate-pulse" />
         </div>
       )}
       <div
         className={`p-4 rounded-lg max-w-3xl backdrop-blur-sm ${
           isAssistant
-            ? 'bg-background/30 border border-white/10 w-24'
+            ? 'bg-background/30 border border-border/30 w-24'
             : 'bg-primary/10 border border-primary/30 w-4/5'
         }`}
       >
         {isAssistant ? (
           // Assistant skeleton - just a single short word (Yes/No)
-          <div className="h-4 bg-white/10 rounded w-16" />
+          <div className="h-4 bg-foreground/10 rounded w-16" />
         ) : (
           // User skeleton - one short line for a question
           <>
-            <div className="h-4 bg-white/20 rounded w-full mb-2" />
-            <div className="h-4 bg-white/20 rounded w-1/2" />
+            <div className="h-4 bg-foreground/20 rounded w-full mb-2" />
+            <div className="h-4 bg-foreground/20 rounded w-1/2" />
           </>
         )}
       </div>
@@ -690,8 +690,8 @@ export default function ChatUI({
                   aria-label="Send"
                 >
                   {cycleInProgress ? (
-                    // Loading indicator (black square)
-                    <div className="w-6 h-6 bg-black" />
+                    // Loading indicator with theme colors
+                    <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                   ) : (
                     // Up Arrow Button
                     <svg
