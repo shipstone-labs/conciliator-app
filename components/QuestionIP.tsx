@@ -16,6 +16,7 @@ import { useIP } from '@/hooks/useIP'
 import { useStytch } from '@stytch/nextjs'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { useSession } from './AuthLayout'
 
 // Define message type interface to avoid repetition
 export interface MessageType {
@@ -38,6 +39,7 @@ const QuestionIP = ({
   docId: string
 }) => {
   const router = useRouter()
+  useSession(['stytchUser', 'fbUser']) // Ensure user is authenticated
   const ideaData = useIP(docId) // Get idea data for context
   const [appState, setAppState] = useState(AppStates.LOADING)
   const [isLoading, setIsLoading] = useState(false)
@@ -90,27 +92,18 @@ const QuestionIP = ({
   }, [docId, messages, stytchClient?.session])
 
   const handleAskQuestion = useCallback(
-    async (question: string) => {
+    async (question: string, source: 'human' | 'lilypad' = 'human') => {
       setIsLoading(true)
       try {
         // We need to handle two sources for messages:
         // 1. Human messages - typed directly by user (default)
         // 2. Lilypad messages - from the AI seeker (marked with |||lilypad)
 
-        let messageContent = question
-        let messageSource: 'human' | 'lilypad' = 'human' // Default is human for direct input
-
-        // If this is from auto-discovery, it will have the Lilypad marker
-        if (question.includes('|||lilypad')) {
-          messageContent = question.replace('|||lilypad', '')
-          messageSource = 'lilypad'
-        }
-
         // First update the messages array with the user's question so it's visible immediately
         const userMessage = {
           role: 'user' as const,
-          content: messageContent,
-          source: messageSource,
+          content: question,
+          source,
         }
         setMessages((prevMessages) => [...prevMessages, userMessage])
 
@@ -129,7 +122,8 @@ const QuestionIP = ({
               ...messages,
               {
                 role: userMessage.role,
-                content: messageContent, // Use the cleaned content without the source tag
+                content: question, // Use the cleaned content without the source tag
+                source,
               },
             ],
           }),

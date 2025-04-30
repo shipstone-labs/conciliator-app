@@ -75,7 +75,7 @@ export default function ChatUI({
 }: {
   doc: IPDoc
   messages: MessageType[]
-  onSend: (message: string) => Promise<void>
+  onSend: (message: string, source?: 'human' | 'lilypad') => Promise<void>
   onSave?: (
     event: MouseEvent<HTMLButtonElement>
   ) => Promise<{ cid: string } | undefined>
@@ -280,7 +280,7 @@ export default function ChatUI({
 
       try {
         // Tag this question as coming from the Lilypad module (AI search)
-        await onSend(`${question}|||lilypad`)
+        await onSend(question, 'lilypad')
       } catch {
         // Force stop auto-discovery completely on API error
         isAutoDiscoveryActive.current = false
@@ -388,7 +388,7 @@ export default function ChatUI({
   }, [autoCompleting, hasStop, runDiscoveryCycle])
 
   // Handle user sending a message
-  const handleSend = useCallback(async () => {
+  const handleSendUser = useCallback(async () => {
     if (!input.trim() || cycleRunning.current) return
 
     try {
@@ -415,7 +415,7 @@ export default function ChatUI({
       setLoading('assistant')
 
       // Send to conciliator
-      await onSend(messageToSend)
+      await onSend(messageToSend, 'human')
     } finally {
       // Reset all flags
       setLoading('none')
@@ -494,12 +494,12 @@ export default function ChatUI({
           e.preventDefault()
           // Trigger the send action
           if (!autoCompleting) {
-            handleSend()
+            handleSendUser()
           }
         }
       }
     },
-    [autoCompleting, handleSend]
+    [autoCompleting, handleSendUser]
   )
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -678,7 +678,7 @@ export default function ChatUI({
               {!autoCompleting ? (
                 <button
                   type="button"
-                  onClick={handleSend}
+                  onClick={handleSendUser}
                   disabled={
                     cycleInProgress || hasStop || input === '' || autoCompleting
                   } // Disable condition
