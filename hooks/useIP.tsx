@@ -264,15 +264,17 @@ export function useIPs({
                 }
               })
               .filter((doc) => doc.ipDoc)
-            const docIds = deals.map((doc) => doc.ipDoc)
+              .filter(
+                (doc) =>
+                  doc.expiresAt == null || doc.expiresAt.toDate() > new Date()
+              )
+            const docIds = new Set(deals.map((doc) => doc.ipDoc))
+            console.log('DealDocs', docIds)
             setAdditionalDocs((current) => {
-              if (
-                new Set(docIds).intersection(new Set(current)).size ===
-                docIds.length
-              ) {
+              if (docIds.intersection(new Set(current)).size === docIds.size) {
                 return current
               }
-              return docIds
+              return Array.from(docIds.values())
             })
           },
           handleError('collectionGroup deals')
