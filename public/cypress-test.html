@@ -10,11 +10,159 @@
   {
     "appInfo": {
       "name": "SafeIdea",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "description": "Secure platform for sharing and selling intellectual property and ideas"
     },
     "testPoints": {
-      "logo": {
-        "selector": "[data-testid='nav-logo']"
+      "navigation": {
+        "selector": ".flex.w-full.items-center.justify-between",
+        "elements": [
+          {
+            "id": "logo",
+            "selector": "[data-testid='nav-logo']",
+            "type": "link",
+            "description": "Main navigation logo that returns to home page"
+          },
+          {
+            "id": "addIdea",
+            "selector": "[data-testid='nav-add-idea']",
+            "type": "link",
+            "description": "Navigation link to add new idea"
+          },
+          {
+            "id": "myIdeas",
+            "selector": "[data-testid='nav-my-ideas']",
+            "type": "link",
+            "description": "Navigation link to view user's ideas"
+          },
+          {
+            "id": "exploreIdeas",
+            "selector": "[data-testid='nav-explore-ideas']",
+            "type": "link",
+            "description": "Navigation link to explore all ideas"
+          },
+          {
+            "id": "themeToggle",
+            "selector": "[data-testid='nav-theme-toggle']",
+            "type": "button",
+            "description": "Toggle between light and dark themes"
+          },
+          {
+            "id": "accountMenu",
+            "selector": "[data-testid='nav-account-menu']",
+            "type": "button",
+            "description": "Account menu dropdown trigger"
+          },
+          {
+            "id": "accountDropdown",
+            "selector": "[data-testid='nav-account-dropdown']",
+            "type": "menu",
+            "description": "Account menu dropdown content" 
+          },
+          {
+            "id": "accountProfile",
+            "selector": "[data-testid='nav-account-profile']",
+            "type": "menuitem",
+            "description": "Account profile menu item"
+          },
+          {
+            "id": "accountLogout",
+            "selector": "[data-testid='nav-account-logout']",
+            "type": "menuitem",
+            "description": "Logout menu item"
+          },
+          {
+            "id": "accountLogin",
+            "selector": "[data-testid='nav-account-login']",
+            "type": "menuitem",
+            "description": "Login menu item for unauthenticated users"
+          },
+          {
+            "id": "accountModal",
+            "selector": "[data-testid='nav-account-modal']",
+            "type": "modal",
+            "description": "Account settings modal"
+          }
+        ],
+        "actions": ["navigation", "toggleTheme", "openAccountMenu", "login", "logout", "viewAccount"]
+      },
+      "addIdeaForm": {
+        "selector": ".add-idea-form",
+        "elements": [
+          {
+            "id": "titleInput",
+            "selector": "[data-testid='idea-title-input']",
+            "type": "input",
+            "description": "Idea title input field"
+          },
+          {
+            "id": "descriptionInput",
+            "selector": "[data-testid='idea-description-input']",
+            "type": "textarea",
+            "description": "Idea description textarea"
+          },
+          {
+            "id": "addEncryptButton",
+            "selector": "[data-testid='add-encrypt-button']",
+            "type": "button",
+            "description": "Add and encrypt idea button"
+          },
+          {
+            "id": "fileUploadInput",
+            "selector": "[data-testid='file-upload-input']",
+            "type": "input",
+            "description": "Hidden file input for uploads"
+          },
+          {
+            "id": "fileUploadZone",
+            "selector": "[data-testid='file-upload-zone']",
+            "type": "div",
+            "description": "File upload completion indicator"
+          },
+          {
+            "id": "aiAgentCheckbox",
+            "selector": "[data-testid='ai-agent-checkbox']", 
+            "type": "checkbox",
+            "description": "Checkbox for enabling AI agent"
+          },
+          {
+            "id": "setTermsButton",
+            "selector": "[data-testid='set-terms-button']",
+            "type": "button",
+            "description": "Set terms button"
+          },
+          {
+            "id": "createIdeaButton",
+            "selector": "[data-testid='create-idea-button']",
+            "type": "button",
+            "description": "Create idea button"
+          }
+        ],
+        "actions": ["addIdea", "uploadFile", "setTerms", "createIdea", "toggleAiAgent"]
+      },
+      "termsDialog": {
+        "selector": "[data-testid='terms-dialog']",
+        "elements": [
+          {
+            "id": "termsContent",
+            "selector": "[data-testid='terms-content']",
+            "type": "div",
+            "description": "Terms content container"
+          },
+          {
+            "id": "businessModelSelect",
+            "selector": "[data-testid='business-model-select']",
+            "type": "select",
+            "description": "Business model select dropdown"
+          },
+          {
+            "id": "termsAcceptButton",
+            "selector": "[data-testid='terms-accept-button']",
+            "type": "button",
+            "description": "Accept terms button"
+          }
+        ],
+        "actions": ["selectBusinessModel", "acceptTerms"]
       }
     }
   }

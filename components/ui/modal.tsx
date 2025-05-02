@@ -52,6 +52,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           'bg-background/95 backdrop-blur-sm w-full max-w-3xl rounded-lg shadow-lg border border-border',
           'flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150'
         )}
+        data-testid="nav-account-modal"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-border">

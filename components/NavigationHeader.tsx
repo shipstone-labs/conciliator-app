@@ -81,6 +81,7 @@ export default function NavigationHeader() {
             <Link
               href="/add-ip"
               className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
+              data-testid="nav-add-idea"
               onClick={() =>
                 traceAction('Navigate', undefined, { destination: '/add-ip' })
               }
@@ -90,6 +91,7 @@ export default function NavigationHeader() {
             <Link
               href="/list-ip/mine"
               className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
+              data-testid="nav-my-ideas"
               onClick={() =>
                 traceAction('Navigate', undefined, {
                   destination: '/list-ip/mine',
@@ -103,6 +105,7 @@ export default function NavigationHeader() {
         <Link
           href="/list-ip"
           className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
+          data-testid="nav-explore-ideas"
           onClick={() =>
             traceAction('Navigate', undefined, { destination: '/list-ip' })
           }
@@ -119,23 +122,29 @@ export default function NavigationHeader() {
       {/* Account menu (hamburger) using DropdownMenu instead of MenubarMenu */}
       <div className="ml-4">
         <DropdownMenu>
-          <DropdownMenuTrigger className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30">
+          <DropdownMenuTrigger
+            className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30"
+            data-testid="nav-account-menu"
+          >
             <Menu className="h-5 w-5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
             className="bg-background/95 border border-border rounded-xl shadow-lg p-2 min-w-[180px]"
+            data-testid="nav-account-dropdown"
           >
             {isAuthenticated && (
               <>
                 <DropdownMenuItem
                   className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
+                  data-testid="nav-account-profile"
                   onClick={() => setIsAccountModalOpen(true)}
                 >
                   Account
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
+                  data-testid="nav-account-logout"
                   onClick={handleLogout}
                   disabled={isLoggingOff}
                 >
@@ -145,7 +154,10 @@ export default function NavigationHeader() {
             )}
             {!isAuthenticated && (
               <Link href="/" className="block">
-                <DropdownMenuItem className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer">
+                <DropdownMenuItem
+                  className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
+                  data-testid="nav-account-login"
+                >
                   Sign In
                 </DropdownMenuItem>
               </Link>
