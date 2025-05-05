@@ -1,39 +1,36 @@
-# SafeIdea Platform
+## SafeIdea Platform
 
-SafeIdea (formerly Conciliator) is an open-source platform for creators to securely store, share and monetize their digital intellectual property.
+SafeIdea is an open-source platform for creators to securely store, share, and monetize their **ideas** (digital intellectual property and other digital assets).
 
-**AVAILABLE NOW (ALPHA test mode): Add, Share, Sell Access to, and Create Agents for your Ideas! Try It at SafeIdea.net**
+## What We Offer
 
-No wallet required, Web2 friendly web services built on blockchain tools from Filecoin, Storacha, Lilypad and LIT Protocol
+Secure Storage: Protect your ideas with blockchain-based encryption
+Controlled Sharing: Share your ideas without risking theft
+Monetization: Sell access to your intellectual property
+AI Sales Agents: Custom agents designed for each idea
 
-**Available This Weekend**  Model Control Protocol (MCP) is in testing with Agents for your Ideas. Starting this weekend, agents from Anthropic and OpenAI will be able to discover your Ideas and quiz agents about their needs.  
+## How It Works
 
-**What We're Working On:** Working toward a beta release next month, lots of optimization going on right now.  
+SafeIdea uses a downsampling technique to support discovery while protecting your IP. Our platform encrypts your content and only shows downsampled versions during AI interactions.
 
-## AI Blueprints with Filecoin Challenges
+[View our detailed workflow PDF](https://drive.google.com/file/d/11snQ9pTAOlVYYIaHupaVc-TqXf16vEJe/view?usp=sharing)
 
-### THANKS SO MUCH! FILECOIN, STORACHA, LILYPAD, LIT == FANTASTIC SUPPORT, THANK YOU!
+## Technology Stack
 
-**Privacy-Preserving AI**: Tools that prioritize privacy of sensitive data, including examples such as training LLMs on datasets with differential privacy, homomorphic encrypted computation, ZK proofs for model outputs and more. 
-**Decentralized AI Infrastructure**: Platform for decentralized AI computation with Filecoin data storage  
-**Creator Economy**: AI tools for content generation, copyright protection, personalized recommendations.  
+Storage: Filecoin and Storacha for secure, decentralized storage
+Computation: Lilypad for decentralized AI processing
+Access Control: LIT Protocol for token-gated encryption
+Authentication: Stytch OTP with LIT PKP wallets
 
-**SafeIdea Alignment**  
-    * SafeIdea’s goal is to offer tools to people that want the securely share access to Intellectual Property (IP). We use a downsampling technique to support discovery without risking the IP. The AI only gets to see the downsampled encrypted content during interactions so it cannot leak accurate information.  
-    * SafeIdea’s uses Lilypad for decentralized AI computer to create Agentic search support  
-    * We think that SafeIdea could be a fundamental part of the creator economy, starting with intellectual property 
+## Current Status
+Add, share, sell access to, and create agents for your ideas at https://SafeIdea.net
 
-### Storacha Challenge
+No crypto wallet required
+Web2-friendly interface
+Working toward beta release this month
+Currently running on testnets
 
-Your goal is to have 2 or more AI agents share data between one another. These AI Agents should be built using open source AI frameworks. They should be utilizing Storacha for data storage. (Input, Chain of Thought, Metadata, and output) 
-
-**SafeIdea Alignment:** SafeIdea's local agent uses Storacha to store encrypted downsampled content inserted into the system prompt of a lilypad ai completion. Input Chain of Thought and Metadata are stored with Storacha when the user saves their chat for download. We use Storacha for Token metadata, token image and encrypted content as well as downsampled encrypted content. The encryption uses LIT with token gating using Stytch OTP authenticated LIT PKP wallets which contain balances on a ERC1155 IPDocV8 token running in filecoinCalibration FEVM.  used to manage restricted sessions with external AI agents sent to search for IP. SafeIdea simulates the external agent to demonstrate how the local agent can provide enough information for external agents while keeping core data secret.  
-
-### Lilypad Challenge
-
-Build advanced agent workflows on the Lilypad network that can dynamically select the best AI model (from options like DeepSeek, Llama) for specific subtasks, orchestrate multiple models, and handle complex reasoning, overcoming limitations of single-model agents. 
-
-**SafeIdea Alignment:** SafeIdea's agents are using anura-testnet Lilypad, enabling SafeIdea to deploy different AI models on demand, depending on the type of IP that is offered. (It’s setup but we are currently loading the model from an environment variable for testing)
+Try it today! Tell us what you think!
 
 ## Getting Started
 
