@@ -4,10 +4,10 @@ SafeIdea is an open-source platform for creators to securely store, share, and m
 
 ## What We Offer
 
-Secure Storage: Protect your ideas with blockchain-based encryption
-Controlled Sharing: Share your ideas without risking theft
-Monetization: Sell access to your intellectual property
-AI Sales Agents: Custom agents designed for each idea
+### Secure Storage: Protect your ideas with blockchain-based encryption
+### Controlled Sharing: Share your ideas without risking theft
+### Monetization: Sell access to your intellectual property
+### AI Sales Agents: Custom agents designed for each idea
 
 ## How It Works
 
