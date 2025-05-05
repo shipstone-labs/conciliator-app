@@ -4,10 +4,10 @@ SafeIdea is an open-source platform for creators to securely store, share, and m
 
 ## What We Offer
 
-#### Secure Storage: Protect your ideas with blockchain-based encryption
-#### Controlled Sharing: Share your ideas without risking theft
-#### Monetization: Sell access to your intellectual property
-#### AI Sales Agents: Custom agents designed for each idea
+* Secure Storage: Protect your ideas with blockchain-based encryption
+* Controlled Sharing: Share your ideas without risking theft
+* Monetization: Sell access to your intellectual property
+* AI Sales Agents: Custom agents designed for each idea
 
 ## How It Works
 
@@ -17,18 +17,18 @@ SafeIdea uses a downsampling technique to support discovery while protecting you
 
 ## Technology Stack
 
-Storage: Filecoin and Storacha for secure, decentralized storage
-Computation: Lilypad for decentralized AI processing
-Access Control: LIT Protocol for token-gated encryption
-Authentication: Stytch OTP with LIT PKP wallets
+* Storage: Filecoin and Storacha for secure, decentralized storage
+* Computation: Lilypad for decentralized AI processing
+* Access Control: LIT Protocol for token-gated encryption
+* Authentication: Stytch OTP with LIT PKP wallets
 
 ## Current Status
 Add, share, sell access to, and create agents for your ideas at https://SafeIdea.net
 
-No crypto wallet required
-Web2-friendly interface
-Working toward beta release this month
-Currently running on testnets
+* No crypto wallet required
+* Web2-friendly interface
+* Working toward beta release this month
+* Currently running on testnets
 
 Try it today! Tell us what you think!
 
