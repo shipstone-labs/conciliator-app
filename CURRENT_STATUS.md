@@ -3,7 +3,7 @@
 ## Overview
 This document tracks the current state of development with focus on validated functionality to ensure continuity between work sessions.
 
-**Last Updated:** May 3, 2025
+**Last Updated:** May 8, 2025
 
 ## Validated Functionality
 1. **Navigation Component Test IDs**:
@@ -21,6 +21,12 @@ This document tracks the current state of development with focus on validated fu
    - Removed deprecated JSON manifest files
    - Structured by functional areas (navigation, forms, dialogs)
 
+4. **Home Pages Test IDs**:
+   - Added test IDs to both logged-in and logged-out home pages
+   - Fixed `file-upload-zone` implementation in AddStepContent
+   - Updated manifest with homePage and welcomePage sections
+   - Used consistent naming conventions with `home-` and `welcome-` prefixes
+
 ## Current Session Development (Pending Validation)
 1. **Account Modal Test IDs**:
    - Added test ID to modal dialog for account settings
@@ -31,20 +37,20 @@ This document tracks the current state of development with focus on validated fu
    - **STATUS**: Committed but NOT YET VALIDATED for theme switching tests
 
 ## Next Steps (Priority Order)
-1. **Expand test ID coverage to List-IP views**:
+1. **Validate Home Page Test IDs**:
+   - Run Cypress tests to validate new test IDs on home pages
+   - Create basic navigation tests for home page elements
+   - Verify test ID discovery via the manifest
+
+2. **Expand test ID coverage to List-IP views**:
    - Add test IDs to list view components
    - Ensure proper integration with the test manifest
    - Create consistent naming pattern for list items
 
-2. **Improve test coverage for Details view**:
+3. **Improve test coverage for Details view**:
    - Add test IDs to detail page components
    - Ensure modal dialogs have proper test IDs
    - Add test IDs to transaction history elements
-
-3. **Integrate with test automation**:
-   - Validate functionality with the safeidea-tester project
-   - Ensure test IDs are discoverable via manifest
-   - Document test ID patterns for future test development
 
 ## Running Test Validation
 ```bash
