@@ -10,7 +10,10 @@ function WelcomeHome() {
   return (
     <>
       {/* Top-right Auth Button (below menubar) */}
-      <div className="fixed top-20 right-4 z-20">
+      <div
+        className="fixed top-20 right-4 z-20"
+        data-testid="welcome-auth-login"
+      >
         <AuthButton
           text="Sign In / Register"
           className="bg-primary hover:bg-primary/80 text-black font-medium rounded-xl shadow-lg hover:shadow-xl hover:scale-105"
@@ -20,10 +23,15 @@ function WelcomeHome() {
       {/* Banner removed as requested */}
 
       <div className="flex flex-col items-center min-h-screen pt-16">
-        <Logo />
+        <div data-testid="welcome-logo">
+          <Logo />
+        </div>
 
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32">
+        <section
+          className="w-full py-12 md:py-24 lg:py-32"
+          data-testid="welcome-hero"
+        >
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
               <div className="space-y-4">
@@ -38,13 +46,16 @@ function WelcomeHome() {
                   assets with our AI-powered sales agent.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-6 justify-center mt-6">
-                  <AuthButton
-                    text="Start Protecting Your Ideas"
-                    className="px-6 py-3 bg-primary hover:bg-primary/80 text-black font-medium rounded-md transition-all shadow-lg hover:shadow-primary/30 text-center text-base"
-                  />
+                  <div data-testid="welcome-auth-signup">
+                    <AuthButton
+                      text="Start Protecting Your Ideas"
+                      className="px-6 py-3 bg-primary hover:bg-primary/80 text-black font-medium rounded-md transition-all shadow-lg hover:shadow-primary/30 text-center text-base"
+                    />
+                  </div>
                   <Link
                     href="#how-it-works"
                     className="px-6 py-3 bg-card hover:bg-card/80 text-primary font-medium rounded-md transition-all shadow-lg hover:shadow-border border border-border text-center text-base"
+                    data-testid="welcome-learn-more"
                   >
                     Learn More
                   </Link>
@@ -58,6 +69,7 @@ function WelcomeHome() {
         <section
           id="how-it-works"
           className="w-full py-12 md:py-24 bg-card border-y border-border"
+          data-testid="welcome-features"
         >
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center space-y-3 mb-12">
@@ -75,7 +87,10 @@ function WelcomeHome() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Feature 1 - Protection */}
-              <Card className="bg-card border-border">
+              <Card
+                className="bg-card border-border"
+                data-testid="welcome-feature-card-1"
+              >
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-3">
                     <img src="/secure.svg" alt="Secure" className="w-8 h-8" />
@@ -112,7 +127,10 @@ function WelcomeHome() {
               </Card>
 
               {/* Feature 2 - Sharing */}
-              <Card className="bg-card border-border">
+              <Card
+                className="bg-card border-border"
+                data-testid="welcome-feature-card-2"
+              >
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-secondary/20 flex items-center justify-center mb-3">
                     <img
@@ -153,7 +171,10 @@ function WelcomeHome() {
               </Card>
 
               {/* Feature 3 - Sales Agent */}
-              <Card className="bg-card border-border">
+              <Card
+                className="bg-card border-border"
+                data-testid="welcome-feature-card-3"
+              >
                 <CardHeader className="pb-2">
                   <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mb-3">
                     <img src="/chatbot.svg" alt="AI" className="w-8 h-8" />
@@ -195,7 +216,10 @@ function WelcomeHome() {
         </section>
 
         {/* How It Works Section */}
-        <section className="w-full py-12 md:py-24">
+        <section
+          className="w-full py-12 md:py-24"
+          data-testid="welcome-how-it-works"
+        >
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center space-y-3 mb-12">
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -207,7 +231,10 @@ function WelcomeHome() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Step 1 */}
-              <div className="text-center space-y-4">
+              <div
+                className="text-center space-y-4"
+                data-testid="welcome-step-1"
+              >
                 <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto">
                   <span className="text-2xl font-bold text-primary-foreground">
                     1
@@ -232,7 +259,10 @@ function WelcomeHome() {
               </div>
 
               {/* Step 2 */}
-              <div className="text-center space-y-4">
+              <div
+                className="text-center space-y-4"
+                data-testid="welcome-step-2"
+              >
                 <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto">
                   <span className="text-2xl font-bold text-secondary-foreground">
                     2
@@ -257,7 +287,10 @@ function WelcomeHome() {
               </div>
 
               {/* Step 3 */}
-              <div className="text-center space-y-4">
+              <div
+                className="text-center space-y-4"
+                data-testid="welcome-step-3"
+              >
                 <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center mx-auto">
                   <span className="text-2xl font-bold text-accent-foreground">
                     3
@@ -286,7 +319,10 @@ function WelcomeHome() {
         </section>
 
         {/* Testimonial Section */}
-        <section className="w-full py-12 md:py-24 bg-muted">
+        <section
+          className="w-full py-12 md:py-24 bg-muted"
+          data-testid="welcome-testimonials"
+        >
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-extrabold text-foreground sm:text-4xl">
@@ -355,10 +391,12 @@ function WelcomeHome() {
               </Card>
             </div>
             <div className="mt-12 text-center">
-              <AuthButton
-                text="Join SafeIdea Today"
-                className="px-6 py-3 bg-primary hover:bg-primary/80 text-primary-foreground font-bold rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
-              />
+              <div data-testid="welcome-auth-join">
+                <AuthButton
+                  text="Join SafeIdea Today"
+                  className="px-6 py-3 bg-primary hover:bg-primary/80 text-primary-foreground font-bold rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -376,13 +414,16 @@ function WelcomeHome() {
                 </h2>
               </div>
               <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-4">
-                <AuthButton
-                  text="Get Started"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
-                />
+                <div data-testid="welcome-auth-get-started">
+                  <AuthButton
+                    text="Get Started"
+                    className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
+                  />
+                </div>
                 <Link
                   href="/list-ip"
                   className="inline-flex items-center justify-center px-6 py-3 border border-border text-base font-medium rounded-md text-foreground bg-card hover:bg-card/80"
+                  data-testid="welcome-explore"
                 >
                   Explore Options
                 </Link>

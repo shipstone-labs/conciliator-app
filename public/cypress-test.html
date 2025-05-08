@@ -163,6 +163,150 @@
           }
         ],
         "actions": ["selectBusinessModel", "acceptTerms"]
+      },
+      "homePage": {
+        "selector": ".flex.flex-col.items-center.min-h-screen",
+        "elements": [
+          {
+            "id": "logo",
+            "selector": "[data-testid='home-logo']",
+            "type": "div",
+            "description": "Logo container on logged-in home page"
+          },
+          {
+            "id": "welcomeCard",
+            "selector": "[data-testid='home-welcome-card']",
+            "type": "card",
+            "description": "Welcome card with account information"
+          },
+          {
+            "id": "addIdeaButton",
+            "selector": "[data-testid='home-add-idea-button']",
+            "type": "link",
+            "description": "Button to add a new idea"
+          },
+          {
+            "id": "myIdeasButton",
+            "selector": "[data-testid='home-my-ideas-button']",
+            "type": "link",
+            "description": "Button to view user's ideas"
+          },
+          {
+            "id": "exploreButton",
+            "selector": "[data-testid='home-explore-button']",
+            "type": "link",
+            "description": "Button to explore all ideas"
+          }
+        ],
+        "actions": ["addIdea", "viewMyIdeas", "exploreIdeas"]
+      },
+      "welcomePage": {
+        "selector": ".flex.flex-col.items-center.min-h-screen",
+        "elements": [
+          {
+            "id": "authLogin",
+            "selector": "[data-testid='welcome-auth-login']",
+            "type": "div",
+            "description": "Top right login button container"
+          },
+          {
+            "id": "logo",
+            "selector": "[data-testid='welcome-logo']",
+            "type": "div",
+            "description": "Logo container on welcome page"
+          },
+          {
+            "id": "heroSection",
+            "selector": "[data-testid='welcome-hero']",
+            "type": "section",
+            "description": "Hero section with main headline"
+          },
+          {
+            "id": "authSignup",
+            "selector": "[data-testid='welcome-auth-signup']",
+            "type": "div",
+            "description": "Hero section signup button container"
+          },
+          {
+            "id": "learnMore",
+            "selector": "[data-testid='welcome-learn-more']",
+            "type": "link",
+            "description": "Learn more link in hero section"
+          },
+          {
+            "id": "featuresSection",
+            "selector": "[data-testid='welcome-features']",
+            "type": "section",
+            "description": "Features section with service cards"
+          },
+          {
+            "id": "featureCard1",
+            "selector": "[data-testid='welcome-feature-card-1']",
+            "type": "card",
+            "description": "Protection feature card"
+          },
+          {
+            "id": "featureCard2",
+            "selector": "[data-testid='welcome-feature-card-2']",
+            "type": "card",
+            "description": "Sharing feature card"
+          },
+          {
+            "id": "featureCard3",
+            "selector": "[data-testid='welcome-feature-card-3']",
+            "type": "card",
+            "description": "AI Sales Agent feature card"
+          },
+          {
+            "id": "howItWorksSection",
+            "selector": "[data-testid='welcome-how-it-works']",
+            "type": "section",
+            "description": "How it works section with steps"
+          },
+          {
+            "id": "step1",
+            "selector": "[data-testid='welcome-step-1']",
+            "type": "div",
+            "description": "Step 1 container"
+          },
+          {
+            "id": "step2",
+            "selector": "[data-testid='welcome-step-2']",
+            "type": "div",
+            "description": "Step 2 container"
+          },
+          {
+            "id": "step3",
+            "selector": "[data-testid='welcome-step-3']",
+            "type": "div",
+            "description": "Step 3 container"
+          },
+          {
+            "id": "testimonialsSection",
+            "selector": "[data-testid='welcome-testimonials']",
+            "type": "section",
+            "description": "Testimonials section with advisor quotes"
+          },
+          {
+            "id": "authJoin",
+            "selector": "[data-testid='welcome-auth-join']",
+            "type": "div",
+            "description": "Join button in testimonials section"
+          },
+          {
+            "id": "authGetStarted",
+            "selector": "[data-testid='welcome-auth-get-started']",
+            "type": "div",
+            "description": "Get Started button in footer"
+          },
+          {
+            "id": "exploreLink",
+            "selector": "[data-testid='welcome-explore']",
+            "type": "link",
+            "description": "Explore options link in footer"
+          }
+        ],
+        "actions": ["login", "signup", "scrollToLearnMore", "joinNow", "getStarted", "explore"]
       }
     }
   }
