@@ -85,7 +85,10 @@ export const AddStepContent = memo(
     return (
       <>
         {ipDoc.content ? (
-          <div className="p-4 rounded-lg border border-primary/30 bg-muted/30">
+          <div
+            className="p-4 rounded-lg border border-primary/30 bg-muted/30"
+            data-testid="file-upload-zone"
+          >
             <div className="flex justify-between items-center">
               <p className="text-sm font-medium text-foreground">
                 File uploaded successfully

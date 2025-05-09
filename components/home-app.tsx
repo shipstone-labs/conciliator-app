@@ -19,12 +19,15 @@ function LoggedInHome() {
     <>
       <div className="flex flex-col items-center min-h-screen px-6 pt-12 pb-16">
         {/* Logo Section */}
-        <div className="mb-8">
+        <div className="mb-8" data-testid="home-logo">
           <Logo showText={false} />
         </div>
 
         {/* Description Section */}
-        <Card className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border">
+        <Card
+          className="max-w-3xl mx-auto text-center backdrop-blur-lg bg-background/30 border-border"
+          data-testid="home-welcome-card"
+        >
           <CardHeader>
             <CardTitle className="text-2xl text-foreground">
               Welcome to Your SafeIdea Account
@@ -64,18 +67,21 @@ function LoggedInHome() {
           <Link
             href="/add-ip"
             className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
+            data-testid="home-add-idea-button"
           >
             Add Idea
           </Link>
           <Link
             href="/list-ip/mine"
             className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
+            data-testid="home-my-ideas-button"
           >
             My Ideas
           </Link>
           <Link
             href="/list-ip"
             className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
+            data-testid="home-explore-button"
           >
             Explore Ideas
           </Link>
