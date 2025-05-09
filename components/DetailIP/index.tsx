@@ -38,7 +38,7 @@ const DetailIP = ({
     delegatedSessionSigs,
     sessionSigs,
     fbUser,
-  } = useSession()
+  } = useSession(view ? ['stytchUser', 'fbUser'] : [])
   const ipDoc = useIP(docId)
 
   const audit = useIPAudit(docId)
