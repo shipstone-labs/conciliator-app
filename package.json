@@ -24,7 +24,16 @@
     "lint-staged": "lint-staged",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test:ideas-count": "cypress run --spec cypress/e2e/count-ideas.cy.js"
+    "test:ideas-count": "cypress run --spec cypress/e2e/count-ideas.cy.js",
+    "test:add-idea": "cypress open --e2e",
+    "test:inspect-ids": "cypress open --e2e",
+    "test:direct-add": "cypress open --e2e",
+    "test:reliable-add": "cypress open --e2e",
+    "test:complete-idea": "cypress open --e2e",
+    "test:add-title": "cypress open --e2e",
+    "test:add-description": "cypress open --e2e",
+    "test:add-description-scroll": "cypress open --e2e",
+    "test:add-smooth-scroll": "cypress open --e2e"
   },
   "dependencies": {
     "@google-cloud/kms": "^5.0.1",
