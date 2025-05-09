@@ -3,10 +3,15 @@
 ## Overview
 This document tracks the current state of development with focus on validated functionality to ensure continuity between work sessions.
 
-**Last Updated:** May 8, 2025
+**Last Updated:** May 9, 2025
 
 ## Validated Functionality
-1. **Navigation Component Test IDs**:
+1. **Cypress Test Implementation**:
+   - Added simple Cypress test for counting ideas on list page
+   - Created configuration to test against production or custom URLs
+   - Implemented convenient runner script and documentation
+   
+2. **Navigation Component Test IDs**:
    - Added comprehensive test IDs to all navigation elements (PR #117)
    - Confirmed working in both light and dark themes
    - Verified proper structure in HTML manifest (`/public/cypress-test.html`)
@@ -67,3 +72,5 @@ open http://localhost:3000/cypress-test.html
 2. Is the current data-testid naming convention sufficient for all components?
 3. How should we handle test IDs for dynamically generated content (like lists)?
 4. Do we need a documentation page specifically for test automation?
+5. Should we expand the Cypress tests to cover additional key user flows?
+6. How can we integrate the idea count test into CI/CD pipeline?

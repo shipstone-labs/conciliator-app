@@ -21,7 +21,10 @@
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
     "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08",
     "prepare": "husky",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:ideas-count": "cypress run --spec cypress/e2e/count-ideas.cy.js"
   },
   "dependencies": {
     "@google-cloud/kms": "^5.0.1",
@@ -117,6 +120,7 @@
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
+    "cypress": "^13.17.0",
     "esbuild": "^0.25.3",
     "eslint": "^9.25.1",
     "eslint-config-next": "15.1.7",
