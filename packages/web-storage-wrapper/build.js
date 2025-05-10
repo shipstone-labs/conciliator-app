@@ -23,10 +23,13 @@ async function build() {
     const content = readFileSync(file, 'utf-8')
     writeFileSync(
       file,
-      content.replace(
-        "const buffer = await crypto$1.web.subtle.digest('SHA-512', message.buffer);",
-        "const buffer = await crypto$1.web.subtle.digest('SHA-512', message);"
-      )
+      content
+        .replace(
+          "const buffer = await crypto$1.web.subtle.digest('SHA-512', message.buffer);",
+          "const buffer = await crypto$1.web.subtle.digest('SHA-512', message);"
+        )
+        .replace(/https:\/\/up\.storacha\.network/g, 'https://up.web3.storage')
+        .replace(/did:web:up\.storacha\.network/g, 'did:web:web3.storage')
     )
 
     console.log('✅ web-storage-wrapper built successfully!')

@@ -1,13 +1,13 @@
 // Web Storage Wrapper
 // Isolated wrapper for Web3 Storage client
-import { type Client, create } from '@web3-storage/w3up-client'
-import { StoreMemory } from '@web3-storage/w3up-client/stores/memory'
-import { parse } from '@web3-storage/w3up-client/proof'
-import { Signer } from '@web3-storage/w3up-client/principal/ed25519'
+import { type Client, create } from '@storacha/client'
+import { StoreMemory } from '@storacha/client/stores/memory'
+import { parse } from '@storacha/client/proof'
+import { Signer } from '@storacha/client/principal/ed25519'
 import type {
   ListRequestOptions,
   UploadListSuccess,
-} from '@web3-storage/w3up-client/types'
+} from '@storacha/client/types'
 import * as ed from '@noble/ed25519'
 import { sha512 } from '@noble/hashes/sha512'
 
@@ -138,6 +138,7 @@ export async function createAsAgent(key: string, proof: string) {
   // Load client with specific private key
   const principal = Signer.parse(key)
   const store = new StoreMemory()
+
   const client = await create({ principal, store })
   // Add proof that this agent has been delegated capabilities on the space
   const parsedProof = await parse(proof)
