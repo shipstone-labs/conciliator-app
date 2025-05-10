@@ -68,7 +68,7 @@ steps:
     args:
       - -c
       - |
-        sed -e 's#git@github.com:shipstone-labs#https://github.com/shipstone-labs#g' -i.bak .gitmodule
+        sed -e 's#git@github.com:shipstone-labs#https://github.com/shipstone-labs#g' -i.bak .gitmodules
         git submodule update --init --recursive
 
         # Set cache tag based on branch or PR
