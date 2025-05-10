@@ -19,6 +19,16 @@ import { AddStepPublic } from './AddStepPublic'
 import { AddStepContent } from './AddStepContent'
 import { AddStepTerms } from './AddStepTerms'
 import { handleError } from '@/hooks/useIP'
+import { bytesToHex, type Hex, pad } from 'viem'
+
+export const firestoreIdToHex = (base64: string): Hex => {
+  return bytesToHex(
+    pad(new Uint8Array([...atob(base64)].map((c) => c.charCodeAt(0))), {
+      size: 32,
+      dir: 'left',
+    })
+  )
+}
 
 export type AddDoc = Omit<IPDoc, 'id'> & {
   content?: string
@@ -94,19 +104,20 @@ const AppIP = () => {
       }
       const ref = doc(collection(fb, 'ip'))
       const id = ref.id
-      const { tokenId } = await fetch('/api/prestore', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${stytchClient?.session?.getTokens()?.session_jwt}`,
-        },
-        body: JSON.stringify({ id }),
-      }).then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to get token ID')
-        }
-        return res.json()
-      })
+      const tokenId = firestoreIdToHex(id) // Convert Firestore ID to hex for EVM
+      // const { tokenId } = await fetch('/api/prestore', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: `Bearer ${stytchClient?.session?.getTokens()?.session_jwt}`,
+      //   },
+      //   body: JSON.stringify({ id }),
+      // }).then((res) => {
+      //   if (!res.ok) {
+      //     throw new Error('Failed to get token ID')
+      //   }
+      //   return res.json()
+      // })
       setLocalStatus('Storing your idea')
       setDocId(id)
       const sessionSigs = await _sessionSigs.wait()
@@ -131,7 +142,7 @@ const AppIP = () => {
           standardContractType: 'ERC1155',
           chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
-          parameters: [':userAddress', `${tokenId}`],
+          parameters: [':userAddress', tokenId],
           returnValueTest: {
             comparator: '>',
             value: '0',
@@ -145,7 +156,7 @@ const AppIP = () => {
           standardContractType: 'ERC1155',
           chain: 'filecoinCalibrationTestnet',
           method: 'balanceOf',
-          parameters: [':userAddress', `${tokenId}`],
+          parameters: [':userAddress', tokenId],
           returnValueTest: {
             comparator: '>',
             value: '0',

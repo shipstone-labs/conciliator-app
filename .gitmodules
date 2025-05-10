@@ -1,0 +1,6 @@
+[submodule "submods/upload-service"]
+	path = submods/upload-service
+	url = git@github.com:shipstone-labs/upload-service
+[submodule "submods/js-sdk"]
+	path = submods/js-sdk
+	url = git@github.com:shipstone-labs/js-sdk.git
