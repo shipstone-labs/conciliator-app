@@ -1,12 +1,3 @@
-dependencies:
- - gitSource:
-     repository:
-       url: 'https://github.com/shipstone-labs/conciliator-app.git'
-       developerConnect: 'projects/conciliator-456321/locations/us-central1/connections/github-central/repositories/shipstone-labs-conciliator-app'
-     revision: '$REVISION_ID'
-     recurseSubmodules: true
-     depth: 5
-     destPath: '.'
 steps:
   # Post build start notification with logs URL
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
@@ -77,6 +68,9 @@ steps:
     args:
       - -c
       - |
+        sed -e 's#git@github.com:shipstone-labs#https://github.com/shipstone-labs#g' -i.bak .gitmodule
+        git submodule update --init --recursive
+
         # Set cache tag based on branch or PR
         if [[ "$BRANCH_NAME" == "main" ]]; then
           CACHE_TAG="main-latest"
