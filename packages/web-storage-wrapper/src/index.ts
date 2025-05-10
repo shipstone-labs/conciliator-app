@@ -8,6 +8,7 @@ import type {
   ListRequestOptions,
   UploadListSuccess,
 } from '@storacha/client/types'
+import * as DID from '@ipld/dag-ucan/did'
 
 // import * as ed from '@noble/ed25519'
 // import { sha512 } from '@noble/hashes/sha512'
@@ -80,13 +81,36 @@ export interface StoreResult {
   cid: string | null
 }
 
+const url = new URL('https://up.web3.storage')
+const id = DID.parse('did:web:web3.storage')
+const serviceConf = {
+  access: {
+    url,
+    id,
+  },
+  store: {
+    url,
+    id,
+  },
+  upload: {
+    url,
+    id,
+  },
+  space: {
+    url,
+    id,
+  },
+}
+
 /**
  * Create a new Web3.Storage client
  * @returns The Web3.Storage client instance
  */
 export async function createW3Client(): Promise<Client> {
   try {
-    return await create()
+    return await create({
+      serviceConf,
+    })
   } catch (error) {
     console.error('Error creating W3 client:', error)
     throw error

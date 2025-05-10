@@ -20,6 +20,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ipld/dag-ucan": "catalog:",
     "@storacha/client": "^1.2.8"
   },
   "devDependencies": {

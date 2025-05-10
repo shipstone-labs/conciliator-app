@@ -4,6 +4,12 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@ipld/dag-ucan':
+      specifier: ^3.4.5
+      version: 3.4.5
+
 overrides:
   react: ^19.0.0
   react-dom: ^19.0.0
@@ -449,6 +455,9 @@ importers:
 
   packages/web-storage-wrapper:
     dependencies:
+      '@ipld/dag-ucan':
+        specifier: 'catalog:'
+        version: 3.4.5
       '@storacha/client':
         specifier: link:../../submods/upload-service/packages/w3up-client
         version: link:../../submods/upload-service/packages/w3up-client
@@ -1578,6 +1587,17 @@ packages:
 
   '@invertase/firestore-stripe-payments@0.0.7':
     resolution: {integrity: sha512-J4R49Z+x13hqQ6wX+xoglnDuwTvAbXMmOJaL8LcqRo2NFRjBEs8zWh5mUvDVwvlRV4ABnYzjzm/t4+wuOIfBPg==}
+
+  '@ipld/dag-cbor@9.2.3':
+    resolution: {integrity: sha512-x78CdVhtctIMBpwOnzbojsvDy6qNxdeR3RC2W+/fMo2sccqlYkPXbjpmghAVdKx/g0xfHYvSMU8cgCnYvLwRag==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+
+  '@ipld/dag-json@10.2.4':
+    resolution: {integrity: sha512-u1Pp4Tqz4r9GHGeLIJUJat5slasSxpBiBlL/i5pmGVEkCnQ1plrp5rQ5e+x3wZaPabxvsirQpfR76TPoGAiXiw==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+
+  '@ipld/dag-ucan@3.4.5':
+    resolution: {integrity: sha512-wiWhH0Ju7WgnumsarHCYtlo+1NRy+WIsXyAB7g2sDqVsKCyEJiLLmjeZzKqNv+qMxLnUS8bQ287cPiQ//s/oJQ==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -3649,6 +3669,10 @@ packages:
   cbor@10.0.3:
     resolution: {integrity: sha512-72Jnj81xMsqepqdcSdf2+fflz/UDsThOHy5hj2MW5F5xzHL8Oa0KQ6I6V9CwVUPxg5pf+W9xp6W2KilaRXWWtw==}
     engines: {node: '>=18'}
+
+  cborg@4.2.10:
+    resolution: {integrity: sha512-ZVA0xrVn8uBfDJYgfKKZzB/93z/Uiz7YtRdBPsZi/gyHNyqFdHMLHURVEk9dejOHepaX0zhcMyNva2/vF972SA==}
+    hasBin: true
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -8940,6 +8964,22 @@ snapshots:
       - encoding
       - utf-8-validate
 
+  '@ipld/dag-cbor@9.2.3':
+    dependencies:
+      cborg: 4.2.10
+      multiformats: 13.3.3
+
+  '@ipld/dag-json@10.2.4':
+    dependencies:
+      cborg: 4.2.10
+      multiformats: 13.3.3
+
+  '@ipld/dag-ucan@3.4.5':
+    dependencies:
+      '@ipld/dag-cbor': 9.2.3
+      '@ipld/dag-json': 10.2.4
+      multiformats: 13.3.3
+
   '@isaacs/cliui@8.0.2':
     dependencies:
       string-width: 5.1.2
@@ -11257,6 +11297,8 @@ snapshots:
   cbor@10.0.3:
     dependencies:
       nofilter: 3.1.0
+
+  cborg@4.2.10: {}
 
   ccount@2.0.1: {}
 
