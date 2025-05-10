@@ -37,7 +37,7 @@ RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
 COPY packages ./packages
 
-RUN pnpm build-wrappers
+RUN pnpm build:wrappers
 
 RUN mv node_modules node_modules.dev
 RUN pnpm install --prod

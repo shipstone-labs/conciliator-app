@@ -3,21 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "pnpm run build-wrappers",
+    "predev": "pnpm run build:wrappers",
     "dev": "bash -c 'set -e pipefail; trap \"kill 0\" SIGINT; cross-env ENV NODE_NO_WARNINGS=1 next dev | grep --color=always -v \"nextjs_original-stack-frames\"'",
     "dev:trace": "bash -c 'source .env.development && trap \"kill 0\" SIGINT; cross-env ENV NODE_NO_WARNINGS=1 next dev | grep --color=always -v \"nextjs_original-stack-frames\"'",
     "trace:start": "./start-local-tracing.sh",
     "trace:stop": "docker-compose down",
-    "prebuild": "pnpm run build-wrappers",
+    "prebuild": "pnpm run build:wrappers",
     "build": "next build",
     "build:plain": "next build",
-    "build-wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
+    "build:wrappers": "pnpm --filter lilypad-wrapper build && pnpm --filter lit-wrapper build && pnpm --filter web-storage-wrapper build",
     "start": "cross-env ENV NODE_NO_WARNINGS=1 next start",
     "lint": "biome lint .",
     "lint:biome": "biome lint .",
     "check": "biome check . ; BIOME_CODE=$? ; tsc --noEmit ; TSC_CODE=$? ; (exit $(( BIOME_CODE || TSC_CODE )))",
     "format": "biome format --write .",
-    "prepages:build": "pnpm run build-wrappers",
+    "prepages:build": "pnpm run build:wrappers",
     "pages:build": "pnpm dlx @cloudflare/next-on-pages@1",
     "pages:dev": "pnpm dlx wrangler pages dev --compatibility-flags nodejs_compat --compatibility-date 2025-04-08",
     "prepare": "husky",
@@ -28,6 +28,7 @@
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.4.1",
     "@google-cloud/opentelemetry-resource-util": "^2.4.0",
     "@invertase/firestore-stripe-payments": "^0.0.7",
+    "@lit-protocol/access-control-conditions": "link:submods/js-sdk/packages/access-control-conditions",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/context-zone": "^2.0.0",
     "@opentelemetry/core": "^2.0.0",
@@ -161,6 +162,18 @@
     ],
     "patchedDependencies": {
       "@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1": "./patches/@google-cloud__opentelemetry-cloud-trace-exporter.patch"
+    },
+    "overrides": {
+      "@lit-protocol/auth-helpers": "link:submods/js-sdk/packages/auth-helpers",
+      "@lit-protocol/constants": "link:submods/js-sdk/packages/constants",
+      "@lit-protocol/contracts": "link:submods/js-sdk/packages/contracts",
+      "@lit-protocol/contracts-sdk": "link:submods/js-sdk/packages/contracts-sdk",
+      "@lit-protocol/crypto": "link:submods/js-sdk/packages/crypto",
+      "@lit-protocol/lit-auth-client": "link:submods/js-sdk/packages/lit-auth-client",
+      "@lit-protocol/lit-node-client": "link:submods/js-sdk/packages/lit-node-client",
+      "@lit-protocol/pkp-ethers": "link:submods/js-sdk/packages/pkp-ethers",
+      "@lit-protocol/types": "link:submods/js-sdk/packages/types",
+      "@storacha/client": "link:submods/upload-service/packages/w3up-client"
     }
   },
   "resolutions": {
