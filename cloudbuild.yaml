@@ -3,8 +3,8 @@ dependencies:
      repository:
        url: 'https://github.com/shipstone-labs/conciliator-app.git'
        developerConnect: 'projects/conciliator-456321/locations/us-central1/connections/github-central'
-     revision: 'REVISION'
-     recurseSubmodules: 'true'
+     revision: '$REVISION_ID'
+     recurseSubmodules: true
      depth: 5
      destPath: '.'
 steps:
