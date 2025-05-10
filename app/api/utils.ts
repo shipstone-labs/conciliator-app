@@ -6,7 +6,6 @@ import {
   LIT_NETWORK,
 } from 'lit-wrapper'
 import { OpenAI } from 'openai'
-import { PinataSDK } from 'pinata-web3'
 import {
   createPublicClient,
   http,
@@ -94,11 +93,6 @@ export function getCompletionAI() {
 }
 
 export const indexName = 'ip-embeddings'
-
-export const pinata = new PinataSDK({
-  pinataJwt: process.env.PINATA_JWT,
-  pinataGateway: process.env.PINATA_GATEWAY,
-})
 
 export const genAuthSig = async (
   wallet: PrivateKeyAccount,

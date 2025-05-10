@@ -179,7 +179,7 @@ const nextConfig: NextConfig = {
     '@lit-protocol/lit-node-client',
     // Web3 Storage
     'web-storage-wrapper',
-    '@web3-storage/w3up-client',
+    '@storacha/client',
     '@noble/ed25519',
     'multiformats',
     // Lilypad

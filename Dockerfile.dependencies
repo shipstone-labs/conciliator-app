@@ -23,6 +23,9 @@ ENV PATH="${PATH}:/usr/local/go/bin:/usr/local/tinygo/bin:/root/go/bin"
 RUN mkdir -p /root/go
 ENV GOPATH="/root/go"
 
+COPY submods ./submods
+RUN cd ./submods/js-sdk && yarn install && yarn build
+RUN cd ./submods/upload-service && pnpm install && pnpm build
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 COPY packages/lit-wrapper/package.json ./packages/lit-wrapper/

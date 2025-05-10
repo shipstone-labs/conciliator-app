@@ -129,8 +129,12 @@ steps:
         # Create a hash of all dependency-related files
         # Explicitly exclude node_modules directories
         echo "Calculating dependency hash..."
-        DEP_HASH=$(find . -type f \( -name "package.json" -o -name "pnpm-lock.yaml" -o -ipath "./packages/*" -o -name "Dockerfile.dependencies" -o -name "pnpm-workspace.yaml" \) -not -path "*/node_modules/*" |
-        sort | xargs cat | sha256sum | cut -d ' ' -f 1 | cut -c 1-12)
+        git submodule status > .file
+        find . -type f \( -name "package.json" -o -name "pnpm-lock.yaml" \
+          -o -ipath "./packages/*" -o -name "Dockerfile.dependencies" \
+          -o -name "pnpm-workspace.yaml" \) -not -path "*/node_modules/*" \
+          | sort | xargs cat >> .file
+        DEP_HASH=$(cat .file | sha256sum | cut -d ' ' -f 1 | cut -c 1-12)
         echo "Dependency hash: $${DEP_HASH}"
 
         # Image tag based on hash
@@ -140,6 +144,9 @@ steps:
         echo "Checking if dependency image already exists..."
         if ! docker pull "$${IMAGE_TAG}" &>/dev/null; then
           echo "🔨 Building dependency container $${IMAGE_TAG}..."
+
+          # Checkout PR repos.
+          git submodule update --init --recursive
 
           # Build the dependency container
           if ! (docker build \
