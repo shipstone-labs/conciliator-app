@@ -1,9 +1,5 @@
 packages:
   - "packages/*"
-  - "submods/js-sdk"
-  - "submods/js-sdk/packages/**"
-  - "submods/upload-service"
-  - "submods/upload-service/packages/**"
 
 catalog:
   '@arethetypeswrong/cli': ^0.17.3

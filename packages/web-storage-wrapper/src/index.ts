@@ -8,76 +8,60 @@ import type {
   ListRequestOptions,
   UploadListSuccess,
 } from '@storacha/client/types'
-import * as ed from '@noble/ed25519'
-import { sha512 } from '@noble/hashes/sha512'
 
-// Fix the SHA-512 implementation for ed25519
-// This is critical for correct operation in all environments
-// @ts-ignore
-ed.etc.sha512Sync = (...m) => {
-  try {
-    // Create a clean TypedArray from the concatenated bytes
-    const input = ed.etc.concatBytes(...m)
+// import * as ed from '@noble/ed25519'
+// import { sha512 } from '@noble/hashes/sha512'
 
-    // Ensure we're always using a clean Uint8Array for consistency
-    const cleanInput = new Uint8Array(input)
+// // Fix the SHA-512 implementation for ed25519
+// // This is critical for correct operation in all environments
+// // @ts-ignore
+// ed.etc.sha512Sync = (...m) => {
+//   try {
+//     // Create a clean TypedArray from the concatenated bytes
+//     const input = ed.etc.concatBytes(...m)
 
-    // Call the SHA-512 implementation with the clean input
-    return sha512(cleanInput)
-  } catch (error) {
-    console.error('Error in custom sha512Sync:', error)
-    // Return a dummy buffer with the correct length (64 bytes)
-    return new Uint8Array(64).fill(1)
-  }
-}
+//     // Ensure we're always using a clean Uint8Array for consistency
+//     const cleanInput = new Uint8Array(input)
 
-// Also patch the async SHA-512 function that uses SubtleCrypto directly
-// This fixes the "message.buffer" issue in WebCrypto
-// @ts-ignore
-ed.etc.sha512Async = async (...messages) => {
-  try {
-    // Get the crypto object
-    const crypto =
-      typeof globalThis === 'object' && 'crypto' in globalThis
-        ? globalThis.crypto
-        : undefined
+//     // Call the SHA-512 implementation with the clean input
+//     return sha512(cleanInput)
+//   } catch (error) {
+//     console.error('Error in custom sha512Sync:', error)
+//     // Return a dummy buffer with the correct length (64 bytes)
+//     return new Uint8Array(64).fill(1)
+//   }
+// }
 
-    if (!crypto || !crypto.subtle) {
-      throw new Error('crypto.subtle must be defined')
-    }
+// // Also patch the async SHA-512 function that uses SubtleCrypto directly
+// // This fixes the "message.buffer" issue in WebCrypto
+// // @ts-ignore
+// ed.etc.sha512Async = async (...messages) => {
+//   try {
+//     // Get the crypto object
+//     const crypto =
+//       typeof globalThis === 'object' && 'crypto' in globalThis
+//         ? globalThis.crypto
+//         : undefined
 
-    // Concatenate messages
-    const m = ed.etc.concatBytes(...messages)
+//     if (!crypto || !crypto.subtle) {
+//       throw new Error('crypto.subtle must be defined')
+//     }
 
-    // Create a clean Uint8Array - THE KEY FIX: don't use .buffer property!
-    const cleanInput = new Uint8Array(m)
+//     // Concatenate messages
+//     const m = ed.etc.concatBytes(...messages)
 
-    // Call digest WITHOUT using .buffer property
-    const hashBuffer = await crypto.subtle.digest('SHA-512', cleanInput)
+//     // Create a clean Uint8Array - THE KEY FIX: don't use .buffer property!
+//     const cleanInput = new Uint8Array(m)
 
-    // Return as Uint8Array
-    return new Uint8Array(hashBuffer)
-  } catch (error) {
-    console.error('Error in patched sha512Async:', error)
-    throw error
-  }
-}
+//     // Call digest WITHOUT using .buffer property
+//     const hashBuffer = await crypto.subtle.digest('SHA-512', cleanInput)
 
-// /**
-//  * Type definitions for Web3 Storage client
-//  */
-// export interface Web3StorageClient {
-//   login(email: string): Promise<void>;
-//   currentSpace(): Promise<any>;
-//   spaces(): Promise<any[]>;
-//   createSpace(name: string): Promise<any>;
-//   uploadBlob(blob: Blob): Promise<{ toString(): string }>;
-//   capability: {
-//     store: {
-//       list(options: { space: string }): Promise<any[]>;
-//     };
-//   };
-//   [key: string]: any;
+//     // Return as Uint8Array
+//     return new Uint8Array(hashBuffer)
+//   } catch (error) {
+//     console.error('Error in patched sha512Async:', error)
+//     throw error
+//   }
 // }
 
 /**
