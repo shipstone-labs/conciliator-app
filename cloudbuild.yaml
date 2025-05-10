@@ -2,7 +2,7 @@ dependencies:
  - gitSource:
      repository:
        url: 'https://github.com/shipstone-labs/conciliator-app.git'
-       developerConnect: 'projects/conciliator-456321/locations/us-central1/connections/github-central'
+       developerConnect: 'projects/conciliator-456321/locations/us-central1/connections/github-central/repositories/shipstone-labs-conciliator-app'
      revision: '$REVISION_ID'
      recurseSubmodules: true
      depth: 5
