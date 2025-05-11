@@ -41,7 +41,7 @@ RUN set -eux; \
   rustup --version; \
   cargo --version; \
   rustc --version; \
-  cargo install wasm-pack;
+  cargo install wasm-pack wasm-opt;
 
 ENV PATH="${PATH}:/usr/local/go/bin:/usr/local/tinygo/bin:/root/go/bin"
 RUN mkdir -p /root/go
