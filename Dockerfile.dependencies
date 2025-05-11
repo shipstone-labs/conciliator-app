@@ -29,6 +29,7 @@ RUN git init /fakegit
 # Tell git to use that repo instead of the .git file in the submodule.
 ENV GIT_DIR=/fakegit/.git
 COPY submods ./submods
+RUN cd ./submods && git init
 RUN cd ./submods/js-sdk && yarn install && yarn build
 RUN cd ./submods/upload-service && pnpm install && pnpm build
 # Install dependencies based on the preferred package manager
