@@ -24,6 +24,7 @@ RUN mkdir -p /root/go
 ENV GOPATH="/root/go"
 
 COPY submods ./submods
+COPY .git /app/.git
 RUN cd ./submods/js-sdk && yarn install && yarn build
 RUN cd ./submods/upload-service && pnpm install && pnpm build
 # Install dependencies based on the preferred package manager
