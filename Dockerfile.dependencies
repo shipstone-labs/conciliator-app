@@ -56,7 +56,7 @@ COPY .gitmodules ./.gitmodules
 COPY submods ./submods
 RUN cd submods/js-sdk && yarn install && yarn build
 RUN corepack enable pnpm
-RUN cd submods/upload-service && pnpm install && pnpm build
+RUN cd submods/upload-service && pnpm install && pnpm nx run-many -t build --prod --parallel --all
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 COPY packages/lit-wrapper/package.json ./packages/lit-wrapper/
