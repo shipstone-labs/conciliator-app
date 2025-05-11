@@ -9,7 +9,6 @@ cloudbuild.yaml
 /.env*
 /.dev.vars
 /.github
-/.git
 /.wrangler
 /packages/*/node_modules
 /packages/*/dist
