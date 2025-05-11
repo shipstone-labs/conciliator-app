@@ -12,6 +12,7 @@ cloudbuild.yaml
 /.wrangler
 /packages/*/node_modules
 /packages/*/dist
+/submods/*/node_modules
 .DS_Store
 /*.log
 /.dockerignore
