@@ -19,7 +19,7 @@ RUN wget -q https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VER
   tar -C /usr/local -xzf tinygo${TINYGO_VERSION}.linux-amd64.tar.gz && \
   rm tinygo${TINYGO_VERSION}.linux-amd64.tar.gz
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -y --default-toolchain stable 
 RUN rustup default stable && cargo add target wasm32-unknown-unknown && cargo install wasm-pack
 
 ENV PATH="${PATH}:/usr/local/go/bin:/usr/local/tinygo/bin:/root/go/bin"
