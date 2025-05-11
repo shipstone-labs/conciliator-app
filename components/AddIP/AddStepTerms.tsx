@@ -154,7 +154,10 @@ export const AddStepTerms = memo(
             )}
           </Button>
           {status?.status || localStatus ? (
-            <div className="p-4 rounded-lg border border-border/30 bg-muted/30 mb-2 mt-4">
+            <div
+              className="p-4 rounded-lg border border-border/30 bg-muted/30 mb-2 mt-4"
+              data-testid="status-message-loading"
+            >
               <div className="flex items-center">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 <span className="text-foreground/90">

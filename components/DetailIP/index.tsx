@@ -227,7 +227,7 @@ const DetailIP = ({
     )
   }
   return (
-    <div className="w-full py-8">
+    <div className="w-full py-8" data-testid="ip-item-details">
       <div className="max-w-4xl mx-auto space-y-8 px-4">
         {/* Header with page title and image */}
         <div className="text-center mb-8">

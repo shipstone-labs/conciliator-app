@@ -302,6 +302,7 @@ const AppIP = () => {
               <Alert
                 variant="destructive"
                 className="border-red-300 bg-red-500/20"
+                data-testid="status-message"
               >
                 <AlertDescription className="text-foreground">
                   {ipDoc.error}
@@ -311,7 +312,10 @@ const AppIP = () => {
 
             {/* Success message shown when content exists */}
             {ipDoc.content && (
-              <div className="p-4 rounded-lg border border-primary/30 bg-muted/30 mb-2 mt-4">
+              <div
+                className="p-4 rounded-lg border border-primary/30 bg-muted/30 mb-2 mt-4"
+                data-testid="status-message-success"
+              >
                 <p className="text-sm font-semibold text-primary mb-1">
                   ✓ Document Encrypted
                 </p>

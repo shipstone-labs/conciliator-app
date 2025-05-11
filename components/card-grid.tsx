@@ -72,6 +72,7 @@ function CardGrid({ myItems, itemsPerPage = 16 }: CardGridProps) {
           <Card
             key={`${item.name}-${item.description}-${index}`}
             className="shadow-xl hover:shadow-primary/20 transition-all hover:-translate-y-1 backdrop-blur-md hover:backdrop-blur-lg"
+            data-testid="ip-list-item"
           >
             {/* Name (Title) with Tooltip */}
             <CardHeader className="p-4 rounded-t-xl text-center h-16">

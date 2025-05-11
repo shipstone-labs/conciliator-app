@@ -62,6 +62,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
               type="button"
               onClick={onClose}
               className="text-2xl text-gray-400 hover:text-gray-100 transition-colors"
+              data-testid="modal-close-button"
             >
               &times;
             </button>
