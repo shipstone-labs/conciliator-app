@@ -28,8 +28,10 @@ RUN git init /fakegit
 
 # Tell git to use that repo instead of the .git file in the submodule.
 COPY .git ./.git
-RUN cd ./submods/js-sdk && yarn install && yarn build
-RUN cd ./submods/upload-service && pnpm install && pnpm build
+COPY .gitmodules ./.gitmodules
+COPY submods ./submods
+RUN cd submods/js-sdk && yarn install && yarn build
+RUN cd submods/upload-service && pnpm install && pnpm build
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 COPY packages/lit-wrapper/package.json ./packages/lit-wrapper/
