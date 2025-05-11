@@ -23,8 +23,12 @@ ENV PATH="${PATH}:/usr/local/go/bin:/usr/local/tinygo/bin:/root/go/bin"
 RUN mkdir -p /root/go
 ENV GOPATH="/root/go"
 
+# Initialize an empty git repo.
+RUN git init /fakegit
+
+# Tell git to use that repo instead of the .git file in the submodule.
+ENV GIT_DIR=/fakegit/.git
 COPY submods ./submods
-COPY .git /app/.git
 RUN cd ./submods/js-sdk && yarn install && yarn build
 RUN cd ./submods/upload-service && pnpm install && pnpm build
 # Install dependencies based on the preferred package manager
