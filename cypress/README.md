@@ -12,13 +12,25 @@ The `count-ideas.cy.js` test:
 3. Counts the number of ideas displayed on the list page
 4. Outputs the count to the console and saves it to a JSON file
 
+### Add Idea Navigation Test
+
+The `add-idea-navigation.cy.js` test:
+1. Navigates to the SafeIdea website
+2. Waits for manual user login
+3. Once logged in, navigates to the Add Idea page
+
+This test is designed to run in interactive mode to allow manual login.
+
 ## Running Tests
 
 ### Using NPM Scripts
 
 ```bash
-# Run the ideas count test
+# Run the ideas count test (headless)
 pnpm test:ideas-count
+
+# Run the add idea navigation test (interactive)
+pnpm test:add-idea
 
 # Run all Cypress tests
 pnpm cypress:run
@@ -33,18 +45,25 @@ pnpm cypress:open
 # Run the ideas count test with default URL (safeidea.net)
 npx cypress run --spec cypress/e2e/count-ideas.cy.js
 
+# Run the add idea test in interactive mode
+npx cypress open --e2e
+
 # Run with a custom URL
 npx cypress run --spec cypress/e2e/count-ideas.cy.js --env BASE_URL=https://staging.safeidea.net
 ```
 
-### Using Convenience Script
+### Using Convenience Scripts
 
 ```bash
-# Run with default URL (safeidea.net)
+# Run idea count test with default URL (safeidea.net)
 ./run-ideas-count.sh
+
+# Run add idea test with default URL (safeidea.net)
+./run-add-idea.sh
 
 # Run with custom URL
 ./run-ideas-count.sh https://staging.safeidea.net
+./run-add-idea.sh https://staging.safeidea.net
 ```
 
 ## Test Output
