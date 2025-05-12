@@ -78,5 +78,5 @@ COPY --from=builder ./app/packages ./packages
 COPY --from=builder ./app/patches ./patches
 COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 RUN corepack enable pnpm
-RUN mv node_modules node_modules.prod
-RUN mv node_modules.dev node_modules
+COPY --from=builder /app/node_modules.dev ./node_modules
+COPY --from=builder /app/node_modules.prod ./node_modules.prod
