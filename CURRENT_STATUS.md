@@ -9,7 +9,7 @@ This document tracks the current state of development with focus on validated fu
 1. **Navigation Component Test IDs**:
    - Added comprehensive test IDs to all navigation elements (PR #117)
    - Confirmed working in both light and dark themes
-   - Verified proper structure in HTML manifest (`/public/cypress-test.html`)
+   - Verified proper structure in HTML manifest (`/public/test-manifest.html`)
    
 2. **Add-IP Workflow Testing**:
    - Complete test ID coverage across all steps of the workflow
@@ -30,15 +30,15 @@ This document tracks the current state of development with focus on validated fu
 ## Current Session Development (Pending Validation)
 1. **Account Modal Test IDs**:
    - Added test ID to modal dialog for account settings
-   - **STATUS**: Committed in PR #117 but NOT YET VALIDATED with Cypress tests
+   - **STATUS**: Committed in PR #117 but NOT YET VALIDATED with automated tests
 
 2. **Theme Toggle Test ID**:
    - Enhanced theme toggle button with test ID
-   - **STATUS**: Committed but NOT YET VALIDATED for theme switching tests
+   - **STATUS**: Committed but NOT YET VALIDATED with automated tests
 
 ## Next Steps (Priority Order)
 1. **Validate Home Page Test IDs**:
-   - Run Cypress tests to validate new test IDs on home pages
+   - Run automated tests to validate new test IDs on home pages
    - Create basic navigation tests for home page elements
    - Verify test ID discovery via the manifest
 
@@ -54,12 +54,8 @@ This document tracks the current state of development with focus on validated fu
 
 ## Running Test Validation
 ```bash
-# Local testing via safeidea-tester (recommended)
-cd /Users/creed/projects/safeidea-tester
-npx cypress run --spec cypress/e2e/add-idea-to-safeidea.cy.js --env url=http://localhost:3000
-
 # View test points manifest directly
-open http://localhost:3000/cypress-test.html
+open http://localhost:3000/test-manifest.html
 ```
 
 ## Open Questions for Next Session
