@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
   TooltipTrigger,
@@ -21,6 +22,70 @@ import {
 import { useIPs } from '@/hooks/useIP'
 import { useSession } from '@/components/AuthLayout'
 import CachedImage from '@/components/CachedImage'
+import type { Timestamp } from 'firebase/firestore'
+
+// Status badge component for deal status visualization
+const StatusBadge = ({
+  status,
+  isOwner,
+}: { status?: string; isOwner: boolean }) => {
+  // Default status for items without deals
+  if (!status) {
+    return (
+      <Badge
+        variant={isOwner ? 'default' : 'outline'}
+        className="whitespace-nowrap"
+      >
+        {isOwner ? 'Owner' : 'Shared'}
+      </Badge>
+    )
+  }
+
+  // For items with deal status
+  const statusConfig: Record<
+    string,
+    {
+      variant: 'default' | 'secondary' | 'destructive' | 'outline'
+      label: string
+    }
+  > = {
+    active: { variant: 'default', label: 'Active' },
+    pending: { variant: 'secondary', label: 'Pending' },
+    review: { variant: 'secondary', label: 'In Review' },
+    inactive: { variant: 'outline', label: 'Inactive' },
+    completed: { variant: 'default', label: 'Completed' },
+    expired: { variant: 'destructive', label: 'Expired' },
+  }
+
+  const config = statusConfig[status] || statusConfig.inactive
+
+  return (
+    <Badge variant={config.variant} className="whitespace-nowrap">
+      {config.label}
+    </Badge>
+  )
+}
+
+// Helper function for time remaining calculation
+const getTimeRemaining = (expiresAt?: Timestamp): string | undefined => {
+  if (!expiresAt) return undefined
+
+  const now = new Date()
+  const expiry = expiresAt.toDate()
+  const diffMs = expiry.getTime() - now.getTime()
+
+  if (diffMs <= 0) return 'Expired'
+
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const diffHours = Math.floor(
+    (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  )
+
+  if (diffDays > 0) {
+    return `${diffDays}d ${diffHours}h`
+  }
+  return `${diffHours}h`
+}
 
 type IPListViewProps = {
   myItems?: boolean
@@ -39,16 +104,20 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
   const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
   const [imageWidth, setImageWidth] = useState(getImageWidth())
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 640 : false
+  )
   useSession(myItems ? ['stytchUser', 'fbUser'] : [])
 
-  // Responsive image size calculation
+  // Responsive handling for screen size
   useEffect(() => {
-    const updateImageWidth = () => {
+    const updateResponsiveness = () => {
       const newWidth = getImageWidth()
       setImageWidth(newWidth)
+      setIsMobile(window.innerWidth <= 640)
     }
-    window.addEventListener('resize', updateImageWidth)
-    return () => window.removeEventListener('resize', updateImageWidth)
+    window.addEventListener('resize', updateResponsiveness)
+    return () => window.removeEventListener('resize', updateResponsiveness)
   }, [])
 
   const { data: ipItems, pages: totalPages } = useIPs({
@@ -77,14 +146,16 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
   return (
     <div className="w-full flex flex-col items-center p-3">
       <Card className="w-full max-w-6xl">
-        <CardContent className="p-6">
+        <CardContent className="p-6 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead className="w-[280px]">Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead className="w-[200px] md:w-[280px]">Name</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  Description
+                </TableHead>
+                <TableHead className="hidden md:table-cell">Created</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -96,57 +167,99 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                ipItems.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleRowClick(item.id)}
-                  >
-                    <TableCell>
-                      <div className="flex justify-center">
-                        <CachedImage
-                          src={
-                            item?.image?.cid
-                              ? `/api/cached-image/${item.image.cid}`
-                              : undefined
-                          }
-                          fallbackSrc="/images/placeholder.png"
-                          alt={item.name}
-                          width={imageWidth}
-                          height={imageWidth}
-                          className="rounded-md object-cover shadow-sm border border-border hover:border-primary/30 transition-all"
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <Tooltip>
-                        <TooltipTrigger className="block w-full text-left">
-                          <span className="truncate block">{item.name}</span>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-xs border border-border shadow-lg">
-                          {item.name}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell className="max-w-md">
-                      <Tooltip>
-                        <TooltipTrigger className="block w-full text-left">
-                          <span className="truncate block">
+                ipItems.map((item) => {
+                  // Get the most recent deal if exists
+                  const latestDeal =
+                    item.deals && item.deals.length > 0
+                      ? item.deals.sort((a, b) => {
+                          const aTime = a.createdAt.toMillis()
+                          const bTime = b.createdAt.toMillis()
+                          return bTime - aTime
+                        })[0]
+                      : null
+
+                  // Determine deal status and expiry
+                  const dealStatus = latestDeal ? latestDeal.status : undefined
+                  const accessExpiry = latestDeal
+                    ? latestDeal.expiresAt
+                    : undefined
+
+                  return (
+                    <TableRow
+                      key={item.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleRowClick(item.id)}
+                    >
+                      <TableCell>
+                        <div className="flex justify-center">
+                          <CachedImage
+                            src={
+                              item?.image?.cid
+                                ? `/api/cached-image/${item.image.cid}`
+                                : undefined
+                            }
+                            fallbackSrc="/images/placeholder.png"
+                            alt={item.name}
+                            width={imageWidth}
+                            height={imageWidth}
+                            className="rounded-md object-cover shadow-sm border border-border hover:border-primary/30 transition-all"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <Tooltip>
+                          <TooltipTrigger className="block w-full text-left">
+                            <span className="truncate block max-w-[180px]">
+                              {item.name}
+                            </span>
+                            {isMobile && (
+                              <span className="text-xs text-foreground/60 truncate block mt-1">
+                                {item.description}
+                              </span>
+                            )}
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-xs border border-border shadow-lg">
+                            {item.name}
+                            {isMobile && (
+                              <p className="mt-2 text-sm">{item.description}</p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell max-w-md">
+                        <Tooltip>
+                          <TooltipTrigger className="block w-full text-left">
+                            <span className="truncate block">
+                              {item.description}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-sm border border-border shadow-lg">
                             {item.description}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-sm border border-border shadow-lg">
-                          {item.description}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      {item.createdAt?.toDate().toLocaleDateString() ||
-                        'Unknown'}
-                    </TableCell>
-                    <TableCell>{item.creator ? 'Owner' : 'Shared'}</TableCell>
-                  </TableRow>
-                ))
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {item.createdAt?.toDate().toLocaleDateString() ||
+                          'Unknown'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <StatusBadge
+                            status={dealStatus}
+                            isOwner={Boolean(item.creator)}
+                          />
+                          {accessExpiry && (
+                            <span
+                              className={`text-xs ${getTimeRemaining(accessExpiry) === 'Expired' ? 'text-destructive' : 'text-foreground/60'}`}
+                            >
+                              {getTimeRemaining(accessExpiry)}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
               )}
             </TableBody>
           </Table>
@@ -155,7 +268,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
 
       {/* Improved Pagination Controls */}
       {totalPages > 0 && (
-        <div className="flex items-center space-x-3 mt-8">
+        <div className="flex items-center space-x-3 mt-8 overflow-x-auto py-2">
           <button
             type="button"
             onClick={() => goToPage(currentPage - 1)}
