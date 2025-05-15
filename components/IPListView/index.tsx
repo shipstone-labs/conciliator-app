@@ -93,41 +93,86 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
         </CardContent>
       </Card>
 
-      {/* Pagination Controls - Exact match to card-grid */}
-      <div className="flex items-center space-x-3 mt-8">
-        <button
-          type="button"
-          onClick={() => goToPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-border rounded-xl text-foreground/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-        >
-          Prev
-        </button>
-
-        {/* Display up to 5 page numbers dynamically */}
-        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => (
+      {/* Improved Pagination Controls */}
+      {totalPages > 0 && (
+        <div className="flex items-center space-x-3 mt-8">
           <button
             type="button"
-            key={`page-${i + 1}`}
-            onClick={() => goToPage(i + 1)}
-            className={`px-4 py-2 h-11 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all ${
-              currentPage === i + 1
-                ? 'bg-primary text-black font-medium'
-                : 'bg-background/50 backdrop-blur-sm border border-border text-foreground/90 hover:bg-background/70'
-            }`}
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-border rounded-xl text-foreground/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
           >
-            {i + 1}
+            Prev
           </button>
-        ))}
 
-        <button
-          type="button"
-          onClick={() => goToPage(currentPage + 1)}
-          className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-border rounded-xl text-foreground/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-        >
-          Next
-        </button>
-      </div>
+          {/* Create a sliding window of page numbers around the current page */}
+          {(() => {
+            // Determine start and end pages to show (max 5 page buttons)
+            const maxButtons = 5
+
+            // Handle case with few pages
+            if (totalPages <= maxButtons) {
+              return Array.from({ length: totalPages }, (_, i) => {
+                const pageNumber = i + 1
+                return (
+                  <button
+                    type="button"
+                    key={`page-${pageNumber}`}
+                    onClick={() => goToPage(pageNumber)}
+                    className={`px-4 py-2 h-11 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all ${
+                      currentPage === pageNumber
+                        ? 'bg-primary text-black font-medium'
+                        : 'bg-background/50 backdrop-blur-sm border border-border text-foreground/90 hover:bg-background/70'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                )
+              })
+            }
+
+            // Handle case with many pages
+            let startPage = Math.max(
+              1,
+              currentPage - Math.floor(maxButtons / 2)
+            )
+            let endPage = startPage + maxButtons - 1
+
+            // Adjust if the end is beyond the total pages
+            if (endPage > totalPages) {
+              endPage = totalPages
+              startPage = Math.max(1, endPage - maxButtons + 1)
+            }
+
+            return Array.from({ length: endPage - startPage + 1 }, (_, i) => {
+              const pageNumber = startPage + i
+              return (
+                <button
+                  type="button"
+                  key={`page-${pageNumber}`}
+                  onClick={() => goToPage(pageNumber)}
+                  className={`px-4 py-2 h-11 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all ${
+                    currentPage === pageNumber
+                      ? 'bg-primary text-black font-medium'
+                      : 'bg-background/50 backdrop-blur-sm border border-border text-foreground/90 hover:bg-background/70'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              )
+            })
+          })()}
+
+          <button
+            type="button"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className="px-5 py-2 h-11 bg-background/50 backdrop-blur-sm border border-border rounded-xl text-foreground/90 disabled:opacity-30 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   )
 }
