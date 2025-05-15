@@ -150,8 +150,8 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead className="w-[200px] md:w-[280px]">Name</TableHead>
+                <TableHead className="w-[80px] text-center">Image</TableHead>
+                <TableHead className="w-[200px] md:w-[280px]">Title</TableHead>
                 <TableHead className="hidden sm:table-cell">
                   Description
                 </TableHead>
@@ -209,11 +209,11 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                       <TableCell className="font-medium">
                         <Tooltip>
                           <TooltipTrigger className="block w-full text-left">
-                            <span className="truncate block max-w-[180px]">
+                            <span className="line-clamp-2 block max-w-[180px]">
                               {item.name}
                             </span>
                             {isMobile && (
-                              <span className="text-xs text-foreground/60 truncate block mt-1">
+                              <span className="text-xs text-foreground/60 line-clamp-2 block mt-1 max-w-[300px]">
                                 {item.description}
                               </span>
                             )}
@@ -229,7 +229,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                       <TableCell className="hidden sm:table-cell max-w-md">
                         <Tooltip>
                           <TooltipTrigger className="block w-full text-left">
-                            <span className="truncate block">
+                            <span className="line-clamp-2 block max-w-[400px]">
                               {item.description}
                             </span>
                           </TooltipTrigger>
