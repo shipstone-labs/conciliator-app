@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Loading from '@/components/Loading'
 
@@ -13,18 +13,43 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip'
 import { useIPs } from '@/hooks/useIP'
 import { useSession } from '@/components/AuthLayout'
+import CachedImage from '@/components/CachedImage'
 
 type IPListViewProps = {
   myItems?: boolean
   itemsPerPage?: number
 }
 
+function getImageWidth() {
+  const screenWidth = typeof window === 'undefined' ? 640 : window.innerWidth
+  if (screenWidth <= 640) {
+    return 40 // Small thumbnails for mobile
+  }
+  return 60 // Slightly larger thumbnails for desktop
+}
+
 function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
   const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
+  const [imageWidth, setImageWidth] = useState(getImageWidth())
   useSession(myItems ? ['stytchUser', 'fbUser'] : [])
+
+  // Responsive image size calculation
+  useEffect(() => {
+    const updateImageWidth = () => {
+      const newWidth = getImageWidth()
+      setImageWidth(newWidth)
+    }
+    window.addEventListener('resize', updateImageWidth)
+    return () => window.removeEventListener('resize', updateImageWidth)
+  }, [])
 
   const { data: ipItems, pages: totalPages } = useIPs({
     orderBy: 'createdAt',
@@ -56,7 +81,8 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[300px]">Name</TableHead>
+                <TableHead className="w-[80px]">Image</TableHead>
+                <TableHead className="w-[280px]">Name</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Status</TableHead>
@@ -65,7 +91,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
             <TableBody>
               {ipItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">
+                  <TableCell colSpan={5} className="text-center">
                     No items found
                   </TableCell>
                 </TableRow>
@@ -76,9 +102,43 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleRowClick(item.id)}
                   >
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell className="max-w-md truncate">
-                      {item.description}
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <CachedImage
+                          src={
+                            item?.image?.cid
+                              ? `/api/cached-image/${item.image.cid}`
+                              : undefined
+                          }
+                          fallbackSrc="/images/placeholder.png"
+                          alt={item.name}
+                          width={imageWidth}
+                          height={imageWidth}
+                          className="rounded-md object-cover shadow-sm border border-border hover:border-primary/30 transition-all"
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <Tooltip>
+                        <TooltipTrigger className="block w-full text-left">
+                          <span className="truncate block">{item.name}</span>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-xs border border-border shadow-lg">
+                          {item.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell className="max-w-md">
+                      <Tooltip>
+                        <TooltipTrigger className="block w-full text-left">
+                          <span className="truncate block">
+                            {item.description}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-sm border border-border shadow-lg">
+                          {item.description}
+                        </TooltipContent>
+                      </Tooltip>
                     </TableCell>
                     <TableCell>
                       {item.createdAt?.toDate().toLocaleDateString() ||
