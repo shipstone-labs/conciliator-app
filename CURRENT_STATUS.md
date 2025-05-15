@@ -36,6 +36,7 @@ This document tracks the current state of development with focus on validated fu
    - Enhanced theme toggle button with test ID
    - **STATUS**: Committed but NOT YET VALIDATED with automated tests
 
+
 3. **List2 Table View Implementation**:
    - Created new table-based list view at /list2 route (PR #125)
    - Implemented improved pagination with sliding window
@@ -56,6 +57,10 @@ This document tracks the current state of development with focus on validated fu
    - Ensure consistent user experience between table and card views
 
 3. **Validate Home Page Test IDs**:
+
+## Next Steps (Priority Order)
+1. **Validate Home Page Test IDs**:
+
    - Run automated tests to validate new test IDs on home pages
    - Create basic navigation tests for home page elements
    - Verify test ID discovery via the manifest
