@@ -43,6 +43,7 @@ next-env.d.ts
 
 # claude assistant files
 CLAUDE.md
+working-together.md
 .dev.vars
 /conciliator-*.json
 !/.husky
