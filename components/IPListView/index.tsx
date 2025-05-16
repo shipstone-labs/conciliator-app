@@ -1,8 +1,10 @@
 'use client'
 
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Loading from '@/components/Loading'
+import { Input } from '@/components/ui/input'
+import { useDebounce } from 'use-debounce'
 
 import {
   Table,
@@ -92,6 +94,32 @@ type IPListViewProps = {
   itemsPerPage?: number
 }
 
+// Helper function to perform case-insensitive search
+function searchItems(
+  items: Array<{ name?: string; description?: string; [key: string]: any }>,
+  searchTerm: string
+) {
+  if (!searchTerm.trim()) return items
+
+  const lowerCaseSearch = searchTerm.toLowerCase().trim()
+  const searchTerms = lowerCaseSearch
+    .split(/\s+/)
+    .filter((term) => term.length > 0)
+
+  // If no valid search terms after splitting, return all items
+  if (searchTerms.length === 0) return items
+
+  return items.filter((item) => {
+    const title = item.name?.toLowerCase() || ''
+    const description = item.description?.toLowerCase() || ''
+
+    // Check if all search terms are found in either title or description
+    return searchTerms.every(
+      (term) => title.includes(term) || description.includes(term)
+    )
+  })
+}
+
 function getImageWidth() {
   const screenWidth = typeof window === 'undefined' ? 640 : window.innerWidth
   if (screenWidth <= 640) {
@@ -107,6 +135,47 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth <= 640 : false
   )
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300)
+
+  // Handle pagination reset when search term changes
+  // This needs to be a separate useCallback to avoid dependency issues
+  const resetPagination = useCallback(() => {
+    setCurrentPage(1)
+  }, [])
+
+  // Apply the pagination reset when search changes
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      resetPagination()
+    }
+  }, [debouncedSearchTerm, resetPagination])
+
+  // Handle keyboard events for the search input
+  const handleSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Clear search when Escape key is pressed
+      if (e.key === 'Escape' && searchTerm) {
+        setSearchTerm('')
+        e.preventDefault()
+      }
+      // Submit search when Enter key is pressed
+      if (e.key === 'Enter') {
+        e.preventDefault() // Prevent form submission
+        // The actual search is handled by the debounced effect
+      }
+    },
+    [searchTerm]
+  )
+
+  // Handle explicit search button click
+  const handleSearchClick = useCallback(() => {
+    // Force the input to blur to close mobile keyboard
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+    // The actual search is handled by the debounced effect
+  }, [])
   useSession(myItems ? ['stytchUser', 'fbUser'] : [])
 
   // Responsive handling for screen size
@@ -139,19 +208,115 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
     [router]
   )
 
+  // Filter items based on debounced search term
+  const filteredItems = useMemo(() => {
+    return ipItems ? searchItems(ipItems, debouncedSearchTerm) : []
+  }, [ipItems, debouncedSearchTerm])
+
   if (!ipItems) {
     return <Loading />
   }
 
   return (
     <div className="w-full flex flex-col items-center p-3">
+      {/* Search input */}
+      <div className="w-full max-w-6xl mb-4">
+        <div className="relative">
+          <div className="relative flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/50"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+              role="presentation"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <Input
+              type="text"
+              placeholder="Search by title or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              className="w-full bg-background/50 border-border focus:border-primary transition-colors pl-10 pr-10 backdrop-blur-sm"
+              data-testid="ip-search-input"
+            />
+            <div className="absolute right-0 flex items-center space-x-1">
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="h-8 w-8 flex items-center justify-center text-foreground/50 hover:text-foreground transition-colors"
+                  aria-label="Clear search"
+                  data-testid="clear-search-button"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    role="presentation"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleSearchClick}
+                className="h-8 w-8 mr-2 flex items-center justify-center text-foreground/70 hover:text-foreground transition-colors sm:hidden"
+                aria-label="Search"
+                data-testid="search-button"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  role="presentation"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        {debouncedSearchTerm && (
+          <div className="text-sm text-foreground/70 mt-2 pl-1">
+            Found {filteredItems.length}{' '}
+            {filteredItems.length === 1 ? 'result' : 'results'} for "
+            {debouncedSearchTerm}"
+          </div>
+        )}
+      </div>
       <Card className="w-full max-w-6xl">
         <CardContent className="p-6 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead className="w-[200px] md:w-[280px]">Name</TableHead>
+                <TableHead className="w-[80px] text-center">Image</TableHead>
+                <TableHead className="w-[200px] md:w-[280px]">Title</TableHead>
                 <TableHead className="hidden sm:table-cell">
                   Description
                 </TableHead>
@@ -160,18 +325,20 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ipItems.length === 0 ? (
+              {filteredItems.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center">
-                    No items found
+                    {ipItems.length === 0
+                      ? 'No items found'
+                      : 'No matching results found'}
                   </TableCell>
                 </TableRow>
               ) : (
-                ipItems.map((item) => {
+                filteredItems.map((item) => {
                   // Get the most recent deal if exists
                   const latestDeal =
                     item.deals && item.deals.length > 0
-                      ? item.deals.sort((a, b) => {
+                      ? item.deals.sort((a: any, b: any) => {
                           const aTime = a.createdAt.toMillis()
                           const bTime = b.createdAt.toMillis()
                           return bTime - aTime
@@ -199,7 +366,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                                 : undefined
                             }
                             fallbackSrc="/images/placeholder.png"
-                            alt={item.name}
+                            alt={item.name || 'IP asset image'}
                             width={imageWidth}
                             height={imageWidth}
                             className="rounded-md object-cover shadow-sm border border-border hover:border-primary/30 transition-all"
@@ -209,11 +376,11 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                       <TableCell className="font-medium">
                         <Tooltip>
                           <TooltipTrigger className="block w-full text-left">
-                            <span className="truncate block max-w-[180px]">
+                            <span className="line-clamp-2 block max-w-[180px]">
                               {item.name}
                             </span>
                             {isMobile && (
-                              <span className="text-xs text-foreground/60 truncate block mt-1">
+                              <span className="text-xs text-foreground/60 line-clamp-2 block mt-1 max-w-[300px]">
                                 {item.description}
                               </span>
                             )}
@@ -229,8 +396,8 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                       <TableCell className="hidden sm:table-cell max-w-md">
                         <Tooltip>
                           <TooltipTrigger className="block w-full text-left">
-                            <span className="truncate block">
-                              {item.description}
+                            <span className="line-clamp-2 block max-w-[400px]">
+                              {item.description || ''}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="bg-background/80 backdrop-blur-md text-foreground p-3 rounded-xl max-w-sm border border-border shadow-lg">
@@ -267,7 +434,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
       </Card>
 
       {/* Improved Pagination Controls */}
-      {totalPages > 0 && (
+      {filteredItems.length > 0 && totalPages > 0 && (
         <div className="flex items-center space-x-3 mt-8 overflow-x-auto py-2">
           <button
             type="button"
