@@ -1,7 +1,7 @@
 'use client'
 
-import CardGrid from '@/components/card-grid'
+import IPListView from '@/components/IPListView'
 
-export default function Home() {
-  return <CardGrid />
+export default function ListIPPage() {
+  return <IPListView />
 }
