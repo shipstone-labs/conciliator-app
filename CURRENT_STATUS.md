@@ -3,7 +3,7 @@
 ## Overview
 This document tracks the current state of development with focus on validated functionality to ensure continuity between work sessions.
 
-**Last Updated:** May 15, 2025 (4th session)
+**Last Updated:** May 16, 2025 (5th session)
 
 ## Validated Functionality
 1. **Navigation Component Test IDs**:
@@ -37,36 +37,34 @@ This document tracks the current state of development with focus on validated fu
    - **STATUS**: Committed but NOT YET VALIDATED with automated tests
 
 
-3. **List2 Table View Implementation**:
-   - Created new table-based list view at /list2 route (PR #125)
-   - Implemented improved pagination with sliding window
-   - Enhanced with responsive layout for mobile devices
-   - Added image thumbnails and enhanced status visualization
-   - Improved tooltip functionality for longer text content
-   - **STATUS**: Merged and deployed to production
-
-4. **List2 UX Improvements**:
-   - Enhanced table view with centered image labels (PR #126)
+3. **Enhanced List View Implementation**:
+   - Implemented improved table-based list view for /list-ip routes (PR #125, #126, #127)
+   - Added pagination with sliding window for better UX
+   - Enhanced responsive layout for mobile, tablet, and desktop devices
+   - Implemented image thumbnails and enhanced status visualization
+   - Added tooltip functionality for text content that exceeds space
+   - Enhanced with centered image labels for better alignment
    - Changed 'Name' header to 'Title' for better semantic meaning
-   - Improved title and description fields to allow 2-line truncation with ellipsis
-   - Added responsive width constraints for mobile devices (iPhone SE)
+   - Improved title and description fields with 2-line truncation and ellipsis
+   - Optimized responsive constraints for mobile devices (including iPhone SE)
    - Fixed layout issues for iPad mini
    - Added search functionality with debounced filtering
    - Implemented multi-word search across title and description fields
    - Added search results count indicator
-   - Fixed pagination reset on search term changes
-   - **STATUS**: PR created (#126), awaiting review
+   - Fixed pagination reset when search terms change
+   - **STATUS**: Merged and deployed to production
 
 ## Next Steps (Priority Order)
-1. **Merge List2 UX Improvements**:
-   - Review and approve PR #126
-   - Verify proper rendering across device sizes
-   - Ensure CI checks pass before merging
-
-2. **Apply List2 Improvements to Card Grid**:
-   - Implement improved pagination from List2 in card-grid component
+1. **Apply List View Improvements to Card Grid**:
+   - Implement improved pagination from table view in card-grid component
+   - Add search functionality to card grid view
    - Add enhanced status badges and expiry information to cards
    - Ensure consistent user experience between table and card views
+
+2. **Consider Route Simplification**:
+   - Evaluate renaming list-ip routes to something more intuitive (e.g., /browse, /ideas)
+   - Update all navigation references if route names change
+   - Ensure backwards compatibility or proper redirects
 
 3. **Validate Home Page Test IDs**:
 
@@ -95,10 +93,12 @@ open http://localhost:3000/test-manifest.html
 2. Is the current data-testid naming convention sufficient for all components?
 3. How should we handle test IDs for dynamically generated content (like lists)?
 4. Do we need a documentation page specifically for test automation?
-5. Which elements of the List2 implementation should we prioritize for other components?
+5. Which elements of the enhanced list view implementation should we prioritize for other components?
 6. Should we consider additional accessibility enhancements for mobile and tablet users?
 7. What additional status information would be valuable to display in the table view?
 8. Should we implement any performance optimizations for the list component (like virtualization)?
-9. Should we add test IDs for the improved List2 UX elements?
+9. Should we add test IDs for the improved list view UX elements?
 10. Are there other components that could benefit from the multi-line ellipsis pattern?
 11. Should we adjust the max width of description text for different screen sizes?
+12. Should we completely replace the card-grid view or maintain both options for users?
+13. Is the search functionality sufficient, or should we add advanced filtering options?
