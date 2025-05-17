@@ -3,7 +3,7 @@
 ## Overview
 This document tracks the current state of development with focus on validated functionality to ensure continuity between work sessions.
 
-**Last Updated:** May 16, 2025 (6th session)
+**Last Updated:** May 17, 2025 (7th session)
 
 ## Validated Functionality
 1. **Navigation Component Test IDs**:
@@ -66,35 +66,48 @@ This document tracks the current state of development with focus on validated fu
    - Fixed TypeScript errors and missing icon dependencies
    - **STATUS**: Implementation complete and validated with successful build
 
+5. **Marketing Funnel Implementation**:
+   - Initialized marketing funnel structure in /plan directory (PR #129)
+   - Implemented homepage with hero section, benefits, service plans, and testimonials
+   - Created FunnelSteps and PlanStorage utilities for funnel state management
+   - Added progress indicator and shared layout for all funnel pages
+   - Designed responsive UI following existing application patterns
+   - Added proper test IDs for automated testing
+   - **STATUS**: PR created (#129), awaiting validation in deployment preview
+
 ## Next Steps (Priority Order)
-1. **Complete Journey Implementation Refinements**:
+1. **Complete Marketing Funnel Implementation**:
+   - Complete remaining funnel pages based on specifications
+   - Implement assessment questionnaire with multi-step flow
+   - Create plan comparison page with feature tables
+   - Implement individual plan detail pages
+   - Add FAQ page with expandable sections
+   - Ensure responsive design across all pages
+
+2. **Complete Journey Implementation Refinements**:
    - Standardize button styling across journey pages
    - Ensure consistent spacing and layout patterns
    - Improve color usage for better theme integration
    - Extract common UI patterns into reusable components
    - Add appropriate test IDs for automated testing
 
-2. **Apply List View Improvements to Card Grid**:
+3. **Apply List View Improvements to Card Grid**:
    - Implement improved pagination from table view in card-grid component
    - Add search functionality to card grid view
    - Add enhanced status badges and expiry information to cards
    - Ensure consistent user experience between table and card views
 
-3. **Consider Route Simplification**:
+4. **Consider Route Simplification**:
    - Evaluate renaming list-ip routes to something more intuitive (e.g., /browse, /ideas)
    - Update all navigation references if route names change
    - Ensure backwards compatibility or proper redirects
 
-4. **Validate Home Page Test IDs**:
+5. **Expand Test ID Coverage**:
    - Run automated tests to validate new test IDs on home pages
-   - Create basic navigation tests for home page elements
-   - Verify test ID discovery via the manifest
-
-5. **Expand test ID coverage to List-IP and Journey views**:
    - Add test IDs to list view components
-   - Add test IDs to journey pages for automated testing
+   - Add test IDs to journey and funnel pages for automated testing
    - Ensure proper integration with the test manifest
-   - Create consistent naming pattern for list items
+   - Create consistent naming pattern for dynamically generated content
 
 ## Running Test Validation
 ```bash
@@ -116,7 +129,10 @@ open http://localhost:3000/test-manifest.html
 11. Should we adjust the max width of description text for different screen sizes?
 12. Should we completely replace the card-grid view or maintain both options for users?
 13. Is the search functionality sufficient, or should we add advanced filtering options?
-14. Should the journey state be persisted in Firebase instead of localStorage for better cross-device support?
-15. How should we handle deep linking into the journey pages?
+14. Should the journey and funnel state be persisted in Firebase instead of localStorage for better cross-device support?
+15. How should we handle deep linking into the journey and funnel pages?
 16. Is the current form validation pattern reusable for other forms in the application?
 17. Should we add animation transitions between journey steps?
+18. Should we make the funnel assessment results persist beyond the session?
+19. Should we implement a shared FunnelContext or stick with decentralized storage?
+20. Should the funnel pages be auth-gated or freely accessible for marketing purposes?
