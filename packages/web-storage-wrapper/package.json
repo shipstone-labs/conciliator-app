@@ -20,15 +20,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ipld/dag-cbor": "^9.2.2",
-    "@ipld/dag-json": "^10.2.3",
-    "@ipld/dag-pb": "^4.1.3",
-    "@noble/ed25519": "2.1.0",
-    "@noble/hashes": "^1.7.1",
-    "@ucanto/principal": "^9.0.2",
-    "@web3-storage/w3up-client": "^17.2.0",
-    "multiformats": "13.3.2",
-    "uint8arrays": "^5.1.0"
+    "@ipld/dag-ucan": "catalog:",
+    "@storacha/client": "^1.2.8"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",

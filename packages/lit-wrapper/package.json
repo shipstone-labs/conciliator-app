@@ -23,23 +23,22 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@lit-protocol/accs-schemas": "^0.0.24",
-    "@lit-protocol/auth-helpers": "7.0.10-alpha.0",
-    "@lit-protocol/constants": "7.0.10-alpha.0",
+    "@lit-protocol/accs-schemas": "^0.0.26",
+    "@lit-protocol/auth-helpers": "7.1.1",
+    "@lit-protocol/constants": "7.1.1",
     "@lit-protocol/contracts": "^0.0.90",
-    "@lit-protocol/contracts-sdk": "7.0.10-alpha.0",
-    "@lit-protocol/crypto": "7.0.10-alpha.0",
-    "@lit-protocol/lit-auth-client": "7.0.10-alpha.0",
-    "@lit-protocol/lit-node-client": "7.0.10-alpha.0",
+    "@lit-protocol/contracts-sdk": "7.1.1",
+    "@lit-protocol/crypto": "7.1.1",
+    "@lit-protocol/lit-auth-client": "7.1.1",
+    "@lit-protocol/lit-node-client": "7.1.1",
     "@lit-protocol/pkp-ethers": "^7.1.1",
-    "@lit-protocol/types": "^7.1.0",
+    "@lit-protocol/types": "^7.1.1",
     "@simplewebauthn/browser": "^13.1.0",
     "blakejs": "^1.2.1",
     "browser-headers": "^0.4.1",
     "cross-fetch": "^4.1.0",
     "js-sha256": "^0.11.0",
-    "multiformats": "9.9.0",
     "uint8arrays": "^5.1.0",
-    "utf-8-validate": "^5.0.10"
+    "utf-8-validate": "^6.0.5"
   }
 }

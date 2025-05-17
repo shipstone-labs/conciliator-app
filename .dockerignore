@@ -9,10 +9,10 @@ cloudbuild.yaml
 /.env*
 /.dev.vars
 /.github
-/.git
 /.wrangler
 /packages/*/node_modules
 /packages/*/dist
+/submods/*/node_modules
 .DS_Store
 /*.log
 /.dockerignore

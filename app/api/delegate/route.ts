@@ -30,7 +30,7 @@ export const POST = withAPITracing(async (req: NextRequest) => {
     const doc = await fs.collection('ip').doc(id).get()
     const deals: IPDeal[] = doc.exists
       ? (doc.data() as { creator?: string }).creator === user.user.user_id
-        ? [{ id: '', status: 'complete' } as IPDeal]
+        ? [{ id: '', status: 'completed' } as IPDeal]
         : ((await fs
             .collection('ip')
             .doc(id)

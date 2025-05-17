@@ -12,6 +12,7 @@ import { useStytchUser } from '@stytch/nextjs'
 import { ViewNDA } from '../ViewNDA'
 import { Button } from '../ui/button'
 import { useSession } from '../AuthLayout'
+import { useFeature } from '@/hooks/useFeature'
 
 export type AmendedProduct = Product & {
   price: Price
@@ -25,6 +26,7 @@ type MainCardProps = {
 }
 
 export const MainCard = ({ ipDoc, onBuy }: MainCardProps) => {
+  const hasPurchase = useFeature('stripe')
   const products = useProducts()
   const [ndaChecked, setNdaChecked] = useState(false)
   const stytchUser = useStytchUser()
@@ -136,7 +138,7 @@ export const MainCard = ({ ipDoc, onBuy }: MainCardProps) => {
           </div>
 
           {/* Access Terms Section - Show if terms information exists */}
-          {ipDoc.terms && !ipDoc.deals?.length && (
+          {hasPurchase && ipDoc.terms && !ipDoc.deals?.length && (
             <div className="border-t border-border/30 pt-5 mt-5">
               <h3 className="text-lg font-medium text-primary mb-3">
                 Access Terms
