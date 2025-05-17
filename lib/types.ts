@@ -159,3 +159,8 @@ export function formatNumber(
     maximumFractionDigits: 2,
   }).format(number)
 }
+
+// Journey related types
+export type PatentPriorityLevel = 'low' | 'medium' | 'high'
+export type SharingPreferenceType = 'private' | 'selective' | 'public'
+export type EnforcementLevelType = 'aggressive' | 'moderate' | 'passive'
