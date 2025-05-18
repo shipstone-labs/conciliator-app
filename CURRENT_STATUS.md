@@ -3,7 +3,7 @@
 ## Overview
 This document tracks the current state of development with focus on validated functionality to ensure continuity between work sessions.
 
-**Last Updated:** May 16, 2025 (5th session)
+**Last Updated:** May 17, 2025 (6th session)
 
 ## Validated Functionality
 1. **Navigation Component Test IDs**:
@@ -27,17 +27,7 @@ This document tracks the current state of development with focus on validated fu
    - Updated manifest with homePage and welcomePage sections
    - Used consistent naming conventions with `home-` and `welcome-` prefixes
 
-## Current Session Development (Pending Validation)
-1. **Account Modal Test IDs**:
-   - Added test ID to modal dialog for account settings
-   - **STATUS**: Committed in PR #117 but NOT YET VALIDATED with automated tests
-
-2. **Theme Toggle Test ID**:
-   - Enhanced theme toggle button with test ID
-   - **STATUS**: Committed but NOT YET VALIDATED with automated tests
-
-
-3. **Enhanced List View Implementation**:
+5. **Enhanced List View Implementation**:
    - Implemented improved table-based list view for /list-ip routes (PR #125, #126, #127)
    - Added pagination with sliding window for better UX
    - Enhanced responsive layout for mobile, tablet, and desktop devices
@@ -54,30 +44,61 @@ This document tracks the current state of development with focus on validated fu
    - Fixed pagination reset when search terms change
    - **STATUS**: Merged and deployed to production
 
+## Current Session Development (Pending Validation)
+1. **Marketing Funnel Pages Implementation**:
+   - Created a dedicated branch `feature/marketing-funnel-standalone` for the marketing funnel implementation without journey dependencies
+   - Implemented 9 funnel pages:
+     - /plan/home - Landing page for marketing funnel
+     - /plan/how-it-works - Explanation of service
+     - /plan/assessment - Multi-step questionnaire
+     - /plan/plans - Pricing and plans comparison
+     - /plan/basic - Basic plan details
+     - /plan/secure - Secure plan details
+     - /plan/complete - Complete plan details
+     - /plan/faq - Frequently asked questions
+     - /plan/success - Confirmation page after signup
+   - Added shared layout with progress indicator
+   - Implemented state management with PlanStorage
+   - Added step navigation with FunnelSteps
+   - Verified build successful for all paths
+   - **STATUS**: Ready for PR, pending final review
+
+2. **Account Modal Test IDs**:
+   - Added test ID to modal dialog for account settings
+   - **STATUS**: Committed in PR #117 but NOT YET VALIDATED with automated tests
+
+3. **Theme Toggle Test ID**:
+   - Enhanced theme toggle button with test ID
+   - **STATUS**: Committed but NOT YET VALIDATED with automated tests
+
 ## Next Steps (Priority Order)
-1. **Apply List View Improvements to Card Grid**:
+1. **Create PR for Marketing Funnel**:
+   - Create PR from `feature/marketing-funnel-standalone` to `main`
+   - Ensure journey-related code is not included in the PR
+   - Validate all pages work independently
+
+2. **Apply List View Improvements to Card Grid**:
    - Implement improved pagination from table view in card-grid component
    - Add search functionality to card grid view
    - Add enhanced status badges and expiry information to cards
    - Ensure consistent user experience between table and card views
 
-2. **Consider Route Simplification**:
+3. **Consider Route Simplification**:
    - Evaluate renaming list-ip routes to something more intuitive (e.g., /browse, /ideas)
    - Update all navigation references if route names change
    - Ensure backwards compatibility or proper redirects
 
-3. **Validate Home Page Test IDs**:
-
+4. **Validate Home Page Test IDs**:
    - Run automated tests to validate new test IDs on home pages
    - Create basic navigation tests for home page elements
    - Verify test ID discovery via the manifest
 
-4. **Expand test ID coverage to List-IP views**:
+5. **Expand test ID coverage to List-IP views**:
    - Add test IDs to list view components
    - Ensure proper integration with the test manifest
    - Create consistent naming pattern for list items
 
-5. **Improve test coverage for Details view**:
+6. **Improve test coverage for Details view**:
    - Add test IDs to detail page components
    - Ensure modal dialogs have proper test IDs
    - Add test IDs to transaction history elements
@@ -102,3 +123,5 @@ open http://localhost:3000/test-manifest.html
 11. Should we adjust the max width of description text for different screen sizes?
 12. Should we completely replace the card-grid view or maintain both options for users?
 13. Is the search functionality sufficient, or should we add advanced filtering options?
+14. Should the marketing funnel be integrated into the main navigation?
+15. What additional analytics should we add to track funnel conversion rates?
