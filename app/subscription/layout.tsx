@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/Logo'
-import NavigationHeader from '@/components/NavigationHeader'
 
 /**
  * Layout component for the subscription section
@@ -22,8 +21,6 @@ export default function SubscriptionLayout({
 
   return (
     <>
-      <NavigationHeader />
-
       {/* Breadcrumb navigation for subscription pages */}
       {!isHomePage && (
         <div className="container mx-auto px-4 py-3 flex items-center text-sm">

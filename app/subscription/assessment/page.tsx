@@ -289,6 +289,7 @@ export default function AssessmentPage() {
   const router = useRouter()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [tempAnswers, setTempAnswers] = useState<Record<string, string>>({})
   const [showResults, setShowResults] = useState(false)
   const [recommendedPlan, setRecommendedPlan] = useState('')
 
@@ -321,6 +322,7 @@ export default function AssessmentPage() {
       )
     } else {
       setAnswers(data)
+      setTempAnswers(data) // Initialize temp answers with saved answers
 
       // Check if assessment was completed
       if (Object.keys(data).length === ASSESSMENT_QUESTIONS.length) {
@@ -338,12 +340,22 @@ export default function AssessmentPage() {
   // Current question
   const currentQuestion = ASSESSMENT_QUESTIONS[currentQuestionIndex]
 
-  // Save answer and navigate
-  const handleAnswer = (questionId: string, answerId: string) => {
+  // Handle radio selection (no save, just update temporary state)
+  const handleRadioSelection = (questionId: string, answerId: string) => {
+    setTempAnswers({ ...tempAnswers, [questionId]: answerId })
+  }
+
+  // Save answer and navigate when next button is clicked
+  const handleNextClick = () => {
     // Clear any previous errors
     setSaveError(null)
 
-    // Update local state
+    const questionId = currentQuestion.id
+    const answerId = tempAnswers[questionId]
+
+    if (!answerId) return // Should never happen as button is disabled when no answer selected
+
+    // Update permanent answers state
     const newAnswers = { ...answers, [questionId]: answerId }
     setAnswers(newAnswers)
 
@@ -518,7 +530,16 @@ export default function AssessmentPage() {
               </p>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-center pb-8">
+          <CardFooter className="flex justify-between pb-8">
+            <Button
+              variant="outline"
+              onClick={() => setShowResults(false)}
+              data-testid="back-to-assessment-button"
+            >
+              <ArrowLeftIcon className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+
             <Button
               size="lg"
               onClick={handleViewPlans}
@@ -555,8 +576,10 @@ export default function AssessmentPage() {
           <CardContent className="px-6 pt-2 pb-6">
             <RadioGroup
               className="space-y-3"
-              value={answers[currentQuestion.id] || ''}
-              onValueChange={(value) => handleAnswer(currentQuestion.id, value)}
+              value={tempAnswers[currentQuestion.id] || ''}
+              onValueChange={(value) =>
+                handleRadioSelection(currentQuestion.id, value)
+              }
               data-testid={`radio-group-${currentQuestion.id}`}
             >
               {currentQuestion.options.map((option) => (
@@ -597,19 +620,8 @@ export default function AssessmentPage() {
             </Button>
 
             <Button
-              onClick={() => {
-                if (answers[currentQuestion.id]) {
-                  if (currentQuestionIndex < ASSESSMENT_QUESTIONS.length - 1) {
-                    setCurrentQuestionIndex(currentQuestionIndex + 1)
-                  } else {
-                    const calculatedPlan = determineRecommendedPlan(answers)
-                    setRecommendedPlan(calculatedPlan)
-                    saveRecommendedPlan(calculatedPlan)
-                    setShowResults(true)
-                  }
-                }
-              }}
-              disabled={!answers[currentQuestion.id]}
+              onClick={handleNextClick}
+              disabled={!tempAnswers[currentQuestion.id]}
               data-testid="next-question-button"
             >
               {currentQuestionIndex < ASSESSMENT_QUESTIONS.length - 1
