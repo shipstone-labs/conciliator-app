@@ -116,7 +116,7 @@ export default function HowItWorksPage() {
                 </div>
               </div>
             </div>
-            <div className="md:w-14 flex items-center justify-center order-1 mb-4 md:mb-0">
+            <div className="md:w-14 flex items-center justify-center order-1 md:order-2 mb-4 md:mb-0">
               <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center z-10">
                 <span className="text-xl font-bold text-secondary-foreground">
                   2
@@ -129,8 +129,9 @@ export default function HowItWorksPage() {
               </h3>
               <p className="text-foreground/80 mb-4">
                 Share your ideas with potential partners, investors, or team
-                members under controlled conditions. Our NDA system creates
-                enforceable agreements with timestamped proof of access.
+                members under controlled conditions. Use our standard NDAs or
+                your own customized NDAs to enforce agreements with timestamped
+                proof of access.
               </p>
               <div className="flex flex-wrap gap-3">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary">

@@ -242,7 +242,7 @@ export default function PlansPage() {
                         .slice(0, 5)
                         .map(([key, value]) => (
                           <div key={key} className="flex items-start">
-                            <div className="mr-2 mt-0.5">
+                            <div className="mr-2 mt-0.5 w-10 flex justify-center">
                               {value === true ? (
                                 <CheckIcon
                                   className={`h-4 w-4 text-${plan.color}`}

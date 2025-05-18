@@ -34,28 +34,28 @@ const ASSESSMENT_QUESTIONS = [
     description: 'This helps us understand the nature of your IP assets.',
     options: [
       {
-        id: 'trade-secret',
-        label: 'Trade Secrets / Confidential Information',
-        description:
-          'Internal processes, formulas, or methods that give your business an advantage',
-      },
-      {
-        id: 'creative-work',
-        label: 'Creative Works',
-        description:
-          'Written content, designs, music, software code, or other creative assets',
-      },
-      {
         id: 'invention',
         label: 'Invention or Innovation',
         description:
           'New technologies or products that could potentially be patented',
       },
       {
+        id: 'trade-secret',
+        label: 'Trade Secrets / Confidential Information',
+        description:
+          'Internal processes, formulas, or methods that give your business an advantage',
+      },
+      {
         id: 'business-model',
         label: 'Business Model or Strategy',
         description:
           'Innovative business approaches, marketing plans, or strategic documents',
+      },
+      {
+        id: 'creative-work',
+        label: 'Creative Works',
+        description:
+          'Written content, designs, music, software code, or other creative assets',
       },
       {
         id: 'unsure',

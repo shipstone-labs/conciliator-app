@@ -149,19 +149,25 @@ const FAQ_CATEGORIES = [
         id: 'browser-compatibility',
         question: 'Which browsers are supported?',
         answer:
-          'SafeIdea works with all modern browsers including Chrome, Firefox, Safari, Edge, and Opera. We recommend keeping your browser updated to the latest version for optimal security and performance. Our platform also works on mobile browsers, though we recommend using our mobile apps (available for iOS and Android) for the best mobile experience.',
+          'SafeIdea works with modern browsers including Chrome and Safari. We recommend keeping your browser updated to the latest version for optimal security and performance. Our platform supports both desktop and mobile browsers.',
       },
       {
         id: 'api-integration',
         question: 'Do you offer API access?',
         answer:
-          "Yes, we offer API access for businesses that want to integrate SafeIdea's protection features into their existing workflows or applications. API access is available on the Complete plan and for Enterprise customers. Our REST API allows you to programmatically create timestamps, manage sharing, track access, and more.",
+          "Yes, we offer API access for businesses that want to integrate SafeIdea's protection features into their existing workflows or applications. API access is available for Enterprise customers. Contact us for details. Our REST API allows you to programmatically create timestamps, manage sharing, track access, and more.",
       },
       {
         id: 'export-data',
         question: 'Can I export my data?',
         answer:
           'Yes, you can export all your data at any time. This includes your documents, timestamp certificates, access logs, and sharing histories. We provide your data in industry-standard formats along with detailed documentation to ensure you always have access to your information, even if you decide to leave our service.',
+      },
+      {
+        id: 'ip-safety-over-time',
+        question: 'How do I know my IP will remain safe over time?',
+        answer:
+          "SafeIdea has partnered with Filecoin to establish immutable security for your intellectual property. Filecoin is the largest decentralized storage network in the world, with approximately 3.8 exabytes of capacity distributed across thousands of independent storage providers. This massive infrastructure ensures your IP is protected with the same technology trusted by prestigious institutions like the Internet Archive, Wikipedia, MIT, and the Smithsonian.\n\nOur Filecoin integration creates an unalterable blockchain record of your intellectual property, establishing verifiable proof of ownership and creation date. Unlike traditional storage solutions, Filecoin's decentralized approach eliminates single points of failure while providing cryptographic verification that your data remains unchanged over time. This gives you confidence that your IP provenance is permanently secured and legally defensible.",
       },
     ],
   },
