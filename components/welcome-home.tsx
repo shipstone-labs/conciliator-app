@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Logo } from './Logo'
 import { AuthButton } from './AuthButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SubscriptionBanner } from './SubscriptionBanner'
 
 // This is the logged-out version of the home page
 function WelcomeHome() {
@@ -20,7 +21,8 @@ function WelcomeHome() {
         />
       </div>
 
-      {/* Banner removed as requested */}
+      {/* Subscription banner at the top */}
+      <SubscriptionBanner />
 
       <div className="flex flex-col items-center min-h-screen pt-16">
         <div data-testid="welcome-logo">
@@ -62,7 +64,7 @@ function WelcomeHome() {
                 </div>
                 <div className="mt-4" data-testid="welcome-plan-link">
                   <Link
-                    href="/plan/home"
+                    href="/subscription/home"
                     className="px-6 py-3 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-md transition-all shadow-lg hover:shadow-secondary/30 text-center text-base inline-block"
                   >
                     Patent and Trade Secret Services
@@ -429,7 +431,7 @@ function WelcomeHome() {
                   />
                 </div>
                 <Link
-                  href="/list-ip"
+                  href="/subscription/home"
                   className="inline-flex items-center justify-center px-6 py-3 border border-border text-base font-medium rounded-md text-foreground bg-card hover:bg-card/80"
                   data-testid="welcome-explore"
                 >
