@@ -11,7 +11,7 @@ import { useStytchUser } from '@stytch/nextjs'
 import type { SubscriptionTier } from './FeatureAccess'
 
 // Storage for non-authenticated users (localStorage)
-const STORAGE_PREFIX = 'subscription_data_'
+const STORAGE_PREFIX = 'plan_funnel_'
 
 /**
  * Save funnel data to localStorage for non-authenticated users
@@ -52,6 +52,14 @@ export function clearLocalData(): void {
       .filter((key) => key.startsWith(STORAGE_PREFIX))
       .forEach((key) => localStorage.removeItem(key))
   }
+}
+
+/**
+ * Clear all funnel-related data from localStorage
+ * This is for backward compatibility with the funnel flow
+ */
+export function clearFunnelData(): void {
+  clearLocalData()
 }
 
 /**

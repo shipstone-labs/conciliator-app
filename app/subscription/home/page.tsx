@@ -43,7 +43,7 @@ export default function HomePage() {
           <Button
             size="lg"
             variant="outline"
-            onClick={() => router.push('/plan/how-it-works')}
+            onClick={() => router.push('/subscription/how-it-works')}
             data-testid="plan-secondary-cta"
           >
             Learn How It Works
@@ -210,7 +210,7 @@ const SERVICE_PLANS = [
     text: 'Encrypted storage with immutable timestamps that create provable documentation of your intellectual property.',
     icon: <CheckIcon className="w-6 h-6 text-primary" />,
     price: '$9/month',
-    link: '/plan/basic',
+    link: '/subscription/basic',
   },
   {
     id: 'secure',
@@ -219,7 +219,7 @@ const SERVICE_PLANS = [
     text: 'Share your IP with partners and investors while maintaining control through secure access protocols and NDA tracking.',
     icon: <Share2Icon className="w-6 h-6 text-primary" />,
     price: '$19/month',
-    link: '/plan/secure',
+    link: '/subscription/secure',
   },
   {
     id: 'complete',
@@ -228,7 +228,7 @@ const SERVICE_PLANS = [
     text: 'Active monitoring of the web for unauthorized use of your intellectual property with quarterly reports and alerts.',
     icon: <TargetIcon className="w-6 h-6 text-primary" />,
     price: '$29/month',
-    link: '/plan/complete',
+    link: '/subscription/complete',
   },
 ]
 
