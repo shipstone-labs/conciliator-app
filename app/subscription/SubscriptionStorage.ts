@@ -11,7 +11,7 @@ import { useStytchUser } from '@stytch/nextjs'
 import type { SubscriptionTier } from './FeatureAccess'
 
 // Storage for non-authenticated users (localStorage)
-const STORAGE_PREFIX = 'plan_funnel_'
+const STORAGE_PREFIX = 'subscription_data_'
 
 /**
  * Save funnel data to localStorage for non-authenticated users
@@ -20,7 +20,15 @@ const STORAGE_PREFIX = 'plan_funnel_'
  */
 export function saveLocalData<T>(key: string, data: T): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(`${STORAGE_PREFIX}${key}`, JSON.stringify(data))
+    const fullKey = `${STORAGE_PREFIX}${key}`
+    const dataStr = JSON.stringify(data)
+    console.log(`DEBUG-STORAGE: Saving data to ${fullKey}:`, dataStr)
+    localStorage.setItem(fullKey, dataStr)
+    
+    // Verify the data was actually saved
+    const savedData = localStorage.getItem(fullKey)
+    console.log(`DEBUG-STORAGE: Verification read from ${fullKey}:`, savedData)
+    console.log('DEBUG-STORAGE: Save successful:', savedData === dataStr)
   }
 }
 
@@ -33,8 +41,18 @@ export function saveLocalData<T>(key: string, data: T): void {
 export function getLocalData<T>(key: string, defaultValue: T): T {
   if (typeof window !== 'undefined') {
     try {
-      const item = localStorage.getItem(`${STORAGE_PREFIX}${key}`)
-      return item ? (JSON.parse(item) as T) : defaultValue
+      const fullKey = `${STORAGE_PREFIX}${key}`
+      console.log(`DEBUG-STORAGE: Reading data from ${fullKey}`)
+      const item = localStorage.getItem(fullKey)
+      console.log(`DEBUG-STORAGE: Raw data from ${fullKey}:`, item)
+      
+      if (item) {
+        const parsedData = JSON.parse(item) as T
+        console.log(`DEBUG-STORAGE: Parsed data from ${fullKey}:`, parsedData)
+        return parsedData
+      }
+      console.log(`DEBUG-STORAGE: No data found for ${fullKey}, using default:`, defaultValue)
+      return defaultValue
     } catch (e) {
       console.error('Error retrieving subscription data:', e)
       return defaultValue
@@ -82,14 +100,27 @@ export function trackFunnelPageVisit(page: string): void {
  * @param answer The selected answer
  */
 export function saveAssessmentAnswer(questionId: string, answer: string): void {
+  console.log(`DEBUG-ASSESSMENT: Saving answer for question ${questionId}:`, answer)
+  
   const currentAnswers = getLocalData<Record<string, string>>(
     'assessment_answers',
     {}
   )
-  saveLocalData('assessment_answers', {
+  console.log('DEBUG-ASSESSMENT: Current answers before update:', currentAnswers)
+  
+  const updatedAnswers = {
     ...currentAnswers,
     [questionId]: answer,
-  })
+  }
+  console.log('DEBUG-ASSESSMENT: Updated answers to save:', updatedAnswers)
+  
+  saveLocalData('assessment_answers', updatedAnswers)
+  
+  // Double-check the save by reading it back
+  const verifiedAnswers = getLocalData<Record<string, string>>('assessment_answers', {})
+  console.log('DEBUG-ASSESSMENT: Verified answers after save:', verifiedAnswers)
+  console.log(`DEBUG-ASSESSMENT: Answer save verification for ${questionId}:`, 
+              verifiedAnswers[questionId] === answer ? 'SUCCESS' : 'FAILED')
 }
 
 /**
