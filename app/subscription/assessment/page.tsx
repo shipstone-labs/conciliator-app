@@ -289,41 +289,8 @@ export default function AssessmentPage() {
   )
   const [showResults, setShowResults] = useState(false)
 
-  // Track page visit and debug localStorage
+  // Track page visit
   useEffect(() => {
-    // Debug localStorage state
-    if (typeof window !== 'undefined') {
-      console.log('=== DEBUG: ASSESSMENT PAGE STORAGE STATE ===')
-      
-      // Log all localStorage keys
-      const allKeys = Object.keys(localStorage)
-      console.log('All localStorage keys:', allKeys)
-      
-      // Log keys with subscription_data_ prefix
-      const subscriptionKeys = allKeys.filter(key => key.startsWith('subscription_data_'))
-      console.log('subscription_data_ keys:', subscriptionKeys)
-      
-      // Log keys with plan_funnel_ prefix
-      const planFunnelKeys = allKeys.filter(key => key.startsWith('plan_funnel_'))
-      console.log('plan_funnel_ keys:', planFunnelKeys)
-      
-      // Log assessment answers content
-      console.log('Current assessment_answers:', localStorage.getItem('subscription_data_assessment_answers'))
-      console.log('Old assessment_answers:', localStorage.getItem('plan_funnel_assessment_answers'))
-      
-      // Test localStorage write and read
-      try {
-        localStorage.setItem('assessment_debug_test', 'test_value')
-        const testValue = localStorage.getItem('assessment_debug_test')
-        console.log('localStorage test:', testValue === 'test_value' ? 'SUCCESS' : 'FAILED')
-        localStorage.removeItem('assessment_debug_test')
-      } catch (error) {
-        console.error('localStorage test error:', error)
-      }
-      
-      console.log('=== END DEBUG ===')
-    }
-    
     trackFunnelPageVisit('assessment')
   }, [])
 
@@ -332,32 +299,18 @@ export default function AssessmentPage() {
 
   // Save answer and navigate
   const handleAnswer = (questionId: string, answerId: string) => {
-    console.log('DEBUG-HANDLER: handleAnswer called with:', { questionId, answerId })
-    
     // Update local state
     const newAnswers = { ...answers, [questionId]: answerId }
-    console.log('DEBUG-HANDLER: Updating state with newAnswers:', newAnswers)
     setAnswers(newAnswers)
-    
-    // Add a hook to check if the state actually updated
-    setTimeout(() => {
-      console.log('DEBUG-HANDLER: State after update (async check):', answers)
-      console.log('DEBUG-HANDLER: Did state update?', 
-                  answers[questionId] === answerId ? 'YES' : 'NO - State update may be async')
-    }, 0)
 
     // Save to storage
-    console.log('DEBUG-HANDLER: Calling saveAssessmentAnswer')
     saveAssessmentAnswer(questionId, answerId)
 
     // Move to next question or show results
     if (currentQuestionIndex < ASSESSMENT_QUESTIONS.length - 1) {
-      console.log('DEBUG-HANDLER: Moving to next question:', currentQuestionIndex + 1)
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
-      console.log('DEBUG-HANDLER: All questions answered, showing results')
       const recommendedPlan = determineRecommendedPlan(newAnswers)
-      console.log('DEBUG-HANDLER: Recommended plan:', recommendedPlan)
       setRecommendedPlan(recommendedPlan)
       setShowResults(true)
     }
@@ -530,12 +483,7 @@ export default function AssessmentPage() {
             <RadioGroup
               className="space-y-3"
               value={answers[currentQuestion.id] || ''}
-              onValueChange={(value) => {
-                console.log('DEBUG-RADIO: onValueChange event fired with value:', value)
-                console.log('DEBUG-RADIO: current question ID:', currentQuestion.id)
-                console.log('DEBUG-RADIO: current answers state before update:', answers)
-                handleAnswer(currentQuestion.id, value)
-              }}
+              onValueChange={(value) => handleAnswer(currentQuestion.id, value)}
               data-testid={`radio-group-${currentQuestion.id}`}
             >
               {currentQuestion.options.map((option) => (
@@ -546,7 +494,6 @@ export default function AssessmentPage() {
                       id={`${currentQuestion.id}-${option.id}`}
                       className="mr-2"
                       data-testid={`option-${option.id}`}
-                      onClick={() => console.log(`DEBUG-OPTION: RadioGroupItem clicked: ${option.id}`)}
                     />
                   </div>
                   <div className="flex-1">
