@@ -6,6 +6,9 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useStytchUser } from '@stytch/nextjs'
+import { useRouter } from 'next/navigation'
+import { useUserSubscription } from '@/app/subscription/SubscriptionStorage'
+import { Badge } from '@/components/ui/badge'
 
 interface AccountModalProps {
   isOpen: boolean
@@ -13,7 +16,9 @@ interface AccountModalProps {
 }
 
 export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
+  const router = useRouter()
   const { user } = useStytchUser()
+  const { subscription, loading: subscriptionLoading } = useUserSubscription()
   const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -47,6 +52,48 @@ export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
     return 'Contact information not available'
   }
 
+  // Format the subscription tier for display
+  const formatSubscriptionTier = (tier: string) => {
+    switch (tier) {
+      case 'basic':
+        return 'Basic'
+      case 'secure':
+        return 'Secure'
+      case 'complete':
+        return 'Complete'
+      default:
+        return 'No Subscription'
+    }
+  }
+
+  // Format subscription status
+  const formatSubscriptionStatus = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'Active'
+      case 'cancelled':
+        return 'Cancelled'
+      case 'expired':
+        return 'Expired'
+      default:
+        return 'Unknown'
+    }
+  }
+
+  // Get badge color based on subscription tier
+  const getSubscriptionBadgeColor = (tier: string) => {
+    switch (tier) {
+      case 'basic':
+        return 'bg-primary/20 text-primary border-primary/30'
+      case 'secure':
+        return 'bg-secondary/20 text-secondary border-secondary/30'
+      case 'complete':
+        return 'bg-accent/20 text-accent border-accent/30'
+      default:
+        return 'bg-muted/20 text-muted-foreground border-muted/30'
+    }
+  }
+
   // Handle saving changes
   const handleSave = async () => {
     if (!user) {
@@ -76,6 +123,15 @@ export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
     }
   }
 
+  // Format date to human-readable format
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Account Settings">
       <div className="space-y-6 py-4">
@@ -93,6 +149,84 @@ export const AccountModal = ({ isOpen, onClose }: AccountModalProps) => {
             <AlertDescription>Changes saved successfully</AlertDescription>
           </Alert>
         )}
+
+        {/* Subscription Information Section */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <p className="text-sm font-medium text-foreground/90">
+              Subscription
+            </p>
+            <Button
+              variant="link"
+              className="h-auto p-0 text-primary"
+              onClick={() => {
+                onClose()
+                router.push('/subscription/home')
+              }}
+              data-testid="manage-subscription-link"
+            >
+              Manage Subscription
+            </Button>
+          </div>
+
+          <div className="p-3 bg-muted/30 rounded-md border border-border/40 space-y-3">
+            {subscriptionLoading ? (
+              <div className="animate-pulse h-5 bg-muted/50 rounded w-1/3" />
+            ) : subscription && subscription.tier !== 'none' ? (
+              <>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span>Plan:</span>
+                    <Badge
+                      className={getSubscriptionBadgeColor(subscription.tier)}
+                      data-testid="subscription-tier-badge"
+                    >
+                      {formatSubscriptionTier(subscription.tier)}
+                    </Badge>
+                  </div>
+                  <Badge
+                    variant={
+                      subscription.status === 'active' ? 'default' : 'outline'
+                    }
+                    className={
+                      subscription.status === 'active'
+                        ? 'bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30'
+                        : 'text-muted-foreground'
+                    }
+                    data-testid="subscription-status-badge"
+                  >
+                    {formatSubscriptionStatus(subscription.status)}
+                  </Badge>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <div>Started: {formatDate(subscription.startDate)}</div>
+                  {subscription.endDate && (
+                    <div>
+                      {subscription.status === 'cancelled'
+                        ? 'Access until'
+                        : 'Expires'}
+                      : {formatDate(subscription.endDate)}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <span>No active subscription</span>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    onClose()
+                    router.push('/subscription/home')
+                  }}
+                  data-testid="start-subscription-button"
+                >
+                  Start Subscription
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="space-y-2">
           <label

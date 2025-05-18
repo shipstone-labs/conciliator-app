@@ -12,11 +12,14 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import WelcomeHome from './welcome-home'
+import { SubscriptionBanner } from './SubscriptionBanner'
 
 // Logged in version of the home page
 function LoggedInHome() {
   return (
     <>
+      <SubscriptionBanner />
+
       <div className="flex flex-col items-center min-h-screen px-6 pt-12 pb-16">
         {/* Logo Section */}
         <div className="mb-8" data-testid="home-logo">
