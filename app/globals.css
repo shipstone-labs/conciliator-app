@@ -42,6 +42,15 @@
     /* Gradient background variables - cleaner gradient */
     --gradient-start: 220 14% 96%; /* Very light blue-gray */
     --gradient-end: 0 0% 100%; /* Pure white */
+
+    /* New heading gradient variables - more subtle for better readability */
+    --heading-gradient-from: 220 70% 50%; /* More muted blue */
+    --heading-gradient-to: 250 60% 55%; /* Subtle purple transition */
+
+    /* Text heading gradient variables - for improved readability */
+    --heading-gradient-from: 202 85% 35%; /* Deeper blue with better contrast */
+    --heading-gradient-to: 340 75% 45%; /* Deeper pink with better contrast */
+    --heading-solid: 222 47% 11%; /* Solid heading color for maximum readability */
   }
 
   .dark {
@@ -81,6 +90,15 @@
     /* Gradient background variables - matches original */
     --gradient-start: 203 47% 36%; /* #2B5B75 */
     --gradient-end: 240 10% 10%; /* #1A1B25 */
+
+    /* New heading gradient variables for dark mode - more readable */
+    --heading-gradient-from: 200 85% 70%; /* Brighter blue for dark backgrounds */
+    --heading-gradient-to: 250 75% 75%; /* Subtle purple transition for dark mode */
+
+    /* Text heading gradient variables - for improved readability */
+    --heading-gradient-from: 198 90% 72%; /* Brighter blue with better contrast */
+    --heading-gradient-to: 348 85% 82%; /* Softer pink with better contrast */
+    --heading-solid: 210 40% 98%; /* Solid heading color for maximum readability */
   }
 }
 
@@ -170,4 +188,33 @@
 
 .markdown-content table td {
   @apply p-2 border border-border;
+}
+
+/* Heading styles with improved readability */
+.heading-gradient-subtle {
+  @apply bg-gradient-to-r from-heading-from to-heading-to bg-clip-text text-transparent font-bold;
+}
+
+.heading-gradient-light {
+  @apply bg-gradient-to-r from-heading-from/90 to-heading-to/90 bg-clip-text text-transparent font-bold;
+}
+
+.heading-gradient-underline {
+  @apply text-heading font-bold relative;
+  background-image: linear-gradient(
+    to right,
+    hsl(var(--heading-gradient-from) / 0.3),
+    hsl(var(--heading-gradient-to) / 0.3)
+  );
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 3px;
+}
+
+.heading-solid {
+  @apply text-heading font-bold;
+}
+
+.heading-solid-accent {
+  @apply text-primary font-bold;
 }

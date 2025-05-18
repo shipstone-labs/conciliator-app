@@ -26,6 +26,11 @@ const config = {
         foreground: 'hsl(var(--foreground))',
         'gradient-from': 'hsl(var(--gradient-start))',
         'gradient-to': 'hsl(var(--gradient-end))',
+        'heading-gradient-from': 'hsl(var(--heading-gradient-from))',
+        'heading-gradient-to': 'hsl(var(--heading-gradient-to))',
+        'heading-from': 'hsl(var(--heading-gradient-from))',
+        'heading-to': 'hsl(var(--heading-gradient-to))',
+        heading: 'hsl(var(--heading-solid))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',

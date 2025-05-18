@@ -34,7 +34,7 @@ export default function HowItWorksPage() {
     >
       {/* Introduction Section */}
       <section className="w-full max-w-4xl mx-auto text-center px-4 py-12">
-        <h1 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h1 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-heading-gradient-from to-heading-gradient-to bg-clip-text text-transparent">
           How SafeIdea Works For You
         </h1>
         <p className="text-lg text-foreground/80 max-w-3xl mx-auto mb-8">
@@ -46,7 +46,7 @@ export default function HowItWorksPage() {
 
       {/* Process Overview Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
-        <h2 className="text-2xl font-bold text-center mb-10 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h2 className="text-2xl font-bold text-center mb-10 bg-gradient-to-r from-heading-gradient-from to-heading-gradient-to bg-clip-text text-transparent">
           The Protection Process
         </h2>
 

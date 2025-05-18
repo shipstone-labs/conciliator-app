@@ -24,7 +24,7 @@ export default function HomePage() {
     <div className="flex flex-col items-center">
       {/* Hero Section */}
       <section className="w-full max-w-4xl mx-auto text-center px-4 py-12 md:py-20">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl heading-solid-accent mb-4">
           Because Your Ideas Are Worth Protecting
         </h1>
         <p className="text-lg md:text-xl text-foreground/80 max-w-3xl mx-auto mb-8">
@@ -53,7 +53,7 @@ export default function HomePage() {
 
       {/* Key Benefits Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h2 className="text-2xl md:text-3xl text-center mb-12 heading-gradient-subtle">
           Your IP Protection Should Be As Innovative As Your Ideas
         </h2>
 
@@ -80,7 +80,7 @@ export default function HomePage() {
 
       {/* Services Overview Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h2 className="text-2xl md:text-3xl text-center mb-12 heading-gradient-underline">
           Complete Protection Throughout Your Invention Journey
         </h2>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
 
       {/* Testimonials Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h2 className="text-2xl md:text-3xl text-center mb-12 heading-gradient-light">
           Trusted by Inventors and Creators
         </h2>
 
@@ -156,7 +156,7 @@ export default function HomePage() {
 
       {/* Final CTA Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h2 className="text-2xl md:text-3xl mb-4 heading-solid">
           Ready to Protect Your Innovative Ideas?
         </h2>
 

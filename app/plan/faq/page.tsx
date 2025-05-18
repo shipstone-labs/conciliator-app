@@ -218,7 +218,7 @@ export default function FAQPage() {
     <div className="flex flex-col items-center" data-testid="faq-container">
       {/* Header Section */}
       <section className="w-full max-w-4xl mx-auto text-center px-4 py-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-heading-gradient-from to-heading-gradient-to bg-clip-text text-transparent">
           Frequently Asked Questions
         </h1>
         <p className="text-lg text-foreground/80 max-w-2xl mx-auto mb-8">

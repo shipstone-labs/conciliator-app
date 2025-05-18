@@ -50,7 +50,7 @@ export default function PlanLayout({
 
           {showProgress && (
             <>
-              <h1 className="mt-6 text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h1 className="mt-6 text-2xl font-bold text-center bg-gradient-to-r from-heading-gradient-from to-heading-gradient-to bg-clip-text text-transparent">
                 IP Protection Plans
               </h1>
 
