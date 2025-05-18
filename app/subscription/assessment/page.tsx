@@ -328,7 +328,7 @@ export default function AssessmentPage() {
 
   // Proceed to plans page
   const handleViewPlans = () => {
-    router.push('/subscription/plans')
+    router.push('/plan/plans')
   }
 
   return (
