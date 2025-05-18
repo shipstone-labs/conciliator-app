@@ -60,6 +60,7 @@ This document tracks the current state of development with focus on validated fu
    - Added shared layout with progress indicator
    - Implemented state management with PlanStorage
    - Added step navigation with FunnelSteps
+   - Added "Patent and Trade Secret Services" button to main welcome page, linking to the marketing funnel
    - Verified build successful for all paths
    - **STATUS**: Ready for PR, pending final review
 
