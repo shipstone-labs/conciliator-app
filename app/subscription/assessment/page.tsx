@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { trackFunnelPageVisit } from '../SubscriptionStorage'
 import {
-  trackFunnelPageVisit,
-  saveAssessmentAnswer,
-  getAssessmentAnswers,
-  setRecommendedPlan,
-} from '../SubscriptionStorage'
+  checkStorageAvailability,
+  saveAnswer,
+  getAnswers,
+  saveRecommendedPlan,
+  type StorageStatus,
+  getRecommendedPlan,
+} from '../LocalStorageService'
 import {
   Card,
   CardContent,
@@ -18,6 +21,7 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import {
   ArrowRightIcon,
   ArrowLeftIcon,
@@ -284,14 +288,51 @@ function determineRecommendedPlan(answers: Record<string, string>): string {
 export default function AssessmentPage() {
   const router = useRouter()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, string>>(
-    getAssessmentAnswers()
-  )
+  const [answers, setAnswers] = useState<Record<string, string>>({})
   const [showResults, setShowResults] = useState(false)
+  const [recommendedPlan, setRecommendedPlan] = useState('')
 
-  // Track page visit
+  // Storage status
+  const [storageStatus, setStorageStatus] = useState<StorageStatus>('available')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  // Check storage and load data on mount
   useEffect(() => {
+    // Track page visit
     trackFunnelPageVisit('assessment')
+
+    // Check storage availability
+    const status = checkStorageAvailability()
+    setStorageStatus(status)
+
+    if (status !== 'available') {
+      setLoading(false)
+      setError('Local storage is not available. Your progress cannot be saved.')
+      return
+    }
+
+    // Load saved answers
+    const { data, success } = getAnswers()
+    if (!success) {
+      setError(
+        'Unable to load your previous answers. You may need to start over.'
+      )
+    } else {
+      setAnswers(data)
+
+      // Check if assessment was completed
+      if (Object.keys(data).length === ASSESSMENT_QUESTIONS.length) {
+        const { data: savedPlan } = getRecommendedPlan()
+        if (savedPlan) {
+          setRecommendedPlan(savedPlan)
+          setShowResults(true)
+        }
+      }
+    }
+
+    setLoading(false)
   }, [])
 
   // Current question
@@ -299,19 +340,28 @@ export default function AssessmentPage() {
 
   // Save answer and navigate
   const handleAnswer = (questionId: string, answerId: string) => {
+    // Clear any previous errors
+    setSaveError(null)
+
     // Update local state
     const newAnswers = { ...answers, [questionId]: answerId }
     setAnswers(newAnswers)
 
     // Save to storage
-    saveAssessmentAnswer(questionId, answerId)
+    const { success } = saveAnswer(questionId, answerId)
+    if (!success) {
+      setSaveError(
+        'Unable to save your answer. You may continue, but your progress might be lost if you leave this page.'
+      )
+    }
 
     // Move to next question or show results
     if (currentQuestionIndex < ASSESSMENT_QUESTIONS.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
-      const recommendedPlan = determineRecommendedPlan(newAnswers)
-      setRecommendedPlan(recommendedPlan)
+      const calculatedPlan = determineRecommendedPlan(newAnswers)
+      setRecommendedPlan(calculatedPlan)
+      saveRecommendedPlan(calculatedPlan)
       setShowResults(true)
     }
   }
@@ -331,11 +381,50 @@ export default function AssessmentPage() {
     router.push('/subscription/plans')
   }
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        <p className="mt-4 text-foreground/70">Loading your assessment...</p>
+      </div>
+    )
+  }
+
   return (
     <div
       className="flex flex-col items-center"
       data-testid="assessment-container"
     >
+      {/* Storage status alerts */}
+      {storageStatus !== 'available' && (
+        <Alert variant="destructive" className="mb-4 max-w-3xl mx-auto">
+          <AlertTitle>Storage Error</AlertTitle>
+          <AlertDescription>
+            Local storage is not available. Your progress in this assessment
+            cannot be saved. This may be due to private browsing mode or browser
+            settings.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {error && (
+        <Alert variant="destructive" className="mb-4 max-w-3xl mx-auto">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {saveError && (
+        <Alert
+          variant="default"
+          className="mb-4 max-w-3xl mx-auto border-yellow-400/50"
+        >
+          <AlertTitle>Warning</AlertTitle>
+          <AlertDescription>{saveError}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Header Section */}
       <section className="w-full max-w-3xl mx-auto text-center px-4 py-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-heading-gradient-from to-heading-gradient-to bg-clip-text text-transparent">
@@ -367,8 +456,8 @@ export default function AssessmentPage() {
                 Based on your needs, we recommend:
               </h3>
 
-              {answers.budget === 'minimal' ||
-              getAssessmentAnswers().budget === 'minimal' ? (
+              {/* Display the recommendation based on the calculated plan */}
+              {recommendedPlan === 'basic' ? (
                 <div className="text-center mb-6">
                   <div className="text-2xl font-bold text-primary mb-1">
                     Basic Plan
@@ -377,9 +466,7 @@ export default function AssessmentPage() {
                     Essential protection for your ideas
                   </div>
                 </div>
-              ) : answers.budget === 'moderate' ||
-                answers.sharing === 'investor-sharing' ||
-                answers.concern === 'nda-enforcement' ? (
+              ) : recommendedPlan === 'secure' ? (
                 <div className="text-center mb-6">
                   <div className="text-2xl font-bold text-secondary mb-1">
                     Secure Plan
@@ -404,39 +491,25 @@ export default function AssessmentPage() {
                   This recommendation is based on:
                 </h4>
                 <ul className="space-y-2">
-                  {answers.type && (
-                    <li className="flex items-start">
-                      <div className="mt-0.5 mr-2 text-primary">•</div>
-                      <div>
-                        <span className="font-medium">IP Type:</span>{' '}
-                        {ASSESSMENT_QUESTIONS[0].options.find(
-                          (o) => o.id === answers.type
-                        )?.label || 'Not specified'}
-                      </div>
-                    </li>
-                  )}
-                  {answers.sharing && (
-                    <li className="flex items-start">
-                      <div className="mt-0.5 mr-2 text-primary">•</div>
-                      <div>
-                        <span className="font-medium">Sharing needs:</span>{' '}
-                        {ASSESSMENT_QUESTIONS[1].options.find(
-                          (o) => o.id === answers.sharing
-                        )?.label || 'Not specified'}
-                      </div>
-                    </li>
-                  )}
-                  {answers.concern && (
-                    <li className="flex items-start">
-                      <div className="mt-0.5 mr-2 text-primary">•</div>
-                      <div>
-                        <span className="font-medium">Main concern:</span>{' '}
-                        {ASSESSMENT_QUESTIONS[2].options.find(
-                          (o) => o.id === answers.concern
-                        )?.label || 'Not specified'}
-                      </div>
-                    </li>
-                  )}
+                  {ASSESSMENT_QUESTIONS.map((question) => {
+                    const answerId = answers[question.id]
+                    if (!answerId) return null
+
+                    const option = question.options.find(
+                      (o) => o.id === answerId
+                    )
+                    return (
+                      <li key={question.id} className="flex items-start">
+                        <div className="mt-0.5 mr-2 text-primary">•</div>
+                        <div>
+                          <span className="font-medium">
+                            {question.title.split('?')[0]}:
+                          </span>{' '}
+                          {option?.label || 'Not specified'}
+                        </div>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
 
@@ -529,8 +602,9 @@ export default function AssessmentPage() {
                   if (currentQuestionIndex < ASSESSMENT_QUESTIONS.length - 1) {
                     setCurrentQuestionIndex(currentQuestionIndex + 1)
                   } else {
-                    const recommendedPlan = determineRecommendedPlan(answers)
-                    setRecommendedPlan(recommendedPlan)
+                    const calculatedPlan = determineRecommendedPlan(answers)
+                    setRecommendedPlan(calculatedPlan)
+                    saveRecommendedPlan(calculatedPlan)
                     setShowResults(true)
                   }
                 }
