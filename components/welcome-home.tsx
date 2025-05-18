@@ -60,6 +60,14 @@ function WelcomeHome() {
                     Learn More
                   </Link>
                 </div>
+                <div className="mt-4" data-testid="welcome-plan-link">
+                  <Link
+                    href="/plan/home"
+                    className="px-6 py-3 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-md transition-all shadow-lg hover:shadow-secondary/30 text-center text-base inline-block"
+                  >
+                    Patent and Trade Secret Services
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
