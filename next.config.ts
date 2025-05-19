@@ -9,6 +9,22 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  redirects: async () => {
+    return [
+      // Redirect root plan path
+      {
+        source: '/plan',
+        destination: '/subscription',
+        permanent: true,
+      },
+      // Redirect all plan subpaths
+      {
+        source: '/plan/:path*',
+        destination: '/subscription/:path*',
+        permanent: true,
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {
