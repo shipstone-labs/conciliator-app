@@ -1,0 +1,23 @@
+# Node modules
+node_modules/
+
+# Test reports
+reports/
+*.html
+!report-template.html
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Playwright browser data
+playwright-browsers/
+
+# Environment variables
+.env
+.env.local

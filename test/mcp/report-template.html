@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessment Test Report</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      line-height: 1.6; 
+      color: #333; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px; 
+    }
+    h1 { 
+      color: #2c3e50; 
+      border-bottom: 2px solid #eee; 
+      padding-bottom: 10px; 
+    }
+    h2 { 
+      color: #3498db; 
+      margin-top: 30px; 
+    }
+    .success { 
+      color: #27ae60; 
+      font-weight: bold; 
+    }
+    .failure { 
+      color: #e74c3c; 
+      font-weight: bold; 
+    }
+    .screenshot { 
+      max-width: 800px; 
+      border: 1px solid #ddd; 
+      margin: 10px 0; 
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+    }
+    pre { 
+      background: #f8f8f8; 
+      padding: 10px; 
+      border-radius: 4px; 
+      overflow-x: auto; 
+    }
+    .step { 
+      margin-bottom: 30px; 
+      border: 1px solid #eee; 
+      padding: 15px; 
+      border-radius: 5px; 
+    }
+    .step-header { 
+      display: flex; 
+      justify-content: space-between; 
+    }
+    .step-name { 
+      font-weight: bold; 
+      font-size: 1.2em; 
+    }
+    .step-status { 
+      font-weight: bold; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Assessment Form Test Report</h1>
+  <p><strong>Test Date:</strong> <span id="test-date">--</span></p>
+  <p><strong>Environment:</strong> <span id="test-environment">--</span></p>
+  <p><strong>Duration:</strong> <span id="test-duration">--</span></p>
+  <p><strong>Status:</strong> <span id="test-status" class="success">--</span></p>
+  
+  <h2>Summary</h2>
+  <p id="test-summary">Test results summary will appear here.</p>
+  
+  <div id="errors-section" style="display: none;">
+    <h2>Errors</h2>
+    <ul id="error-list"></ul>
+  </div>
+  
+  <h2>Local Storage Analysis</h2>
+  <ul>
+    <li><strong>Assessment Answers:</strong> <span id="storage-answers">--</span></li>
+    <li><strong>Recommended Plan:</strong> <span id="storage-plan">--</span></li>
+    <li><strong>Visited Pages:</strong> <span id="storage-pages">--</span></li>
+  </ul>
+  
+  <div id="storage-issues" style="display: none;">
+    <p><strong>Issues:</strong></p>
+    <ul id="storage-issue-list"></ul>
+  </div>
+  
+  <h2>Test Steps</h2>
+  <div id="steps-container">
+    <!-- Steps will be inserted here -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-name">Example Step</div>
+        <div class="step-status success">SUCCESS</div>
+      </div>
+      <p>This is a placeholder. Actual test steps will replace this.</p>
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" alt="Placeholder Screenshot" class="screenshot">
+    </div>
+  </div>
+  
+  <h2>Raw Test Data</h2>
+  <pre id="raw-data">{ "status": "placeholder" }</pre>
+
+  <script>
+    // This script section will be replaced with actual test results
+    document.getElementById('test-date').textContent = 'PLACEHOLDER';
+    document.getElementById('test-environment').textContent = 'PLACEHOLDER';
+    document.getElementById('test-duration').textContent = 'PLACEHOLDER';
+    document.getElementById('test-status').textContent = 'PLACEHOLDER';
+    document.getElementById('test-summary').textContent = 'PLACEHOLDER';
+  </script>
+</body>
+</html>
