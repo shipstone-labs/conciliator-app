@@ -101,14 +101,19 @@ const DetailIP = ({
           if (error) {
             // Show an error to your customer and
             // inspect your Cloud Function logs in the Firebase console.
-            alert(`An error occured: ${error.message}`)
+            console.error(
+              'DetailIP: Error during checkout for document ID:',
+              docId,
+              error
+            )
+            alert(`An error occurred during checkout: ${error.message}`)
           }
           if (url) {
             // We have a Stripe Checkout URL, let's redirect.
             window.location.assign(url)
           }
         },
-        handleError(docRef)
+        handleError(docRef, 'processing checkout for')
       )
     },
     [user?.user_id, docId, ipDoc, sessionSigs, fbUser]
@@ -131,14 +136,16 @@ const DetailIP = ({
         isViewLoading.current = true
         const url = cidAsURL(ipDoc.encrypted.cid)
         if (!url) {
-          console.error('Invalid CID URL')
+          console.error('DetailIP: Invalid CID URL for document ID:', docId)
           return
         }
 
         const arrayData = url
           ? await fetch(url).then((res) => {
               if (!res.ok) {
-                throw new Error('Failed to fetch encrypted data')
+                throw new Error(
+                  `Failed to fetch encrypted data for document ID: ${docId}`
+                )
               }
               return res.arrayBuffer()
             })
@@ -151,24 +158,28 @@ const DetailIP = ({
         }
         try {
           if (!arrayData) {
-            throw new Error('No data')
+            throw new Error(`No encrypted data found for document ID: ${docId}`)
           }
           const content = await cbor.decodeAll(new Uint8Array(arrayData))
           const [tag, network] = content
           if (!tag) {
-            throw new Error('No tag')
+            throw new Error(`Missing encryption tag for document ID: ${docId}`)
           }
           if (tag !== 'LIT-ENCRYPTED') {
-            throw new Error('Invalid tag')
+            throw new Error(`Invalid encryption tag for document ID: ${docId}`)
           }
           if (content.length !== 8 && content.length !== 7) {
-            throw new Error('Invalid content length')
+            throw new Error(
+              `Invalid encrypted content length for document ID: ${docId}`
+            )
           }
           if (
             content.length === 8 &&
             network !== 'filecoinCalibrationTestnet'
           ) {
-            throw new Error('Invalid network')
+            throw new Error(
+              `Invalid network for encryption content for document ID: ${docId}`
+            )
           }
           const [
             dataToEncryptHash,
@@ -204,7 +215,11 @@ const DetailIP = ({
           capacityDelegationAuthSig,
         } as unknown as Parameters<typeof litClient.decrypt>[0]
         const decrypted = await litClient.decrypt(request).catch((error) => {
-          console.error('Error decrypting data:', error)
+          console.error(
+            'DetailIP: Error decrypting data for document ID:',
+            docId,
+            error
+          )
           // Too bad, but don't retry.
           return null
         })

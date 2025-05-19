@@ -281,8 +281,13 @@ export default function ChatUI({
       try {
         // Tag this question as coming from the Lilypad module (AI search)
         await onSend(question, 'lilypad')
-      } catch {
+      } catch (error) {
         // Force stop auto-discovery completely on API error
+        console.error(
+          'Chat: Error sending auto-discovery question:',
+          question,
+          error
+        )
         isAutoDiscoveryActive.current = false
         setAutoCompleting(false)
         if (isStopping) {
@@ -443,13 +448,18 @@ export default function ChatUI({
         const result = await onSave(event)
 
         if (!result) {
-          alert('Failed to save the snapshot.')
+          console.error('Chat: Failed to save conversation snapshot')
+          alert('Failed to save the snapshot. Please try again later.')
           return
         }
 
         const { cid } = result
 
         if (downloads.find((file) => file.title === cid)) {
+          console.warn(
+            'Chat: Attempted to save duplicate snapshot with CID:',
+            cid
+          )
           alert('This snapshot has already been saved.')
           return
         }

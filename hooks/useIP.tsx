@@ -37,11 +37,12 @@ import { useSession } from '@/components/AuthLayout'
 import { useDebounce } from 'use-debounce'
 
 export function handleError(
-  docRef: DocumentReference | CollectionReference | string
+  docRef: DocumentReference | CollectionReference | string,
+  operation = 'fetching'
 ): (error: Error) => void {
   return (error) => {
-    console.warn(
-      'Error fetching document:',
+    console.error(
+      `Error ${operation} document:`,
       typeof docRef === 'string' ? docRef : docRef.path,
       error
     )
@@ -237,7 +238,9 @@ export function useIPs({
     qry = query(qry, orderBy(_orderBy, _orderDir))
     const _startAfter = pages[_page]
     if (!_startAfter && _page > 1) {
-      console.error('Last page')
+      console.error(
+        `useIPs: Cannot navigate to page ${_page} - beyond last available page`
+      )
       return
     }
     if (_startAfter) {

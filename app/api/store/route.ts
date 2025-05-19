@@ -283,7 +283,11 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
         }
       })
       .catch((error: unknown) => {
-        console.error('Errornect generating image:', error)
+        console.error(
+          'API store: Error generating image for document:',
+          name,
+          error
+        )
       })
     const now = new Date()
     const data: IPDocJSON = clean({
@@ -406,9 +410,15 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    console.error(error)
+    console.error('API store: Error storing document:', error)
     return new NextResponse(
-      JSON.stringify({ error: 'Internal Server Error' }),
+      JSON.stringify({
+        success: false,
+        error: {
+          message: 'Internal Server Error',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        },
+      }),
       {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

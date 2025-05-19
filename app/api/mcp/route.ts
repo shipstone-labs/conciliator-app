@@ -530,7 +530,7 @@ export const POST = withAPITracing(async (req: NextRequest) => {
         )
     }
   } catch (error) {
-    console.error('MCP API error:', error)
+    console.error('MCP API: Parse error in processing request:', error)
 
     // Handle parse errors (invalid JSON)
     return NextResponse.json(

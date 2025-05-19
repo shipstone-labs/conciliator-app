@@ -36,7 +36,11 @@ export function getLocalData<T>(key: string, defaultValue: T): T {
       const item = localStorage.getItem(`${STORAGE_PREFIX}${key}`)
       return item ? (JSON.parse(item) as T) : defaultValue
     } catch (e) {
-      console.error('Error retrieving subscription data:', e)
+      console.error(
+        'SubscriptionStorage: Error retrieving local subscription data for key:',
+        key,
+        e
+      )
       return defaultValue
     }
   }
@@ -155,7 +159,11 @@ export async function getUserSubscription(userId: string): Promise<{
     // No subscription found for user
     return null
   } catch (error) {
-    console.error('Error getting user subscription:', error)
+    console.error(
+      'SubscriptionStorage: Error getting user subscription for userId:',
+      userId,
+      error
+    )
     return null
   }
 }
@@ -194,7 +202,11 @@ export async function setUserSubscription(
 
     return true
   } catch (error) {
-    console.error('Error setting user subscription:', error)
+    console.error(
+      'SubscriptionStorage: Error setting user subscription for userId:',
+      userId,
+      error
+    )
     return false
   }
 }
