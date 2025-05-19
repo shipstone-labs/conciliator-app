@@ -44,6 +44,9 @@ next-env.d.ts
 # claude assistant files
 CLAUDE.md
 working-together.md
+safeidea-current.md
+ERROR_HANDLING_SPEC.md
+MCP_TESTING_PLAN.md
 .dev.vars
 /conciliator-*.json
 !/.husky
