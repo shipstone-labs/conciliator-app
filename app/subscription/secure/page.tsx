@@ -36,12 +36,14 @@ export default function SecurePlanPage() {
     >
       {/* Hero Section */}
       <section className="w-full max-w-4xl mx-auto text-center px-4 py-12">
-        <div className="inline-flex items-center justify-center p-3 rounded-full bg-secondary/10 mb-6">
-          <Share2Icon className="w-6 h-6 text-secondary" />
+        <div className="flex flex-col items-center">
+          <div className="inline-flex items-center justify-center p-3 rounded-full bg-secondary/10 mb-4">
+            <Share2Icon className="w-6 h-6 text-secondary" />
+          </div>
+          <div className="inline-flex items-center px-3 py-1 bg-secondary text-secondary-foreground text-sm font-medium rounded-full mb-4">
+            Most Popular
+          </div>
         </div>
-        <span className="inline-flex items-center px-3 py-1 bg-secondary text-secondary-foreground text-sm font-medium rounded-full mb-4">
-          Most Popular
-        </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
           Secure IP Protection Plan
         </h1>

@@ -206,9 +206,9 @@
     hsl(var(--heading-gradient-from) / 0.3),
     hsl(var(--heading-gradient-to) / 0.3)
   );
-  background-position: 0 100%;
+  background-position: 0 calc(100% + 4px);
   background-repeat: no-repeat;
-  background-size: 100% 3px;
+  background-size: 100% 2px;
 }
 
 .heading-solid {

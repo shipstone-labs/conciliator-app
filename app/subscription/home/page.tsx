@@ -80,7 +80,7 @@ export default function HomePage() {
 
       {/* Services Overview Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl text-center mb-12 heading-gradient-underline">
+        <h2 className="text-2xl md:text-3xl text-center mb-12 heading-gradient-subtle">
           Complete Protection Throughout Your Invention Journey
         </h2>
 
