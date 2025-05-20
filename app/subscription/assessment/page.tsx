@@ -471,7 +471,10 @@ export default function AssessmentPage() {
               {/* Display the recommendation based on the calculated plan */}
               {recommendedPlan === 'basic' ? (
                 <div className="text-center mb-6">
-                  <div className="text-2xl font-bold text-primary mb-1">
+                  <div
+                    className="text-2xl font-bold text-primary mb-1"
+                    data-testid="assessment-recommended-plan"
+                  >
                     Basic Plan
                   </div>
                   <div className="text-foreground/80">
@@ -480,7 +483,10 @@ export default function AssessmentPage() {
                 </div>
               ) : recommendedPlan === 'secure' ? (
                 <div className="text-center mb-6">
-                  <div className="text-2xl font-bold text-secondary mb-1">
+                  <div
+                    className="text-2xl font-bold text-secondary mb-1"
+                    data-testid="assessment-recommended-plan"
+                  >
                     Secure Plan
                   </div>
                   <div className="text-foreground/80">
@@ -489,7 +495,10 @@ export default function AssessmentPage() {
                 </div>
               ) : (
                 <div className="text-center mb-6">
-                  <div className="text-2xl font-bold text-accent mb-1">
+                  <div
+                    className="text-2xl font-bold text-accent mb-1"
+                    data-testid="assessment-recommended-plan"
+                  >
                     Complete Plan
                   </div>
                   <div className="text-foreground/80">
@@ -558,14 +567,20 @@ export default function AssessmentPage() {
         >
           <CardHeader className="pb-2">
             {/* Progress indicator */}
-            <div className="w-full bg-muted/50 h-2 rounded-full mb-6 overflow-hidden">
+            <div
+              className="w-full bg-muted/50 h-2 rounded-full mb-6 overflow-hidden"
+              data-testid="assessment-progress-bar"
+            >
               <div
                 className="bg-primary h-full rounded-full"
                 style={{ width: `${progress}%` }}
               />
             </div>
 
-            <CardTitle className="text-xl md:text-2xl">
+            <CardTitle
+              className="text-xl md:text-2xl"
+              data-testid={`assessment-question-${currentQuestion.id}`}
+            >
               {currentQuestion.title}
             </CardTitle>
             <p className="text-foreground/80 mt-2">
