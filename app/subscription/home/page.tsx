@@ -44,7 +44,7 @@ export default function HomePage() {
             size="lg"
             variant="outline"
             onClick={() => router.push('/subscription/how-it-works')}
-            data-testid="plan-secondary-cta"
+            data-testid="welcome-how-it-works-link"
           >
             Learn How It Works
           </Button>

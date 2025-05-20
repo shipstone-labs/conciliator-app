@@ -307,6 +307,120 @@
           }
         ],
         "actions": ["login", "signup", "scrollToLearnMore", "joinNow", "getStarted", "explore"]
+      },
+      "subscriptionFlow": {
+        "selector": "[data-testid='how-it-works-container'], [data-testid='assessment-container']",
+        "elements": [
+          {
+            "id": "howItWorksContainer",
+            "selector": "[data-testid='how-it-works-container']",
+            "type": "div",
+            "description": "How it works page container"
+          },
+          {
+            "id": "welcomeHowItWorksLink",
+            "selector": "[data-testid='welcome-how-it-works-link']", 
+            "type": "link",
+            "description": "Learn how it works link on homepage"
+          },
+          {
+            "id": "subscriptionAssessmentButton",
+            "selector": "[data-testid='subscription-assessment-button']",
+            "type": "button",
+            "description": "Take the assessment button on how it works page"
+          },
+          {
+            "id": "subscriptionProtectionProcess",
+            "selector": "[data-testid='subscription-protection-process']",
+            "type": "section",
+            "description": "Protection process section"
+          },
+          {
+            "id": "subscriptionKeyFeatures",
+            "selector": "[data-testid='subscription-key-features']",
+            "type": "section",
+            "description": "Key features section"
+          },
+          {
+            "id": "subscriptionFaq",
+            "selector": "[data-testid='subscription-faq']",
+            "type": "section",
+            "description": "Frequently asked questions section"
+          },
+          {
+            "id": "assessmentContainer",
+            "selector": "[data-testid='assessment-container']",
+            "type": "div",
+            "description": "Assessment page container"
+          },
+          {
+            "id": "assessmentProgressBar",
+            "selector": "[data-testid='assessment-progress-bar']",
+            "type": "div",
+            "description": "Assessment progress indicator"
+          },
+          {
+            "id": "assessmentQuestionType",
+            "selector": "[data-testid='assessment-question-type']",
+            "type": "div",
+            "description": "Question about intellectual property type"
+          },
+          {
+            "id": "assessmentQuestionSharing",
+            "selector": "[data-testid='assessment-question-sharing']",
+            "type": "div",
+            "description": "Question about sharing requirements"
+          },
+          {
+            "id": "assessmentQuestionConcern",
+            "selector": "[data-testid='assessment-question-concern']",
+            "type": "div",
+            "description": "Question about biggest concern"
+          },
+          {
+            "id": "assessmentQuestionBudget",
+            "selector": "[data-testid='assessment-question-budget']",
+            "type": "div",
+            "description": "Question about budget"
+          },
+          {
+            "id": "assessmentQuestionTimeline",
+            "selector": "[data-testid='assessment-question-timeline']",
+            "type": "div",
+            "description": "Question about timeline"
+          },
+          {
+            "id": "assessmentNextButton",
+            "selector": "[data-testid='next-question-button']",
+            "type": "button",
+            "description": "Next question button"
+          },
+          {
+            "id": "assessmentPrevButton",
+            "selector": "[data-testid='prev-question-button']",
+            "type": "button",
+            "description": "Previous question button"
+          },
+          {
+            "id": "assessmentResults",
+            "selector": "[data-testid='assessment-results']",
+            "type": "div",
+            "description": "Assessment results container"
+          },
+          {
+            "id": "assessmentRecommendedPlan",
+            "selector": "[data-testid='assessment-recommended-plan']",
+            "type": "div",
+            "description": "Recommended plan name"
+          },
+          {
+            "id": "assessmentViewPlansButton",
+            "selector": "[data-testid='view-plans-button']",
+            "type": "button",
+            "description": "View all plans button"
+          }
+        ],
+        "actions": ["startAssessment", "answerQuestions", "viewResults", "browseAllPlans"]
       }
     }
   }

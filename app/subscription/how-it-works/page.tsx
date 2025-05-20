@@ -45,7 +45,10 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Process Overview Section */}
-      <section className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <section
+        className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12"
+        data-testid="subscription-protection-process"
+      >
         <h2 className="text-2xl font-bold text-center mb-10 bg-gradient-to-r from-heading-gradient-from to-heading-gradient-to bg-clip-text text-transparent">
           The Protection Process
         </h2>
@@ -196,7 +199,10 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Key Features Section */}
-      <section className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12 bg-card/30 border-y border-border">
+      <section
+        className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12 bg-card/30 border-y border-border"
+        data-testid="subscription-key-features"
+      >
         <h2 className="text-2xl font-bold text-center mb-10 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Key Protection Features
         </h2>
@@ -294,7 +300,10 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Common Questions */}
-      <section className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <section
+        className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12"
+        data-testid="subscription-faq"
+      >
         <h2 className="text-2xl font-bold text-center mb-10 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Common Questions
         </h2>
@@ -352,7 +361,7 @@ export default function HowItWorksPage() {
         <Button
           size="lg"
           onClick={() => router.push('/subscription/assessment')}
-          data-testid="how-it-works-cta"
+          data-testid="subscription-assessment-button"
         >
           Take the Assessment
           <ArrowRightIcon className="ml-2 h-4 w-4" />
