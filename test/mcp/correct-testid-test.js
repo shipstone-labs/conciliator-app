@@ -4,8 +4,8 @@
  * Using the exact testids as implemented in the codebase
  */
 const { chromium } = require('playwright')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 // Map of question IDs to their option IDs in the correct order
 const QUESTION_OPTION_MAP = {
@@ -112,7 +112,7 @@ async function runAssessmentTest() {
             console.log(`Selected alternative option: ${optId}`)
             optionSelected = true
             break
-          } catch (err) {
+          } catch {
             // Continue trying other options
           }
         }
@@ -148,7 +148,7 @@ async function runAssessmentTest() {
           const button = document.querySelector(
             '[data-testid="next-question-button"]'
           )
-          return button && button.disabled
+          return button?.disabled
         })
 
         if (isDisabled) {
@@ -265,7 +265,7 @@ if (require.main === module) {
 
       if (result.success) {
         console.log('✅ Assessment test completed successfully')
-        console.log(`Screenshots saved to assessment-screenshots/ directory`)
+        console.log('Screenshots saved to assessment-screenshots/ directory')
       } else {
         console.log('❌ Assessment test failed')
         console.log(`Error: ${result.error}`)

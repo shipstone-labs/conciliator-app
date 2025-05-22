@@ -7,9 +7,9 @@
  * 3. Analyze and report the results
  */
 
-const { execSync } = require('child_process')
-const fs = require('fs')
-const path = require('path')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
 
 // Configuration
 const outputDir = path.join(__dirname, 'claude-generated-tests')
@@ -123,8 +123,7 @@ function executeTest(testFilePath) {
 function analyzeTestResults(testResult, originalCode) {
   console.log('🔍 Asking Claude to analyze test results...')
 
-  const analysisPrompt = `
-I executed the following test script:
+  const analysisPrompt = `I executed the following test script:
 
 \`\`\`javascript
 ${originalCode}
@@ -140,8 +139,7 @@ Please analyze these results and provide:
 1. A summary of what the test did
 2. Whether it successfully tested all aspects of the assessment form
 3. Any issues or improvements needed in the test script
-4. Recommendations for making the tests more robust
-`
+4. Recommendations for making the tests more robust`
 
   try {
     const analysis = execSync(
@@ -167,8 +165,7 @@ async function main() {
   console.log('🔧 Starting Claude MCP Testing Demo')
 
   // Step 1: Generate a test script using Claude
-  const testPrompt = `
-Write a Playwright script that tests the subscription assessment form at 
+  const testPrompt = `Write a Playwright script that tests the subscription assessment form at 
 https://safeidea.net/subscription/assessment. The script should:
 
 1. Navigate to the assessment page
@@ -186,8 +183,7 @@ Use the following information about the page structure:
 - The Next button has: data-testid="next-question-button"
 - The results container has: data-testid="assessment-results"
 
-Make the script robust enough to handle any potential issues.
-`
+Make the script robust enough to handle any potential issues.`
 
   const generatedTest = generateTestWithClaude(testPrompt)
 

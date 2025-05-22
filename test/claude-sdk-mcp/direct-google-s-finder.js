@@ -81,7 +81,7 @@ async function findFirstWordWithS() {
         // Clean the word (remove punctuation)
         const cleanWord = word.replace(/[^\w]/g, '')
 
-        if (cleanWord && cleanWord.toLowerCase().includes('s')) {
+        if (cleanWord?.toLowerCase().includes('s')) {
           firstWordWithS = cleanWord
           wordContext = `Found in a <${element}> element with text: "${text}"`
           break
@@ -95,10 +95,9 @@ async function findFirstWordWithS() {
       console.log(`✅ First word containing 's': "${firstWordWithS}"`)
       console.log(wordContext)
       return { word: firstWordWithS, context: wordContext }
-    } else {
-      console.log('❌ No words containing "s" were found')
-      return { word: null, context: null }
     }
+    console.log('❌ No words containing "s" were found')
+    return { word: null, context: null }
   } catch (error) {
     console.error('Error during search:', error)
     return { error: error.message }

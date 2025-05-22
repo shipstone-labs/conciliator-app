@@ -2,8 +2,8 @@
  * Script to inspect the structure of the SafeIdea assessment page
  */
 const { chromium } = require('playwright')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 async function inspectAssessmentPage() {
   // Launch browser

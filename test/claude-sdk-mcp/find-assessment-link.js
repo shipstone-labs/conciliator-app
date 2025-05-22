@@ -1,7 +1,7 @@
 // @ts-check
 const { chromium } = require('playwright')
-const path = require('path')
-const fs = require('fs')
+const path = require('node:path')
+// const fs = require('node:fs') // Not used in this file
 ;(async () => {
   // Launch browser with visible UI
   const browser = await chromium.launch({ headless: false })
@@ -89,10 +89,8 @@ const fs = require('fs')
       assessmentLinkKeywords.some(
         (keyword) =>
           button.text.toLowerCase().includes(keyword.toLowerCase()) ||
-          (button.id &&
-            button.id.toLowerCase().includes(keyword.toLowerCase())) ||
-          (button.classes &&
-            button.classes.toLowerCase().includes(keyword.toLowerCase()))
+          button.id?.toLowerCase().includes(keyword.toLowerCase()) ||
+          button.classes?.toLowerCase().includes(keyword.toLowerCase())
       )
     )
 

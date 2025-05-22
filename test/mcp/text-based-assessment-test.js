@@ -4,8 +4,8 @@
  * This version uses text-based selectors for more reliable clicking
  */
 const { chromium } = require('playwright')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 async function runAssessmentTest() {
   // Create screenshots directory
@@ -109,7 +109,7 @@ async function runAssessmentTest() {
           { timeout: 3000 }
         )
         console.log(`Question ${questionNumber} loaded (found by testid)`)
-      } catch (error) {
+      } catch {
         // If that fails, just wait for stability
         await page.waitForTimeout(1000)
         console.log(
@@ -143,7 +143,7 @@ async function runAssessmentTest() {
             console.log(`Selected alternative option: "${text}"`)
             optionSelected = true
             break
-          } catch (err) {
+          } catch {
             // Continue trying other options
           }
         }
@@ -295,7 +295,7 @@ if (require.main === module) {
 
       if (result.success) {
         console.log('✅ Assessment test completed successfully')
-        console.log(`Screenshots saved to assessment-screenshots/ directory`)
+        console.log('Screenshots saved to assessment-screenshots/ directory')
       } else {
         console.log('❌ Assessment test failed')
         console.log(`Error: ${result.error}`)

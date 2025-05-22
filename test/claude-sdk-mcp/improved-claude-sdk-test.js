@@ -4,10 +4,10 @@
  * This script takes a user prompt and uses Claude Code SDK to generate and execute
  * a Playwright test based on the prompt, with improvements based on actual website structure.
  */
-const { execSync } = require('child_process')
-const fs = require('fs')
-const path = require('path')
-const { exec } = require('child_process')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
+const { exec } = require('node:child_process')
 
 // Create screenshots directory if it doesn't exist
 const screenshotDir = path.join(__dirname, 'screenshots')

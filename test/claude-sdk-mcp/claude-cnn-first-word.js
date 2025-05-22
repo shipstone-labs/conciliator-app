@@ -1,15 +1,14 @@
 /**
  * Script using Claude SDK to find the first word on CNN.com
  */
-const { execSync } = require('child_process')
-const fs = require('fs')
-const path = require('path')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
 
 console.log('🔍 Using Claude SDK to find the first word on CNN.com')
 
 // Step 1: Create a prompt for Claude
-const prompt = `
-Write a Playwright script that:
+const prompt = `Write a Playwright script that:
 1. Navigates to CNN.com
 2. Finds the first visible text content (excluding menus, navigation, etc.)
 3. Extracts and returns the first word from that text
@@ -18,8 +17,7 @@ Write a Playwright script that:
 Return only the JavaScript code with no explanations. The script should:
 - Handle errors gracefully
 - Log the first word to the console
-- Save the screenshot as "cnn-first-word.png"
-`
+- Save the screenshot as "cnn-first-word.png"`
 
 // Step 2: Use Claude to generate the code
 console.log('Asking Claude to generate the script...')
@@ -35,7 +33,7 @@ try {
 
   console.log('Generated code:')
   console.log('----------------')
-  console.log(claudeCode.substring(0, 500) + '...') // Show first 500 chars
+  console.log(`${claudeCode.substring(0, 500)}...`) // Show first 500 chars
   console.log('----------------')
 
   // Save the code to a file

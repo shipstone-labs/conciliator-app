@@ -3,7 +3,7 @@
  */
 const { execSync } = require('node:child_process')
 const fs = require('node:fs')
-const path = require('node:path')
+// const path = require('node:path') // Not used in this file
 
 // Directory for output
 const OUTPUT_DIR = './claude-output'
@@ -29,22 +29,23 @@ function askClaudeForCode(prompt) {
 }
 
 // Function to extract code from Claude's response
-function extractCodeFromResponse(response) {
-  // Look for code between ```javascript and ``` markers
-  const match = response.match(/```(?:javascript|js)\s*([\s\S]*?)\s*```/)
-  if (match?.[1]) {
-    return match[1].trim()
-  }
-
-  // If no javascript markers, try generic code blocks
-  const genericMatch = response.match(/```\s*([\s\S]*?)\s*```/)
-  if (genericMatch?.[1]) {
-    return genericMatch[1].trim()
-  }
-
-  // If no code blocks found, return the entire response
-  return response
-}
+// Not used in this file but kept for potential future use
+// function extractCodeFromResponse(response) {
+//   // Look for code between ```javascript and ``` markers
+//   const match = response.match(/```(?:javascript|js)\s*([\s\S]*?)\s*```/)
+//   if (match?.[1]) {
+//     return match[1].trim()
+//   }
+//
+//   // If no javascript markers, try generic code blocks
+//   const genericMatch = response.match(/```\s*([\s\S]*?)\s*```/)
+//   if (genericMatch?.[1]) {
+//     return genericMatch[1].trim()
+//   }
+//
+//   // If no code blocks found, return the entire response
+//   return response
+// }
 
 async function main() {
   console.log('🔍 Starting Google.com search for first word containing "s"...')

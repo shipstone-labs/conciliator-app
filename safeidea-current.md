@@ -298,3 +298,39 @@ The PR #134 has successfully implemented and validated the data-testid attribute
 12. **Testing Infrastructure**: 
     While there appear to be Cypress testing references, the test infrastructure is not comprehensive. What's the strategy for ensuring reliability as the complexity increases, especially with the encryption features?
     - **IMPLEMENTED**: A comprehensive testing strategy has been developed using Anthropic's Model Context Protocol (MCP) to create automated tests for the three core services. The implementation is available in the `/test/claude-sdk-mcp` and `/test/mcp` directories, with a focus on testing the subscription assessment flow as an initial proof of concept. The approach uses Claude Code SDK to generate, execute, and analyze Playwright tests, with both data-testid and text-based selector strategies for reliable automation.
+
+## Recent Updates
+
+### Portfolio Interest Research Feature (May 2025)
+
+Added a portfolio management research feature to gather insights from IP professionals and understand market demand for enterprise-level features.
+
+**Implementation Details:**
+- **New Route**: `/portfolio-interest` - Standalone page for portfolio manager research
+- **Home Page Enhancement**: Added fourth service card targeting IP portfolio managers
+- **Google Forms Integration**: Simple, reliable data collection without backend complexity
+- **Research Focus**: Positioned as late 2025 feature research, not immediate product promise
+
+**Key Features:**
+- Research-focused messaging to manage expectations
+- Comprehensive form collecting organization type, timeline, and pain points
+- Mobile-responsive design matching existing SafeIdea styling
+- Direct Google Forms submission with inline success state
+
+**Strategic Value:**
+- **Market Validation**: Test demand for enterprise IP management features
+- **Product Development**: Gather specific requirements from target users
+- **Revenue Opportunity**: Enterprise customers typically have 10x+ budgets vs individual inventors
+- **Low Risk**: No engineering commitment required until market validation is complete
+
+**Technical Implementation:**
+- **Files Added**: `app/portfolio-interest/page.tsx` (420 lines)
+- **Files Modified**: `app/subscription/home/page.tsx` (added portfolio card)
+- **Integration**: Google Forms handles all data collection and storage
+- **Build Impact**: 7.28 kB additional bundle size for portfolio interest page
+
+**Next Steps:**
+1. Create Google Form with matching field structure
+2. Replace placeholder form URL with actual Google Form endpoint
+3. Monitor submission volume and quality of leads
+4. Use feedback to prioritize enterprise feature development roadmap

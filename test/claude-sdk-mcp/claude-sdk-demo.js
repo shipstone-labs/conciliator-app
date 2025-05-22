@@ -70,7 +70,7 @@ async function main() {
   // Execute the script
   console.log('Executing the generated script...')
   try {
-    const _result = require(tempScriptPath)
+    require(tempScriptPath)
     console.log('Script execution completed')
 
     // Step 2: Ask Claude to analyze the screenshot
@@ -81,11 +81,9 @@ async function main() {
 
       // This would typically use something like uploading the image for Claude to see,
       // but we'll just ask Claude to analyze the results
-      const analysisPrompt = `
-        I've captured a screenshot of the SafeIdea website. 
+      const analysisPrompt = `I've captured a screenshot of the SafeIdea website. 
         Based on what you know about SafeIdea, what kind of website is it?
-        What is the primary purpose of the site? Describe it briefly.
-      `
+        What is the primary purpose of the site? Describe it briefly.`
 
       const analysis = askClaude(analysisPrompt)
       console.log("\nClaude's Analysis of SafeIdea:\n")

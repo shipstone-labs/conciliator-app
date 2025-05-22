@@ -2,25 +2,23 @@
  * Script that uses Claude SDK to generate code for finding the first word
  * on safeidea.net, but only displays the code without running it
  */
-const { execSync } = require('child_process')
-const fs = require('fs')
-const path = require('path')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
 
 console.log(
   '🔍 Using Claude SDK to generate code for finding the first word on safeidea.net'
 )
 
 // Create a prompt for Claude
-const prompt = `
-Write a Playwright script that:
+const prompt = `Write a Playwright script that:
 1. Navigates to https://safeidea.net
 2. Finds the first visible text content on the page
 3. Extracts and returns just the first word from that text
 4. Takes a screenshot of the page
 
 Return only the JavaScript code with no explanations. The script should be complete 
-and runnable with Node.js. Make it short and simple.
-`
+and runnable with Node.js. Make it short and simple.`
 
 // Use Claude to generate the code
 console.log('Asking Claude to generate the script...')

@@ -2,23 +2,21 @@
  * Script that uses Claude SDK to generate and run a Playwright script
  * to find the first word with "s" on Google.com
  */
-const { execSync } = require('child_process')
-const fs = require('fs')
-const path = require('path')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
 
 console.log('🤖 Using Claude SDK to find first word with "s" on Google.com')
 
 // Step 1: Create a prompt for Claude to generate a Playwright script
-const prompt = `
-Write a complete, runnable Playwright script that:
+const prompt = `Write a complete, runnable Playwright script that:
 1. Navigates to Google.com
 2. Finds the first word containing the letter "s" in the visible text
 3. Prints that word and the element it was found in
 4. Returns an object with the word and its context
 
 IMPORTANT: Only write code, no explanations. The script should be complete
-and self-contained so I can run it directly with Node.js.
-`
+and self-contained so I can run it directly with Node.js.`
 
 // Step 2: Ask Claude to generate the code
 console.log('Asking Claude to generate the Playwright script...')
@@ -56,7 +54,7 @@ console.log(`💾 Saved generated script to ${tempFilePath}`)
 // Step 5: Run the generated code
 console.log('🚀 Running the generated script...')
 try {
-  const result = execSync(`node ${tempFilePath}`, {
+  execSync(`node ${tempFilePath}`, {
     encoding: 'utf8',
     stdio: 'inherit', // Show output in real-time
   })

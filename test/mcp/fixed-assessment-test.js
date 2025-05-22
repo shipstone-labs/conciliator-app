@@ -3,8 +3,8 @@
  * selecting the 3rd option for each question and taking screenshots
  */
 const { chromium } = require('playwright')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 async function runAssessmentTest() {
   // Create screenshots directory
@@ -120,7 +120,7 @@ async function runAssessmentTest() {
             await page.click(`[data-testid="option-${opt}"]`)
             console.log(`Selected alternative option: ${opt}`)
             break
-          } catch (err) {
+          } catch {
             // Continue trying other options
           }
         }
@@ -246,7 +246,7 @@ if (require.main === module) {
 
       if (result.success) {
         console.log('✅ Assessment test completed successfully')
-        console.log(`Screenshots saved to assessment-screenshots/ directory`)
+        console.log('Screenshots saved to assessment-screenshots/ directory')
       } else {
         console.log('❌ Assessment test failed')
         console.log(`Error: ${result.error}`)

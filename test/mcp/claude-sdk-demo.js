@@ -1,8 +1,8 @@
 /**
  * Demonstration of using Claude Code SDK to control website testing
  */
-const { execSync } = require('child_process')
-const fs = require('fs')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
 
 // Directory for screenshots
 const SCREENSHOT_DIR = './claude-screenshots'
@@ -28,13 +28,13 @@ function askClaude(prompt) {
 function extractCodeFromResponse(response) {
   // Look for code between ```javascript and ``` markers
   const match = response.match(/```javascript\s*([\s\S]*?)\s*```/)
-  if (match && match[1]) {
+  if (match?.[1]) {
     return match[1].trim()
   }
 
   // If no javascript markers, try generic code blocks
   const genericMatch = response.match(/```\s*([\s\S]*?)\s*```/)
-  if (genericMatch && genericMatch[1]) {
+  if (genericMatch?.[1]) {
     return genericMatch[1].trim()
   }
 
@@ -70,7 +70,7 @@ async function main() {
   // Execute the script
   console.log('Executing the generated script...')
   try {
-    const result = require(tempScriptPath)
+    require(tempScriptPath)
     console.log('Script execution completed')
 
     // Step 2: Ask Claude to analyze the screenshot
@@ -81,11 +81,9 @@ async function main() {
 
       // This would typically use something like uploading the image for Claude to see,
       // but we'll just ask Claude to analyze the results
-      const analysisPrompt = `
-        I've captured a screenshot of the SafeIdea website. 
+      const analysisPrompt = `I've captured a screenshot of the SafeIdea website. 
         Based on what you know about SafeIdea, what kind of website is it?
-        What is the primary purpose of the site? Describe it briefly.
-      `
+        What is the primary purpose of the site? Describe it briefly.`
 
       const analysis = askClaude(analysisPrompt)
       console.log("\nClaude's Analysis of SafeIdea:\n")

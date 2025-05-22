@@ -1,20 +1,18 @@
 /**
  * Simple script using Claude SDK to generate a script that visits Google.com
  */
-const { execSync } = require('child_process')
-const fs = require('fs')
-const path = require('path')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
 
 // Step 1: Create a very simple prompt for Claude
-const prompt = `
-Write a short Playwright script that only does the following:
+const prompt = `Write a short Playwright script that only does the following:
 1. Starts a browser
 2. Navigates to Google.com
 3. Takes a screenshot
 4. Closes the browser
 
-No explanation needed, just the JavaScript code.
-`
+No explanation needed, just the JavaScript code.`
 
 // Step 2: Use Claude to generate the code
 console.log('Asking Claude to generate a simple script to visit Google.com...')

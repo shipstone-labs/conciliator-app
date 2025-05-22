@@ -5,23 +5,20 @@
  * Playwright tests for web testing.
  */
 
-const { chromium } = require('playwright')
-const { execSync } = require('child_process')
-const fs = require('fs')
-const path = require('path')
+const { execSync } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
 
 async function runSimpleTest(url = 'http://localhost:3000') {
   // Step 1: Use Claude Code SDK to generate test logic
   console.log('Using Claude SDK to generate test steps...')
-  const promptTemplate = `
-  Write a Playwright test function that will:
+  const promptTemplate = `Write a Playwright test function that will:
   1. Visit the URL: ${url}
   2. Check if the page title contains "SafeIdea"
   3. Verify the navigation menu has at least 3 items
   4. Take a screenshot of the homepage
   
-  Return ONLY the JavaScript function (no explanations or markdown).
-  `
+  Return ONLY the JavaScript function (no explanations or markdown).`
 
   // Call Claude Code via CLI to generate the test function
   const claudeResponse = execSync(
@@ -41,15 +38,13 @@ async function runSimpleTest(url = 'http://localhost:3000') {
   // Write the temporary test file
   fs.writeFileSync(
     tempTestFile,
-    `
-    // Generated test file from Claude SDK
+    `// Generated test file from Claude SDK
     const { chromium } = require('playwright');
     
     ${generatedFunction}
     
     // Export the function
-    module.exports = { testHomepage };
-  `
+    module.exports = { testHomepage };`
   )
 
   console.log('Generated test file with the following function:')
@@ -66,7 +61,7 @@ async function runSimpleTest(url = 'http://localhost:3000') {
     console.log('Test completed successfully!')
 
     // Save screenshot if one was generated
-    if (results && results.screenshot) {
+    if (results?.screenshot) {
       const screenshotPath = path.join(__dirname, 'homepage-screenshot.png')
       fs.writeFileSync(screenshotPath, results.screenshot, 'base64')
       console.log(`Screenshot saved to: ${screenshotPath}`)

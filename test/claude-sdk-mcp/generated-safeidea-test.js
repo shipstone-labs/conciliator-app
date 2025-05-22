@@ -1,7 +1,7 @@
 // @ts-check
 const { chromium } = require('playwright')
-const path = require('path')
-const fs = require('fs')
+const path = require('node:path')
+const fs = require('node:fs')
 ;(async () => {
   // Create screenshots directory if it doesn't exist
   const screenshotsDir = path.join(__dirname, 'screenshots')
