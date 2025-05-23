@@ -9,6 +9,7 @@ import {
 import type { AddDoc } from '.'
 import { Button } from '../ui/button'
 import { Modal } from '../ui/modal'
+import { testIds } from '@/lib/testIds'
 
 type AddStepContentProps = {
   isLoading: boolean
@@ -74,7 +75,7 @@ export const AddStepContent = memo(
             )
             if (fileUploadZone) {
               fileUploadZone.setAttribute('data-upload-complete', 'true')
-              fileUploadZone.setAttribute('data-testid', 'file-upload-zone')
+              fileUploadZone.setAttribute('data-testid', testIds.addIdea.fileUploadZone)
             }
           }
         }
@@ -87,7 +88,7 @@ export const AddStepContent = memo(
         {ipDoc.content ? (
           <div
             className="p-4 rounded-lg border border-primary/30 bg-muted/30"
-            data-testid="file-upload-zone"
+            data-testid={testIds.addIdea.fileUploadZone}
           >
             <div className="flex justify-between items-center">
               <p className="text-sm font-medium text-foreground">
@@ -109,7 +110,7 @@ export const AddStepContent = memo(
             variant="outline"
             className="w-full border border-border/30 bg-muted/30 text-foreground hover:bg-muted/50 py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 h-12"
             disabled={isLoading || !ipDoc.name || !ipDoc.description}
-            data-testid="add-encrypt-button"
+            data-testid={testIds.addIdea.addEncryptButton}
           >
             Upload File
           </Button>
@@ -121,7 +122,7 @@ export const AddStepContent = memo(
           onChange={handleFileSelection}
           accept=".txt,.md,.markdown,text/plain,text/markdown"
           className="hidden"
-          data-testid="file-upload-input"
+          data-testid={testIds.addIdea.fileUploadInput}
         />
         {/* File upload modal */}
         <Modal

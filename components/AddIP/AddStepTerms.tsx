@@ -13,6 +13,7 @@ import { type Price, useProducts } from '@/hooks/useProducts'
 import { Button } from '../ui/button'
 import { Loader2 } from 'lucide-react'
 import { Modal } from '../ui/modal'
+import { testIds } from '@/lib/testIds'
 import { SortedProducts } from './SortedProducts'
 import { legalDocuments, ViewNDA } from '../ViewNDA'
 
@@ -119,7 +120,7 @@ export const AddStepTerms = memo(
           variant="outline"
           className="w-full border border-border/30 text-foreground/90 hover:bg-muted/30 py-3 px-4 rounded-xl transition-all h-12"
           disabled={isLoading || !ipDoc.content}
-          data-testid="set-terms-button"
+          data-testid={testIds.addIdea.setTermsButton}
         >
           Set Sharing Terms
         </Button>
@@ -132,7 +133,7 @@ export const AddStepTerms = memo(
             disabled={
               isLoading || !ipDoc.content || !ipDoc.name || !ipDoc.description
             }
-            data-testid="create-idea-button"
+            data-testid={testIds.addIdea.createButton}
             data-ready={(!(
               isLoading ||
               !ipDoc.content ||
@@ -169,10 +170,10 @@ export const AddStepTerms = memo(
           isOpen={isTermsModalOpen}
           onClose={() => setIsTermsModalOpen(false)}
           title="Set Sharing Terms"
-          data-testid="terms-dialog"
+          data-testid={testIds.addIdea.termsDialog}
           data-terms-ready="false"
         >
-          <div className="space-y-5" data-testid="terms-content">
+          <div className="space-y-5" data-testid={testIds.addIdea.termsContent}>
             <p className="text-foreground/90 mb-4">
               When someone shows interest in your idea (such as a potential
               investor or partner), you typically need to share details while
@@ -207,13 +208,13 @@ export const AddStepTerms = memo(
                 value={ipDoc.terms?.businessModel || ''}
                 onChange={handleBusinessModelChange}
                 className="w-full p-3 border border-border/30 bg-muted/30 text-foreground rounded-xl h-11"
-                data-testid="business-model-select"
+                data-testid={testIds.addIdea.businessModelSelect}
               >
                 {legalDocuments.map((doc) => (
                   <option
                     key={doc.id}
                     value={doc.id}
-                    data-testid={`ip-business-model-option-${doc.id}`}
+                    data-testid={testIds.addIdea.businessModelOption(doc.id)}
                   >
                     {doc.name}
                   </option>
@@ -270,7 +271,7 @@ export const AddStepTerms = memo(
                   setIsTermsModalOpen(false)
                 }}
                 className="bg-primary hover:bg-primary/80 text-black font-medium transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-xl h-11"
-                data-testid="terms-accept-button"
+                data-testid={testIds.addIdea.termsAcceptButton}
               >
                 Accept
               </Button>

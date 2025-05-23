@@ -48,3 +48,10 @@ working-together.md
 /conciliator-*.json
 !/.husky
 /*.json
+
+# test generated files
+test/claude-sdk-mcp/synthetic-idea.json
+test/claude-sdk-mcp/synthetic-ideas/
+test/claude-sdk-mcp/test-document.txt
+test/claude-sdk-mcp/assessment-screenshots/
+test/claude-sdk-mcp/*.png

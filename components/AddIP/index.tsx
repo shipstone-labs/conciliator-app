@@ -19,6 +19,7 @@ import { AddStepPublic } from './AddStepPublic'
 import { AddStepContent } from './AddStepContent'
 import { AddStepTerms } from './AddStepTerms'
 import { handleError } from '@/hooks/useIP'
+import { testIds } from '@/lib/testIds'
 
 export type AddDoc = Omit<IPDoc, 'id'> & {
   content?: string
@@ -388,7 +389,7 @@ const AppIP = () => {
                   }
                   disabled={isLoading}
                   className="rounded border-border/30 bg-muted/30 text-primary"
-                  data-testid="ai-agent-checkbox"
+                  data-testid={testIds.addIdea.aiAgentCheckbox}
                 />
                 <label
                   htmlFor="ai-agent-checkbox"

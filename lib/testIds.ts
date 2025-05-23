@@ -23,11 +23,29 @@ export const testIds = {
   },
   addIdea: {
     form: 'add-idea-form',
+    // Step 1: Upload content
+    fileUploadZone: 'file-upload-zone',
+    fileUploadInput: 'file-upload-input',
+    addEncryptButton: 'add-encrypt-button',
+    // Step 2: Public details
     titleInput: 'idea-title-input',
     descriptionInput: 'idea-description-input',
+    // Step 3: Terms and AI agent
+    setTermsButton: 'set-terms-button',
+    createButton: 'create-idea-button',
+    aiAgentCheckbox: 'ai-agent-checkbox',
+    // Terms dialog
+    termsDialog: 'terms-dialog',
+    termsContent: 'terms-content',
+    businessModelSelect: 'business-model-select',
+    businessModelOption: (id: string) => `ip-business-model-option-${id}`,
+    termsAcceptButton: 'terms-accept-button',
+    // Navigation
     nextButton: 'next-step-button',
     prevButton: 'prev-step-button',
-    createButton: 'create-idea-button',
+    // Status and loading
+    statusMessage: 'add-idea-status-message',
+    loadingSpinner: 'add-idea-loading-spinner',
   },
   common: {
     modal: 'modal-container',

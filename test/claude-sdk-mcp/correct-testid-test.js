@@ -54,7 +54,8 @@ async function runAssessmentTest() {
   try {
     // Step 1: Navigate to the assessment page
     console.log('Navigating to assessment page...')
-    await page.goto('https://safeidea.net/subscription/assessment')
+    const testUrl = process.env.TEST_URL || 'https://safeidea.net/subscription/assessment'
+    await page.goto(testUrl.includes('subscription/assessment') ? testUrl : `${testUrl}/subscription/assessment`)
     await page.waitForLoadState('networkidle')
     console.log('Loaded assessment page')
 

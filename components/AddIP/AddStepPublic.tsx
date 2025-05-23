@@ -11,6 +11,7 @@ import { useDebounce } from 'use-debounce'
 import type { AddDoc } from '.'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
+import { testIds } from '@/lib/testIds'
 
 type AddStepPublicProps = {
   isLoading: boolean
@@ -68,7 +69,7 @@ export const AddStepPublic = memo(
           <Input
             id="public-title"
             placeholder="Enter public title for your Idea here"
-            data-testid="idea-title-input"
+            data-testid={testIds.addIdea.titleInput}
             data-ready="false"
             value={name}
             onChange={handleNameChange}
@@ -87,7 +88,7 @@ export const AddStepPublic = memo(
           <Textarea
             id="public-description"
             placeholder="Enter public description of your Idea here"
-            data-testid="idea-description-input"
+            data-testid={testIds.addIdea.descriptionInput}
             data-ready="false"
             value={description}
             onChange={handleDescriptionChange}
