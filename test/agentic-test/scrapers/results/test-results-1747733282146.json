@@ -1,0 +1,120 @@
+{
+  "timestamp": "2025-05-20T09:27:43.093Z",
+  "summary": {
+    "BasicScraper": {
+      "successRate": 0.6666666666666666,
+      "averageDuration": 4516.333333333333,
+      "averageMatchScore": 0.16666666666666666
+    },
+    "ResilientScraper": {
+      "successRate": 0.6666666666666666,
+      "averageDuration": 969.6666666666666,
+      "averageMatchScore": 0.16666666666666666
+    },
+    "DOMAnalyzerScraper": {
+      "successRate": 0.6666666666666666,
+      "averageDuration": 864.6666666666666,
+      "averageMatchScore": 0.25
+    }
+  },
+  "details": [
+    {
+      "site": "Memeorandum",
+      "url": "https://memeorandum.com",
+      "complexity": "High",
+      "scraperResults": [
+        {
+          "scraper": "BasicScraper",
+          "success": true,
+          "duration": 1603,
+          "matchScore": 0.3333333333333333,
+          "content": "memeorandum is an auto-generated summary of the stories that US political commentators are discussing online right now....",
+          "error": null
+        },
+        {
+          "scraper": "ResilientScraper",
+          "success": true,
+          "duration": 1033,
+          "matchScore": 0.3333333333333333,
+          "content": "memeorandum is an auto-generated summary of the stories that US political commentators are discussing online right now....",
+          "error": null
+        },
+        {
+          "scraper": "DOMAnalyzerScraper",
+          "success": true,
+          "duration": 945,
+          "matchScore": 0,
+          "content": "Trump administration agrees to nearly $5 million settlement in case of Ashli Babbitt's Jan. 6 shooting death...",
+          "error": null
+        }
+      ]
+    },
+    {
+      "site": "Metafilter",
+      "url": "https://www.metafilter.com",
+      "complexity": "Medium",
+      "scraperResults": [
+        {
+          "scraper": "BasicScraper",
+          "success": true,
+          "duration": 1740,
+          "matchScore": 0,
+          "content": "« Older posts...",
+          "error": null
+        },
+        {
+          "scraper": "ResilientScraper",
+          "success": true,
+          "duration": 996,
+          "matchScore": 0,
+          "content": "In response to about an AskMetaFilter question titled \"When did airliner pilots stop drinking, on-the-job? Did they ever?\", Jane the Brown posted a comment that touches on just a few subjects, such as...",
+          "error": null
+        },
+        {
+          "scraper": "DOMAnalyzerScraper",
+          "success": true,
+          "duration": 945,
+          "matchScore": 0.5,
+          "content": "MetaFilter is a weblog that anyone can contribute a link or a comment to. A typical weblog is one person posting their thoughts on the unique things they find on the web. This website exists to break ...",
+          "error": null
+        }
+      ]
+    },
+    {
+      "site": "Fark",
+      "url": "https://www.fark.com",
+      "complexity": "High",
+      "scraperResults": [
+        {
+          "scraper": "BasicScraper",
+          "success": false,
+          "duration": 10206,
+          "matchScore": 0,
+          "content": null,
+          "error": "page.goto: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://www.fark.com/\", waiting until \"load\"\u001b[22m\n"
+        },
+        {
+          "scraper": "ResilientScraper",
+          "success": false,
+          "duration": 880,
+          "matchScore": 0,
+          "content": null,
+          "error": "Extracted content failed quality validation"
+        },
+        {
+          "scraper": "DOMAnalyzerScraper",
+          "success": false,
+          "duration": 704,
+          "matchScore": 0,
+          "content": null,
+          "error": "DOM analysis could not identify main content paragraph"
+        }
+      ]
+    }
+  ],
+  "rankings": {
+    "successRate": ["BasicScraper", "ResilientScraper", "DOMAnalyzerScraper"],
+    "speed": ["DOMAnalyzerScraper", "ResilientScraper", "BasicScraper"],
+    "accuracy": ["DOMAnalyzerScraper", "BasicScraper", "ResilientScraper"]
+  }
+}

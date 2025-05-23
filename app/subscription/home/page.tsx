@@ -15,6 +15,7 @@ import {
   TargetIcon,
   Share2Icon,
   CheckIcon,
+  PersonIcon,
 } from '@radix-ui/react-icons'
 
 export default function HomePage() {
@@ -229,6 +230,15 @@ const SERVICE_PLANS = [
     icon: <TargetIcon className="w-6 h-6 text-primary" />,
     price: '$29/month',
     link: '/subscription/complete',
+  },
+  {
+    id: 'portfolio',
+    tag: 'Research Phase',
+    heading: 'Managing IP Portfolios?',
+    text: "Help us build the tools IP portfolio managers need. We're researching features for late 2025 - early participants will shape what we build.",
+    icon: <PersonIcon className="w-6 h-6 text-primary" />,
+    price: 'Join Research',
+    link: '/portfolio-interest',
   },
 ]
 

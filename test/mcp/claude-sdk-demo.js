@@ -12,10 +12,10 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
 
 // Function to execute Claude CLI command and return the result
 function askClaude(prompt) {
-  console.log(`Asking Claude: ${prompt.substring(0, 100)}...`)
+  console.log(`Asking Claude: ${prompt}`)
   try {
     const result = execSync(
-      `claude -p "${prompt.replace(/"/g, '\\"')}" --output-format text`
+      `claude -p "${prompt}" --output-format text`
     ).toString()
     return result.trim()
   } catch (error) {
