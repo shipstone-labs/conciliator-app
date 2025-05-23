@@ -16,6 +16,7 @@ import { AccountModal } from './AccountModal'
 import { useClientTracing } from '@/hooks/useClientTracing'
 import { useSession } from './AuthLayout'
 import { ModeToggle } from './mode-toggle'
+import { testIds } from '@/lib/testIds'
 
 export default function NavigationHeader() {
   const router = useRouter()
@@ -62,7 +63,7 @@ export default function NavigationHeader() {
       <Link
         href="/"
         className="mr-4"
-        data-testid="nav-logo"
+        data-testid={testIds.nav.logo}
         onClick={() => traceAction('Navigate', undefined, { destination: '/' })}
       >
         <Image
@@ -81,7 +82,7 @@ export default function NavigationHeader() {
             <Link
               href="/add-ip"
               className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
-              data-testid="nav-add-idea"
+              data-testid={testIds.nav.addIdea}
               onClick={() =>
                 traceAction('Navigate', undefined, { destination: '/add-ip' })
               }
@@ -91,7 +92,7 @@ export default function NavigationHeader() {
             <Link
               href="/list-ip/mine"
               className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
-              data-testid="nav-my-ideas"
+              data-testid={testIds.nav.listIdeas}
               onClick={() =>
                 traceAction('Navigate', undefined, {
                   destination: '/list-ip/mine',
@@ -124,7 +125,7 @@ export default function NavigationHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger
             className="cursor-pointer h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted/30"
-            data-testid="nav-account-menu"
+            data-testid={testIds.nav.account}
           >
             <Menu className="h-5 w-5" />
           </DropdownMenuTrigger>
@@ -144,7 +145,7 @@ export default function NavigationHeader() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
-                  data-testid="nav-account-logout"
+                  data-testid={testIds.nav.signOut}
                   onClick={handleLogout}
                   disabled={isLoggingOff}
                 >
@@ -156,7 +157,7 @@ export default function NavigationHeader() {
               <Link href="/" className="block">
                 <DropdownMenuItem
                   className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
-                  data-testid="nav-account-login"
+                  data-testid={testIds.nav.signIn}
                 >
                   Sign In
                 </DropdownMenuItem>

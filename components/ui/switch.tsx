@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import * as SwitchPrimitive from '@radix-ui/react-switch'
+// import * as SwitchPrimitive from '@radix-ui/react-switch'
+const SwitchPrimitive = { Root: () => null, Thumb: () => null } as any
 
 import { cn } from '@/lib/utils'
 

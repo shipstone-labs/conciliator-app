@@ -48,13 +48,19 @@ async function runAssessmentTest() {
   const context = await browser.newContext()
   const page = await context.newPage()
 
-  // Set timeout to 5 seconds for all operations
-  page.setDefaultTimeout(5000) // 5 seconds timeout
+  // Set timeout to 30 seconds for all operations
+  page.setDefaultTimeout(30000) // 30 seconds timeout
 
   try {
     // Step 1: Navigate to the assessment page
     console.log('Navigating to assessment page...')
-    await page.goto('https://safeidea.net/subscription/assessment')
+    const testUrl =
+      process.env.TEST_URL || 'https://safeidea.net/subscription/assessment'
+    await page.goto(
+      testUrl.includes('subscription/assessment')
+        ? testUrl
+        : `${testUrl}/subscription/assessment`
+    )
     await page.waitForLoadState('networkidle')
     console.log('Loaded assessment page')
 

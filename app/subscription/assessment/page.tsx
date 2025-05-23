@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { trackFunnelPageVisit } from '../SubscriptionStorage'
+import { testIds } from '@/lib/testIds'
 import {
   checkStorageAvailability,
   saveAnswer,
@@ -406,7 +407,7 @@ export default function AssessmentPage() {
   return (
     <div
       className="flex flex-col items-center"
-      data-testid="assessment-container"
+      data-testid={testIds.assessment.form}
     >
       {/* Storage status alerts */}
       {storageStatus !== 'available' && (
@@ -452,7 +453,7 @@ export default function AssessmentPage() {
         /* Results View */
         <Card
           className="w-full max-w-3xl mx-auto border border-border/30 bg-card/70 backdrop-blur-lg overflow-hidden mb-8"
-          data-testid="assessment-results"
+          data-testid={testIds.assessment.results}
         >
           <CardHeader className="pb-4 text-center">
             <CardTitle className="text-xl md:text-2xl">
@@ -563,7 +564,7 @@ export default function AssessmentPage() {
         /* Question View */
         <Card
           className="w-full max-w-3xl mx-auto border border-border/30 bg-card/70 backdrop-blur-lg overflow-hidden mb-8"
-          data-testid={`question-${currentQuestion.id}`}
+          data-testid={testIds.assessment.question(currentQuestion.id)}
         >
           <CardHeader className="pb-2">
             {/* Progress indicator */}
@@ -604,7 +605,7 @@ export default function AssessmentPage() {
                       value={option.id}
                       id={`${currentQuestion.id}-${option.id}`}
                       className="mr-2"
-                      data-testid={`option-${option.id}`}
+                      data-testid={testIds.assessment.option(option.id)}
                     />
                   </div>
                   <div className="flex-1">
@@ -628,7 +629,7 @@ export default function AssessmentPage() {
               variant="outline"
               onClick={handleBack}
               disabled={currentQuestionIndex === 0}
-              data-testid="prev-question-button"
+              data-testid={testIds.assessment.prevButton}
             >
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back
@@ -637,7 +638,7 @@ export default function AssessmentPage() {
             <Button
               onClick={handleNextClick}
               disabled={!tempAnswers[currentQuestion.id]}
-              data-testid="next-question-button"
+              data-testid={testIds.assessment.nextButton}
             >
               {currentQuestionIndex < ASSESSMENT_QUESTIONS.length - 1
                 ? 'Next'
