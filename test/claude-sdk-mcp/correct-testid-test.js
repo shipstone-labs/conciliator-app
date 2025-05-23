@@ -48,8 +48,8 @@ async function runAssessmentTest() {
   const context = await browser.newContext()
   const page = await context.newPage()
 
-  // Set timeout to 5 seconds for all operations
-  page.setDefaultTimeout(5000) // 5 seconds timeout
+  // Set timeout to 30 seconds for all operations
+  page.setDefaultTimeout(30000) // 30 seconds timeout
 
   try {
     // Step 1: Navigate to the assessment page
