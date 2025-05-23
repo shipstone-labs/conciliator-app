@@ -45,7 +45,7 @@ export default function BasicPlanPage() {
           Essential protection for establishing and securing your intellectual
           property.
         </p>
-        <div className="text-3xl font-bold mb-6">$9/month</div>
+        <div className="text-3xl font-bold mb-6 pricing-blur">$9/month</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             size="lg"

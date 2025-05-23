@@ -134,9 +134,9 @@ const FEATURE_INFO = {
       'Automated scanning for unauthorized use of your intellectual property',
   },
   ai: {
-    name: 'AI Sales Agent',
+    name: 'AI Agent',
     description:
-      'AI-powered agent that can represent and promote your IP to potential buyers',
+      'AI-powered agent that monitors the internet for unauthorized use of your IP and provides detailed reports',
   },
   support: {
     name: 'Customer Support',
@@ -239,7 +239,9 @@ export default function PlansPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1">
-                    <div className="text-2xl font-bold mb-4">{plan.price}</div>
+                    <div className="text-2xl font-bold mb-4 pricing-blur">
+                      {plan.price}
+                    </div>
                     <div className="space-y-3">
                       {Object.entries(plan.features)
                         .slice(0, 5)
@@ -315,7 +317,7 @@ export default function PlansPage() {
                           {plan.tagline}
                         </span>
                         <span className="font-bold">{plan.name}</span>
-                        <span className="text-lg font-bold mt-1">
+                        <span className="text-lg font-bold mt-1 pricing-blur">
                           {plan.price}
                         </span>
                         {(recommendedPlan === plan.id ||

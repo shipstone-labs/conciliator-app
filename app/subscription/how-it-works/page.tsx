@@ -40,7 +40,7 @@ export default function HowItWorksPage() {
         <p className="text-lg text-foreground/80 max-w-3xl mx-auto mb-8">
           SafeIdea provides a complete ecosystem for protecting your
           intellectual property at every stage—from initial documentation to
-          secure sharing and monetization.
+          secure sharing and continuous protection.
         </p>
       </section>
 
@@ -157,19 +157,20 @@ export default function HowItWorksPage() {
           >
             <div className="w-full md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
               <h3 className="text-xl font-semibold text-foreground mb-2">
-                Monetize Your IP
+                Protect Your IP
               </h3>
               <p className="text-foreground/80 mb-4">
-                Your ideas deserve to earn revenue. Our AI agents act like
-                highly specialized salespeople for your intellectual property,
-                connecting with potential buyers and licensing opportunities.
+                Your ideas deserve protection. Our AI agents continuously
+                monitor the internet for unauthorized use of your intellectual
+                property, providing comprehensive reports and actionable
+                insights.
               </p>
               <div className="flex flex-wrap gap-3 md:justify-end">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent">
                   <ChatBubbleIcon className="w-3 h-3 mr-1" /> AI-powered
                 </span>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent">
-                  <FileTextIcon className="w-3 h-3 mr-1" /> Custom Terms
+                  <FileTextIcon className="w-3 h-3 mr-1" /> Detailed Reports
                 </span>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent">
                   <LightningBoltIcon className="w-3 h-3 mr-1" /> Automated
@@ -258,19 +259,20 @@ export default function HowItWorksPage() {
             <CardHeader>
               <div className="flex items-center gap-3">
                 <ChatBubbleIcon className="w-6 h-6 text-accent" />
-                <CardTitle>AI Sales Agents</CardTitle>
+                <CardTitle>AI Agents</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80 mb-4">
-                Specialized AI agents trained specifically on your intellectual
-                property can represent your ideas to potential buyers across the
-                internet, working 24/7 to find opportunities.
+                Specialized AI agents trained on your intellectual property
+                continuously scan the internet for potential infringement,
+                providing you with detailed reports and evidence when
+                unauthorized use is detected.
               </p>
               <p className="text-foreground/80">
                 <strong>Why it matters:</strong> Most creators don't have the
-                time or resources to continuously market their intellectual
-                property to the right audiences.
+                time or resources to continuously monitor the internet for
+                unauthorized use of their intellectual property.
               </p>
             </CardContent>
           </Card>

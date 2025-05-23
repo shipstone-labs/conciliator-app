@@ -23,7 +23,7 @@ const FAQ_CATEGORIES = [
         id: 'what-is-safeidea',
         question: 'What is SafeIdea?',
         answer:
-          'SafeIdea is a comprehensive intellectual property protection platform that helps creators, inventors, and businesses secure, document, share, and monetize their intellectual property. Our services include secure documentation with immutable timestamps, controlled sharing with NDA integration, and advanced monitoring for potential infringement.',
+          'SafeIdea is a comprehensive intellectual property protection platform that helps creators, inventors, and businesses secure, document, share, and protect their intellectual property. Our services include secure documentation with immutable timestamps, controlled sharing with NDA integration, and advanced monitoring for potential infringement.',
       },
       {
         id: 'different-from-patent',
@@ -53,7 +53,8 @@ const FAQ_CATEGORIES = [
         id: 'plan-differences',
         question: 'What are the differences between the plans?',
         answer:
-          'Our Basic Plan ($9/month) provides essential protection with secure storage, encryption, and timestamping. The Secure Plan ($19/month) adds unlimited sharing with access controls, NDA integration, and detailed activity tracking. The Complete Plan ($29/month) includes all features plus IP monitoring, infringement detection, AI sales agent capabilities, and expert consultation.',
+          'Our Basic Plan (PRICE_BASIC) provides essential protection with secure storage, encryption, and timestamping. The Secure Plan (PRICE_SECURE) adds unlimited sharing with access controls, NDA integration, and detailed activity tracking. The Complete Plan (PRICE_COMPLETE) includes all features plus IP monitoring, infringement detection, AI agent capabilities, and expert consultation.',
+        hasPrice: true,
       },
       {
         id: 'change-plans',
@@ -71,7 +72,8 @@ const FAQ_CATEGORIES = [
         id: 'additional-storage',
         question: 'Can I purchase additional storage?',
         answer:
-          'Yes, additional storage can be purchased in increments of 10GB for $3/month. Simply go to your account settings after signing up and select "Add Storage" to increase your storage capacity beyond what\'s included in your plan.',
+          'Yes, additional storage can be purchased in increments of 10GB for PRICE_STORAGE. Simply go to your account settings after signing up and select "Add Storage" to increase your storage capacity beyond what\'s included in your plan.',
+        hasPrice: true,
       },
     ],
   },
@@ -123,9 +125,9 @@ const FAQ_CATEGORIES = [
       },
       {
         id: 'ai-agent-work',
-        question: 'How does the AI sales agent work?',
+        question: 'How does the AI agent work?',
         answer:
-          'The AI sales agent (available in the Complete plan) is trained on your intellectual property documents and your specific business parameters. It can engage with potential customers, explain your offering within your defined boundaries, answer basic questions, and facilitate introductions for more complex negotiations—all while operating 24/7 to maximize opportunity discovery.',
+          'The AI agent (available in the Complete plan) continuously monitors the internet for potential unauthorized use of your intellectual property. It scans websites, marketplaces, and digital platforms to detect copying, derivative works, or misappropriation. When potential infringement is found, it provides comprehensive reports with evidence and suggested next steps for protecting your IP.',
       },
       {
         id: 'monitoring-scope',
@@ -172,6 +174,53 @@ const FAQ_CATEGORIES = [
     ],
   },
 ]
+
+// Helper function to render answer with blurred prices
+function renderAnswer(answer: string, hasPrice?: boolean) {
+  if (!hasPrice) {
+    return <p className="text-foreground/80">{answer}</p>
+  }
+
+  // Replace price placeholders with blurred spans
+  const parts = answer.split(
+    /(PRICE_BASIC|PRICE_SECURE|PRICE_COMPLETE|PRICE_STORAGE)/
+  )
+
+  return (
+    <p className="text-foreground/80">
+      {parts.map((part, index) => {
+        switch (part) {
+          case 'PRICE_BASIC':
+            return (
+              <span key={index} className="pricing-blur">
+                $9/month
+              </span>
+            )
+          case 'PRICE_SECURE':
+            return (
+              <span key={index} className="pricing-blur">
+                $19/month
+              </span>
+            )
+          case 'PRICE_COMPLETE':
+            return (
+              <span key={index} className="pricing-blur">
+                $29/month
+              </span>
+            )
+          case 'PRICE_STORAGE':
+            return (
+              <span key={index} className="pricing-blur">
+                $3/month
+              </span>
+            )
+          default:
+            return part
+        }
+      })}
+    </p>
+  )
+}
 
 export default function FAQPage() {
   const router = useRouter()
@@ -307,9 +356,8 @@ export default function FAQPage() {
                     {openQuestions[q.id] && (
                       <CardContent className="pt-0 pb-4 px-4 border-t border-border/30">
                         <div className="pl-7">
-                          {' '}
                           {/* Align with question icon */}
-                          <p className="text-foreground/80">{q.answer}</p>
+                          {renderAnswer(q.answer, (q as any).hasPrice)}
                         </div>
                       </CardContent>
                     )}

@@ -51,7 +51,7 @@ export default function SecurePlanPage() {
           Enhanced protection with controlled sharing and NDA integration for
           teams and businesses.
         </p>
-        <div className="text-3xl font-bold mb-6">$19/month</div>
+        <div className="text-3xl font-bold mb-6 pricing-blur">$19/month</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             size="lg"

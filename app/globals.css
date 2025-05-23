@@ -218,3 +218,12 @@
 .heading-solid-accent {
   @apply text-primary font-bold;
 }
+
+/* Pricing blur effect for test/placeholder pricing */
+.pricing-blur {
+  @apply relative select-none;
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+  user-select: none;
+  pointer-events: none;
+}

@@ -69,7 +69,7 @@ const PLANS = {
     features: [
       'All Secure features',
       'IP monitoring & infringement detection',
-      'AI sales agent',
+      'AI monitoring agent for IP protection',
       'Real-time alerts',
       '50GB secure storage',
       'Priority support & consulting',
@@ -431,7 +431,9 @@ export default function SignupPage() {
                     {plan.name} Plan
                   </CardTitle>
                 </div>
-                <div className="text-xl font-bold">{plan.price}</div>
+                <div className="text-xl font-bold pricing-blur">
+                  {plan.price}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
