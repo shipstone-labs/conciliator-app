@@ -129,10 +129,10 @@ const ASSESSMENT_QUESTIONS = [
           'You need confidence that sharing agreements will be respected',
       },
       {
-        id: 'monetization',
-        label: 'Finding ways to monetize it',
+        id: 'monitoring',
+        label: 'Monitoring for unauthorized use',
         description:
-          'You want to generate revenue from your intellectual property',
+          'You want to detect and prevent unauthorized use of your intellectual property',
       },
       {
         id: 'visibility',
@@ -249,7 +249,7 @@ function determineRecommendedPlan(answers: Record<string, string>): string {
   } else if (answers.concern === 'nda-enforcement') {
     securePoints += 2
   } else if (
-    answers.concern === 'monetization' ||
+    answers.concern === 'monitoring' ||
     answers.concern === 'visibility'
   ) {
     completePoints += 2

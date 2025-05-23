@@ -44,8 +44,8 @@ function WelcomeHome() {
                 </h1>
                 <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
                   Protect your intellectual property with advanced encryption,
-                  share it securely with partners, and monetize your digital
-                  assets with our AI-powered sales agent.
+                  share it securely with partners, and protect your digital
+                  assets with our AI-powered agent.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-6 justify-center mt-6">
                   <div data-testid="welcome-auth-signup">
@@ -90,9 +90,9 @@ function WelcomeHome() {
                 Complete Protection for Your Intellectual Property
               </p>
               <p className="mt-4 max-w-2xl text-xl text-muted-foreground lg:mx-auto">
-                From protecting trade secrets to monetizing patents, we're
-                developing tools to secure, prove ownership, and profit from
-                your intellectual property.
+                From protecting trade secrets to monitoring for infringement,
+                we're developing tools to secure, prove ownership, and profit
+                from your intellectual property.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -121,7 +121,9 @@ function WelcomeHome() {
                         ✓
                       </span>
                       <span className="text-foreground text-sm">
-                        Free for first year
+                        <span className="pricing-blur">
+                          Free for first year
+                        </span>
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -165,7 +167,7 @@ function WelcomeHome() {
                         ✓
                       </span>
                       <span className="text-foreground text-sm">
-                        $100 per year
+                        <span className="pricing-blur">$100 per year</span>
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -180,7 +182,7 @@ function WelcomeHome() {
                 </CardContent>
               </Card>
 
-              {/* Feature 3 - Sales Agent */}
+              {/* Feature 3 - Agent */}
               <Card
                 className="bg-card border-border"
                 data-testid="welcome-feature-card-3"
@@ -190,16 +192,15 @@ function WelcomeHome() {
                     <img src="/chatbot.svg" alt="AI" className="w-8 h-8" />
                   </div>
                   <CardTitle className="text-card-foreground text-xl">
-                    AI-Powered Sales Agent
+                    AI-Powered Agent
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Turn your digital assets into revenue. Get your own AI Sales
-                    Agents that we train on your intellectual property. These
-                    agents talk to people and other AI seekers online to present
-                    your idea and offer them customized transactions agreed by
-                    you.
+                    Protect your intellectual property with continuous
+                    monitoring. Our AI Agents scan the internet for unauthorized
+                    use of your IP and provide comprehensive reports with
+                    evidence and recommended actions to defend your innovations.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start">
@@ -207,7 +208,7 @@ function WelcomeHome() {
                         ✓
                       </span>
                       <span className="text-foreground text-sm">
-                        Custom pricing (contact us)
+                        24/7 automated monitoring
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -215,7 +216,7 @@ function WelcomeHome() {
                         ✓
                       </span>
                       <span className="text-foreground text-sm">
-                        Fixed, subscription, or royalty models
+                        Detailed infringement reports
                       </span>
                     </li>
                   </ul>
@@ -310,9 +311,10 @@ function WelcomeHome() {
                   Get Yourself An Agent
                 </h3>
                 <p className="text-muted-foreground">
-                  SafeIdeas AI Agents work for you to set up royalty or
-                  subscriptions systems for your digital content. Get visibility
-                  directly with AI agents from Anthropic, OpenAI and Google.
+                  SafeIdea AI Agents work for you to monitor the internet for
+                  unauthorized use of your intellectual property. Get
+                  comprehensive protection with continuous monitoring and
+                  detailed infringement reports.
                 </p>
                 <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border p-3 h-64 mx-auto max-w-xs">
                   <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">

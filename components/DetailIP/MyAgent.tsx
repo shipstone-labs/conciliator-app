@@ -25,7 +25,7 @@ export const MyAgent = ({ ipDoc }: MyAgentProps) => {
       <a
         href={`/discovery/${ipDoc.id}`}
         className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
-        aria-label="Go to My AI Sales Agent"
+        aria-label="Go to My AI Agent"
         onKeyDown={onKeyDown}
       >
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all mt-8">
@@ -41,15 +41,16 @@ export const MyAgent = ({ ipDoc }: MyAgentProps) => {
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-medium text-primary mb-1 text-center sm:text-left flex items-center justify-center sm:justify-start gap-2">
-                My AI Sales Agent{' '}
+                My AI Agent{' '}
                 <ArrowRight
                   className="w-4 h-4 inline-block"
                   aria-hidden="true"
                 />
               </h3>
               <p className="text-foreground/80 text-sm">
-                Your AI Sales agent is trained on this Idea and can discuss
-                details with people - and AIs from Anthropic, Google and OpenAI.
+                Your AI agent monitors the internet for unauthorized use of this
+                Idea and provides detailed reports when potential infringement
+                is detected.
               </p>
             </div>
           </CardContent>

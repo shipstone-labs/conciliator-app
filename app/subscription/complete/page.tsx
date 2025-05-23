@@ -50,7 +50,7 @@ export default function CompletePlanPage() {
           Comprehensive protection with monitoring, AI-powered assistance, and
           advanced security features.
         </p>
-        <div className="text-3xl font-bold mb-6">$29/month</div>
+        <div className="text-3xl font-bold mb-6 pricing-blur">$29/month</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             size="lg"
@@ -102,15 +102,15 @@ export default function CompletePlanPage() {
             <CardHeader>
               <div className="flex items-center gap-3">
                 <ChatBubbleIcon className="w-6 h-6 text-accent" />
-                <CardTitle>AI Sales Agent</CardTitle>
+                <CardTitle>AI Agent</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Our specialized AI agents work 24/7 to represent your
-                intellectual property to potential licensees and buyers,
-                increasing exposure and monetization opportunities while
-                operating within your parameters.
+                Our specialized AI agents work 24/7 to monitor the internet for
+                unauthorized use of your intellectual property, providing
+                comprehensive reports with evidence and suggested actions when
+                potential infringement is detected.
               </p>
             </CardContent>
           </Card>
@@ -193,7 +193,7 @@ export default function CompletePlanPage() {
           </div>
           <div className="flex items-start">
             <CheckIcon className="w-5 h-5 text-accent mr-2 mt-0.5" />
-            <span>AI-powered sales agent</span>
+            <span>AI-powered agent</span>
           </div>
           <div className="flex items-start">
             <CheckIcon className="w-5 h-5 text-accent mr-2 mt-0.5" />
@@ -265,15 +265,15 @@ export default function CompletePlanPage() {
 
           <Card className="border border-border/30 bg-card/70 backdrop-blur-lg overflow-hidden">
             <CardHeader>
-              <CardTitle>IP Monetization Focus</CardTitle>
+              <CardTitle>IP Protection Focus</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Perfect for creators and organizations looking to generate
-                revenue from their intellectual property through licensing,
-                sales, or partnerships. The AI sales agent actively works to
-                identify monetization opportunities and represent your IP to
-                potential buyers.
+                Perfect for creators and organizations looking to actively
+                protect their intellectual property from unauthorized use. The
+                AI agent continuously monitors the internet for potential
+                infringement and provides comprehensive reports with evidence
+                and suggested actions.
               </p>
             </CardContent>
           </Card>
@@ -304,7 +304,7 @@ export default function CompletePlanPage() {
 
           <div className="flex items-start">
             <div className="flex-shrink-0 w-1/3 pr-6 font-medium text-right">
-              <span className="text-accent">Complete:</span> AI Sales Agent
+              <span className="text-accent">Complete:</span> AI Agent
             </div>
             <div className="flex-grow border-l border-border pl-6 pb-4">
               <p className="text-sm text-foreground/80">
@@ -378,11 +378,11 @@ export default function CompletePlanPage() {
               property?
             </h3>
             <p className="mt-2 text-sm text-foreground/80">
-              Yes, you have complete control over the AI sales agent. You can
-              define parameters including pricing requirements, potential use
-              cases, target industries, conversation boundaries, and
-              presentation style. You can also review and approve all leads
-              before direct contact is made.
+              Yes, you have complete control over the AI agent. You can define
+              parameters including pricing requirements, potential use cases,
+              target industries, conversation boundaries, and presentation
+              style. You can also review and approve all leads before direct
+              contact is made.
             </p>
           </div>
 

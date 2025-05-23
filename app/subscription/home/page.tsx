@@ -30,7 +30,7 @@ export default function HomePage() {
         <p className="text-lg md:text-xl text-foreground/80 max-w-3xl mx-auto mb-8">
           Securely store your intellectual property with encryption, share it
           safely with partners, and protect it from unauthorized use – all from
-          just $9/month.
+          just <span className="pricing-blur">$9/month</span>.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
@@ -94,7 +94,7 @@ export default function HomePage() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="text-sm font-medium text-primary mb-1">
+                    <div className="text-sm font-medium text-primary mb-1 pricing-blur">
                       {plan.tag}
                     </div>
                     <CardTitle>{plan.heading}</CardTitle>
@@ -104,7 +104,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-foreground/80 mb-4">{plan.text}</p>
-                <div className="font-bold text-lg text-foreground">
+                <div className="font-bold text-lg text-foreground pricing-blur">
                   {plan.price}
                 </div>
               </CardContent>
