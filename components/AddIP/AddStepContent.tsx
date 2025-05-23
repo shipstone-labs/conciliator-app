@@ -75,7 +75,10 @@ export const AddStepContent = memo(
             )
             if (fileUploadZone) {
               fileUploadZone.setAttribute('data-upload-complete', 'true')
-              fileUploadZone.setAttribute('data-testid', testIds.addIdea.fileUploadZone)
+              fileUploadZone.setAttribute(
+                'data-testid',
+                testIds.addIdea.fileUploadZone
+              )
             }
           }
         }
