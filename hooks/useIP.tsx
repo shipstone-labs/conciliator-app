@@ -190,7 +190,9 @@ export function useIPs({
   myItems?: boolean
   currentPage?: number
 }) {
+  console.log('[useIPs] Hook called with:', { myItems, currentPage: _page, _limit })
   const { user } = useStytchUser()
+  console.log('[useIPs] Stytch user:', user?.user_id)
   const { owner, creator } = useMemo(() => {
     if (!myItems) {
       return {}
@@ -211,8 +213,22 @@ export function useIPs({
       : undefined
     return { creator, owner }
   }, [user?.user_id, myItems])
-  const { fbPromise, fbUser } = useSession()
+  const sessionResult = useSession()
+  console.log('[useIPs] useSession result type:', typeof sessionResult)
+  console.log('[useIPs] Session state:', sessionResult?.state)
+  console.log(
+    '[useIPs] Session properties:',
+    Object.keys(sessionResult || {}).slice(0, 10)
+  )
+  const { fbPromise, fbUser } = sessionResult as any
+  console.log(
+    '[useIPs] Destructured values - fbPromise:',
+    fbPromise,
+    'fbUser:',
+    fbUser
+  )
   if (!fbUser && fbPromise) {
+    console.log('[useIPs] Would throw fbPromise but it is:', fbPromise)
     throw fbPromise
   }
   const [ideaData, setIdeaData] = useState<{
@@ -224,6 +240,14 @@ export function useIPs({
   >({ 1: undefined })
   const [additionalDocs, setAdditionalDocs] = useState<string[]>()
   useEffect(() => {
+    console.log(
+      '[useIPs] useEffect running with additionalDocs:',
+      additionalDocs,
+      'creator:',
+      creator,
+      'owner:',
+      owner
+    )
     const fs = getFirestore()
     let qry: Query = collection(fs, 'ip')
     if (additionalDocs) {
@@ -319,8 +343,18 @@ export function useIPs({
 }
 
 export function useIPAudit(tokenId: string) {
-  const { fbPromise, fbUser } = useSession()
+  console.log('[useIPAudit] Hook called with tokenId:', tokenId)
+  const sessionResult = useSession()
+  console.log('[useIPAudit] useSession result type:', typeof sessionResult)
+  const { fbPromise, fbUser } = sessionResult as any
+  console.log(
+    '[useIPAudit] Destructured values - fbPromise:',
+    fbPromise,
+    'fbUser:',
+    fbUser
+  )
   if (!fbUser && fbPromise) {
+    console.log('[useIPAudit] Would throw fbPromise but it is:', fbPromise)
     throw fbPromise
   }
   const [ideaData, setIdeaData] = useState<IPAudit | undefined>()
