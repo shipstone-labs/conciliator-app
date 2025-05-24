@@ -189,13 +189,16 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
     return () => window.removeEventListener('resize', updateResponsiveness)
   }, [])
 
-  const { data: ipItems, pages: totalPages } = useIPs({
+  console.log('[IPListView] Calling useIPs with myItems:', myItems)
+  const ipData = useIPs({
     orderBy: 'createdAt',
     orderDirection: 'desc',
     itemsPerPage,
     currentPage,
     myItems,
-  }) || { pages: 1 }
+  })
+  console.log('[IPListView] useIPs returned:', ipData)
+  const { data: ipItems, pages: totalPages } = ipData || { pages: 1 }
 
   const goToPage = useCallback((page: number) => {
     setCurrentPage(page)
@@ -214,8 +217,10 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
   }, [ipItems, debouncedSearchTerm])
 
   if (!ipItems) {
+    console.log('[IPListView] No ipItems, showing Loading component')
     return <Loading />
   }
+  console.log('[IPListView] Have ipItems:', ipItems.length, 'items')
 
   return (
     <div className="w-full flex flex-col items-center p-3">
