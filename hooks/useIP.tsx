@@ -190,7 +190,11 @@ export function useIPs({
   myItems?: boolean
   currentPage?: number
 }) {
-  console.log('[useIPs] Hook called with:', { myItems, currentPage: _page, _limit })
+  console.log('[useIPs] Hook called with:', {
+    myItems,
+    currentPage: _page,
+    _limit,
+  })
   const { user } = useStytchUser()
   console.log('[useIPs] Stytch user:', user?.user_id)
   const { owner, creator } = useMemo(() => {
