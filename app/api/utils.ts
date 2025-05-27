@@ -1,9 +1,17 @@
-import {
-  type LitNodeClient,
-  type LitResourceAbilityRequest,
-  type AuthCallbackParams,
-  createLitClient,
-  LIT_NETWORK,
+// Conditional import to prevent server-side issues
+let litWrapperModule: any = null
+async function getLitWrapper() {
+  if (!litWrapperModule) {
+    litWrapperModule = await import('lit-wrapper')
+  }
+  return litWrapperModule
+}
+
+// Type imports (these don't execute at runtime)
+import type {
+  LitNodeClient,
+  LitResourceAbilityRequest,
+  AuthCallbackParams,
 } from 'lit-wrapper'
 import { OpenAI } from 'openai'
 import {
@@ -286,8 +294,12 @@ export async function getLit() {
     return await withTracing(
       'litClient',
       async () => {
-        const litClient = await createLitClient({
-          litNetwork: LIT_NETWORK.Datil,
+        const litWrapper = await getLitWrapper()
+        if (!litWrapper) {
+          throw new Error('lit-wrapper not available in server environment')
+        }
+        const litClient = await litWrapper.createLitClient({
+          litNetwork: litWrapper.LIT_NETWORK.Datil,
           debug: false,
         })
         global.document = { dispatchEvent: (_event: Event) => true } as Document
