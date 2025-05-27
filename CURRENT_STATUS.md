@@ -289,3 +289,63 @@ Added a portfolio management research feature to gather insights from IP profess
 - **Pricing Display**: Added CSS blur effects during testing phases
 - **Responsive Design**: Enhanced mobile experience across all subscription pages
 - **Accessibility**: Improved navigation and form interactions
+
+## TestID Implementation Guidelines
+
+### Overview
+SafeIdea uses data-testid attributes to enable automated testing with Claude Code SDK and Playwright. The test manifest has been removed in favor of direct DOM discovery.
+
+### Naming Convention
+Use the pattern: `[context]-[element]-[action]`
+
+Examples:
+- `ip-list-search-input`
+- `ip-detail-decrypt-button` 
+- `add-idea-title-input`
+- `nav-home-link`
+
+### Implementation Rules
+1. **Add testids only to interactive elements** and key content areas
+2. **Don't add testids to purely visual elements** (decorative divs, spacers, etc.)
+3. **Be consistent with naming** - if similar elements exist elsewhere, use similar patterns
+4. **Keep names descriptive but concise** - they should be self-documenting
+
+### When to Add TestIDs
+- ✅ Buttons, links, and other clickable elements
+- ✅ Form inputs, selects, and textareas
+- ✅ Key content containers that tests need to verify
+- ✅ Modal dialogs and their close buttons
+- ✅ Navigation elements
+- ❌ Pure styling wrappers
+- ❌ Static text unless it's a key assertion point
+- ❌ Hidden elements used only for styling
+
+### Current Coverage
+**Well Covered:**
+- Navigation components (nav-*)
+- Add IP workflow
+- Terms dialog
+- Assessment flow
+- Welcome/homepage
+
+**Needs TestIDs:**
+- IP Details/Discovery flow (priority)
+- Individual IP list items
+- Some modal dialogs
+
+### Example Implementation
+```tsx
+// Good - interactive element with clear naming
+<Button data-testid="ip-detail-view-button" onClick={handleView}>
+  View Document
+</Button>
+
+// Good - form input with context
+<Input data-testid="add-idea-title-input" value={title} />
+
+// Good - content area that tests verify
+<div data-testid="ip-detail-content">{content}</div>
+
+// Bad - purely visual wrapper
+<div data-testid="spacer-div" className="mt-4" />
+```

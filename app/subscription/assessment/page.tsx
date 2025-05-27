@@ -124,7 +124,7 @@ const ASSESSMENT_QUESTIONS = [
       },
       {
         id: 'nda-enforcement',
-        label: 'Making sure NDAs are enforceable',
+        label: 'Making sure NDAs are cryptographically verifiable',
         description:
           'You need confidence that sharing agreements will be respected',
       },
@@ -149,22 +149,22 @@ const ASSESSMENT_QUESTIONS = [
     options: [
       {
         id: 'minimal',
-        label: 'Less than $10/month',
-        description: 'Basic protection with minimal features',
+        label: 'Basic budget',
+        description: 'Essential protection with core features',
       },
       {
         id: 'moderate',
-        label: '$10-20/month',
-        description: 'Standard protection with essential features',
+        label: 'Standard budget',
+        description: 'Balanced protection with key sharing features',
       },
       {
         id: 'premium',
-        label: '$20-30/month',
-        description: 'Enhanced protection with advanced features',
+        label: 'Professional budget',
+        description: 'Advanced protection with monitoring capabilities',
       },
       {
         id: 'enterprise',
-        label: 'More than $30/month',
+        label: 'Enterprise budget',
         description: 'Comprehensive protection with all available features',
       },
       {

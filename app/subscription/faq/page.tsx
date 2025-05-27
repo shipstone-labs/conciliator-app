@@ -119,9 +119,9 @@ const FAQ_CATEGORIES = [
       },
       {
         id: 'nda-enforcement',
-        question: 'Are the NDAs legally enforceable?',
+        question: 'Are the NDAs cryptographically verifiable?',
         answer:
-          'Yes, our NDAs are created by intellectual property attorneys and are legally binding in most jurisdictions. We use proper electronic signature technology that complies with e-signature laws, and we timestamp and record all agreement acceptances. However, as with any legal document, enforcement may vary by jurisdiction.',
+          'Yes, your NDAs are linked to your encrypted content so that the terms of the NDA are permanently attached to your intellectual property. We use proper electronic signature technology that complies with e-signature laws, and we timestamp and record all agreement acceptances. However, as with any legal document, enforcement may vary by jurisdiction.',
       },
       {
         id: 'ai-agent-work',

@@ -18,7 +18,10 @@ export const ShowDocument = ({ viewed, view }: ShowDocumentProps) => {
           </span>
         </div>
       </CardHeader>
-      <CardContent className="pt-6 space-y-5">
+      <CardContent
+        className="pt-6 space-y-5"
+        data-testid="ip-detail-document-content"
+      >
         {viewed ? (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{viewed}</ReactMarkdown>
         ) : (
