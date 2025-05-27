@@ -32,6 +32,7 @@
   ],
   "exclude": [
     "node_modules",
+    "submods",
     "node_modules.prod",
     "packages/firebase-functions",
     "firebase-functions",

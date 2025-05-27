@@ -1,83 +1,68 @@
 // Web Storage Wrapper
 // Isolated wrapper for Web3 Storage client
-import { type Client, create } from '@web3-storage/w3up-client'
-import { StoreMemory } from '@web3-storage/w3up-client/stores/memory'
-import { parse } from '@web3-storage/w3up-client/proof'
-import { Signer } from '@web3-storage/w3up-client/principal/ed25519'
+import { type Client, create } from '@storacha/client'
+import { StoreMemory } from '@storacha/client/stores/memory'
+import { parse } from '@storacha/client/proof'
+import { Signer } from '@storacha/client/principal/ed25519'
 import type {
   ListRequestOptions,
   UploadListSuccess,
-} from '@web3-storage/w3up-client/types'
-import * as ed from '@noble/ed25519'
-import { sha512 } from '@noble/hashes/sha512'
+} from '@storacha/client/types'
+import * as DID from '@ipld/dag-ucan/did'
 
-// Fix the SHA-512 implementation for ed25519
-// This is critical for correct operation in all environments
-// @ts-ignore
-ed.etc.sha512Sync = (...m) => {
-  try {
-    // Create a clean TypedArray from the concatenated bytes
-    const input = ed.etc.concatBytes(...m)
+// import * as ed from '@noble/ed25519'
+// import { sha512 } from '@noble/hashes/sha512'
 
-    // Ensure we're always using a clean Uint8Array for consistency
-    const cleanInput = new Uint8Array(input)
+// // Fix the SHA-512 implementation for ed25519
+// // This is critical for correct operation in all environments
+// // @ts-ignore
+// ed.etc.sha512Sync = (...m) => {
+//   try {
+//     // Create a clean TypedArray from the concatenated bytes
+//     const input = ed.etc.concatBytes(...m)
 
-    // Call the SHA-512 implementation with the clean input
-    return sha512(cleanInput)
-  } catch (error) {
-    console.error('Error in custom sha512Sync:', error)
-    // Return a dummy buffer with the correct length (64 bytes)
-    return new Uint8Array(64).fill(1)
-  }
-}
+//     // Ensure we're always using a clean Uint8Array for consistency
+//     const cleanInput = new Uint8Array(input)
 
-// Also patch the async SHA-512 function that uses SubtleCrypto directly
-// This fixes the "message.buffer" issue in WebCrypto
-// @ts-ignore
-ed.etc.sha512Async = async (...messages) => {
-  try {
-    // Get the crypto object
-    const crypto =
-      typeof globalThis === 'object' && 'crypto' in globalThis
-        ? globalThis.crypto
-        : undefined
+//     // Call the SHA-512 implementation with the clean input
+//     return sha512(cleanInput)
+//   } catch (error) {
+//     console.error('Error in custom sha512Sync:', error)
+//     // Return a dummy buffer with the correct length (64 bytes)
+//     return new Uint8Array(64).fill(1)
+//   }
+// }
 
-    if (!crypto || !crypto.subtle) {
-      throw new Error('crypto.subtle must be defined')
-    }
+// // Also patch the async SHA-512 function that uses SubtleCrypto directly
+// // This fixes the "message.buffer" issue in WebCrypto
+// // @ts-ignore
+// ed.etc.sha512Async = async (...messages) => {
+//   try {
+//     // Get the crypto object
+//     const crypto =
+//       typeof globalThis === 'object' && 'crypto' in globalThis
+//         ? globalThis.crypto
+//         : undefined
 
-    // Concatenate messages
-    const m = ed.etc.concatBytes(...messages)
+//     if (!crypto || !crypto.subtle) {
+//       throw new Error('crypto.subtle must be defined')
+//     }
 
-    // Create a clean Uint8Array - THE KEY FIX: don't use .buffer property!
-    const cleanInput = new Uint8Array(m)
+//     // Concatenate messages
+//     const m = ed.etc.concatBytes(...messages)
 
-    // Call digest WITHOUT using .buffer property
-    const hashBuffer = await crypto.subtle.digest('SHA-512', cleanInput)
+//     // Create a clean Uint8Array - THE KEY FIX: don't use .buffer property!
+//     const cleanInput = new Uint8Array(m)
 
-    // Return as Uint8Array
-    return new Uint8Array(hashBuffer)
-  } catch (error) {
-    console.error('Error in patched sha512Async:', error)
-    throw error
-  }
-}
+//     // Call digest WITHOUT using .buffer property
+//     const hashBuffer = await crypto.subtle.digest('SHA-512', cleanInput)
 
-// /**
-//  * Type definitions for Web3 Storage client
-//  */
-// export interface Web3StorageClient {
-//   login(email: string): Promise<void>;
-//   currentSpace(): Promise<any>;
-//   spaces(): Promise<any[]>;
-//   createSpace(name: string): Promise<any>;
-//   uploadBlob(blob: Blob): Promise<{ toString(): string }>;
-//   capability: {
-//     store: {
-//       list(options: { space: string }): Promise<any[]>;
-//     };
-//   };
-//   [key: string]: any;
+//     // Return as Uint8Array
+//     return new Uint8Array(hashBuffer)
+//   } catch (error) {
+//     console.error('Error in patched sha512Async:', error)
+//     throw error
+//   }
 // }
 
 /**
@@ -96,13 +81,36 @@ export interface StoreResult {
   cid: string | null
 }
 
+const url = new URL('https://up.web3.storage')
+const id = DID.parse('did:web:web3.storage')
+const serviceConf = {
+  access: {
+    url,
+    id,
+  },
+  store: {
+    url,
+    id,
+  },
+  upload: {
+    url,
+    id,
+  },
+  space: {
+    url,
+    id,
+  },
+}
+
 /**
  * Create a new Web3.Storage client
  * @returns The Web3.Storage client instance
  */
 export async function createW3Client(): Promise<Client> {
   try {
-    return await create()
+    return await create({
+      serviceConf,
+    })
   } catch (error) {
     console.error('Error creating W3 client:', error)
     throw error
@@ -138,6 +146,7 @@ export async function createAsAgent(key: string, proof: string) {
   // Load client with specific private key
   const principal = Signer.parse(key)
   const store = new StoreMemory()
+
   const client = await create({ principal, store })
   // Add proof that this agent has been delegated capabilities on the space
   const parsedProof = await parse(proof)

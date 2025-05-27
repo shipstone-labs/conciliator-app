@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Menu } from 'lucide-react'
@@ -29,6 +29,7 @@ export default function NavigationHeader() {
     isAuthenticated: Boolean(isInitialized && user).toString(),
   })
 
+  const session = useSession()
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
 
   // Only show account options if user is authenticated
@@ -55,6 +56,10 @@ export default function NavigationHeader() {
       { userId: user?.user_id || 'unknown' }
     )
   }
+
+  const handleLogin = useCallback(() => {
+    session.stytchUser?.wait(true)
+  }, [session.stytchUser])
 
   return (
     <div className="flex w-full items-center justify-between">
@@ -155,6 +160,7 @@ export default function NavigationHeader() {
             {!isAuthenticated && (
               <Link href="/" className="block">
                 <DropdownMenuItem
+                  onClick={handleLogin}
                   className="px-3 py-2 hover:bg-muted/20 rounded-lg cursor-pointer"
                   data-testid="nav-account-login"
                 >

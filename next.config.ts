@@ -73,6 +73,15 @@ const nextConfig: NextConfig = {
         })
       )
     }
+    // Handle js-sdk files properly - they are CommonJS with some ESM features
+    config.module.rules.push({
+      test: /\.js$/,
+      include: /submods\/js-sdk/,
+      type: 'javascript/auto', // Let webpack auto-detect the module type
+      resolve: {
+        fullySpecified: false,
+      },
+    })
     // Handle browser-compatibility for Node.js built-ins
     // Provide empty implementations for Node.js built-ins
     if (!isServer) {
@@ -129,6 +138,10 @@ const nextConfig: NextConfig = {
         'node:punycode': require.resolve('./lib/shims/punycode.js'),
         punycode: require.resolve('./lib/shims/punycode.js'),
         depd: require.resolve('./lib/shims/depd.js'),
+        // Prevent server from loading browser-specific wrappers
+        'lit-wrapper': false,
+        'web-storage-wrapper': false,
+        'lilypad-wrapper': false,
       }
 
       // Tell webpack not to bundle these modules for server builds
@@ -142,6 +155,10 @@ const nextConfig: NextConfig = {
         '@opentelemetry/instrumentation-express',
         '@opentelemetry/resources',
         '@opentelemetry/instrumentation',
+        // Prevent browser wrappers from being bundled on server
+        'lit-wrapper',
+        'web-storage-wrapper',
+        'lilypad-wrapper',
       ]
     }
 
@@ -152,8 +169,27 @@ const nextConfig: NextConfig = {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     }
 
+    // Handle import.meta differently for dev vs production and server vs client
+    if (!isServer) {
+      // Add browser globals
+      env['globalThis.self'] = 'globalThis'
+      env.window = 'globalThis'
+    }
+
     // CRITICAL: Do NOT map "process.env" as a whole object - this can break variable replacement
     config.plugins.push(new webpack.DefinePlugin(env))
+
+    // Fix webpack chunk loading for server-side bundles
+    if (isServer) {
+      // Ensure webpack uses 'global' instead of 'self' for server bundles
+      config.output = {
+        ...config.output,
+        globalObject: 'global',
+      }
+
+      // Add global definition for self to prevent ReferenceError
+      env.self = 'global'
+    }
 
     // Add support for Handlebars templates
     config.module.rules.push({
@@ -169,19 +205,50 @@ const nextConfig: NextConfig = {
       type: 'asset/source',
     })
 
+    // Ensure proper ES module support for import.meta
+    config.module.rules.push({
+      test: /\.(js|mjs|ts|tsx)$/,
+      resolve: {
+        fullySpecified: false,
+      },
+    })
+
+    // Handle .mjs files specifically to prevent import.meta errors
+    config.module.rules.push({
+      test: /\.mjs$/,
+      include: /node_modules/,
+      type: 'javascript/auto',
+      resolve: {
+        fullySpecified: false,
+      },
+    })
+
+    // Enable ES module support
+    config.experiments = {
+      ...config.experiments,
+      topLevelAwait: true,
+      layers: true,
+    }
+
+    // Minimal import.meta support - only add what's necessary
+    if (dev && !isServer) {
+      // Add import.meta polyfill for client-side dev builds
+      env['import.meta.webpackHot'] = 'undefined'
+    }
+
     return config
   },
   // Skip module checking for wrapper packages and their external dependencies
   serverExternalPackages: [
     // Lit Protocol
     'lit-wrapper',
-    '@lit-protocol/constants',
-    '@lit-protocol/lit-node-client',
+    // '@lit-protocol/constants',
+    // '@lit-protocol/lit-node-client',
     // Web3 Storage
     'web-storage-wrapper',
-    '@web3-storage/w3up-client',
-    '@noble/ed25519',
-    'multiformats',
+    // '@storacha/client',
+    // '@noble/ed25519',
+    // 'multiformats',
     // Lilypad
     'lilypad-wrapper',
     // Firebase
