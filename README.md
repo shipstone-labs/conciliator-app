@@ -18,7 +18,7 @@ SafeIdea uses a downsampling technique to support discovery while protecting you
 ## Technology Stack
 
 * Storage: Filecoin and Storacha for secure, decentralized storage
-* Computation: Lilypad for decentralized AI processing
+* Computation: Lilypad for decentralized AI processing (temporarily disabled)
 * Access Control: LIT Protocol for token-gated encryption
 * Authentication: Stytch OTP with LIT PKP wallets
 
