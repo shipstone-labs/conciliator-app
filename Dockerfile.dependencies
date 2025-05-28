@@ -54,7 +54,7 @@ COPY .gitmodules ./.gitmodules
 COPY submods ./submods
 RUN cd submods/upload-service && corepack enable pnpm && pnpm install && pnpm nx run-many -t build --prod --parallel --all
 RUN cd submods/js-sdk && yarn install && yarn build
-RUN corepack enable pnpm
+
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-*.yaml* .npmrc* ./
 COPY packages/lit-wrapper/package.json ./packages/lit-wrapper/
@@ -62,7 +62,7 @@ COPY packages/web-storage-wrapper/package.json ./packages/web-storage-wrapper/
 COPY packages/lilypad-wrapper/package.json ./packages/lilypad-wrapper/
 COPY patches ./patches
 
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
+RUN corepack enable pnpm && pnpm i
 
 COPY packages ./packages
 
