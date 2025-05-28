@@ -2,12 +2,17 @@ import { formatDate, type IPDoc } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Fragment } from 'react'
 import { Button } from '../ui/button'
+import { useFeature } from '@/hooks/useFeature'
 
 type DealsProps = {
   ipDoc: IPDoc
 }
 
 export const Deals = ({ ipDoc }: DealsProps) => {
+  const hasPurchase = useFeature('stripe')
+  if (!hasPurchase) {
+    return null
+  }
   return ipDoc.deals?.length ? (
     <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
       <CardHeader>

@@ -20,7 +20,8 @@
       "package.json",
       "db.json",
       "packages/firebase-functions/lib/**",
-      "hardhat"
+      "hardhat",
+      "submods"
     ]
   },
   "formatter": {
