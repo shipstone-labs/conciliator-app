@@ -24,15 +24,6 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "@lit-protocol/constants": "link:submods/js-sdk/packages/constants",
-    "@lit-protocol/contracts-sdk": "link:submods/js-sdk/packages/contracts-sdk",
-    "@lit-protocol/contracts": "link:submods/js-sdk/packages/contracts",
-    "@lit-protocol/crypto": "link:submods/js-sdk/packages/crypto",
-    "@lit-protocol/lit-auth-client": "link:submods/js-sdk/packages/lit-auth-client",
-    "@lit-protocol/lit-node-client": "link:submods/js-sdk/packages/lit-node-client",
-    "@lit-protocol/pkp-ethers": "link:submods/js-sdk/packages/pkp-ethers",
-    "@lit-protocol/types": "link:submods/js-sdk/packages/types",
-    "@storacha/client": "link:submods/upload-service/packages/w3up-client",
     "@google-cloud/kms": "^5.0.1",
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.4.1",
     "@google-cloud/opentelemetry-resource-util": "^2.4.0",
