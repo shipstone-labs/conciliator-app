@@ -27,6 +27,7 @@ export const MyAgent = ({ ipDoc }: MyAgentProps) => {
         className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
         aria-label="Go to My AI Agent"
         onKeyDown={onKeyDown}
+        data-testid="ip-detail-discovery-button"
       >
         <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all mt-8">
           <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">

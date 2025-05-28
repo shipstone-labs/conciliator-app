@@ -244,7 +244,10 @@ const DetailIP = ({
               height={160}
               className="rounded-xl object-cover shadow-md border border-border/30 hover:border-primary/30 transition-all mb-4"
             />
-            <h1 className="text-3xl font-bold text-primary mb-2">
+            <h1
+              className="text-3xl font-bold text-primary mb-2"
+              data-testid="ip-detail-title"
+            >
               {ipDoc.name}
             </h1>
             {/* Removed instructional text as per cleanup request */}

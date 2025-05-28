@@ -16,6 +16,7 @@ export const ViewStatus = ({ view, ipDoc }: ViewDocProps) => {
       onClick={() => router.push(`/view/${ipDoc.id}`)}
       className="cursor-pointer transform transition-transform hover:scale-[1.01] active:scale-[0.99]"
       aria-label="Go to View Mode"
+      data-testid="ip-detail-view-button"
     >
       <Card className="w-full backdrop-blur-lg bg-background/30 border border-primary/20 shadow-xl hover:border-primary hover:shadow-primary/20 transition-all">
         <CardContent className="p-5 flex flex-col sm:flex-row gap-4 items-center">

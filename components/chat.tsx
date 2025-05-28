@@ -674,6 +674,7 @@ export default function ChatUI({
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
                 className="resize-none bg-background/40 border-border focus:ring-primary focus:border-primary w-full h-[120px] pr-16 rounded-lg backdrop-blur-sm text-foreground placeholder:text-foreground/50" // Adjust height and padding for the button
+                data-testid="discovery-chat-input"
               />
               {!autoCompleting ? (
                 <button
@@ -688,6 +689,7 @@ export default function ChatUI({
                       : 'bg-white border-blue-500 hover:bg-blue-50'
                   }`}
                   aria-label="Send"
+                  data-testid="discovery-send-button"
                 >
                   {cycleInProgress ? (
                     // Loading indicator with theme colors

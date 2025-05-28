@@ -200,7 +200,7 @@ export const MainCard = ({ ipDoc, onBuy }: MainCardProps) => {
                         Access Options:
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        {prices?.map((item: AmendedProduct) => (
+                        {prices?.map((item: AmendedProduct, index: number) => (
                           <button
                             key={item.id}
                             type="button"
@@ -213,6 +213,7 @@ export const MainCard = ({ ipDoc, onBuy }: MainCardProps) => {
                             onClick={() => ndaValid && onBuy(item)}
                             role={ndaValid ? 'button' : ''}
                             tabIndex={ndaValid ? 0 : -1}
+                            data-testid={`ip-detail-access-option-${index}`}
                           >
                             <p className="text-foreground/70 text-xs">
                               {item.name}
@@ -267,6 +268,7 @@ export const MainCard = ({ ipDoc, onBuy }: MainCardProps) => {
                                     setNdaChecked(e.target.checked)
                                   }
                                   className="mr-2 rounded border-border/30 bg-muted/30 text-primary"
+                                  data-testid="ip-detail-nda-checkbox"
                                 />
                                 <label
                                   htmlFor="nda-confirmation"
