@@ -241,3 +241,7 @@ We welcome contributions to SafeIdea! Please feel free to submit issues and pull
 ## Support
 
 If you have questions about SafeIdea, please contact us at dev@safeidea.ai
+
+## force
+
+Deploy 1
