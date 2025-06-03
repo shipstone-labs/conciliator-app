@@ -403,6 +403,12 @@ importers:
 
   packages/lit-wrapper:
     dependencies:
+      '@lit-protocol/accs-schemas':
+        specifier: link:../../submods/js-sdk/packages/accs-schema
+        version: link:../../submods/js-sdk/packages/accs-schema
+      '@lit-protocol/auth-helpers':
+        specifier: link:../../submods/js-sdk/packages/auth-helpers
+        version: link:../../submods/js-sdk/packages/auth-helpers
       '@lit-protocol/constants':
         specifier: link:../../submods/js-sdk/packages/constants
         version: link:../../submods/js-sdk/packages/constants
