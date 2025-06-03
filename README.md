@@ -50,107 +50,107 @@ Try it today! Tell us what you think!
    cd conciliator-app
    ```
 
-2. Install [mise](https://mise.jdx.dev/getting-started.html) first or manage node@22.13.1 and pnpm@10.7.1. Later versions will most likely work but these are the versions used. You're welcome to use asdf or nvm, but you'd have
-to manually assure all the versions.
+2. Install [mise](https://mise.jdx.dev/getting-started.html)
+  first or manage node@22.13.1 and pnpm@10.7.1. Later versions will most likely work but these are the versions used. You're welcome to use asdf or nvm, but you'd have to manually assure all the versions.
 
-  ```bash
-  mise install
-  ```
+    ```bash
+    mise install
+    ```
 
-1. Install dependencies:
+3. Install dependencies:
 
-   ```bash
-   pnpm install
-   ```
+    ```bash
+    pnpm install
+    ```
 
-2. Create a `.env.local` file with all the required environment variables in `.env.local.example`
+4. Create a `.env.local` file with all the required environment variables in `.env.local.example`
 
-  i.e.
+    i.e.
 
-  ```bash
-  cp .env.local.example .env.local
-  cp hardhat/.env.example hardhat/.env
-  # Fill out .env.local and hardhat/.env.example
-  ```
+    ```bash
+    cp .env.local.example .env.local
+    cp hardhat/.env.example hardhat/.env
+    # Fill out .env.local and hardhat/.env.example
+    ```
 
-and then fillin all the environment variables. The PK is in both .env files.
+    and then fillin all the environment variables. The PK is in both .env files.
 
-1. Deploy the IPDocV8 token
+5. Deploy the IPDocV8 token
 
-  ```bash
-  cd hardhat
-  npm install
-  npx hardhat compile
-  npx hardhat run scripts/deploy.js --network hyperspace
-  ```
+    ```bash
+    cd hardhat
+    npm install
+    npx hardhat compile
+    npx hardhat run scripts/deploy.js --network hyperspace
+    ```
 
-Watch which new buildInfo is generated.
-Add the buildinfo path and the token address into the verify.js file.
-Put the deployed contract and your PK address (listed during deploy)
+    Watch which new buildInfo is generated.
+    Add the buildinfo path and the token address into the verify.js file.
+    Put the deployed contract and your PK address (listed during deploy)
 
-  ```.env
-  NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=0x79665408484fFf9dC7b0BC6b0d42CB18866b9311
-  NEXT_PUBLIC_LIT_ADDRESS=0xa6985f885c29cff477212ba5b2fb7679f83555b6
-  ```
+    ```.env
+    NEXT_PUBLIC_LIT_CONTRACT_ADDRESS=0x79665408484fFf9dC7b0BC6b0d42CB18866b9311
+    NEXT_PUBLIC_LIT_ADDRESS=0xa6985f885c29cff477212ba5b2fb7679f83555b6
+    ```
 
-  ```bash
-  npx hardhat run script/verify.js --network hyperspace
-  ```
+    ```bash
+    npx hardhat run script/verify.js --network hyperspace
+    ```
 
-This will verify the contract on filfox for filecoin calibration.
+    This will verify the contract on filfox for filecoin calibration.
 
-1. Get a capacity token for LIT using the lit explorer and faucet and put the tokenID. And get a relayer api key (although I was able to get test-api-key to work for now)
+6. Get a capacity token for LIT using the lit explorer and faucet and put the tokenID. And get a relayer api key (although I was able to get test-api-key to work for now)
 
-  ```.env
-  LIT_CAPACITY_TOKEN_ID=
-  NEXT_PUBLIC_LIT_RELAY_API_KEY=test-api-key
-  ```
+    ```.env
+    LIT_CAPACITY_TOKEN_ID=
+    NEXT_PUBLIC_LIT_RELAY_API_KEY=test-api-key
+    ```
 
-1. Create a storacha space, key and delegation proof and put them
+7. Create a storacha space, key and delegation proof and put them
 
-  ```.env
-  STORACHA_AGENT_KEY=
-  STORACHA_AGENT_DID=
-  STORACHA_AGENT_PROOF=
-  ```
+    ```.env
+    STORACHA_AGENT_KEY=
+    STORACHA_AGENT_DID=
+    STORACHA_AGENT_PROOF=
+    ```
 
-The proof has to be base64 encoded.
+    The proof has to be base64 encoded.
 
-1. Create a stytch project and setup
+8. Create a stytch project and setup
 
-  ```.env
-  STYTCH_APP_ID=
-  STYTCH_APP_SECRET=
-  STYTCH_ENV=test
-  NEXT_PUBLIC_STYTCH_PROJECT_ENV=test
-  NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=
-  NEXT_PUBLIC_STYTCH_APP_ID=
-  ```
+    ```.env
+    STYTCH_APP_ID=
+    STYTCH_APP_SECRET=
+    STYTCH_ENV=test
+    NEXT_PUBLIC_STYTCH_PROJECT_ENV=test
+    NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=
+    NEXT_PUBLIC_STYTCH_APP_ID=
+    ```
 
-1. Create a firebase and store sa and credentials (this is assuming firestore, auth and storage is setup) It's not using firebase signing, so you don't need to setup any specific login.
+9. Create a firebase and store sa and credentials (this is assuming firestore, auth and storage is setup) It's not using firebase signing, so you don't need to setup any specific login.
 
-You'll need to single line the JSON to put them into the environment variables. `jq -c FILE` should do it.
-The SA is a service account using JSON and the Config is what you see when connecing a web app to firebase.
+    You'll need to single line the JSON to put them into the environment variables. `jq -c FILE` should do it.
+    The SA is a service account using JSON and the Config is what you see when connecing a web app to firebase.
 
-  ```.env
-  FIREBASE_SA=
-  FIREBASE_PROJECT_ID=c
-  NEXT_PUBLIC_FIREBASE_CONFIG=
-```
+    ```.env
+    FIREBASE_SA=
+    FIREBASE_PROJECT_ID=c
+    NEXT_PUBLIC_FIREBASE_CONFIG=
+    ```
 
-1. Get a anura-testnet lilypad api key and put it into.
+10. Get a anura-testnet lilypad api key and put it into.
 
-  ```.env
-  COMPLETION_API_KEY=
-  ```
+    ```.env
+    COMPLETION_API_KEY=
+    ```
 
-1. For image generation we're currently using openai due to time constraints (this will change soon.)
+11. For image generation we're currently using openai due to time constraints (this will change soon.)
 
-  ```.env
-  IMAGE_API_KEY=
-  IMAGE_PROJECT_ID=
-  IMAGE_ORGANIZATION_ID=
-  ```
+    ```.env
+    IMAGE_API_KEY=
+    IMAGE_PROJECT_ID=
+    IMAGE_ORGANIZATION_ID=
+    ```
 
 ### Development
 
