@@ -158,7 +158,7 @@ SafeIdea provides a complete ecosystem for protecting your intellectual property
    - Permanently stored on decentralized infrastructure, impossible to tamper with
    - **Why it matters**: In IP disputes, proving who created something first is often the key to establishing ownership
 
-2. **Enforceable NDAs**
+2. **Cryptographically Verifiable NDAs**
    - System records exactly when someone accessed your information and under what terms
    - Clear chain of evidence if your IP is misused
    - **Why it matters**: Traditional NDAs are difficult to enforce without proof that someone actually had access

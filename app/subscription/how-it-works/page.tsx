@@ -237,7 +237,7 @@ export default function HowItWorksPage() {
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Share2Icon className="w-6 h-6 text-secondary" />
-                <CardTitle>Enforceable NDAs</CardTitle>
+                <CardTitle>Cryptographically Verifiable NDAs</CardTitle>
               </div>
             </CardHeader>
             <CardContent>

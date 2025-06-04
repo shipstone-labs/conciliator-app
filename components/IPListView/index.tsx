@@ -326,7 +326,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
             </TableHeader>
             <TableBody>
               {filteredItems.length === 0 ? (
-                <TableRow>
+                <TableRow data-testid="ip-list-empty-state">
                   <TableCell colSpan={5} className="text-center">
                     {ipItems.length === 0
                       ? 'No items found'
@@ -334,7 +334,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredItems.map((item) => {
+                filteredItems.map((item, index) => {
                   // Get the most recent deal if exists
                   const latestDeal =
                     item.deals && item.deals.length > 0
@@ -356,6 +356,7 @@ function IPListView({ myItems, itemsPerPage = 16 }: IPListViewProps) {
                       key={item.id}
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => handleRowClick(item.id)}
+                      data-testid={`ip-list-item-${index}`}
                     >
                       <TableCell>
                         <div className="flex justify-center">
