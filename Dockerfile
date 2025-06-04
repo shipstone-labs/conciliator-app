@@ -49,6 +49,9 @@ RUN apk add --no-cache libc6-compat
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+COPY --from=builder --chown=nextjs:nodejs /app/submods ./submods
+COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
+
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules.prod ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
@@ -57,6 +60,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+RUN corepack enable pnpm
 
 USER nextjs
 
@@ -67,4 +72,4 @@ ENV PORT=3000
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
 ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+CMD ["pnpm", "node", "server.js"]

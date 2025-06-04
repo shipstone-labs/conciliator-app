@@ -96,7 +96,7 @@ export default {
     }),
     commonjs({
       // Include all node_modules
-      include: /node_modules/,
+      // include: /node_modules/,
       // Transform CommonJS modules to ES6
       transformMixedEsModules: true,
     }),
@@ -129,16 +129,16 @@ export default {
   },
   // We don't want ANY externals - everything should be bundled
   external: [
-    '@lit-protocol/accs-schemas',
-    '@lit-protocol/auth-helpers',
-    '@lit-protocol/constants',
-    '@lit-protocol/contracts',
     // '@lit-protocol/contracts-sdk',
-    '@lit-protocol/crypto',
-    '@lit-protocol/lit-auth-client',
-    '@lit-protocol/pkp-ethers',
-    '@lit-protocol/lit-node-client',
-    '@lit-protocol/types',
+    // '@lit-protocol/accs-schemas',
+    // '@lit-protocol/auth-helpers',
+    // '@lit-protocol/constants',
+    // '@lit-protocol/contracts',
+    // '@lit-protocol/crypto',
+    // '@lit-protocol/lit-auth-client',
+    // '@lit-protocol/pkp-ethers',
+    // '@lit-protocol/lit-node-client',
+    // '@lit-protocol/types',
     // '@simplewebauthn/browser',
     'blakejs',
     'browser-headers',

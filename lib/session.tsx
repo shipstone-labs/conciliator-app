@@ -414,7 +414,6 @@ function constructSession(inject: Partial<Injected>) {
       })
       const pkps = await provider.fetchPKPsThroughRelayer(authMethod)
       const pkp = pkps[0]
-      const duration = 1000 * 60 * 10
       const sessionSigs = await litClient.getPkpSessionSigs({
         pkpPublicKey: pkp.publicKey,
         chain: 'filecoinCalibrationTestnet',
@@ -429,11 +428,13 @@ function constructSession(inject: Partial<Injected>) {
             ability: litModule.LIT_ABILITY.AccessControlConditionDecryption,
           },
         ],
-        expiration: new Date(Date.now() + duration).toISOString(),
       })
-      session._sessionSigsTimeout = setTimeout(() => {
-        session.sessionSigs.clear()
-      }, duration - 5000)
+      let total = 24 * 3600 - 20
+      session._sessionSigsTimeout = setInterval(() => {
+        if (--total < 0) {
+          session.sessionSigs.clear()
+        }
+      }, 1000)
       session.notify({ isLitLoggedIn: true })
       return {
         authMethod,
@@ -491,7 +492,6 @@ function constructSession(inject: Partial<Injected>) {
         return res.json()
       })
 
-      const duration = 1000 * 60 * 10
       const sessionSigs = await litClient.getPkpSessionSigs({
         pkpPublicKey,
         // litNetwork: litModule.LIT_NETWORK.Datil,
@@ -508,12 +508,14 @@ function constructSession(inject: Partial<Injected>) {
             ability: litModule.LIT_ABILITY.AccessControlConditionDecryption,
           },
         ],
-        expiration: new Date(Date.now() + duration).toISOString(), // 10 minutes
         // capacityDelegationAuthSig,
       })
-      setTimeout(() => {
-        session.delegatedSessionSigs.clear()
-      }, duration - 5000)
+      let total = 24 * 3600 - 20
+      session._sessionSigsTimeout = setInterval(() => {
+        if (--total < 0) {
+          session.delegatedSessionSigs.clear()
+        }
+      }, 1000)
       return {
         sessionSigs,
         capacityDelegationAuthSig,
