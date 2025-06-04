@@ -51,6 +51,9 @@ importers:
       '@lit-protocol/access-control-conditions':
         specifier: link:submods/js-sdk/packages/access-control-conditions
         version: link:submods/js-sdk/packages/access-control-conditions
+      '@lit-protocol/auth-helpers':
+        specifier: link:submods/js-sdk/packages/auth-helpers
+        version: link:submods/js-sdk/packages/auth-helpers
       '@opentelemetry/api':
         specifier: 1.9.0
         version: 1.9.0
@@ -401,8 +404,8 @@ importers:
   packages/lit-wrapper:
     dependencies:
       '@lit-protocol/accs-schemas':
-        specifier: ^0.0.26
-        version: 0.0.26
+        specifier: link:../../submods/js-sdk/packages/accs-schema
+        version: link:../../submods/js-sdk/packages/accs-schema
       '@lit-protocol/auth-helpers':
         specifier: link:../../submods/js-sdk/packages/auth-helpers
         version: link:../../submods/js-sdk/packages/auth-helpers
@@ -1687,9 +1690,6 @@ packages:
 
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
-
-  '@lit-protocol/accs-schemas@0.0.26':
-    resolution: {integrity: sha512-njLWohavO/xuqIlH3K6+kbAuF1bNLbKVATX7laD084/BiH84O4Ws+JtAp8qbEyY9OJNXrB7OJl5vMnuwgc2vdA==}
 
   '@modelcontextprotocol/sdk@1.11.1':
     resolution: {integrity: sha512-9LfmxKTb1v+vUS1/emSk1f5ePmTLkb9Le9AxOB5T0XM59EUumwcS45z05h7aiZx3GI0Bl7mjb3FMEglYj+acuQ==}
@@ -9134,10 +9134,6 @@ snapshots:
     optional: true
 
   '@js-sdsl/ordered-map@4.4.2': {}
-
-  '@lit-protocol/accs-schemas@0.0.26':
-    dependencies:
-      ajv: 8.17.1
 
   '@modelcontextprotocol/sdk@1.11.1':
     dependencies:

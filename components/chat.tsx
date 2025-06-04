@@ -117,15 +117,23 @@ export default function ChatUI({
     }
   }, [autoCompleting])
 
-  const hasStop = useMemo(
-    () =>
+  const hasStop = useRef(false)
+  useEffect(() => {
+    if (
       (messages || []).find((message) => {
         return (
           message?.role === 'assistant' && /^(STOP)/i.test(message?.content)
         )
-      }) != null,
-    [messages]
-  )
+      }) != null
+    ) {
+      hasStop.current = true
+      setAutoCompleting(false)
+      setIsStopping(true)
+      setTimeout(() => {
+        setIsStopping(false)
+      }, 1000)
+    }
+  }, [messages])
 
   // Simple flag to track if a discovery cycle is running
   const [cycleInProgress, setCycleInProgress] = useState(false)
@@ -140,7 +148,11 @@ export default function ChatUI({
   // Main function to run a complete cycle (seeker → conciliator)
   const runDiscoveryCycle = useCallback(async () => {
     // Don't start if component unmounted, stopped, or already running
-    if (!isMounted.current || !isAutoDiscoveryActive.current || hasStop) {
+    if (
+      !isMounted.current ||
+      !isAutoDiscoveryActive.current ||
+      hasStop.current
+    ) {
       return
     }
 
@@ -312,7 +324,7 @@ export default function ChatUI({
       }
 
       // If we haven't reached a STOP, schedule next cycle
-      if (!hasStop) {
+      if (!hasStop.current) {
         // IMPORTANT: Make sure we're not already running a cycle
         // This is critical to maintain the ping-pong pattern
         if (cycleRunning.current) {
@@ -331,7 +343,7 @@ export default function ChatUI({
           if (
             isMounted.current &&
             isAutoDiscoveryActive.current &&
-            !hasStop &&
+            !hasStop.current &&
             !cycleRunning.current
           ) {
             runDiscoveryCycle()
@@ -346,7 +358,7 @@ export default function ChatUI({
       cycleRunning.current = false
       setCycleInProgress(false)
     }
-  }, [hasStop, messages, onSend, isStopping, doc, stytchClient?.session])
+  }, [messages, onSend, isStopping, doc, stytchClient?.session])
 
   // Add a mounted ref to track component lifecycle
   const isMounted = useRef(true)
@@ -380,16 +392,16 @@ export default function ChatUI({
     }
 
     // Start the cycle if needed - with strict safety checks for the ping-pong pattern
-    if (autoCompleting && !hasStop && !cycleRunning.current) {
+    if (autoCompleting && !hasStop.current && !cycleRunning.current) {
       // We're intentionally NOT setting cycleRunning.current here
       // runDiscoveryCycle will set it at the beginning to ensure atomicity
       runDiscoveryCycle()
     }
-  }, [autoCompleting, hasStop, runDiscoveryCycle])
+  }, [autoCompleting, runDiscoveryCycle])
 
   // Handle user sending a message
   const handleSendUser = useCallback(async () => {
-    if (!input.trim() || cycleRunning.current) return
+    if (!input.trim() || cycleRunning.current || hasStop.current) return
 
     try {
       // Don't allow manual messages during auto-discovery
@@ -665,12 +677,12 @@ export default function ChatUI({
               <Textarea
                 autoFocus
                 placeholder={
-                  hasStop
+                  hasStop.current
                     ? 'The conversation has ended'
                     : 'Type your question...'
                 }
                 value={input}
-                disabled={loading !== 'none' || hasStop}
+                disabled={loading !== 'none' || hasStop.current}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown} // Handle Enter and Shift + Enter
                 className="resize-none bg-background/40 border-border focus:ring-primary focus:border-primary w-full h-[120px] pr-16 rounded-lg backdrop-blur-sm text-foreground placeholder:text-foreground/50" // Adjust height and padding for the button
@@ -680,10 +692,13 @@ export default function ChatUI({
                   type="button"
                   onClick={handleSendUser}
                   disabled={
-                    cycleInProgress || hasStop || input === '' || autoCompleting
+                    cycleInProgress ||
+                    hasStop.current ||
+                    input === '' ||
+                    autoCompleting
                   } // Disable condition
                   className={`absolute bottom-3 right-3 flex items-center justify-center w-12 h-12 rounded-full border transition ${
-                    cycleInProgress || hasStop
+                    cycleInProgress || hasStop.current
                       ? 'bg-gray-100 border-gray-300 cursor-not-allowed'
                       : 'bg-white border-blue-500 hover:bg-blue-50'
                   }`}
@@ -700,7 +715,7 @@ export default function ChatUI({
                       className="h-5 w-5 transition"
                       fill="none"
                       stroke={
-                        cycleInProgress || hasStop || input === ''
+                        cycleInProgress || hasStop.current || input === ''
                           ? '#A0AEC0'
                           : '#3B82F6'
                       } // Gray when disabled, blue otherwise
@@ -730,11 +745,11 @@ export default function ChatUI({
               <button
                 type="button"
                 onClick={onAutoComplete}
-                disabled={hasStop}
+                disabled={hasStop.current}
                 className={`px-6 py-2 rounded-lg font-medium transition 
       focus:outline-none focus:ring-2 focus:ring-opacity-50 
       ${
-        hasStop
+        hasStop.current
           ? 'bg-gray-500 text-white focus:ring-gray-400'
           : autoCompleting
             ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground focus:ring-secondary/40'
@@ -744,7 +759,7 @@ export default function ChatUI({
       } 
       disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed`}
               >
-                {hasStop
+                {hasStop.current
                   ? 'Discovery Finished'
                   : autoCompleting
                     ? 'Stop'

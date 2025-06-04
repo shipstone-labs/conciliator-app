@@ -48,7 +48,7 @@ export default {
     }),
     commonjs({
       // Include all node_modules
-      include: /node_modules/,
+      // include: /node_modules/,
       // Transform CommonJS modules to ES6
       transformMixedEsModules: true,
     }),
