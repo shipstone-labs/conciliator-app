@@ -403,9 +403,9 @@ importers:
 
   packages/lit-wrapper:
     dependencies:
-      '@lit-protocol/accs-schemas':
-        specifier: link:../../submods/js-sdk/packages/accs-schema
-        version: link:../../submods/js-sdk/packages/accs-schema
+      '@lit-protocol/access-control-conditions':
+        specifier: link:../../submods/js-sdk/packages/access-control-conditions
+        version: link:../../submods/js-sdk/packages/access-control-conditions
       '@lit-protocol/auth-helpers':
         specifier: link:../../submods/js-sdk/packages/auth-helpers
         version: link:../../submods/js-sdk/packages/auth-helpers

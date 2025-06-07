@@ -10,6 +10,8 @@ export type Feature =
   | 'firestore'
   | 'firebase'
   | 'bucket'
+  | 'net'
+  | 'ai'
 
 export function useFeatures(): Partial<Record<Feature, boolean>> {
   const config = useConfig()
@@ -23,9 +25,7 @@ export function useFeatures(): Partial<Record<Feature, boolean>> {
   )
 }
 
-export function useFeature(
-  featureName: string
-): boolean | Record<string, boolean> {
+export function useFeature(featureName: string): boolean {
   const enabledFeatures = useFeatures()
   return (
     (featureName in enabledFeatures && (enabledFeatures as any)[featureName]) ??

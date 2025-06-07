@@ -1,0 +1,63 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, legacy ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: '10.11.0'
+          run_install: false
+          
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # Install dependencies and build the wrappers
+      - name: Install dependencies
+        run: |
+          corepack enable pnpm
+          pnpm install
+          
+      # Build the wrapper packages
+      - name: Build wrappers
+        run: pnpm build:wrappers
+        
+      # Run linters
+      - name: Run Biome lint
+        run: pnpm lint
+        
+      # Run type check
+      - name: Run type check
+        run: pnpm check
+        
+      # Add tests when available
+      # - name: Run tests
+      #   run: pnpm test

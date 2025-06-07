@@ -130,7 +130,7 @@ export default {
   // We don't want ANY externals - everything should be bundled
   external: [
     // '@lit-protocol/contracts-sdk',
-    // '@lit-protocol/accs-schemas',
+    // '@lit-protocol/access-control-conditions',
     // '@lit-protocol/auth-helpers',
     // '@lit-protocol/constants',
     // '@lit-protocol/contracts',

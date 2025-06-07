@@ -1,0 +1,151 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, legacy ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      deployments: write
+      pull-requests: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Prepare for build using packaged dependencies
+        run: pnpm install
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Figure out name
+        id: tagname
+        run: |
+          # Set the tag name based on event type
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For pull requests
+            TAG_NAME="pr-${{ github.event.pull_request.number }}"
+            # TAG_NAME will be used for deployment
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # For pushes to main branch
+            TAG_NAME="main"
+          elif [[ "${{ github.ref }}" == "refs/heads/legacy" ]]; then
+            # For pushes to legacy branch
+            TAG_NAME="legacy"
+          else
+            # For other branches, use branch name with slashes converted to hyphens
+            BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+            TAG_NAME="${BRANCH_NAME}"
+          fi
+
+          # Output the tag name for use in later steps
+          echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+          echo "Using tag name: ${TAG_NAME}"
+          echo "Image: ghcr.io/${{ github.repository_owner }}/conciliate-app:${TAG_NAME}"
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Start deployment for PRs
+      - name: Start deployment
+        if: github.event_name == 'pull_request'
+        uses: bobheadxi/deployments@v1
+        id: deployment
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: ${{ steps.tagname.outputs.tag }}
+          ref: ${{ github.head_ref }}
+
+      # Build the main application container
+      - name: Build application container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/conciliate-app:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/conciliate-app:${{ steps.tagname.outputs.tag }}
+          build-args: |
+            NEXT_PUBLIC_SERVICE_NAME=conciliator-app
+          cache-from: |
+            type=gha
+            ghcr.io/${{ github.repository_owner }}/conciliate-app:${{ steps.tagname.outputs.tag }}
+          cache-to: type=gha,mode=max
+
+      # For actual deployment to production/staging/etc.
+      # This would typically involve deploying to your hosting service
+      # Replace this with your actual deployment commands
+      - name: Deploy (for main/legacy branch)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/legacy')
+        run: |
+          echo "Deploying to production/staging environment"
+          # Add your deployment commands here
+          # For example:
+          # - Update service in Google Cloud Run
+          # - Deploy to AWS ECS
+          # - etc.
+
+      # For PR deployments (preview environments)
+      - name: Deploy PR preview
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Deploying PR preview environment"
+          # Add your PR preview deployment commands here
+          # You would typically deploy to a preview environment using the APP_IMAGE
+
+      # Set preview URL for PR deployments
+      - name: Set preview URL
+        if: github.event_name == 'pull_request'
+        id: preview_url
+        run: |
+          PREVIEW_DOMAIN="${{ secrets.PREVIEW_DOMAIN || format('{0}.github.io', github.repository_owner) }}"
+          echo "url=https://preview-${{ github.event.pull_request.number }}.$PREVIEW_DOMAIN" >> $GITHUB_OUTPUT
+          
+      # Update deployment status
+      - name: Update deployment status
+        if: github.event_name == 'pull_request' && success()
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
+          env: ${{ steps.tagname.outputs.tag }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          env_url: ${{ steps.preview_url.outputs.url }}
+
+      # Update deployment status on failure
+      - name: Update deployment status (on failure)
+        if: github.event_name == 'pull_request' && failure()
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
+          env: ${{ steps.tagname.outputs.tag }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}

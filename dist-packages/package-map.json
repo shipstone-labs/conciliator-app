@@ -1,0 +1,16 @@
+{
+  "@lit-protocol/access-control-conditions": "file:dist-packages/@lit-protocol-access-control-conditions-7.1.1-db4bda3794c2.tgz",
+  "@lit-protocol/auth-helpers": "file:dist-packages/@lit-protocol-auth-helpers-7.1.1-7f28c25d06bb.tgz",
+  "@lit-protocol/constants": "file:dist-packages/@lit-protocol-constants-7.1.1-7c84c33f83f9.tgz",
+  "@lit-protocol/contracts-sdk": "file:dist-packages/@lit-protocol-contracts-sdk-7.1.1-462a5dc6ad2b.tgz",
+  "@lit-protocol/contracts": "file:dist-packages/@lit-protocol-contracts-sdk-7.1.1-462a5dc6ad2b.tgz",
+  "@lit-protocol/crypto": "file:dist-packages/@lit-protocol-crypto-7.1.1-649046efad57.tgz",
+  "@lit-protocol/lit-auth-client": "file:dist-packages/@lit-protocol-lit-auth-client-7.1.1-b35d52e54357.tgz",
+  "@lit-protocol/lit-node-client": "file:dist-packages/@lit-protocol-lit-node-client-7.1.1-2e4f1299ddde.tgz",
+  "@lit-protocol/pkp-ethers": "file:dist-packages/@lit-protocol-pkp-ethers-7.1.1-cbf4a61886bc.tgz",
+  "@lit-protocol/types": "file:dist-packages/@lit-protocol-types-7.1.1-3a5a85ad1a4e.tgz",
+  "@storacha/client": "file:dist-packages/@storacha-client-1.2.8-5dfaea50b659.tgz",
+  "lilypad-wrapper": "file:dist-packages/lilypad-wrapper-1.0.0-a207b60612cb.tgz",
+  "lit-wrapper": "file:dist-packages/lit-wrapper-1.0.0-2c3e4d7cc3f9.tgz",
+  "web-storage-wrapper": "file:dist-packages/web-storage-wrapper-1.0.0-a71ae7c1d21d.tgz"
+}

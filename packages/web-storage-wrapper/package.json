@@ -21,14 +21,11 @@
   "license": "ISC",
   "dependencies": {
     "@ipld/dag-ucan": "catalog:",
-    "@storacha/client": "link:../../submods/upload-service/packages/w3up-client"
+    "@storacha/client": "file:../../dist-packages/@storacha-client-1.2.8-5dfaea50b659.tgz"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-virtual": "^3.0.2",
     "typescript": "^5.8.3"
-  },
-  "overrides": {
-    "@noble/ed25519": "2.1.0"
   }
 }
