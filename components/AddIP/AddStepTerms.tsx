@@ -16,6 +16,19 @@ import { Modal } from '../ui/modal'
 import { SortedProducts } from './SortedProducts'
 import { legalDocuments, ViewNDA } from '../ViewNDA'
 
+// Helper function to truncate blockchain addresses
+function truncateAddress(address: string): string {
+  if (!address || address.length <= 11) return address
+  return `${address.slice(0, 6)}...${address.slice(-5)}`
+}
+
+// Helper to truncate status messages containing addresses
+function truncateStatusMessage(message: string): string {
+  // Pattern to match ethereum addresses (0x followed by 40+ hex chars)
+  const addressPattern = /0x[a-fA-F0-9]{40,}/g
+  return message.replace(addressPattern, (match) => truncateAddress(match))
+}
+
 type AddStepTermsProps = {
   isLoading: boolean
   ipDoc: AddDoc
@@ -143,22 +156,18 @@ export const AddStepTerms = memo(
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                <span className="text-foreground/90">
-                  {status?.status ||
-                    localStatus ||
-                    'Creating a site for your Idea. This may take a minute or two.'}
-                </span>
+                <span>Creating Your Idea Page...</span>
               </>
             ) : (
               'Create Your Idea Page'
             )}
           </Button>
           {status?.status || localStatus ? (
-            <div className="p-4 rounded-lg border border-border/30 bg-muted/30 mb-2 mt-4">
+            <div className="p-4 rounded-lg border border-border/30 bg-muted/30 mb-2 mt-4 max-w-full overflow-hidden">
               <div className="flex items-center">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 <span className="text-foreground/90">
-                  {status?.status || localStatus || ''}
+                  {truncateStatusMessage(status?.status || localStatus || '')}
                 </span>
               </div>
             </div>
