@@ -349,3 +349,17 @@ Examples:
 // Bad - purely visual wrapper
 <div data-testid="spacer-div" className="mt-4" />
 ```
+
+## Known Issues
+
+### TypeScript Compilation Blocking Commits (January 2025)
+
+The pre-commit hook runs TypeScript compilation on the entire project, which can block commits of JavaScript-only files when there are unrelated TypeScript errors elsewhere in the codebase. 
+
+**Current Errors:**
+- Missing @radix-ui/react-switch dependency
+- Missing @storacha/client dependencies in packages/web-storage-wrapper
+
+**Workaround:** Use `git commit --no-verify` to bypass pre-commit hooks when necessary.
+
+**See:** [TYPESCRIPT-COMMIT-ISSUE.md](./TYPESCRIPT-COMMIT-ISSUE.md) for full details and recommended solutions.
