@@ -15,8 +15,7 @@ This workflow handles building the application and deploying it to Google Cloud 
 
 2. **Package Caching**:
    - Caches `dist-packages` directory containing packaged dependencies
-   - Bootstraps packages if cache is empty using `bootstrap-packages.sh`
-   - Updates package references with `fix-packages.sh`
+   - Updates package references with `rebuild-packages-fixed.sh`
 
 3. **Build Process**:
    - Installs dependencies with `pnpm install`

@@ -15,27 +15,11 @@ The system works by:
 
 ### Scripts
 
-- **`bootstrap-packages.sh`**: Initializes the system when `dist-packages` is empty
-  - Temporarily sets up packages with `link:` and `workspace:` references
-  - Builds everything once
-  - Creates initial tgz files
-  - Restores original package.json files
-
-- **`pack-packages.sh`**: Builds and packages dependencies with content hashing
+- **`rebuild-packages-fixed.sh`**: Builds and packages dependencies with content hashing
   - Identifies dependencies in submodules
   - Calculates content hashes to detect changes
   - Creates tgz files with versioned names
   - Generates a package mapping file
-
-- **`fix-packages.sh`**: Updates package.json files to use cached packages
-  - Replaces `link:` and `workspace:` references with `file:` references
-  - Updates both dependencies and overrides sections
-  - Handles special cases for certain packages
-
-- **`inspect-package.sh`**: Diagnostic tool for examining package content
-  - Extracts and analyzes package contents
-  - Verifies presence of dist folders and JavaScript files
-  - Helps debug packaging issues
 
 ### File Structure
 
