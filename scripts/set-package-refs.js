@@ -14,7 +14,7 @@ const path = require('node:path')
 
 // Get command line argument
 const mode = process.argv[2] || 'file'
-if (!['original', 'file'].includes(mode)) {
+if (!['original', 'file', 'skip-wrappers'].includes(mode)) {
   console.error(`Invalid mode: ${mode}. Use 'original' or 'file'`)
   process.exit(1)
 }
@@ -39,9 +39,22 @@ console.log(`Using map file: ${mapPath} (${mode} mode)`)
 let packageMap
 try {
   if (fs.existsSync(mapPath)) {
-    packageMap = JSON.parse(fs.readFileSync(mapPath, 'utf8'))
+    originalMap = JSON.parse(
+      fs.readFileSync(PACKAGE_MAP_ORIGINAL_PATH, 'utf-8')
+    )
+    packageMap = JSON.parse(fs.readFileSync(mapPath, 'utf-8'))
+    if (mode === 'skip-wrappers') {
+      packageMap = Object.fromEntries(
+        Object.entries(packageMap).filter(
+          ([key]) => !originalMap[key]?.startsWith('workspace:')
+        )
+      )
+      console.log('Using skip-wrappers to replace ', packageMap)
+    }
+    packageMap = Object.assign(originalMap, packageMap)
     console.log(
-      `Loaded map file with ${Object.keys(packageMap).length} entries`
+      `Loaded map file with ${Object.keys(packageMap).length} entries`,
+      packageMap
     )
   } else {
     console.error(`Map file ${mapPath} does not exist`)
@@ -92,6 +105,11 @@ function adjustPackageJson(location) {
         changed = true
       }
     }
+    if (packageJson.pnpm?.overrides) {
+      if (adjustItems(packageJson.pnpm.overrides)) {
+        changed = true
+      }
+    }
     if (changed) {
       try {
         fs.writeFileSync(location, JSON.stringify(packageJson, null, 2))
@@ -111,16 +129,16 @@ function adjustPackageJson(location) {
 }
 
 // Define which packages go in dependencies vs. overrides
-const dependencyPackages = [
-  'lilypad-wrapper',
-  'lit-wrapper',
-  'web-storage-wrapper',
-]
+// const dependencyPackages = [
+//   'lilypad-wrapper',
+//   'lit-wrapper',
+//   'web-storage-wrapper',
+// ]
 
 adjustPackageJson(path.join(ROOT_DIR, 'package.json'), '')
-for (const item of dependencyPackages) {
-  adjustPackageJson(
-    path.join(ROOT_DIR, 'packages', item, 'package.json'),
-    '../../'
-  )
-}
+// for (const item of dependencyPackages) {
+//   adjustPackageJson(
+//     path.join(ROOT_DIR, 'packages', item, 'package.json'),
+//     '../../'
+//   )
+// }

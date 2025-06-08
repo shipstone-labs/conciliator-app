@@ -373,15 +373,7 @@ function constructSession(inject: Partial<Injected>) {
       session.notify({ isLitActivated: true })
       return litClient
     },
-    async () => {
-      try {
-        if (session._litClient) {
-          await session._litClient.disconnect()
-        }
-      } catch (error) {
-        console.error('Error disconnecting Lit client:', error)
-      }
-    }
+    async () => {}
   )
 
   session.sessionSigs = new SuspendPromise<{

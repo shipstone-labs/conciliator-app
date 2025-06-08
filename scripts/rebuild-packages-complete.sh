@@ -7,7 +7,15 @@ cd "$ROOT_DIR"
 
 echo "====== REBUILDING ALL PACKAGES WITH CONSISTENT REFERENCES ======"
 
-# 1. Ensure dist-packages directory exists
+# 1. Clean up old .tgz files
+echo "Cleaning up old .tgz files..."
+if [ -d "dist-packages" ]; then
+  # Remove all .tgz files but keep the directory and any .json files
+  find dist-packages -name "*.tgz" -type f -delete
+  echo "Removed old .tgz files from dist-packages/"
+fi
+
+# 2. Ensure dist-packages directory exists
 mkdir -p dist-packages
 
 # Get commit hashes for stable versioning
@@ -444,13 +452,7 @@ if [ -d "submods/js-sdk" ]; then
   fi
 
   # Pack only the required lit packages
-  for pkg_name in "${REQUIRED_PACKAGES[@]}"; do
-    # Skip contracts if we already handled it specially
-    if [ "$pkg_name" == "@lit-protocol/contracts" ] && [ ! -d "submods/js-sdk/packages/contracts" ]; then
-      echo "Skipping @lit-protocol/contracts (already handled specially)"
-      continue
-    fi
-    
+  for pkg_name in "${REQUIRED_PACKAGES[@]}"; do    
     # Extract package name without @lit-protocol/
     pkg_short_name=$(echo "$pkg_name" | sed 's/@lit-protocol\///')
     pkg_dir="submods/js-sdk/packages/$pkg_short_name"
@@ -488,7 +490,7 @@ fi
 # STEP 3: Update references to file: paths for built submodules
 echo "STEP 3: Setting up file: references for building wrappers..."
 # Run the script to set file references
-node "$ROOT_DIR/scripts/set-package-refs.js" file
+node "$ROOT_DIR/scripts/set-package-refs.js" skip-wrappers
 pnpm install
 
 # STEP 4: Build wrappers

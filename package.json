@@ -87,9 +87,9 @@
     "firebase": "^11.7.1",
     "husky": "^9.1.7",
     "input-otp": "^1.4.2",
-    "lilypad-wrapper": "file:./dist-packages/lilypad-wrapper-1.0.0-6a8a361.tgz",
+    "lilypad-wrapper": "file:./dist-packages/lilypad-wrapper-1.0.0-6f16ab5.tgz",
     "lint-staged": "^15.5.2",
-    "lit-wrapper": "file:./dist-packages/lit-wrapper-1.0.0-6a8a361.tgz",
+    "lit-wrapper": "file:./dist-packages/lit-wrapper-1.0.0-6f16ab5.tgz",
     "lucide-react": "^0.475.0",
     "next-themes": "^0.4.6",
     "next": "15.1.7",
@@ -112,7 +112,7 @@
     "utf-8-validate": "^6.0.5",
     "uuid": "^11.1.0",
     "viem": "^2.29.1",
-    "web-storage-wrapper": "file:./dist-packages/web-storage-wrapper-1.0.0-6a8a361.tgz",
+    "web-storage-wrapper": "file:./dist-packages/web-storage-wrapper-1.0.0-6f16ab5.tgz",
     "webpack": "^5.99.8"
   },
   "devDependencies": {
@@ -172,6 +172,19 @@
     ],
     "patchedDependencies": {
       "@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1": "./patches/@google-cloud__opentelemetry-cloud-trace-exporter.patch"
+    },
+    "overrides": {
+      "@lit-protocol/access-control-conditions": "file:./dist-packages/@lit-protocol-access-control-conditions-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/auth-helpers": "file:./dist-packages/@lit-protocol-auth-helpers-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/constants": "file:./dist-packages/@lit-protocol-constants-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/contracts": "file:./dist-packages/@lit-protocol-contracts-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/contracts-sdk": "file:./dist-packages/@lit-protocol-contracts-sdk-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/crypto": "file:./dist-packages/@lit-protocol-crypto-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/lit-auth-client": "file:./dist-packages/@lit-protocol-lit-auth-client-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/lit-node-client": "file:./dist-packages/@lit-protocol-lit-node-client-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/lit-node-client-nodejs": "file:./dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/pkp-ethers": "file:./dist-packages/@lit-protocol-pkp-ethers-7.1.1-f7cb21dad.tgz",
+      "@lit-protocol/types": "file:./dist-packages/@lit-protocol-types-7.1.1-f7cb21dad.tgz"
     }
   },
   "resolutions": {
@@ -185,14 +198,14 @@
     "@lit-protocol/access-control-conditions": "file:./dist-packages/@lit-protocol-access-control-conditions-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/auth-helpers": "file:./dist-packages/@lit-protocol-auth-helpers-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/constants": "file:./dist-packages/@lit-protocol-constants-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/contracts": "file:./dist-packages/@lit-protocol-contracts-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/contracts-sdk": "file:./dist-packages/@lit-protocol-contracts-sdk-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/crypto": "file:./dist-packages/@lit-protocol-crypto-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/lit-auth-client": "file:./dist-packages/@lit-protocol-lit-auth-client-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/lit-node-client": "file:./dist-packages/@lit-protocol-lit-node-client-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/lit-node-client-nodejs": "file:./dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.1-f7cb21dad.tgz",
     "@lit-protocol/pkp-ethers": "file:./dist-packages/@lit-protocol-pkp-ethers-7.1.1-f7cb21dad.tgz",
-    "@lit-protocol/types": "file:./dist-packages/@lit-protocol-types-7.1.1-f7cb21dad.tgz",
-    "@lit-protocol/contracts": "file:./dist-packages/@lit-protocol-contracts-7.1.1-f7cb21dad.tgz"
+    "@lit-protocol/types": "file:./dist-packages/@lit-protocol-types-7.1.1-f7cb21dad.tgz"
   },
   "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977",
   "lint-staged": {

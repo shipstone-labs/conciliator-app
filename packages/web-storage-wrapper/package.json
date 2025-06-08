@@ -20,8 +20,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ipld/dag-ucan": "catalog:",
-    "@storacha/client": "file:./dist-packages/@storacha-client-1.2.8-09f9d108.tgz"
+    "@ipld/dag-ucan": "3.4.5",
+    "@storacha/client": "link:../../submods/upload-service/packages/w3up-client"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",
