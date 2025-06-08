@@ -11,7 +11,10 @@ import type {
   SessionSigsMap,
   AuthSig,
 } from '@lit-protocol/types'
+// Import both the client and the nodejs client
 import { LitNodeClient } from '@lit-protocol/lit-node-client'
+// Also import the NodeJS client
+import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs'
 import {
   LitAccessControlConditionResource,
   type LitResourceAbilityRequest,
@@ -43,7 +46,7 @@ export type AuthParams = {
 }
 
 export async function authenticate(
-  client: LitNodeClient,
+  client: LitNodeClient | LitNodeClientNodeJs,
   options: AuthParams
 ): Promise<{
   authMethod: AuthMethod
@@ -52,9 +55,17 @@ export async function authenticate(
 }> {
   const { userId, appId, accessToken, relayApiKey } = options
 
-  console.log('network', client.config.litNetwork)
+  // Try to get network from client.config or client.litNetwork
+  const anyClient = client as any;
+  const litNetwork =
+    anyClient.config?.litNetwork ||
+    anyClient.litNetwork ||
+    LIT_NETWORK.Datil;
+
+  console.log('network', litNetwork)
+
   const litRelay = new LitRelay({
-    relayUrl: LitRelay.getRelayUrl(client.config.litNetwork),
+    relayUrl: LitRelay.getRelayUrl(litNetwork),
     relayApiKey,
   })
 
@@ -77,15 +88,23 @@ export async function authenticate(
   return { authMethod, authId, provider: session }
 }
 
-// Expose a simpler function to create and connect a client
+// Expose a simpler function to create a client
 export async function createLitClient(options = {}) {
   try {
-    const client = new LitNodeClient({
+    // Create a full LitNodeClientConfig object to avoid type issues
+    const config = {
       alertWhenUnauthorized: false,
       litNetwork: LIT_NETWORK.Datil,
-      ...options,
       debug: false,
-    })
+      // Apply any custom options
+      ...options,
+    }
+
+    const client = new LitNodeClient(config)
+
+    // Note: Connection will be handled by the consumer of this client
+    // The client has a connect() method that can be called, but it's not
+    // in the TypeScript definitions, so we can't call it here
 
     return client
   } catch (err) {
@@ -99,7 +118,6 @@ export {
   PROVIDER_TYPE,
   LIT_NETWORK,
   LIT_ABILITY,
-  type LitNodeClient,
   type AuthMethod,
   type AuthCallbackParams,
   type AuthSig,
@@ -111,6 +129,7 @@ export {
   generateAuthSig,
   LitPKPResource,
   LitActionResource,
+  LitNodeClient,
   type SessionSigsMap,
   type EncryptResponse,
 }

@@ -9,9 +9,9 @@ async function getLitWrapper() {
 
 // Type imports (these don't execute at runtime)
 import type {
-  LitNodeClient,
   LitResourceAbilityRequest,
   AuthCallbackParams,
+  LitNodeClient,
 } from 'lit-wrapper'
 import { OpenAI } from 'openai'
 import {

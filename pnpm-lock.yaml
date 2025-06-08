@@ -16,17 +16,6 @@ overrides:
   '@walletconnect/types': 2.9.2
   '@noble/ed25519': 2.1.0
   '@google-cloud/opentelemetry-cloud-trace-exporter': ^2.4.1
-  '@lit-protocol/access-control-conditions': link:submods/js-sdk/packages/access-control-conditions
-  '@lit-protocol/auth-helpers': link:submods/js-sdk/packages/auth-helpers
-  '@lit-protocol/constants': link:submods/js-sdk/packages/constants
-  '@lit-protocol/contracts-sdk': link:submods/js-sdk/packages/contracts-sdk
-  '@lit-protocol/crypto': link:submods/js-sdk/packages/crypto
-  '@lit-protocol/lit-auth-client': link:submods/js-sdk/packages/lit-auth-client
-  '@lit-protocol/lit-node-client': link:submods/js-sdk/packages/lit-node-client
-  '@lit-protocol/pkp-ethers': link:submods/js-sdk/packages/pkp-ethers
-  '@lit-protocol/types': link:submods/js-sdk/packages/types
-  '@storacha/client': link:submods/upload-service/packages/w3up-client
-  '@lit-protocol/contracts': link:submods/js-sdk/packages/contracts-sdk
 
 patchedDependencies:
   '@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1':
@@ -55,6 +44,33 @@ importers:
       '@lit-protocol/auth-helpers':
         specifier: link:submods/js-sdk/packages/auth-helpers
         version: link:submods/js-sdk/packages/auth-helpers
+      '@lit-protocol/constants':
+        specifier: link:submods/js-sdk/packages/constants
+        version: link:submods/js-sdk/packages/constants
+      '@lit-protocol/contracts':
+        specifier: link:submods/js-sdk/packages/contracts-sdk
+        version: link:submods/js-sdk/packages/contracts-sdk
+      '@lit-protocol/contracts-sdk':
+        specifier: link:submods/js-sdk/packages/contracts-sdk
+        version: link:submods/js-sdk/packages/contracts-sdk
+      '@lit-protocol/crypto':
+        specifier: link:submods/js-sdk/packages/crypto
+        version: link:submods/js-sdk/packages/crypto
+      '@lit-protocol/lit-auth-client':
+        specifier: link:submods/js-sdk/packages/lit-auth-client
+        version: link:submods/js-sdk/packages/lit-auth-client
+      '@lit-protocol/lit-node-client':
+        specifier: link:submods/js-sdk/packages/lit-node-client
+        version: link:submods/js-sdk/packages/lit-node-client
+      '@lit-protocol/lit-node-client-nodejs':
+        specifier: link:submods/js-sdk/packages/lit-node-client-nodejs
+        version: link:submods/js-sdk/packages/lit-node-client-nodejs
+      '@lit-protocol/pkp-ethers':
+        specifier: link:submods/js-sdk/packages/pkp-ethers
+        version: link:submods/js-sdk/packages/pkp-ethers
+      '@lit-protocol/types':
+        specifier: link:submods/js-sdk/packages/types
+        version: link:submods/js-sdk/packages/types
       '@opentelemetry/api':
         specifier: 1.9.0
         version: 1.9.0
@@ -160,6 +176,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.4
         version: 1.2.6(@types/react-dom@19.1.3(@types/react@19.1.3))(@types/react@19.1.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@storacha/client':
+        specifier: link:submods/upload-service/packages/w3up-client
+        version: link:submods/upload-service/packages/w3up-client
       '@stytch/nextjs':
         specifier: ^21.5.0
         version: 21.5.0(@stytch/vanilla-js@5.23.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -405,35 +424,38 @@ importers:
   packages/lit-wrapper:
     dependencies:
       '@lit-protocol/access-control-conditions':
-        specifier: link:../../submods/js-sdk/packages/access-control-conditions
-        version: link:../../submods/js-sdk/packages/access-control-conditions
+        specifier: link:submods/js-sdk/packages/access-control-conditions
+        version: link:submods/js-sdk/packages/access-control-conditions
       '@lit-protocol/auth-helpers':
-        specifier: link:../../submods/js-sdk/packages/auth-helpers
-        version: link:../../submods/js-sdk/packages/auth-helpers
+        specifier: link:submods/js-sdk/packages/auth-helpers
+        version: link:submods/js-sdk/packages/auth-helpers
       '@lit-protocol/constants':
-        specifier: link:../../submods/js-sdk/packages/constants
-        version: link:../../submods/js-sdk/packages/constants
+        specifier: link:submods/js-sdk/packages/constants
+        version: link:submods/js-sdk/packages/constants
       '@lit-protocol/contracts':
-        specifier: link:../../submods/js-sdk/packages/contracts-sdk
-        version: link:../../submods/js-sdk/packages/contracts-sdk
+        specifier: link:submods/js-sdk/packages/contracts-sdk
+        version: link:submods/js-sdk/packages/contracts-sdk
       '@lit-protocol/contracts-sdk':
-        specifier: link:../../submods/js-sdk/packages/contracts-sdk
-        version: link:../../submods/js-sdk/packages/contracts-sdk
+        specifier: link:submods/js-sdk/packages/contracts-sdk
+        version: link:submods/js-sdk/packages/contracts-sdk
       '@lit-protocol/crypto':
-        specifier: link:../../submods/js-sdk/packages/crypto
-        version: link:../../submods/js-sdk/packages/crypto
+        specifier: link:submods/js-sdk/packages/crypto
+        version: link:submods/js-sdk/packages/crypto
       '@lit-protocol/lit-auth-client':
-        specifier: link:../../submods/js-sdk/packages/lit-auth-client
-        version: link:../../submods/js-sdk/packages/lit-auth-client
+        specifier: link:submods/js-sdk/packages/lit-auth-client
+        version: link:submods/js-sdk/packages/lit-auth-client
       '@lit-protocol/lit-node-client':
-        specifier: link:../../submods/js-sdk/packages/lit-node-client
-        version: link:../../submods/js-sdk/packages/lit-node-client
+        specifier: link:submods/js-sdk/packages/lit-node-client
+        version: link:submods/js-sdk/packages/lit-node-client
+      '@lit-protocol/lit-node-client-nodejs':
+        specifier: link:submods/js-sdk/packages/lit-node-client-nodejs
+        version: link:submods/js-sdk/packages/lit-node-client-nodejs
       '@lit-protocol/pkp-ethers':
-        specifier: link:../../submods/js-sdk/packages/pkp-ethers
-        version: link:../../submods/js-sdk/packages/pkp-ethers
+        specifier: link:submods/js-sdk/packages/pkp-ethers
+        version: link:submods/js-sdk/packages/pkp-ethers
       '@lit-protocol/types':
-        specifier: link:../../submods/js-sdk/packages/types
-        version: link:../../submods/js-sdk/packages/types
+        specifier: link:submods/js-sdk/packages/types
+        version: link:submods/js-sdk/packages/types
       '@simplewebauthn/browser':
         specifier: ^13.1.0
         version: 13.1.0
@@ -466,8 +488,8 @@ importers:
         specifier: 'catalog:'
         version: 3.4.5
       '@storacha/client':
-        specifier: link:../../submods/upload-service/packages/w3up-client
-        version: link:../../submods/upload-service/packages/w3up-client
+        specifier: link:submods/upload-service/packages/w3up-client
+        version: link:submods/upload-service/packages/w3up-client
     devDependencies:
       '@rollup/plugin-alias':
         specifier: ^5.1.1

@@ -45,7 +45,7 @@ The hash is included in the filename, e.g., `@lit-protocol-crypto-7.1.1-649046ef
 Package references are updated to point to cached packages:
 
 - Original: `"@lit-protocol/crypto": "link:submods/js-sdk/packages/crypto"`
-- Updated: `"@lit-protocol/crypto": "file:dist-packages/@lit-protocol-crypto-7.1.1-649046efad57.tgz"`
+- Updated: `"@lit-protocol/crypto": "file:./dist-packages/@lit-protocol-crypto-7.1.1-649046efad57.tgz"`
 
 ### Bootstrapping
 
