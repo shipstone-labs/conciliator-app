@@ -1,105 +1,117 @@
 # Package Caching System
 
-This project uses GitHub Actions to cache and reuse built packages from forks and local packages.
+This project uses a custom package caching system to optimize builds, especially in CI/CD environments. This approach significantly improves build times by avoiding rebuilding unchanged packages.
+
+## Overview
+
+The system works by:
+
+1. Building and packaging dependencies from submodules and local packages as tgz files
+2. Using content-based hashing to determine when packages need rebuilding
+3. Updating package.json references to use these cached packages
+4. Caching the packaged dependencies in GitHub Actions
+
+## Key Components
+
+### Scripts
+
+- **`bootstrap-packages.sh`**: Initializes the system when `dist-packages` is empty
+  - Temporarily sets up packages with `link:` and `workspace:` references
+  - Builds everything once
+  - Creates initial tgz files
+  - Restores original package.json files
+
+- **`pack-packages.sh`**: Builds and packages dependencies with content hashing
+  - Identifies dependencies in submodules
+  - Calculates content hashes to detect changes
+  - Creates tgz files with versioned names
+  - Generates a package mapping file
+
+- **`fix-packages.sh`**: Updates package.json files to use cached packages
+  - Replaces `link:` and `workspace:` references with `file:` references
+  - Updates both dependencies and overrides sections
+  - Handles special cases for certain packages
+
+- **`inspect-package.sh`**: Diagnostic tool for examining package content
+  - Extracts and analyzes package contents
+  - Verifies presence of dist folders and JavaScript files
+  - Helps debug packaging issues
+
+### File Structure
+
+- **`dist-packages/`**: Directory containing all packaged dependencies
+  - `*.tgz`: Packaged dependencies with content hashes in filenames
+  - `package-map.json`: Mapping between package names and tgz files
 
 ## How It Works
 
-1. **Hash Calculation**: For each package in the `packages/` directory and relevant submodules, we calculate a content hash based on all source files.
+### Content Hashing
 
-2. **Smart Build Detection**: The system checks which submodule packages need to be rebuilt, skipping the lengthy build process (up to 50 minutes) when no changes are detected.
+Each package's content is hashed to determine if it needs rebuilding:
 
-3. **Build & Cache**: Packages are built and cached as `.tgz` files with their content hash in the filename.
+```bash
+# Calculate content hash (excluding node_modules and dist)
+pkg_hash=$(find . -type f -not -path "*/node_modules/*" -not -path "*/dist/*" | sort | xargs cat 2>/dev/null | sha256sum | cut -d ' ' -f 1 | cut -c 1-12)
+```
 
-4. **URL Generation**: GitHub generates URLs to these cached packages that can be used in `package.json` files.
+The hash is included in the filename, e.g., `@lit-protocol-crypto-7.1.1-649046efad57.tgz`.
 
-5. **Dependency Update**: `link:` references in `package.json` files are automatically updated to point to the cached package URLs.
+### Package References
 
-## End-to-End Workflow
+Package references are updated to point to cached packages:
 
-### `cache-packages.yml`
+- Original: `"@lit-protocol/crypto": "link:submods/js-sdk/packages/crypto"`
+- Updated: `"@lit-protocol/crypto": "file:dist-packages/@lit-protocol-crypto-7.1.1-649046efad57.tgz"`
 
-This single consolidated workflow handles the entire process from building packages to updating references to triggering builds. It runs when:
-- Changes are pushed to `packages/` or `submods/` directories
-- On pull requests affecting packages
-- Manually triggered via workflow_dispatch
+### Bootstrapping
 
-The workflow consists of two sequential jobs:
+When the cache is empty (e.g., first run in CI), the bootstrap script:
 
-**Job 1: Build and Cache**
-1. Calculates content hashes for each package
-2. Checks if builds already exist in the cache
-3. Analyzes which submodules need rebuilding:
-   - Only rebuilds js-sdk if packages from that directory need updating
-   - Only rebuilds upload-service if packages from that directory need updating
-   - This can save up to 50 minutes of build time when no changes are detected
-4. Builds and packs only the necessary packages
-5. Uploads the built packages as artifacts
-6. Generates a JSON mapping of package names to their artifact URLs
+1. Temporarily updates package.json files to use direct references
+2. Builds all dependencies
+3. Packages them as tgz files
+4. Restores the original package.json files
+5. Updates references to use the newly created packages
 
-**Job 2: Update Dependencies and Trigger Builds**
-1. Downloads both the package URL mapping and the actual package files from the first job
-2. Updates all `package.json` files in the repository, replacing `link:` references with file paths to the downloaded artifacts
-3. Runs installation to update the dependency tree
-4. Handles changes differently based on context:
-   - **For Pull Requests**: Creates a separate "build PR" that targets the original PR branch, with detailed instructions for next steps
-   - **For Direct Pushes**: Commits and pushes changes directly to the branch, then automatically triggers the build-and-deploy workflow
+## GitHub Actions Integration
 
-### Complete Flow for Pull Requests:
+The GitHub Actions workflow:
 
-1. You create a PR with changes to packages
-2. The workflow automatically:
-   - Builds and caches affected packages
-   - Creates a separate "build PR" targeting your feature branch
-3. You review and merge the build PR into your feature branch
-4. You manually trigger the build-and-deploy workflow on your feature branch
-5. After verifying the build works with cached packages, you merge your feature PR
+1. Checks for an existing `dist-packages` cache
+2. If missing, runs the bootstrap script
+3. Updates package references to use cached packages
+4. Installs dependencies and builds the application
+5. Caches the `dist-packages` directory for future runs
 
-### Complete Flow for Direct Pushes:
+## Benefits
 
-1. You push changes to a main branch that affect packages
-2. The workflow automatically:
-   - Builds and caches affected packages
-   - Updates package references in the repo
-   - Commits and pushes the updates
-   - Triggers the build-and-deploy workflow with the updated references
+This approach:
 
-This end-to-end automation ensures that:
-- Packages are only rebuilt when necessary
-- Package references are always up-to-date
-- Builds use cached packages whenever possible
-- Changes are tested properly before being merged
+1. **Speeds up builds**: Only rebuilds packages when source code changes
+2. **Reduces dependencies**: Eliminates need to run full builds in CI
+3. **Improves reliability**: Makes builds more deterministic and repeatable
+4. **Optimizes Docker builds**: Allows for smaller, faster Docker images
+5. **Works with multiple package managers**: Supports npm, yarn, and pnpm
 
-## Performance Benefits
+## Common Issues and Solutions
 
-- **Build Time Reduction**: By selectively building only changed packages and avoiding unnecessary submodule builds, CI time can be reduced from 50+ minutes to just a few minutes in most cases.
-- **Dependency Stability**: Cached packages ensure consistent builds across branches and pull requests.
-- **Developer Productivity**: Less time waiting for CI builds means faster feedback cycles.
+### Missing dist Folders
 
-## Manual Usage
+If packages are missing dist folders:
+- Check if `.npmignore` files are excluding dist directories
+- Ensure build steps are running correctly
+- Use the inspect-package.sh script to diagnose issues
 
-To manually trigger the caching process:
-1. Go to the "Actions" tab in GitHub
-2. Select "Cache Package Builds" workflow
-3. Click "Run workflow" and select the branch
+### Bootstrap Failures
 
-## Local Development
+If the bootstrap process fails:
+- Check if submodule dependencies are correctly installed
+- Ensure build scripts exist and work correctly
+- Look for circular dependencies that might cause problems
 
-For local development, continue using `link:` references in your `package.json` files. The GitHub Actions workflow will automatically update these to point to cached versions when building in CI.
+### Outdated Packages
 
-When pulling changes that might include updated package references, run your package manager's install command to update dependencies.
-
-## Alternative: Google Cloud Storage
-
-If you prefer using Google Cloud Storage instead:
-
-1. Create a bucket to store your package artifacts
-2. Modify the `cache-packages.yml` workflow to upload to GCS instead of GitHub artifacts
-3. Update the URL generation to use GCS URLs
-4. Ensure proper authentication is configured for GitHub Actions to access GCS
-
-Using GCS may be beneficial for:
-- Long-term storage beyond GitHub's retention period
-- Sharing artifacts across repositories
-- Handling very large packages
-
-However, GitHub Artifacts is generally simpler to set up and maintain for most projects.
+When packages need to be updated:
+- Update the source code in submodules
+- Run `pack-packages.sh` to create new packages with updated hashes
+- Run `fix-packages.sh` to update references

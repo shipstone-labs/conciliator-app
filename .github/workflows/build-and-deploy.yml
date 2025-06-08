@@ -2,21 +2,26 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ main, legacy ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: gcr.io
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  IMAGE_NAME: my-conciliate-app
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-      deployments: write
-      pull-requests: write
-      
+      id-token: write # Needed for GCP authentication
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
@@ -27,125 +32,116 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 10
           run_install: false
 
-      - name: Prepare for build using packaged dependencies
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # Currently all those packages should be built locally
+      # Since they also need to be available to other developers.
+      # - name: Cache dist-packages
+      #   id: cache-dist-packages
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: dist-packages
+      #     key: ${{ runner.os }}-dist-packages-${{ hashFiles('submods/**', 'packages/**', '!**node_modules/**', '!**.next/**') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-dist-packages-
+
+      # - name: Bootstrap packages if needed
+      #   if: steps.cache-dist-packages.outputs.cache-hit != 'true'
+      #   run: |
+      #     echo "dist-packages cache miss, running bootstrap..."
+      #     ./scripts/bootstrap-packages.sh
+
+      # - name: Fix packages
+      #   run: ./scripts/fix-packages.sh
+
+      - name: Install dependencies
         run: pnpm install
-          
+
+      - name: Build
+        run: pnpm run build
+        env:
+          STYTCH_APP_ID: build-value
+          STYTCH_APP_SECRET: something
+          STYTCH_ENV: test
+          NEXT_TELEMETRY_DISABLED: 1
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
-      - name: Figure out name
+
+      # Setup GCP only on push to main branch
+      - name: Authenticate to Google Cloud
+        if: github.event_name != 'pull_request'
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up GCP CLI
+        if: github.event_name != 'pull_request'
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Configure Docker for GCP
+        if: github.event_name != 'pull_request'
+        run: gcloud auth configure-docker $REGISTRY --quiet
+
+      # Determine image tag
+      - name: Set Image Tag
         id: tagname
         run: |
-          # Set the tag name based on event type
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For pull requests
             TAG_NAME="pr-${{ github.event.pull_request.number }}"
-            # TAG_NAME will be used for deployment
-          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            # For pushes to main branch
-            TAG_NAME="main"
-          elif [[ "${{ github.ref }}" == "refs/heads/legacy" ]]; then
-            # For pushes to legacy branch
-            TAG_NAME="legacy"
           else
-            # For other branches, use branch name with slashes converted to hyphens
-            BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
-            TAG_NAME="${BRANCH_NAME}"
+            TAG_NAME="${{ github.ref_name }}"
           fi
 
-          # Output the tag name for use in later steps
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          # Output tag info
           echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "sha_short=${SHA_SHORT}" >> $GITHUB_OUTPUT
+          echo "Using tags: ${TAG_NAME}, ${SHA_SHORT}"
 
-          echo "Using tag name: ${TAG_NAME}"
-          echo "Image: ghcr.io/${{ github.repository_owner }}/conciliate-app:${TAG_NAME}"
-      
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      # Start deployment for PRs
-      - name: Start deployment
-        if: github.event_name == 'pull_request'
-        uses: bobheadxi/deployments@v1
-        id: deployment
-        with:
-          step: start
-          token: ${{ secrets.GITHUB_TOKEN }}
-          env: ${{ steps.tagname.outputs.tag }}
-          ref: ${{ github.head_ref }}
-
-      # Build the main application container
-      - name: Build application container
+      # Build and push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/conciliate-app:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/conciliate-app:${{ steps.tagname.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.tagname.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.tagname.outputs.sha_short }}
           build-args: |
             NEXT_PUBLIC_SERVICE_NAME=conciliator-app
-          cache-from: |
-            type=gha
-            ghcr.io/${{ github.repository_owner }}/conciliate-app:${{ steps.tagname.outputs.tag }}
+          cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # For actual deployment to production/staging/etc.
-      # This would typically involve deploying to your hosting service
-      # Replace this with your actual deployment commands
-      - name: Deploy (for main/legacy branch)
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/legacy')
-        run: |
-          echo "Deploying to production/staging environment"
-          # Add your deployment commands here
-          # For example:
-          # - Update service in Google Cloud Run
-          # - Deploy to AWS ECS
-          # - etc.
-
-      # For PR deployments (preview environments)
-      - name: Deploy PR preview
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "Deploying PR preview environment"
-          # Add your PR preview deployment commands here
-          # You would typically deploy to a preview environment using the APP_IMAGE
-
-      # Set preview URL for PR deployments
-      - name: Set preview URL
-        if: github.event_name == 'pull_request'
-        id: preview_url
-        run: |
-          PREVIEW_DOMAIN="${{ secrets.PREVIEW_DOMAIN || format('{0}.github.io', github.repository_owner) }}"
-          echo "url=https://preview-${{ github.event.pull_request.number }}.$PREVIEW_DOMAIN" >> $GITHUB_OUTPUT
-          
-      # Update deployment status
-      - name: Update deployment status
-        if: github.event_name == 'pull_request' && success()
-        uses: bobheadxi/deployments@v1
-        with:
-          step: finish
-          token: ${{ secrets.GITHUB_TOKEN }}
-          status: ${{ job.status }}
-          env: ${{ steps.tagname.outputs.tag }}
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
-          env_url: ${{ steps.preview_url.outputs.url }}
-
-      # Update deployment status on failure
-      - name: Update deployment status (on failure)
-        if: github.event_name == 'pull_request' && failure()
-        uses: bobheadxi/deployments@v1
-        with:
-          step: finish
-          token: ${{ secrets.GITHUB_TOKEN }}
-          status: ${{ job.status }}
-          env: ${{ steps.tagname.outputs.tag }}
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+      # Deploy to Cloud Run (only on push to main)
+      # - name: Deploy to Cloud Run
+      #   if: github.event_name != 'pull_request'
+      #   run: |
+      #     gcloud run deploy my-conciliate-app \
+      #       --image ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+      #       --region us-central1 \
+      #       --platform managed \
+      #       --allow-unauthenticated

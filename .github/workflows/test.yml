@@ -19,36 +19,49 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           
       - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
-          version: '10.11.0'
+          version: '10'
           run_install: false
           
       - name: Get pnpm store directory
+        id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ${{ env.STORE_PATH }}
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      # Install dependencies and build the wrappers
-      - name: Install dependencies
+      - name: Cache dist-packages
+        id: cache-dist-packages
+        uses: actions/cache@v4
+        with:
+          path: dist-packages
+          key: ${{ runner.os }}-dist-packages-${{ hashFiles('submods/**', 'packages/**', '!**node_modules/**', '!**.next/**') }}
+          restore-keys: |
+            ${{ runner.os }}-dist-packages-
+
+      - name: Bootstrap packages if needed
+        if: steps.cache-dist-packages.outputs.cache-hit != 'true'
         run: |
-          corepack enable pnpm
-          pnpm install
-          
-      # Build the wrapper packages
-      - name: Build wrappers
-        run: pnpm build:wrappers
+          echo "dist-packages cache miss, running bootstrap..."
+          ./scripts/bootstrap-packages.sh
+
+      - name: Fix packages
+        run: ./scripts/fix-packages.sh
+      
+      # Install dependencies
+      - name: Install dependencies
+        run: pnpm install
         
       # Run linters
       - name: Run Biome lint

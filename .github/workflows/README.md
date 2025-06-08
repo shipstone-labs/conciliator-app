@@ -6,25 +6,30 @@ This directory contains GitHub Actions workflows for continuous integration and 
 
 ### `build-and-deploy.yml`
 
-This workflow handles building and deploying the application:
+This workflow handles building the application and deploying it to Google Cloud Run:
 
-1. **Dependency Container Build**:
-   - Calculates a hash based on dependency files
-   - Builds the dependency container (using `Dockerfile.dependencies`)
-   - Pushes the container to GitHub Container Registry with a tag based on the dependency hash
-   - Caches the result to speed up future builds
+1. **Setup Environment**:
+   - Checks out code with submodules
+   - Sets up Node.js and PNPM
+   - Configures caching for PNPM store and dist-packages
 
-2. **Application Container Build**:
-   - Builds the main application container (using `Dockerfile`)
-   - Uses the dependency container as a base
-   - Pushes the container to GitHub Container Registry with tags for:
-     - Commit SHA (for specific deployments)
-     - Branch/PR cache tag (for faster future builds)
+2. **Package Caching**:
+   - Caches `dist-packages` directory containing packaged dependencies
+   - Bootstraps packages if cache is empty using `bootstrap-packages.sh`
+   - Updates package references with `fix-packages.sh`
 
-3. **Deployment**:
-   - For `main` and `legacy` branches: deploys to production/staging
-   - For pull requests: deploys to preview environments
-   - Updates PR with deployment status
+3. **Build Process**:
+   - Installs dependencies with `pnpm install`
+   - Builds the application with `pnpm build`
+
+4. **Docker Build and Push**:
+   - Builds a multi-stage Docker image with Alpine Node runtime
+   - Pushes to Google Container Registry (only on main branch)
+   - Tags with commit SHA, branch/PR name, and short SHA
+
+5. **Deployment**:
+   - Deploys to Google Cloud Run (only on main branch)
+   - Configures with appropriate settings for production
 
 ### `test.yml`
 
@@ -35,20 +40,41 @@ This workflow runs linting, type checking, and tests:
 3. **Lint**: Runs Biome linter
 4. **Type Check**: Ensures TypeScript correctness
 
+## Package Caching System
+
+The package caching system is a key optimization that:
+
+1. Builds and packages all dependencies from submodules and local packages
+2. Creates tgz files with content-based hashing to determine when rebuilds are needed
+3. Updates package references to use these cached packages
+4. Dramatically speeds up CI/CD by avoiding unnecessary rebuilds
+
+### Key Scripts
+
+- `bootstrap-packages.sh`: Initializes the system when no cached packages exist
+- `pack-packages.sh`: Builds and packages dependencies with content hashing
+- `fix-packages.sh`: Updates package.json files to reference cached packages
+- `inspect-package.sh`: Diagnostic tool for examining packaged dependencies
+
 ## Required Secrets
 
 To use these workflows, add the following secrets to your GitHub repository:
 
-- `PREVIEW_DOMAIN`: Domain for PR preview deployments (optional)
+- `GCP_PROJECT_ID`: Google Cloud project ID
+- `GCP_WORKLOAD_IDENTITY_PROVIDER`: Workload Identity provider
+- `GCP_SERVICE_ACCOUNT`: Google Cloud service account
 
-## Deployment Configuration
+## Docker Multi-Stage Build
 
-The deployment steps are placeholders. Update them with your actual deployment commands based on your hosting platform.
+The Dockerfile uses a multi-stage build approach:
 
-## Caching Strategy
+1. **Builder Stage**:
+   - Uses Alpine Node image
+   - Copies necessary files for the build
+   - Prepares the application for production
 
-The workflows use GitHub's cache to optimize build times:
-
-- Dependency cache based on pnpm-lock.yaml
-- Docker layer caching for faster container builds
-- Branch/PR-specific cache tags for application containers
+2. **Runner Stage**:
+   - Uses smaller Alpine Node image for runtime
+   - Only copies production-necessary files
+   - Runs as non-root user for security
+   - Configured for optimal performance
