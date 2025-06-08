@@ -21,7 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "@ipld/dag-ucan": "catalog:",
-    "@storacha/client": "file:../../dist-packages/@storacha-client-1.2.8-5dfaea50b659.tgz"
+    "@storacha/client": "file:dist-packages/@storacha-client-1.2.8-09f9d108.tgz"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",

@@ -16,9 +16,9 @@ overrides:
   '@walletconnect/types': 2.9.2
   '@noble/ed25519': 2.1.0
   '@google-cloud/opentelemetry-cloud-trace-exporter': ^2.4.1
+  '@lit-protocol/access-control-conditions': link:submods/js-sdk/packages/access-control-conditions
   '@lit-protocol/auth-helpers': link:submods/js-sdk/packages/auth-helpers
   '@lit-protocol/constants': link:submods/js-sdk/packages/constants
-  '@lit-protocol/contracts': link:submods/js-sdk/packages/contracts
   '@lit-protocol/contracts-sdk': link:submods/js-sdk/packages/contracts-sdk
   '@lit-protocol/crypto': link:submods/js-sdk/packages/crypto
   '@lit-protocol/lit-auth-client': link:submods/js-sdk/packages/lit-auth-client
@@ -26,6 +26,7 @@ overrides:
   '@lit-protocol/pkp-ethers': link:submods/js-sdk/packages/pkp-ethers
   '@lit-protocol/types': link:submods/js-sdk/packages/types
   '@storacha/client': link:submods/upload-service/packages/w3up-client
+  '@lit-protocol/contracts': link:submods/js-sdk/packages/contracts-sdk
 
 patchedDependencies:
   '@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1':
@@ -413,8 +414,8 @@ importers:
         specifier: link:../../submods/js-sdk/packages/constants
         version: link:../../submods/js-sdk/packages/constants
       '@lit-protocol/contracts':
-        specifier: link:../../submods/js-sdk/packages/contracts
-        version: link:../../submods/js-sdk/packages/contracts
+        specifier: link:../../submods/js-sdk/packages/contracts-sdk
+        version: link:../../submods/js-sdk/packages/contracts-sdk
       '@lit-protocol/contracts-sdk':
         specifier: link:../../submods/js-sdk/packages/contracts-sdk
         version: link:../../submods/js-sdk/packages/contracts-sdk

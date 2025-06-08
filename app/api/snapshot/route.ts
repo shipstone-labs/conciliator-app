@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import type { IPDocJSON } from '@/lib/internalTypes'
 import { getFirestore } from '../firebase'
-import { createAsAgent } from '@/packages/web-storage-wrapper/dist'
+import { createAsAgent } from 'web-storage-wrapper'
 import { initAPIConfig } from '@/lib/apiUtils'
 
 export const runtime = 'nodejs'

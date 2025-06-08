@@ -1,14 +1,6 @@
 name: Cache and Update Package References
 
 on:
-  push:
-    paths:
-      - 'packages/**'
-      - 'submods/**'
-  pull_request:
-    paths:
-      - 'packages/**'
-      - 'submods/**'
   workflow_dispatch:
 
 jobs:

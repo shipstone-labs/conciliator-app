@@ -23,16 +23,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@lit-protocol/access-control-conditions": "file:../../dist-packages/@lit-protocol-access-control-conditions-7.1.1-db4bda3794c2.tgz",
-    "@lit-protocol/auth-helpers": "file:../../dist-packages/@lit-protocol-auth-helpers-7.1.1-7f28c25d06bb.tgz",
-    "@lit-protocol/constants": "file:../../dist-packages/@lit-protocol-constants-7.1.1-7c84c33f83f9.tgz",
-    "@lit-protocol/contracts": "file:../../dist-packages/@lit-protocol-contracts-sdk-7.1.1-462a5dc6ad2b.tgz",
-    "@lit-protocol/contracts-sdk": "file:../../dist-packages/@lit-protocol-contracts-sdk-7.1.1-462a5dc6ad2b.tgz",
-    "@lit-protocol/crypto": "file:../../dist-packages/@lit-protocol-crypto-7.1.1-649046efad57.tgz",
-    "@lit-protocol/lit-auth-client": "file:../../dist-packages/@lit-protocol-lit-auth-client-7.1.1-b35d52e54357.tgz",
-    "@lit-protocol/lit-node-client": "file:../../dist-packages/@lit-protocol-lit-node-client-7.1.1-2e4f1299ddde.tgz",
-    "@lit-protocol/pkp-ethers": "file:../../dist-packages/@lit-protocol-pkp-ethers-7.1.1-cbf4a61886bc.tgz",
-    "@lit-protocol/types": "file:../../dist-packages/@lit-protocol-types-7.1.1-3a5a85ad1a4e.tgz",
+    "@lit-protocol/access-control-conditions": "file:../../dist-packages/@lit-protocol-access-control-conditions-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/auth-helpers": "file:../../dist-packages/@lit-protocol-auth-helpers-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/constants": "file:../../dist-packages/@lit-protocol-constants-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/contracts": "file:../../dist-packages/@lit-protocol-contracts-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/contracts-sdk": "file:../../dist-packages/@lit-protocol-contracts-sdk-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/crypto": "file:../../dist-packages/@lit-protocol-crypto-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/lit-auth-client": "file:../../dist-packages/@lit-protocol-lit-auth-client-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/lit-node-client": "file:../../dist-packages/@lit-protocol-lit-node-client-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/pkp-ethers": "file:../../dist-packages/@lit-protocol-pkp-ethers-7.1.1-f7cb21dad.tgz",
+    "@lit-protocol/types": "file:../../dist-packages/@lit-protocol-types-7.1.1-f7cb21dad.tgz",
     "@simplewebauthn/browser": "^13.1.0",
     "blakejs": "^1.2.1",
     "browser-headers": "^0.4.1",
@@ -40,5 +40,10 @@
     "js-sha256": "^0.11.0",
     "uint8arrays": "^5.1.0",
     "utf-8-validate": "^6.0.5"
-  }
+  },
+  "files": [
+    "dist",
+    "dist/**",
+    "**/*.d.ts"
+  ]
 }

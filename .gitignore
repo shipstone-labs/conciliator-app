@@ -55,3 +55,7 @@ working-together.md
 /conciliator-*.json
 !/.husky
 /*.json
+
+.npmignore.content
+.npmignore.original
+package.json.original
