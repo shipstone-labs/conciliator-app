@@ -97,7 +97,7 @@ jobs:
               TAG_OPTION="--tag=legacy --no-traffic"
             elif [[ "${{ github.event_name }}" != "" ]]; then
               # Tag with PR number for pull requests
-              TAG_OPTION="--tag=pr-${{ github.event_name }} --no-traffic"
+              TAG_OPTION="--tag=pr-${{ github.event.pull_request.number }} --no-traffic"
             else
               # Default: no tag
               TAG_OPTION="--no-traffic"
