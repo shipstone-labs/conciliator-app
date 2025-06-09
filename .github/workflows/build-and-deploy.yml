@@ -86,13 +86,7 @@ jobs:
           
           for service in conciliator conciliator-ai
           do
-            echo "Deploying ${i}..."
-            gcloud run deploy my-conciliate-app \
-              --image ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-              --region=${{ env.REGION }} \
-              --platform=managed \
-              --allow-unauthenticated
-            
+            echo "Deploying ${i}..."            
             DO_ROLLOUT=""
             if [[ "${{ github.ref_name }}" == "main" ]]; then
               # No tag for main branch
