@@ -24,6 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@lit-protocol/access-control-conditions": "link:../../submods/js-sdk/packages/access-control-conditions",
+    "@lit-protocol/auth-browser": "link:../../submods/js-sdk/packages/auth-browser",
     "@lit-protocol/auth-helpers": "link:../../submods/js-sdk/packages/auth-helpers",
     "@lit-protocol/constants": "link:../../submods/js-sdk/packages/constants",
     "@lit-protocol/contracts-sdk": "link:../../submods/js-sdk/packages/contracts-sdk",
@@ -31,14 +32,19 @@
     "@lit-protocol/lit-auth-client": "link:../../submods/js-sdk/packages/lit-auth-client",
     "@lit-protocol/lit-node-client": "link:../../submods/js-sdk/packages/lit-node-client",
     "@lit-protocol/lit-node-client-nodejs": "link:../../submods/js-sdk/packages/lit-node-client-nodejs",
+    "@lit-protocol/misc": "link:../../submods/js-sdk/packages/misc",
+    "@lit-protocol/nacl": "link:../../submods/js-sdk/packages/nacl",
     "@lit-protocol/pkp-ethers": "link:../../submods/js-sdk/packages/pkp-ethers",
     "@lit-protocol/types": "link:../../submods/js-sdk/packages/types",
+    "@lit-protocol/uint8arrays": "link:../../submods/js-sdk/packages/uint8arrays",
+    "@lit-protocol/wasm": "link:../../submods/js-sdk/packages/wasm",
     "@simplewebauthn/browser": "^13.1.0",
     "blakejs": "^1.2.1",
     "browser-headers": "^0.4.1",
     "cross-fetch": "^4.1.0",
     "js-sha256": "^0.11.0",
-    "uint8arrays": "^5.1.0",
+    "siwe-recap": "0.0.1-alpha.0",
+    "typestub-ipfs-only-hash": "^4.0.0",
     "utf-8-validate": "^6.0.5"
   },
   "files": [
