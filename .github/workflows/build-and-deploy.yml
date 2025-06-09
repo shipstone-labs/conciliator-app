@@ -40,7 +40,6 @@ jobs:
 
       # Setup GCP only on push to main branch
       - name: Authenticate to Google Cloud
-        if: github.event_name != 'pull_request'
         id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -48,12 +47,10 @@ jobs:
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up GCP CLI
-        if: github.event_name != 'pull_request'
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Configure Docker for GCP
-        if: github.event_name != 'pull_request'
         run: gcloud auth configure-docker $REGISTRY --quiet
 
       # Determine image tag
@@ -73,21 +70,12 @@ jobs:
           echo "sha_short=${SHA_SHORT}" >> $GITHUB_OUTPUT
           echo "Using tags: ${TAG_NAME}, ${SHA_SHORT}"
 
-      # Debug: Check if repository exists
-      - name: Check Artifact Registry Repository
-        if: github.event_name != 'pull_request'
-        run: |
-          echo "Checking if repository exists..."
-          gcloud artifacts repositories list --location=us-central1 || echo "Failed to list repositories"
-          echo "Full image path will be: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}"
-
       # Build and push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          load: ${{ github.event_name == 'pull_request' }}
+          push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.tagname.outputs.tag }}
@@ -96,16 +84,6 @@ jobs:
             NEXT_PUBLIC_SERVICE_NAME=conciliator-app
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      # Verify the image was pushed
-      - name: Verify Image Push
-        if: github.event_name != 'pull_request'
-        run: |
-          echo "Listing images in repository..."
-          gcloud artifacts docker images list ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/github --include-tags || echo "Failed to list images"
-          
-          echo "Checking specific image..."
-          gcloud artifacts docker images describe ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} || echo "Image not found"
 
       # Deploy to Cloud Run (only on push to main)
       # - name: Deploy to Cloud Run
