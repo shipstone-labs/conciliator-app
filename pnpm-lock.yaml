@@ -466,13 +466,16 @@ importers:
         version: file:dist-packages/@lit-protocol-access-control-conditions-7.1.1-f7cb21dad.tgz
       '@lit-protocol/auth-browser':
         specifier: file:../../dist-packages/@lit-protocol-auth-browser-7.1.1-f7cb21dad.tgz
-        version: file:dist-packages/@lit-protocol-auth-browser-7.1.1-f7cb21dad.tgz(@lit-protocol/contracts@0.0.74(typescript@5.8.3))(@walletconnect/ethereum-provider@2.9.2(@walletconnect/modal@2.6.1(react@19.1.0))(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.5))(@walletconnect/modal@2.6.1(react@19.1.0))(siwe@2.3.2(ethers@5.8.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)))(tweetnacl-util@0.13.5)(tweetnacl@1.0.3)(util@0.12.5)(web-vitals@4.2.4)
+        version: file:dist-packages/@lit-protocol-auth-browser-7.1.1-f7cb21dad.tgz(@lit-protocol/contracts@submods+js-sdk+packages+contracts-sdk)(@walletconnect/ethereum-provider@2.9.2(@walletconnect/modal@2.6.1(react@19.1.0))(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.5))(@walletconnect/modal@2.6.1(react@19.1.0))(siwe@2.3.2(ethers@5.8.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)))(tweetnacl-util@0.13.5)(tweetnacl@1.0.3)(util@0.12.5)(web-vitals@4.2.4)
       '@lit-protocol/auth-helpers':
         specifier: file:../../dist-packages/@lit-protocol-auth-helpers-7.1.1-f7cb21dad.tgz
         version: file:dist-packages/@lit-protocol-auth-helpers-7.1.1-f7cb21dad.tgz
       '@lit-protocol/constants':
         specifier: file:../../dist-packages/@lit-protocol-constants-7.1.1-f7cb21dad.tgz
         version: file:dist-packages/@lit-protocol-constants-7.1.1-f7cb21dad.tgz
+      '@lit-protocol/contracts':
+        specifier: link:../../submods/js-sdk/packages/contracts-sdk
+        version: link:../../submods/js-sdk/packages/contracts-sdk
       '@lit-protocol/contracts-sdk':
         specifier: file:../../dist-packages/@lit-protocol-contracts-sdk-7.1.1-f7cb21dad.tgz
         version: file:dist-packages/@lit-protocol-contracts-sdk-7.1.1-f7cb21dad.tgz(date-and-time@2.4.3)(multiformats@13.3.3)
@@ -10296,6 +10299,17 @@ snapshots:
   '@lit-protocol/auth-browser@file:dist-packages/@lit-protocol-auth-browser-7.1.1-f7cb21dad.tgz(@lit-protocol/contracts@0.0.74(typescript@5.8.3))(@walletconnect/ethereum-provider@2.9.2(@walletconnect/modal@2.6.1(react@19.1.0))(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.5))(@walletconnect/modal@2.6.1(react@19.1.0))(siwe@2.3.2(ethers@5.8.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)))(tweetnacl-util@0.13.5)(tweetnacl@1.0.3)(util@0.12.5)(web-vitals@4.2.4)':
     dependencies:
       '@lit-protocol/contracts': 0.0.74(typescript@5.8.3)
+      '@walletconnect/ethereum-provider': 2.9.2(@walletconnect/modal@2.6.1(react@19.1.0))(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.5)
+      '@walletconnect/modal': 2.6.1(react@19.1.0)
+      siwe: 2.3.2(ethers@5.8.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))
+      tweetnacl: 1.0.3
+      tweetnacl-util: 0.13.5
+      util: 0.12.5
+      web-vitals: 4.2.4
+
+  '@lit-protocol/auth-browser@file:dist-packages/@lit-protocol-auth-browser-7.1.1-f7cb21dad.tgz(@lit-protocol/contracts@submods+js-sdk+packages+contracts-sdk)(@walletconnect/ethereum-provider@2.9.2(@walletconnect/modal@2.6.1(react@19.1.0))(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.5))(@walletconnect/modal@2.6.1(react@19.1.0))(siwe@2.3.2(ethers@5.8.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)))(tweetnacl-util@0.13.5)(tweetnacl@1.0.3)(util@0.12.5)(web-vitals@4.2.4)':
+    dependencies:
+      '@lit-protocol/contracts': link:submods/js-sdk/packages/contracts-sdk
       '@walletconnect/ethereum-provider': 2.9.2(@walletconnect/modal@2.6.1(react@19.1.0))(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.5)
       '@walletconnect/modal': 2.6.1(react@19.1.0)
       siwe: 2.3.2(ethers@5.8.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))

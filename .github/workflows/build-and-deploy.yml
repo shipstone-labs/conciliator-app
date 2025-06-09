@@ -87,21 +87,30 @@ jobs:
           
           for service in conciliator conciliator-ai
           do
-            echo "Deploying ${i}..."            
+            echo "Deploying ${service}..."            
             DO_ROLLOUT=""
+            if [[ "$service" == "conciliator" ]]; then
+              FEATURES="stripe\\,stytch\\,lit\\,lilypad\\,openai\\,storacha\\,firestore\\,firebase,bucket\\,net"
+            else
+              FEATURES="stripe\\,stytch\\,lit\\,lilypad\\,openai\\,storacha\\,firestore\\,firebase,bucket\\,ai"
+            fi
             if [[ "${{ github.ref_name }}" == "main" ]]; then
               # No tag for main branch
               TAG_OPTION="--no-traffic"
               DO_ROLLOUT="yes"
+              SERVICE_NAME="${service}:${{ github.ref_name }}"
             elif [[ "${{ github.ref_name }}" == "legacy" ]]; then
               # Tag as legacy for legacy branch
               TAG_OPTION="--tag=legacy --no-traffic"
+              SERVICE_NAME="${service}:${{ github.ref_name }}"
             elif [[ "${{ github.event_name }}" != "" ]]; then
               # Tag with PR number for pull requests
               TAG_OPTION="--tag=pr-${{ github.event.pull_request.number }} --no-traffic"
+              SERVICE_NAME="${service}:pr-${{ github.event.pull_request.number }}"
             else
               # Default: no tag
               TAG_OPTION="--no-traffic"
+              SERVICE_NAME="${service}:unknown"
             fi
             
             # Execute the deploy command with dynamic tag
@@ -110,6 +119,7 @@ jobs:
               --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
               --labels=managed-by=github,commit-sha=${{ github.sha }} \
               --region=${{ env.REGION }} \
+              --set-env-vars=SERVICE_NAME=${SERVICE_NAME},FEATURES=${FEATURES}
               --quiet \
               $TAG_OPTION 2>&1) | tee ./.info.log
             REV=$(sed < ./.info.log -n -e 's#The revision can be reached directly at https://\(.*\)#https://\1#pi')

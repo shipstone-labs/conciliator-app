@@ -27,6 +27,7 @@
     "@lit-protocol/auth-browser": "link:../../submods/js-sdk/packages/auth-browser",
     "@lit-protocol/auth-helpers": "link:../../submods/js-sdk/packages/auth-helpers",
     "@lit-protocol/constants": "link:../../submods/js-sdk/packages/constants",
+    "@lit-protocol/contracts": "^0.0.74",
     "@lit-protocol/contracts-sdk": "link:../../submods/js-sdk/packages/contracts-sdk",
     "@lit-protocol/crypto": "link:../../submods/js-sdk/packages/crypto",
     "@lit-protocol/lit-auth-client": "link:../../submods/js-sdk/packages/lit-auth-client",
