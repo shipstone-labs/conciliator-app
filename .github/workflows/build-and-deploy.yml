@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: gcr.io
+  REGISTRY: us-central1-docker.pkg.dev
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  IMAGE_NAME: my-conciliate-app
+  IMAGE_NAME: github/conciliator
 
 jobs:
   build:
@@ -34,17 +34,7 @@ jobs:
         with:
           version: 10.11.0
           run_install: true
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm run build
-        env:
-          STYTCH_APP_ID: build-value
-          STYTCH_APP_SECRET: something
-          STYTCH_ENV: test
-          NEXT_TELEMETRY_DISABLED: 1
-
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
