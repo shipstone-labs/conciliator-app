@@ -20,6 +20,7 @@ jobs:
       contents: read
       packages: write
       id-token: write # Needed for GCP authentication
+      pull-requests: write # Needed to comment on PRs
 
     steps:
       - name: Checkout repository
