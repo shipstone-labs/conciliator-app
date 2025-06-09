@@ -104,7 +104,7 @@ jobs:
             fi
             
             # Execute the deploy command with dynamic tag
-            (gcloud run services update $i \
+            (gcloud run services update $service \
               --platform=managed \
               --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
               --labels=managed-by=github,commit-sha=${{ github.sha }} \
