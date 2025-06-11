@@ -90,7 +90,7 @@ jobs:
             echo "Deploying ${service}..."            
             DO_ROLLOUT=""
             if [[ "$service" == "conciliator" ]]; then
-              FEATURES="stripe.stytch.lit.lilypad.openai.storacha.firestore.firebase,bucket.net"
+              FEATURES="stripe.stytch.lit.lilypad.openai.storacha.firestore.firebase.bucket.net"
             else
               FEATURES="stripe.stytch.lit.lilypad.openai.storacha.firestore.firebase.bucket.ai"
             fi
@@ -114,6 +114,7 @@ jobs:
             fi
             
             # Execute the deploy command with dynamic tag
+            set -e pipefail
             (gcloud run services update $service \
               --platform=managed \
               --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
@@ -122,6 +123,11 @@ jobs:
               --set-env-vars=SERVICE_NAME=${SERVICE_NAME},FEATURES=${FEATURES}
               --quiet \
               $TAG_OPTION 2>&1) | tee ./.info.log
+            if $?
+            then
+              echo "Unable to deploy"
+              exit $?
+            fi
             REV=$(sed < ./.info.log -n -e 's#The revision can be reached directly at https://\(.*\)#https://\1#pi')
             echo "Deployed at ${REV}"
             
