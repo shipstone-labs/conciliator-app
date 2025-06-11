@@ -18,7 +18,7 @@ export function useFeatures(): Partial<Record<Feature, boolean>> {
   // This is a placeholder implementation.
   // In a real application, you would replace this with logic to check if the feature is enabled.
   const enabledFeatures = ((config.FEATURES as string) || '')
-    .split(',')
+    .split('.')
     .filter(Boolean) as Feature[] // Example list of enabled features
   return Object.fromEntries(
     enabledFeatures.map((feature) => [feature, true] as [Feature, boolean])

@@ -90,9 +90,9 @@ jobs:
             echo "Deploying ${service}..."            
             DO_ROLLOUT=""
             if [[ "$service" == "conciliator" ]]; then
-              FEATURES="stripe\\,stytch\\,lit\\,lilypad\\,openai\\,storacha\\,firestore\\,firebase,bucket\\,net"
+              FEATURES="stripe.stytch.lit.lilypad.openai.storacha.firestore.firebase,bucket.net"
             else
-              FEATURES="stripe\\,stytch\\,lit\\,lilypad\\,openai\\,storacha\\,firestore\\,firebase,bucket\\,ai"
+              FEATURES="stripe.stytch.lit.lilypad.openai.storacha.firestore.firebase.bucket.ai"
             fi
             if [[ "${{ github.ref_name }}" == "main" ]]; then
               # No tag for main branch
