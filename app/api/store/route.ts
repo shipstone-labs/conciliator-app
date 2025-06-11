@@ -200,12 +200,18 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       await status.update({
         status: message,
         updatedAt: FieldValue.serverTimestamp(),
+        ...Object.fromEntries(
+          Object.entries(extra ?? {}).map(([key, value]) => [
+            `extra.${key}`,
+            value,
+          ])
+        ),
       })
       await auditTable.add({
         status: message,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
-        ...extra,
+        extra,
       })
     }
     const encryptedBlob = new Blob(
@@ -323,9 +329,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       },
     }) as IPDocJSON
     const doc = firestore.collection('ip').doc(id)
-    await setStatus(
-      `Minting ${contract_name} token ID ${tokenId} for you ${to}`
-    )
+    await setStatus('Minting token for you', { contract_name, tokenId, to })
     const mint = (await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({
@@ -342,9 +346,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
           return hash
         })
     })) as `0x${string}`
-    await setStatus(
-      `Storing ${contract_name} token metadata for token ID ${tokenId}`
-    )
+    await setStatus('Storing token metadata', { contract_name, tokenId })
     const metadata = {
       name: _name,
       description,
@@ -369,7 +371,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       }
     )
     const metadataCid = await w3Client.uploadFile(metadataBlob)
-    await setStatus(`Setting token metadata URI on token ID ${tokenId}`)
+    await setStatus('Setting token metadata URI on token', { tokenId })
     const update = await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({

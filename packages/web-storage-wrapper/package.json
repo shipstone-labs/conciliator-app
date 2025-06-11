@@ -20,15 +20,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ipld/dag-ucan": "catalog:",
-    "@storacha/client": "link:../../submods/upload-service/packages/w3up-client"
+    "@ipld/dag-ucan": "3.4.5",
+    "@noble/ed25519": "1.7.5",
+    "@storacha/client": "^1.4.0"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-virtual": "^3.0.2",
     "typescript": "^5.8.3"
-  },
-  "overrides": {
-    "@noble/ed25519": "2.1.0"
   }
 }

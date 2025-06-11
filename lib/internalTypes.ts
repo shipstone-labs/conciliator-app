@@ -92,5 +92,6 @@ export function cidAsURL(cid?: string) {
   if (!cid) {
     return undefined
   }
-  return `https://w3s.link/ipfs/${cid}`
+  const [seg0, ...segs] = cid.split('/')
+  return `https://${seg0}.ipfs.w3s.link/${segs.join('/')}`
 }

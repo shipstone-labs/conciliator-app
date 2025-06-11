@@ -20,6 +20,11 @@ node_modules
 # production
 /build
 
+# package tarballs - explicitly include
+/dist-packages/*.tgz
+!/dist-packages/
+!/dist-packages/*.tgz
+
 # misc
 .DS_Store
 *.pem
@@ -48,3 +53,7 @@ working-together.md
 /conciliator-*.json
 !/.husky
 /*.json
+
+.npmignore.content
+.npmignore.original
+package.json.original

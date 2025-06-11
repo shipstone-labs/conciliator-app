@@ -9,9 +9,9 @@ async function getLitWrapper() {
 
 // Type imports (these don't execute at runtime)
 import type {
-  LitNodeClient,
   LitResourceAbilityRequest,
   AuthCallbackParams,
+  LitNodeClient,
 } from 'lit-wrapper'
 import { OpenAI } from 'openai'
 import {
@@ -108,7 +108,7 @@ export const genAuthSig = async (
   uri: string,
   resources: LitResourceAbilityRequest[]
 ) => {
-  const blockHash = await client.getLatestBlockhash()
+  const blockHash = client.latestBlockhash || '0'
   const { createSiweMessageWithRecaps, generateAuthSig } = await import(
     'lit-wrapper'
   )

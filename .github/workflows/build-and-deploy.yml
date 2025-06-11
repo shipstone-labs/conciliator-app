@@ -1,0 +1,201 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: us-central1-docker.pkg.dev
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  IMAGE_NAME: github/conciliator/app
+  REGION: us-central1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # Needed for GCP authentication
+      pull-requests: write # Needed to comment on PRs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Setup GCP only on push to main branch
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      
+      - name: Set up GCP CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          
+      - name: Configure Docker for GCP
+        run: gcloud auth configure-docker $REGISTRY --quiet
+
+      # Determine image tag
+      - name: Set Image Tag
+        id: tagname
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            TAG_NAME="pr-${{ github.event.pull_request.number }}"
+          else
+            TAG_NAME="${{ github.ref_name }}"
+          fi
+
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          # Output tag info
+          echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "sha_short=${SHA_SHORT}" >> $GITHUB_OUTPUT
+          echo "Using tags: ${TAG_NAME}, ${SHA_SHORT}"
+
+      # Build and push Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.tagname.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ steps.tagname.outputs.sha_short }}
+          build-args: |
+            NEXT_PUBLIC_SERVICE_NAME=conciliator-app
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Deploy to Cloud Run
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          # Initialize variables to store URLs
+          CONCILIATOR_URL=""
+          CONCILIATOR_AI_URL=""
+          
+          for service in conciliator conciliator-ai
+          do
+            echo "Deploying ${service}..."            
+            DO_ROLLOUT=""
+            if [[ "$service" == "conciliator" ]]; then
+              FEATURES="stripe.stytch.lit.lilypad.openai.storacha.firestore.firebase.bucket.net"
+            else
+              FEATURES="stripe.stytch.lit.lilypad.openai.storacha.firestore.firebase.bucket.ai"
+            fi
+            if [[ "${{ github.ref_name }}" == "main" ]]; then
+              # No tag for main branch
+              TAG_OPTION="--no-traffic"
+              DO_ROLLOUT="yes"
+              SERVICE_NAME="${service}:${{ github.ref_name }}"
+            elif [[ "${{ github.ref_name }}" == "legacy" ]]; then
+              # Tag as legacy for legacy branch
+              TAG_OPTION="--tag=legacy --no-traffic"
+              SERVICE_NAME="${service}:${{ github.ref_name }}"
+            elif [[ "${{ github.event_name }}" != "" ]]; then
+              # Tag with PR number for pull requests
+              TAG_OPTION="--tag=pr-${{ github.event.pull_request.number }} --no-traffic"
+              SERVICE_NAME="${service}:pr-${{ github.event.pull_request.number }}"
+            else
+              # Default: no tag
+              TAG_OPTION="--no-traffic"
+              SERVICE_NAME="${service}:unknown"
+            fi
+            
+            # Execute the deploy command with dynamic tag
+            set -e pipefail
+            if ! (gcloud run services update $service \
+              --platform=managed \
+              --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+              --labels=managed-by=github,commit-sha=${{ github.sha }} \
+              --region=${{ env.REGION }} \
+              --set-env-vars=SERVICE_NAME=${SERVICE_NAME},FEATURES=${FEATURES} \
+              --quiet \
+              $TAG_OPTION 2>&1) | tee ./.info.log
+            then
+              echo "Unable to deploy"
+              exit $?
+            fi
+            REV=$(sed < ./.info.log -n -e 's#The revision can be reached directly at https://\(.*\)#https://\1#pi')
+            echo "Deployed at ${REV}"
+            
+            # Store URLs for PR comment
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              if [[ "$service" == "conciliator" ]]; then
+                echo "conciliator_url=$REV" >> $GITHUB_OUTPUT
+              else
+                echo "conciliator_ai_url=$REV" >> $GITHUB_OUTPUT
+              fi
+            fi
+            
+            if [[ "$DO_ROLLOUT" == "yes" ]]
+            then
+              gcloud run services update-traffic $service \
+                --platform=managed \
+                --to-latest \
+                --region=${{ env.REGION }} \
+                --quiet
+            fi
+          done
+      
+      # Post PR comment with deployment URLs
+      - name: Comment PR with deployment URLs
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const conciliatorUrl = '${{ steps.deploy.outputs.conciliator_url }}';
+            const conciliatorAiUrl = '${{ steps.deploy.outputs.conciliator_ai_url }}';
+            
+            const body = `## 🚀 Deployment Preview Ready!
+            
+            Your PR has been deployed to the following Cloud Run services:
+            
+            | Service | Preview URL |
+            |---------|-------------|
+            | Conciliator | ${conciliatorUrl} |
+            | Conciliator AI | ${conciliatorAiUrl} |
+            
+            These preview deployments will be automatically cleaned up when the PR is closed.`;
+            
+            // Look for existing comment by this bot
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('## 🚀 Deployment Preview Ready!')
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }

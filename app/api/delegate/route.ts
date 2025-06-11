@@ -23,42 +23,44 @@ export const POST = withAPITracing(async (req: NextRequest) => {
 
     const user = await getUser(req)
     const { id, pkp } = (await req.json()) as {
-      id: string
+      id?: string
       pkp: `0x${string}`
     }
-    const fs = getFirestore()
-    const doc = await fs.collection('ip').doc(id).get()
-    const deals: IPDeal[] = doc.exists
-      ? (doc.data() as { creator?: string }).creator === user.user.user_id
-        ? [{ id: '', status: 'completed' } as IPDeal]
-        : ((await fs
-            .collection('ip')
-            .doc(id)
-            .collection('deals')
-            .where('owner', '==', user.user.user_id)
-            .get()
-            .then((snapshot) =>
-              snapshot.docs.map((doc) => ({
-                ...doc.data(),
-                id: doc.id,
-              }))
-            )
-            .catch(() => [])) as IPDeal[])
-      : ([] as IPDeal[])
-    const now = new Date()
-    const hasAccess = deals.some(
-      (deal) =>
-        (deal.expiresAt === undefined || deal.expiresAt.toDate() > now) &&
-        deal.status === 'completed'
-    )
-    if (!hasAccess) {
-      return new NextResponse(
-        JSON.stringify({ success: false, error: 'No access' }),
-        {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' },
-        }
+    if (id) {
+      const fs = getFirestore()
+      const doc = await fs.collection('ip').doc(id).get()
+      const deals: IPDeal[] = doc.exists
+        ? (doc.data() as { creator?: string }).creator === user.user.user_id
+          ? [{ id: '', status: 'completed' } as IPDeal]
+          : ((await fs
+              .collection('ip')
+              .doc(id)
+              .collection('deals')
+              .where('owner', '==', user.user.user_id)
+              .get()
+              .then((snapshot) =>
+                snapshot.docs.map((doc) => ({
+                  ...doc.data(),
+                  id: doc.id,
+                }))
+              )
+              .catch(() => [])) as IPDeal[])
+        : ([] as IPDeal[])
+      const now = new Date()
+      const hasAccess = deals.some(
+        (deal) =>
+          (deal.expiresAt === undefined || deal.expiresAt.toDate() > now) &&
+          deal.status === 'completed'
       )
+      if (!hasAccess) {
+        return new NextResponse(
+          JSON.stringify({ success: false, error: 'No access' }),
+          {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
+      }
     }
     const account = privateKeyToAccount(
       (process.env.FILCOIN_PK || '') as `0x${string}`

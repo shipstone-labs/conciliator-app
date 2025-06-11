@@ -10,7 +10,11 @@
     "clean": "rm -rf dist go/mymodule.wasm",
     "test": "node test.js"
   },
-  "keywords": ["wasm", "lilypad", "tinygo"],
+  "keywords": [
+    "wasm",
+    "lilypad",
+    "tinygo"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {},

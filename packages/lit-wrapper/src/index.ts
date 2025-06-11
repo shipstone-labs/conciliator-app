@@ -11,7 +11,11 @@ import type {
   SessionSigsMap,
   AuthSig,
 } from '@lit-protocol/types'
-import { LitNodeClient } from '@lit-protocol/lit-node-client'
+// Import both the client and the nodejs client
+import { LitNodeClient as OrgLitNodeClient } from '@lit-protocol/lit-node-client'
+// Also import the NodeJS client
+import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs'
+import type { ILitNodeClient } from '@lit-protocol/types'
 import {
   LitAccessControlConditionResource,
   type LitResourceAbilityRequest,
@@ -28,6 +32,9 @@ import {
   getAuthIdByAuthMethod,
 } from '@lit-protocol/lit-auth-client'
 import type { AuthMethod, EncryptResponse } from '@lit-protocol/types'
+export type LitNodeClient = OrgLitNodeClient &
+  ILitNodeClient &
+  LitNodeClientNodeJs
 
 // biome-ignore lint/correctness/noUnusedVariables: <explanation>
 // biome-ignore lint/style/noVar: <explanation>
@@ -52,9 +59,15 @@ export async function authenticate(
 }> {
   const { userId, appId, accessToken, relayApiKey } = options
 
-  console.log('network', client.config.litNetwork)
+  // Try to get network from client.config or client.litNetwork
+  const anyClient = client as any
+  const litNetwork =
+    anyClient.config?.litNetwork || anyClient.litNetwork || LIT_NETWORK.Datil
+
+  console.log('network', litNetwork)
+
   const litRelay = new LitRelay({
-    relayUrl: LitRelay.getRelayUrl(client.config.litNetwork),
+    relayUrl: LitRelay.getRelayUrl(litNetwork),
     relayApiKey,
   })
 
@@ -77,17 +90,29 @@ export async function authenticate(
   return { authMethod, authId, provider: session }
 }
 
-// Expose a simpler function to create and connect a client
-export async function createLitClient(options = {}) {
+// Expose a simpler function to create a client
+export async function createLitClient(
+  options = {}
+): Promise<LitNodeClient & LitNodeClientNodeJs & ILitNodeClient> {
   try {
-    const client = new LitNodeClient({
+    // Create a full LitNodeClientConfig object to avoid type issues
+    const config = {
       alertWhenUnauthorized: false,
       litNetwork: LIT_NETWORK.Datil,
-      ...options,
       debug: false,
-    })
+      // Apply any custom options
+      ...options,
+    }
 
-    return client
+    const client = new OrgLitNodeClient(config)
+
+    // Note: Connection will be handled by the consumer of this client
+    // The client has a connect() method that can be called, but it's not
+    // in the TypeScript definitions, so we can't call it here
+
+    return client as unknown as LitNodeClient &
+      LitNodeClientNodeJs &
+      ILitNodeClient
   } catch (err) {
     console.error('Error initializing Lit client:', err)
     throw err
@@ -99,7 +124,6 @@ export {
   PROVIDER_TYPE,
   LIT_NETWORK,
   LIT_ABILITY,
-  type LitNodeClient,
   type AuthMethod,
   type AuthCallbackParams,
   type AuthSig,
@@ -111,6 +135,9 @@ export {
   generateAuthSig,
   LitPKPResource,
   LitActionResource,
+  OrgLitNodeClient,
+  LitNodeClientNodeJs,
+  type ILitNodeClient,
   type SessionSigsMap,
   type EncryptResponse,
 }
