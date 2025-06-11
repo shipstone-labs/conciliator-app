@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   trackFunnelPageVisit,
@@ -89,7 +89,7 @@ interface FormData {
   agreedToMarketing: boolean
 }
 
-export default function SignupPage() {
+function SignupPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -529,5 +529,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignupPageContent />
+    </Suspense>
   )
 }

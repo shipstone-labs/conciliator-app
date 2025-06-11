@@ -41,7 +41,7 @@ export default {
     }),
     // Explicitly resolve from this package's node_modules
     resolve({
-      browser: true,
+      // browser: true,
       preferBuiltins: false,
       // Includes node built-ins
       ignoreSideEffectsForRoot: true,
@@ -70,5 +70,5 @@ export default {
     warn(warning)
   },
   // We don't want ANY externals - everything should be bundled
-  external: [],
+  external: ['crypto'],
 }
