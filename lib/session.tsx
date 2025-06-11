@@ -406,19 +406,37 @@ function constructSession(inject: Partial<Injected>) {
       })
       const pkps = await provider.fetchPKPsThroughRelayer(authMethod)
       const pkp = pkps[0]
+
+      // const { capacityDelegationAuthSig } = await fetch('/api/delegate', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: `Bearer ${stytchClient.session.getTokens()?.session_jwt}`,
+      //   },
+      //   body: JSON.stringify({
+      //     pkp: pkp.ethAddress,
+      //   }),
+      // }).then((res) => {
+      //   if (!res.ok) {
+      //     throw new Error('Failed to fetch lit delegation signature')
+      //   }
+      //   return res.json()
+      // })
+
       const sessionSigs = await litClient.getPkpSessionSigs({
         pkpPublicKey: pkp.publicKey,
         chain: 'filecoinCalibrationTestnet',
         authMethods: [authMethod],
+        // capabilityAuthSigs: [capacityDelegationAuthSig],
         resourceAbilityRequests: [
           {
             resource: new litModule.LitPKPResource('*'),
             ability: litModule.LIT_ABILITY.PKPSigning,
           },
-          {
-            resource: new LitAccessControlConditionResource('*'),
-            ability: litModule.LIT_ABILITY.AccessControlConditionDecryption,
-          },
+          // {
+          //   resource: new LitAccessControlConditionResource('*'),
+          //   ability: litModule.LIT_ABILITY.AccessControlConditionDecryption,
+          // },
         ],
       })
       let total = 24 * 3600 - 20

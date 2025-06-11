@@ -22,10 +22,8 @@ node_modules
 
 # package tarballs - explicitly include
 /dist-packages/*.tgz
-/dist-packages/package-map.json
 !/dist-packages/
 !/dist-packages/*.tgz
-!/dist-packages/package-map.json
 
 # misc
 .DS_Store

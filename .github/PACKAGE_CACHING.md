@@ -25,7 +25,6 @@ The system works by:
 
 - **`dist-packages/`**: Directory containing all packaged dependencies
   - `*.tgz`: Packaged dependencies with content hashes in filenames
-  - `package-map.json`: Mapping between package names and tgz files
 
 ## How It Works
 

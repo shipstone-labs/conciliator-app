@@ -14,7 +14,7 @@ const path = require('node:path')
 
 // Get command line argument
 const mode = process.argv[2] || 'file'
-if (!['original', 'file', 'skip-wrappers'].includes(mode)) {
+if (!['original', 'file', 'skip-wrappers', 'empty'].includes(mode)) {
   console.error(`Invalid mode: ${mode}. Use 'original' or 'file'`)
   process.exit(1)
 }
@@ -79,35 +79,59 @@ function adjustItems(obj) {
   return changed
 }
 
-function adjustPackageJson(location) {
+function adjustPackageJson(location, includeDeps) {
   // Read package.json
   let changed = false
   console.log(`Reading ${location}...`)
   try {
     const packageJson = JSON.parse(fs.readFileSync(location, 'utf8'))
-    if (packageJson.dependencies) {
+    if (includeDeps && packageJson.dependencies) {
       if (adjustItems(packageJson.dependencies)) {
         changed = true
       }
     }
-    if (packageJson.devDependencies) {
+    if (includeDeps && packageJson.devDependencies) {
       if (adjustItems(packageJson.devDependencies)) {
         changed = true
       }
     }
-    if (packageJson.peerDependencies) {
+    if (includeDeps && packageJson.peerDependencies) {
       if (adjustItems(packageJson.peerDependencies)) {
         changed = true
       }
     }
-    if (packageJson.overrides) {
-      if (adjustItems(packageJson.overrides)) {
-        changed = true
+    if (isEmpty) {
+      packageJson.overridesEmpty =
+        packageJson.overrides || packageJson.overridesEmpty
+      // biome-ignore lint/performance/noDelete: <explanation>
+      delete packageJson.overrides
+    } else {
+      if (packageJson.overrides || packageJson.overridesEmpty) {
+        packageJson.overrides =
+          packageJson.overrides || packageJson.overridesEmpty
+        // biome-ignore lint/performance/noDelete: <explanation>
+        delete packageJson.overridesEmpty
+        if (adjustItems(packageJson.overrides)) {
+          changed = true
+        }
       }
     }
-    if (packageJson.pnpm?.overrides) {
-      if (adjustItems(packageJson.pnpm.overrides)) {
-        changed = true
+    if (isEmpty) {
+      if (packageJson.pnpm?.overrides || packageJson.pnpm?.overridesEmpty) {
+        packageJson.pnpm.overridesEmpty =
+          packageJson.pnpm?.overrides || packageJson.pnpm?.overridesEmpty
+        // biome-ignore lint/performance/noDelete: <explanation>
+        delete packageJson.pnpm.overrides
+      }
+    } else {
+      if (packageJson.pnpm?.overrides || packageJson.pnpm?.overridesEmpty) {
+        packageJson.pnpm.overrides =
+          packageJson.pnpm?.overrides || packageJson.pnpm?.overridesEmpty
+        // biome-ignore lint/performance/noDelete: <explanation>
+        delete packageJson.pnpm.overridesEmpty
+        if (adjustItems(packageJson.pnpm.overrides)) {
+          changed = true
+        }
       }
     }
     if (changed) {
@@ -135,7 +159,7 @@ function adjustPackageJson(location) {
 //   'web-storage-wrapper',
 // ]
 
-adjustPackageJson(path.join(ROOT_DIR, 'package.json'), '')
+adjustPackageJson(path.join(ROOT_DIR, 'package.json'), false)
 // for (const item of dependencyPackages) {
 //   adjustPackageJson(
 //     path.join(ROOT_DIR, 'packages', item, 'package.json'),
