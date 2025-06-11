@@ -16,6 +16,78 @@ import { Modal } from '../ui/modal'
 import { SortedProducts } from './SortedProducts'
 import { legalDocuments, ViewNDA } from '../ViewNDA'
 
+// Helper function to truncate blockchain addresses
+function truncateAddress(address: string): string {
+  if (!address || address.length <= 11) return address
+  return `${address.slice(0, 6)}...${address.slice(-5)}`
+}
+
+function truncateTokenId(tokenId: string): string {
+  return tokenId.replace(/^0x0*(.*)$/, '0x$1')
+}
+
+const names = {
+  contract: 'Contract Address',
+  contract_name: 'Contract Name',
+  tokenId: 'Token ID',
+  to: 'User Address',
+}
+
+function RenderExtras(options: { extra?: Record<string, string | number> }) {
+  const { extra } = options
+  if (!extra) {
+    return null
+  }
+
+  const entries = Object.entries(names)
+    .map(([key, label]) => {
+      if (key in extra) {
+        let value = extra[key] as string | number
+        switch (key) {
+          case 'contract':
+          case 'to':
+            value = truncateAddress(value as string)
+            break
+          case 'tokenId':
+            value = truncateTokenId(value as string)
+            break
+        }
+        return { label, value }
+      }
+      return null
+    })
+    .filter(Boolean)
+
+  if (entries.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="ml-4 mt-2 overflow-hidden">
+      <table className="min-w-0 border-collapse">
+        <tbody>
+          {entries.map(
+            (entry, index) =>
+              entry && (
+                <tr
+                  key={index}
+                  className="border-b border-border/20 last:border-b-0"
+                >
+                  <td className="text-sm text-foreground/70 px-2 py-1 whitespace-nowrap font-medium">
+                    {entry.label}:
+                  </td>
+                  <td className="text-sm text-foreground/90 px-2 py-1 font-mono">
+                    {entry.value}
+                  </td>
+                </tr>
+              )
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 type AddStepTermsProps = {
   isLoading: boolean
   ipDoc: AddDoc
@@ -143,23 +215,22 @@ export const AddStepTerms = memo(
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                <span className="text-foreground/90">
-                  {status?.status ||
-                    localStatus ||
-                    'Creating a site for your Idea. This may take a minute or two.'}
-                </span>
+                <span>Creating Your Idea Page...</span>
               </>
             ) : (
               'Create Your Idea Page'
             )}
           </Button>
           {status?.status || localStatus ? (
-            <div className="p-4 rounded-lg border border-border/30 bg-muted/30 mb-2 mt-4">
-              <div className="flex items-center">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                <span className="text-foreground/90">
-                  {status?.status || localStatus || ''}
-                </span>
+            <div className="p-4 rounded-lg border border-border/30 bg-muted/30 mb-2 mt-4 max-w-full overflow-hidden">
+              <div className="flex items-start">
+                <Loader2 className="mr-2 h-5 w-5 animate-spin flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <span className="text-foreground/90">
+                    {status?.status || localStatus || ''}
+                  </span>
+                  <RenderExtras extra={status?.extra} />
+                </div>
               </div>
             </div>
           ) : null}

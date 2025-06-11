@@ -15,17 +15,25 @@ export type IPDoc = IPDocJSON & {
   dealsCount?: number
 }
 
+export type AuditExtra = {
+  contract?: `0x${string}`
+  to?: `0x${string}`
+  contract_name?: string
+  tokenId?: `0x${string}`
+}
 export type IPAudit = IPAuditJSON & {
   id: string // firestore doc id
   updatedAt: Timestamp
   createdAt: Timestamp
   details?: IPAuditDetails[]
+  extra?: AuditExtra
 }
 
 export type IPAuditDetails = IPAuditDetailsJSON & {
   id: string // firestore doc id
   updatedAt: Timestamp
   createdAt: Timestamp
+  extra?: AuditExtra
 }
 
 export type IPDeal = IPDealJSON & {

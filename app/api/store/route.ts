@@ -211,7 +211,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
         status: message,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
-        extra,
+        ...(extra ? { extra } : {}),
       })
     }
     const encryptedBlob = new Blob(
@@ -329,7 +329,12 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       },
     }) as IPDocJSON
     const doc = firestore.collection('ip').doc(id)
-    await setStatus('Minting token for you', { contract_name, tokenId, to })
+    await setStatus('Minting token for you', {
+      contract,
+      contract_name,
+      tokenId,
+      to,
+    })
     const mint = (await runWithNonce(wallet, async (nonce) => {
       return await wallet
         .writeContract({
