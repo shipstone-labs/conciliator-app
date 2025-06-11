@@ -200,6 +200,12 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       await status.update({
         status: message,
         updatedAt: FieldValue.serverTimestamp(),
+        ...Object.fromEntries(
+          Object.entries(extra ?? {}).map(([key, value]) => [
+            `extra.${key}`,
+            value,
+          ])
+        ),
       })
       await auditTable.add({
         status: message,
