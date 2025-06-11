@@ -33,6 +33,8 @@ const PACKAGE_MAP_FILE_PATH = path.join(
 )
 const mapPath =
   mode === 'original' ? PACKAGE_MAP_ORIGINAL_PATH : PACKAGE_MAP_FILE_PATH
+const isEmpty = mode === 'empty'
+
 console.log(`Using map file: ${mapPath} (${mode} mode)`)
 
 // Read map file
