@@ -115,7 +115,7 @@ jobs:
             
             # Execute the deploy command with dynamic tag
             set -e pipefail
-            (gcloud run services update $service \
+            if ! (gcloud run services update $service \
               --platform=managed \
               --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
               --labels=managed-by=github,commit-sha=${{ github.sha }} \
@@ -123,7 +123,6 @@ jobs:
               --set-env-vars=SERVICE_NAME=${SERVICE_NAME},FEATURES=${FEATURES} \
               --quiet \
               $TAG_OPTION 2>&1) | tee ./.info.log
-            if $?
             then
               echo "Unable to deploy"
               exit $?
