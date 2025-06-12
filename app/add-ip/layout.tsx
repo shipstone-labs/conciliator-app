@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import ProgressIndicator from '@/components/AddIP/ProgressIndicator'
+import { AddIPProvider } from '@/components/AddIP/AddIPContext'
 
 export default function AddIPLayout({
   children,
@@ -21,9 +22,11 @@ export default function AddIPLayout({
   }
 
   return (
-    <div>
-      <ProgressIndicator currentStep={currentStep} />
-      {children}
-    </div>
+    <AddIPProvider>
+      <div>
+        <ProgressIndicator currentStep={currentStep} />
+        {children}
+      </div>
+    </AddIPProvider>
   )
 }
