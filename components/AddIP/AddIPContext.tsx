@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 
-interface AddIPFormData {
+export interface AddIPFormData {
   // From Protect page
   title: string
   description: string
