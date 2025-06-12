@@ -47,7 +47,7 @@ export default function ProtectPage() {
     name: formData.title,
     description: formData.description,
     creator: '',
-    category: '',
+    category: 'protected-eval', // Default category
     tags: ['IP'],
     metadata: {
       tokenId: '0x0' as `0x${string}`,
@@ -68,10 +68,17 @@ export default function ProtectPage() {
     },
     updatedAt: null as any,
     createdAt: null as any,
+    // Include default terms structure
+    terms: {
+      businessModel: 'protected-eval',
+      evaluationPeriod: '7 days',
+      pricing: {},
+      ndaRequired: true,
+    },
     // AddDoc specific fields
     content: formData.file ? 'file-loaded' : undefined,
     error: undefined,
-    useAIAgent: formData.enableAI,
+    useAIAgent: formData.enableAI || false,
   })
 
   // Handle updates from AddStepPublic (updates name/description)
@@ -139,9 +146,36 @@ export default function ProtectPage() {
       enableAI: false,
     })
 
-    const { content, ...internalDoc } = ipDoc
+    // Add test data for required backend fields
+    const docWithTestData = {
+      ...ipDoc,
+      category: 'protected-eval', // Default business model
+      tags: ['IP'], // Required by backend
+      terms: {
+        businessModel: 'protected-eval', // Default business model
+        evaluationPeriod: '7 days',
+        pricing: {
+          // Default 7-day evaluation period
+          prod_QzKQ3RmIHfkNKB: {
+            product: 'prod_QzKQ3RmIHfkNKB',
+            duration: '7 days',
+            price: 'price_1Q6SQjBwz6bIBBIuhjyFnrsU',
+            index: 0,
+          },
+        },
+        ndaRequired: true, // Default to requiring NDA
+      },
+      useAIAgent: false, // Default to no AI agent
+    }
+
+    const { content, ...internalDoc } = docWithTestData
     setIsLoading(true)
     setLocalStatus('Encrypting your idea')
+
+    // TypeScript needs this check even though we checked above
+    if (!content) {
+      throw new Error('Content is required')
+    }
 
     try {
       const litClient = await _litClient.wait()
@@ -254,7 +288,7 @@ export default function ProtectPage() {
         terms: {
           ...internalDoc.terms,
         },
-        useAIAgent: internalDoc.useAIAgent || false,
+        useAIAgent: docWithTestData.useAIAgent || false,
       }
 
       setLocalStatus('Uploading encrypted content')
