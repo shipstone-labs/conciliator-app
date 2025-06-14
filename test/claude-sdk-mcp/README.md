@@ -1,9 +1,27 @@
 # Claude SDK MCP Testing
 
-This directory contains test scripts for interacting with the SafeIdea assessment flow using Claude Code SDK and Playwright.
+This directory contains test scripts for interacting with SafeIdea using Claude Code SDK with MCP Puppeteer integration.
 
-## Files
+## 🚀 Quick Start - Add IP Automation
 
+See [ADD-IP-AUTOMATION-GUIDE.md](./ADD-IP-AUTOMATION-GUIDE.md) for the complete guide to running the Add IP automation.
+
+```bash
+# 1. Start Chrome with debugging
+open -na "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir="/tmp/chrome-debug"
+
+# 2. Have Claude run the automation
+# Claude will use MCP Puppeteer tools, not Node.js
+```
+
+## Important Files
+
+### Add IP Automation
+- `add-ip-automated.js` - Reference implementation for Add IP automation (for Claude to execute via MCP)
+- `ADD-IP-AUTOMATION-GUIDE.md` - Complete guide with troubleshooting
+- `generated/` - Directory where generated IP files are saved
+
+### Assessment Flow Testing
 - `claude-sdk-demo.js` - Demonstrates how to use the Claude Code SDK to generate Playwright test scripts dynamically
 - `correct-testid-test.js` - Complete test for the assessment flow using the correct testid selectors
 - `text-based-assessment-test.js` - Alternative test using text-based selectors for the assessment flow
