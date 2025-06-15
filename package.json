@@ -121,6 +121,7 @@
     "eslint": "^9.26.0",
     "eslint-config-next": "15.1.7",
     "postcss": "^8.5.3",
+    "pptxgenjs": "^4.0.0",
     "process": "^0.11.10",
     "raw-loader": "^4.0.2",
     "rollup": "^4.40.2",
