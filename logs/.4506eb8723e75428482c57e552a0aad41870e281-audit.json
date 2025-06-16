@@ -1,0 +1,25 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 14
+  },
+  "auditLog": "/Users/creed/projects/conciliator-app/logs/.4506eb8723e75428482c57e552a0aad41870e281-audit.json",
+  "files": [
+    {
+      "date": 1749843578748,
+      "name": "/Users/creed/projects/conciliator-app/logs/mcp-puppeteer-2025-06-13.log",
+      "hash": "ed29db3a095732f6cec090031db291cc251374fbb42ef9adc23ec2ebe89ddcf4"
+    },
+    {
+      "date": 1749895009006,
+      "name": "/Users/creed/projects/conciliator-app/logs/mcp-puppeteer-2025-06-14.log",
+      "hash": "45bd322960d9e0df89707fc7c350b78d6a219018f06b21da4d048ccb6c62a928"
+    },
+    {
+      "date": 1749987947408,
+      "name": "/Users/creed/projects/conciliator-app/logs/mcp-puppeteer-2025-06-15.log",
+      "hash": "31cad893139ddc1e8dcd59dbb56962b69138eef9f9a28ab104f60517c0c09c26"
+    }
+  ],
+  "hashType": "sha256"
+}
