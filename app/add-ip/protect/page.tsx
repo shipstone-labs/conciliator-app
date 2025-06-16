@@ -63,6 +63,15 @@ export default function ProtectPage() {
           updateFormData({ description: updated.description })
         }
 
+        // Store file content in sessionStorage for other pages
+        if (updated.content && updated.content !== prev.content) {
+          sessionStorage.setItem(
+            'safeidea_add_ip_file_content',
+            updated.content
+          )
+          updateFormData({ fileName: 'document.txt' })
+        }
+
         return updated
       })
     },
@@ -231,6 +240,9 @@ export default function ProtectPage() {
           win.importToolReady.submissionComplete = true
         }
       }
+
+      // Clear stored file content
+      sessionStorage.removeItem('safeidea_add_ip_file_content')
 
       window.location.href = `/details/${id}`
     } catch (err) {

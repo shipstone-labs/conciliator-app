@@ -20,6 +20,8 @@ export interface AddIPFormData {
   sharingStartDate: Date | null
   sharingEndDate: Date | null
   legalDocuments: 'none' | 'generic-nda' | 'external'
+  externalLegalFile: File | null
+  externalLegalFileName: string
   showInDatabase: boolean
 
   // From Guard page
@@ -40,6 +42,8 @@ const defaultFormData: AddIPFormData = {
   sharingStartDate: null,
   sharingEndDate: null,
   legalDocuments: 'none',
+  externalLegalFile: null,
+  externalLegalFileName: '',
   showInDatabase: true,
   enableAI: false,
 }
