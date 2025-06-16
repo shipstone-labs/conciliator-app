@@ -17,9 +17,10 @@ export interface AddIPFormData {
   fileName: string
 
   // From Share page
-  duration: 7 | 30 | 90 | 365
-  viewOnly: boolean
-  allowDownload: boolean
+  sharingStartDate: Date | null
+  sharingEndDate: Date | null
+  legalDocuments: 'none' | 'generic-nda' | 'external'
+  showInDatabase: boolean
 
   // From Guard page
   enableAI: boolean
@@ -36,9 +37,10 @@ const defaultFormData: AddIPFormData = {
   description: '',
   file: null,
   fileName: '',
-  duration: 30,
-  viewOnly: true,
-  allowDownload: false,
+  sharingStartDate: null,
+  sharingEndDate: null,
+  legalDocuments: 'none',
+  showInDatabase: true,
   enableAI: false,
 }
 

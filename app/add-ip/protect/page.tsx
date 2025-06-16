@@ -41,84 +41,32 @@ export default function ProtectPage() {
   const config = useConfig()
   const fb = getFirestore()
 
-  // Create ipDoc that bridges our context with the existing components
+  // Simple state for the components - start with context values
   const [ipDoc, setIPDoc] = useState<AddDoc>({
-    // Map context fields to IPDoc fields
-    name: formData.title,
-    description: formData.description,
-    creator: '',
-    category: 'protected-eval', // Default category
-    tags: ['IP'],
-    metadata: {
-      tokenId: '0x0' as `0x${string}`,
-      cid: '',
-      mint: '0x0' as `0x${string}`,
-      transfer: '0x0' as `0x${string}`,
-      update: '0x0' as `0x${string}`,
-    },
-    encrypted: {
-      cid: '',
-      acl: '',
-      hash: '',
-    },
-    downSampled: {
-      cid: '',
-      acl: '',
-      hash: '',
-    },
-    updatedAt: null as any,
-    createdAt: null as any,
-    // Include default terms structure
-    terms: {
-      businessModel: 'protected-eval',
-      evaluationPeriod: '7 days',
-      pricing: {},
-      ndaRequired: true,
-    },
-    // AddDoc specific fields
-    content: formData.file ? 'file-loaded' : undefined,
+    name: formData.title || '',
+    description: formData.description || '',
+    content: undefined,
     error: undefined,
-    useAIAgent: formData.enableAI || false,
-  })
+  } as AddDoc)
 
-  // Handle updates from AddStepPublic (updates name/description)
-  const handlePublicUpdate = useCallback(
-    (value: AddDoc | ((prev: AddDoc) => AddDoc)) => {
+  // Sync title/description changes back to context
+  const handleSetIPDoc = useCallback(
+    (updater: any) => {
       setIPDoc((prev) => {
-        const updated = typeof value === 'function' ? value(prev) : value
-        // Sync name/description to our context's title/description
-        updateFormData({
-          title: updated.name,
-          description: updated.description,
-        })
+        const updated = typeof updater === 'function' ? updater(prev) : updater
+
+        // Sync to context when name/description change
+        if (updated.name !== prev.name) {
+          updateFormData({ title: updated.name })
+        }
+        if (updated.description !== prev.description) {
+          updateFormData({ description: updated.description })
+        }
+
         return updated
       })
     },
     [updateFormData]
-  )
-
-  // Handle updates from AddStepContent (handles file reading)
-  const handleContentUpdate = useCallback(
-    (value: AddDoc | ((prev: AddDoc) => AddDoc)) => {
-      setIPDoc((prev) => {
-        const updated = typeof value === 'function' ? value(prev) : value
-        // When content is set, it means file was read
-        if (updated.content && !formData.file) {
-          // Get the file from the input
-          const fileInput = document.querySelector(
-            'input[type="file"]'
-          ) as HTMLInputElement
-          if (fileInput?.files?.[0]) {
-            updateFormData({
-              file: fileInput.files[0],
-              fileName: fileInput.files[0].name,
-            })
-          }
-        }
-        return updated
-      })
-    },
-    [formData.file, updateFormData]
   )
 
   // Check if we can continue/create
@@ -128,7 +76,7 @@ export default function ProtectPage() {
     router.push('/add-ip/share')
   }
 
-  // handleStore logic - copied from the original component with minimal changes
+  // Copy handleStore logic from original with minimal modifications
   const handleCreateNow = useCallback(async () => {
     if (!ipDoc.content) {
       setIPDoc((prev) => ({
@@ -138,44 +86,9 @@ export default function ProtectPage() {
       return
     }
 
-    // Set defaults for quick creation
-    updateFormData({
-      duration: 30,
-      viewOnly: true,
-      allowDownload: false,
-      enableAI: false,
-    })
-
-    // Add test data for required backend fields
-    const docWithTestData = {
-      ...ipDoc,
-      category: 'protected-eval', // Default business model
-      tags: ['IP'], // Required by backend
-      terms: {
-        businessModel: 'protected-eval', // Default business model
-        evaluationPeriod: '7 days',
-        pricing: {
-          // Default 7-day evaluation period
-          prod_QzKQ3RmIHfkNKB: {
-            product: 'prod_QzKQ3RmIHfkNKB',
-            duration: '7 days',
-            price: 'price_1Q6SQjBwz6bIBBIuhjyFnrsU',
-            index: 0,
-          },
-        },
-        ndaRequired: true, // Default to requiring NDA
-      },
-      useAIAgent: false, // Default to no AI agent
-    }
-
-    const { content, ...internalDoc } = docWithTestData
+    const { content, ...internalDoc } = ipDoc
     setIsLoading(true)
     setLocalStatus('Encrypting your idea')
-
-    // TypeScript needs this check even though we checked above
-    if (!content) {
-      throw new Error('Content is required')
-    }
 
     try {
       const litClient = await _litClient.wait()
@@ -266,8 +179,14 @@ export default function ProtectPage() {
         })
 
       const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
+
+      // Minimal required fields for API
       const body = {
-        ...internalDoc,
+        name: internalDoc.name,
+        description: internalDoc.description,
+        creator: '', // Will be set by API
+        category: 'protected', // Simple default
+        tags: ['IP'],
         id,
         to: address,
         metadata: {
@@ -284,11 +203,6 @@ export default function ProtectPage() {
           unifiedAccessControlConditions:
             downSampledUnifiedAccessControlConditions,
         },
-        tags: ['IP'],
-        terms: {
-          ...internalDoc.terms,
-        },
-        useAIAgent: docWithTestData.useAIAgent || false,
       }
 
       setLocalStatus('Uploading encrypted content')
@@ -325,18 +239,9 @@ export default function ProtectPage() {
         ...prev,
         error: (err as { message: string }).message,
       }))
-    } finally {
       setIsLoading(false)
     }
-  }, [
-    ipDoc,
-    _litClient,
-    fb,
-    stytchClient?.session,
-    config,
-    _sessionSigs,
-    updateFormData,
-  ])
+  }, [ipDoc, _litClient, fb, stytchClient?.session, config, _sessionSigs])
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
@@ -378,18 +283,17 @@ export default function ProtectPage() {
           </p>
         </div>
 
-        {/* Public Information */}
+        {/* Reuse existing components exactly as they are */}
         <AddStepPublic
           isLoading={isLoading}
           ipDoc={ipDoc}
-          setIPDoc={handlePublicUpdate}
+          setIPDoc={handleSetIPDoc}
         />
 
-        {/* File Upload */}
         <AddStepContent
           isLoading={isLoading}
           ipDoc={ipDoc}
-          setIPDoc={handleContentUpdate}
+          setIPDoc={handleSetIPDoc}
         />
 
         {/* Error Display */}
@@ -416,7 +320,7 @@ export default function ProtectPage() {
             className="flex-1 sm:flex-none"
             data-testid="protect-create-now-button"
           >
-            {isLoading ? 'Creating...' : 'Create Now'}
+            {isLoading ? 'Creating Your Idea Page...' : 'Create Now'}
           </Button>
           <Button
             onClick={handleContinue}
@@ -430,8 +334,8 @@ export default function ProtectPage() {
         </div>
 
         <p className="text-sm text-muted-foreground text-center">
-          Create Now uses default settings (30 days, view-only). Continue Setup
-          lets you customize sharing preferences.
+          Create Now uses default settings. Continue Setup lets you customize
+          sharing preferences.
         </p>
       </div>
     </div>

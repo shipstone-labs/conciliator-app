@@ -83,41 +83,40 @@ export default function TestContextPage() {
             <h3 className="font-semibold">Share Page Fields:</h3>
             <div className="flex gap-2">
               <Button
-                onClick={() => updateFormData({ duration: 7 })}
+                onClick={() => updateFormData({ sharingStartDate: new Date() })}
                 variant="outline"
                 size="sm"
               >
-                7 Days
+                Set Start Date
               </Button>
               <Button
-                onClick={() => updateFormData({ duration: 30 })}
+                onClick={() => {
+                  const endDate = new Date()
+                  endDate.setDate(endDate.getDate() + 30)
+                  updateFormData({ sharingEndDate: endDate })
+                }}
                 variant="outline"
                 size="sm"
               >
-                30 Days
-              </Button>
-              <Button
-                onClick={() => updateFormData({ duration: 90 })}
-                variant="outline"
-                size="sm"
-              >
-                90 Days
-              </Button>
-              <Button
-                onClick={() => updateFormData({ viewOnly: !formData.viewOnly })}
-                variant="outline"
-                size="sm"
-              >
-                Toggle ViewOnly
+                Set End Date (+30d)
               </Button>
               <Button
                 onClick={() =>
-                  updateFormData({ allowDownload: !formData.allowDownload })
+                  updateFormData({ legalDocuments: 'generic-nda' })
                 }
                 variant="outline"
                 size="sm"
               >
-                Toggle Download
+                Generic NDA
+              </Button>
+              <Button
+                onClick={() =>
+                  updateFormData({ showInDatabase: !formData.showInDatabase })
+                }
+                variant="outline"
+                size="sm"
+              >
+                Toggle Visibility
               </Button>
             </div>
           </div>
