@@ -37,8 +37,15 @@ export default function NavigationHeader() {
   // Only show account options if user is authenticated
   const isAuthenticated = isInitialized && user
 
+  // Determine if we're on AI site - check both feature flag and URL
+  const isOnAISite =
+    isAISite ||
+    (typeof window !== 'undefined' &&
+      (window.location.hostname.includes('conciliator-ai') ||
+        window.location.hostname.includes('app.safeidea.ai')))
+
   // Determine the Add Idea route based on the site
-  const addIdeaRoute = isAISite ? '/add-ip/protect' : '/add-ip'
+  const addIdeaRoute = isOnAISite ? '/add-ip/protect' : '/add-ip'
 
   // Handle logout
   const handleLogout = () => {
