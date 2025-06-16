@@ -1,4 +1,4 @@
-# Session Report - June 16, 2025
+# Session Report - June 16, 2025 (Session 1)
 
 ## Session Overview
 - **Duration**: ~2 hours
