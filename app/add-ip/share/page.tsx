@@ -539,7 +539,7 @@ export default function SharePage() {
             disabled={!canProceed || isLoading}
             data-testid="share-continue-button"
           >
-            Continue to AI Guard
+            Continue to Guard
           </Button>
         </div>
 

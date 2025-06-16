@@ -32,20 +32,31 @@ export const AddStepContent = memo(
         const file = e.target.files?.[0]
         if (!file) return
 
-        // Check file size (2MB limit)
-        if (file.size > 2 * 1024 * 1024) {
+        // Check file size (20MB limit)
+        if (file.size > 20 * 1024 * 1024) {
           setIPDoc((prev) => ({
             ...prev,
-            error: 'File size exceeds 2MB limit',
+            error: 'File size exceeds 20MB limit',
           }))
           return
         }
 
-        // Check file type (only text and markdown)
-        if (!file.type.includes('text') && !file.name.endsWith('.md')) {
+        // Check file type (only text, markdown, and HTML)
+        const fileName = file.name.toLowerCase()
+        const isValidType =
+          fileName.endsWith('.txt') ||
+          fileName.endsWith('.md') ||
+          fileName.endsWith('.markdown') ||
+          fileName.endsWith('.html') ||
+          fileName.endsWith('.htm') ||
+          file.type === 'text/plain' ||
+          file.type === 'text/markdown' ||
+          file.type === 'text/html'
+
+        if (!isValidType) {
           setIPDoc((prev) => ({
             ...prev,
-            error: 'Only text and markdown files are supported',
+            error: 'Only Markdown, HTML, or Text files are supported',
           }))
           return
         }
@@ -119,7 +130,7 @@ export const AddStepContent = memo(
           type="file"
           ref={fileInputRef}
           onChange={handleFileSelection}
-          accept=".txt,.md,.markdown,text/plain,text/markdown"
+          accept=".txt,.md,.markdown,.html,.htm,text/plain,text/markdown,text/html"
           className="hidden"
           data-testid="file-upload-input"
         />
@@ -131,8 +142,9 @@ export const AddStepContent = memo(
         >
           <div className="space-y-4">
             <p className="text-foreground/90">
-              Select a text or markdown file containing your idea description.
-              This file will be encrypted and stored securely.
+              Upload a Markdown, HTML, or Text file. Note that only one file is
+              accepted per IP. The file can be up to 20MB. Your file will be
+              encrypted and stored securely.
             </p>
             <div className="flex justify-end space-x-3 mt-4">
               <Button

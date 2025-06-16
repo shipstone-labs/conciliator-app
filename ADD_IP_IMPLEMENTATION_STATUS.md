@@ -204,6 +204,18 @@ AUTOMATED TEST WITH TESTIDS:
 10. Go back, verify data preserved
 ```
 
+### ✅ CHECKPOINT 4: Page 2 - Share Implementation (COMPLETED)
+- **Commit**: `501f6b4` - "feat: Implement Share page for three-page Add-IP flow"
+- **Status**: Deployed and tested
+
+**What was implemented:**
+- Date pickers for sharing duration (start/end dates)
+- Legal document selection (none, generic NDA, external)
+- File upload for external legal documents (ZIP files)
+- Database visibility toggle
+- Both "Create Now" and "Continue to Guard" functionality
+- Full encryption logic with sharing settings
+
 ### CHECKPOINT 4: Page 2 - Share Implementation
 
 #### Design Decisions
@@ -347,6 +359,23 @@ export default function SharePage() {
   )
 }
 ```
+
+### ✅ CHECKPOINT 5: Page 3 - Guard & Creation Flow (COMPLETED)
+- **Commit**: `4bd714c` - "feat: Implement Guard page for three-page Add-IP flow"
+- **Status**: Deployed and tested
+
+**What was implemented:**
+- Guard protection focused on monitoring, reporting, and enforcement
+- Three benefit cards (24/7 Monitoring, Periodic Reports, Legal Documentation)
+- Guard toggle switch
+- Detailed explanation of Guard protection features
+- Full encryption logic with all settings
+- "Create Protected Idea" functionality
+
+**Recent Updates (Session 3):**
+- Updated from "AI Guard" to "Guard" throughout
+- Refocused content on IP protection rather than sales/marketing
+- Changed messaging to emphasize monitoring, reporting, and legal enforcement
 
 ### CHECKPOINT 5: Page 3 - Guard & Creation Flow
 
@@ -495,6 +524,22 @@ export default function GuardPage() {
    - Update MCP test scripts for new flow
 
 ---
+
+## Recent Updates - Session 3 (June 16, 2025)
+
+### File Upload Component Updates
+- **File size limit**: Increased from 2MB to 20MB
+- **File types**: Restricted to Markdown (.md, .markdown), HTML (.html, .htm), and Text (.txt) files
+- **Modal text**: Updated to clearly explain single file limit and accepted formats
+- **Shared component**: Changes affect both `/add-ip` and `/add-ip/protect` pages
+
+### Guard Page Rebranding
+- Changed from "AI Guard" to "Guard" throughout the application
+- Refocused messaging on:
+  - **Monitoring**: 24/7 scanning for potential infringement
+  - **Reporting**: Periodic alerts and detailed comparisons
+  - **Enforcement**: Legal documentation and audit trails
+- Removed sales/marketing agent references
 
 ## Key Implementation Principles
 

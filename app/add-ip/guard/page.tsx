@@ -246,33 +246,23 @@ export default function GuardPage() {
     <div className="container max-w-4xl mx-auto py-8 px-4">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-2">AI Protection (Optional)</h2>
+        <h2 className="text-2xl font-bold mb-2">Guard Protection (Optional)</h2>
         <p className="text-muted-foreground">
-          Enable AI-powered monitoring to help protect and promote your idea.
+          Enable automated monitoring, reporting, and enforcement to protect
+          your intellectual property.
         </p>
       </div>
 
       <div className="space-y-6">
-        {/* AI Benefits */}
+        {/* Guard Benefits */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6 text-center">
-              <Brain className="h-12 w-12 mx-auto mb-3 text-primary" />
-              <h3 className="font-semibold mb-2">Smart Matching</h3>
-              <p className="text-sm text-muted-foreground">
-                AI identifies potential partners and investors interested in
-                your idea
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6 text-center">
               <Shield className="h-12 w-12 mx-auto mb-3 text-primary" />
-              <h3 className="font-semibold mb-2">24/7 Protection</h3>
+              <h3 className="font-semibold mb-2">24/7 Monitoring</h3>
               <p className="text-sm text-muted-foreground">
-                Continuous monitoring for similar ideas and potential
-                infringement
+                Continuous scanning of patent databases, publications, and
+                public repositories for potential infringement
               </p>
             </CardContent>
           </Card>
@@ -280,35 +270,47 @@ export default function GuardPage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <Bell className="h-12 w-12 mx-auto mb-3 text-primary" />
-              <h3 className="font-semibold mb-2">Automated Outreach</h3>
+              <h3 className="font-semibold mb-2">Periodic Reports</h3>
               <p className="text-sm text-muted-foreground">
-                AI agent responds to inquiries and manages initial conversations
+                Regular alerts about similar ideas or potential conflicts, with
+                detailed comparisons for your review
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <Brain className="h-12 w-12 mx-auto mb-3 text-primary" />
+              <h3 className="font-semibold mb-2">Legal Documentation</h3>
+              <p className="text-sm text-muted-foreground">
+                Automated documentation of potential infringement cases to
+                support legal action if needed
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* AI Toggle */}
+        {/* Guard Toggle */}
         <Card>
           <CardHeader>
-            <CardTitle>Enable AI Monitoring</CardTitle>
+            <CardTitle>Enable Guard Protection</CardTitle>
             <CardDescription>
-              Let our AI agent work to protect and promote your idea
+              Let SafeIdea Guard monitor and protect your intellectual property
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <Label htmlFor="ai-toggle" className="text-base font-normal">
-                  Activate AI Agent
+                <Label htmlFor="guard-toggle" className="text-base font-normal">
+                  Activate Guard Protection
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  You can enable or disable this feature later from your idea
-                  dashboard
+                  You can enable or disable Guard protection later from your
+                  idea dashboard
                 </p>
               </div>
               <Switch
-                id="ai-toggle"
+                id="guard-toggle"
                 checked={formData.enableAI}
                 onCheckedChange={(checked) =>
                   updateFormData({ enableAI: checked })
@@ -318,23 +320,33 @@ export default function GuardPage() {
           </CardContent>
         </Card>
 
-        {/* What AI Does */}
+        {/* What Guard Does */}
         <Card>
           <CardHeader>
-            <CardTitle>What the AI Agent Does</CardTitle>
+            <CardTitle>How Guard Protects Your IP</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm">When enabled, your AI agent will:</p>
+            <p className="text-sm">When enabled, SafeIdea Guard will:</p>
             <ul className="text-sm space-y-2 list-disc list-inside text-muted-foreground">
               <li>
-                Monitor patent databases and publications for similar ideas
+                Monitor global patent filings and publications for similar
+                concepts
               </li>
-              <li>Identify companies and investors in your idea's domain</li>
-              <li>Generate tailored responses to inquiries about your idea</li>
               <li>
-                Track engagement and interest levels from potential partners
+                Scan public repositories and databases for potential
+                infringement
               </li>
-              <li>Alert you to important developments or opportunities</li>
+              <li>
+                Generate periodic reports comparing findings to your protected
+                idea
+              </li>
+              <li>
+                Document evidence of potential infringement with timestamps
+              </li>
+              <li>
+                Alert you immediately to high-priority matches requiring review
+              </li>
+              <li>Maintain a legal audit trail for enforcement proceedings</li>
             </ul>
           </CardContent>
         </Card>
