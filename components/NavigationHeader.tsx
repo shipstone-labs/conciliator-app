@@ -16,6 +16,7 @@ import { AccountModal } from './AccountModal'
 import { useClientTracing } from '@/hooks/useClientTracing'
 import { useSession } from './AuthLayout'
 import { ModeToggle } from './mode-toggle'
+import { useFeature } from '@/hooks/useFeature'
 
 export default function NavigationHeader() {
   const router = useRouter()
@@ -23,6 +24,7 @@ export default function NavigationHeader() {
   const { isLoggingOff, setLoggingOff } = useSession()
   const stytchClient = useStytch()
   const { traceComponent, traceAction } = useClientTracing()
+  const isAISite = useFeature('ai')
 
   // Trace component lifecycle
   traceComponent('NavigationHeader', {
@@ -34,6 +36,16 @@ export default function NavigationHeader() {
 
   // Only show account options if user is authenticated
   const isAuthenticated = isInitialized && user
+
+  // Determine if we're on AI site - check both feature flag and URL
+  const isOnAISite =
+    isAISite ||
+    (typeof window !== 'undefined' &&
+      (window.location.hostname.includes('conciliator-ai') ||
+        window.location.hostname.includes('app.safeidea.ai')))
+
+  // Determine the Add Idea route based on the site
+  const addIdeaRoute = isOnAISite ? '/add-ip/protect' : '/add-ip'
 
   // Handle logout
   const handleLogout = () => {
@@ -84,11 +96,13 @@ export default function NavigationHeader() {
         {isAuthenticated && (
           <>
             <Link
-              href="/add-ip"
+              href={addIdeaRoute}
               className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary/90 cursor-pointer transition-colors"
               data-testid="nav-add-idea"
               onClick={() =>
-                traceAction('Navigate', undefined, { destination: '/add-ip' })
+                traceAction('Navigate', undefined, {
+                  destination: addIdeaRoute,
+                })
               }
             >
               Add Idea
