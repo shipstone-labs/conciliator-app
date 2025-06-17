@@ -11,7 +11,7 @@ const _path = require('node:path')
 // Progress tracking helper
 function getProgressFromStatus(statusText) {
   const stages = {
-    'Storing encrypted document in storacha': { progress: 10, emoji: '📦' },
+    'Storing encrypted document in Storacha': { progress: 10, emoji: '📦' },
     'Storing downsampled encrypted document': { progress: 20, emoji: '📦' },
     'AI generating token image': { progress: 30, emoji: '🤖' },
     'Storing AI generated token image': { progress: 40, emoji: '🖼️' },
