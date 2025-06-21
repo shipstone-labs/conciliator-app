@@ -145,7 +145,7 @@ const FAQ_CATEGORIES = [
         id: 'file-types',
         question: 'What file types are supported?',
         answer:
-          'SafeIdea supports a wide variety of file formats including PDFs, Word documents, Excel spreadsheets, PowerPoint presentations, images (JPG, PNG, SVG, etc.), CAD files, code files, text documents, ZIP archives, and more. The maximum file size is 100MB per document, though this limit is higher for enterprise clients.',
+          "SafeIdea supports a wide variety of file formats including PDFs, Word documents, Excel spreadsheets, PowerPoint presentations, images (JPG, PNG, SVG, etc.), CAD files, code files, text documents, ZIP archives, and more. You can add multiple files for each IP that you're adding. The maximum combined file size is 20MB per IP, though this limit is higher for enterprise clients. Please contact us if you need to adjust the maximum combined file size for your IP.",
       },
       {
         id: 'browser-compatibility',
@@ -378,8 +378,8 @@ export default function FAQPage() {
             about our plans, features, or intellectual property protection
             strategies.
           </p>
-          <Button variant="outline" onClick={() => router.push('/contact')}>
-            Contact Support
+          <Button variant="outline" asChild>
+            <a href="mailto:info@safeidea.ai">Contact Support</a>
           </Button>
         </div>
       </section>
