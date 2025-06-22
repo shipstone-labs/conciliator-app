@@ -38,6 +38,11 @@ yarn-error.log*
 # logs
 logs/mcp-puppeteer-*.log*
 
+# PR testing documentation
+PR_TEST*.md
+PR_TESTING*.md
+SESSION_STATUS_*.md
+
 # env files (can opt-in for committing if needed)
 .env*
 !.env*.example
