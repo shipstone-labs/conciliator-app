@@ -27,9 +27,9 @@ overrides:
   '@lit-protocol/types': file:./dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz
   '@lit-protocol/wasm': file:./dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz
   '@storacha/client': file:./dist-packages/@storacha-client-1.4.0-8f47eae0.tgz
-  lilypad-wrapper: file:./dist-packages/lilypad-wrapper-1.0.0-16794b0.tgz
-  lit-wrapper: file:./dist-packages/lit-wrapper-1.0.0-16794b0.tgz
-  web-storage-wrapper: file:./dist-packages/web-storage-wrapper-1.0.0-16794b0.tgz
+  lilypad-wrapper: file:./dist-packages/lilypad-wrapper-1.0.0-9b0b024.tgz
+  lit-wrapper: file:./dist-packages/lit-wrapper-1.0.0-9b0b024.tgz
+  web-storage-wrapper: file:./dist-packages/web-storage-wrapper-1.0.0-9b0b024.tgz
 
 patchedDependencies:
   '@google-cloud/opentelemetry-cloud-trace-exporter@^2.4.1':
@@ -169,6 +169,9 @@ importers:
       cbor-web:
         specifier: ^10.0.3
         version: 10.0.3
+      cbor-x:
+        specifier: ^1.6.0
+        version: 1.6.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -200,14 +203,14 @@ importers:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lilypad-wrapper:
-        specifier: file:dist-packages/lilypad-wrapper-1.0.0-16794b0.tgz
-        version: file:dist-packages/lilypad-wrapper-1.0.0-16794b0.tgz
+        specifier: file:dist-packages/lilypad-wrapper-1.0.0-9b0b024.tgz
+        version: file:dist-packages/lilypad-wrapper-1.0.0-9b0b024.tgz
       lint-staged:
         specifier: ^15.5.2
         version: 15.5.2
       lit-wrapper:
-        specifier: file:dist-packages/lit-wrapper-1.0.0-16794b0.tgz
-        version: file:dist-packages/lit-wrapper-1.0.0-16794b0.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1)
+        specifier: file:dist-packages/lit-wrapper-1.0.0-9b0b024.tgz
+        version: file:dist-packages/lit-wrapper-1.0.0-9b0b024.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1)
       lucide-react:
         specifier: ^0.475.0
         version: 0.475.0(react@19.1.0)
@@ -275,8 +278,8 @@ importers:
         specifier: ^2.29.1
         version: 2.29.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@6.0.5)(zod@3.24.4)
       web-storage-wrapper:
-        specifier: file:dist-packages/web-storage-wrapper-1.0.0-16794b0.tgz
-        version: file:dist-packages/web-storage-wrapper-1.0.0-16794b0.tgz(encoding@0.1.13)
+        specifier: file:dist-packages/web-storage-wrapper-1.0.0-9b0b024.tgz
+        version: file:dist-packages/web-storage-wrapper-1.0.0-9b0b024.tgz(encoding@0.1.13)
       webpack:
         specifier: ^5.99.8
         version: 5.99.8(esbuild@0.25.4)
@@ -727,6 +730,36 @@ packages:
   '@biomejs/cli-win32-x64@1.9.4':
     resolution: {integrity: sha512-8Y5wMhVIPaWe6jw2H+KlEm4wP/f7EW3810ZLmDlrEEy5KvBsb9ECEfu/kMWD484ijfQ8+nIi0giMgu9g1UAuuA==}
     engines: {node: '>=14.21.3'}
+    cpu: [x64]
+    os: [win32]
+
+  '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
+    resolution: {integrity: sha512-P7swiOAdF7aSi0H+tHtHtr6zrpF3aAq/W9FXx5HektRvLTM2O89xCyXF3pk7pLc7QpaY7AoaE8UowVf9QBdh3w==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@cbor-extract/cbor-extract-darwin-x64@2.2.0':
+    resolution: {integrity: sha512-1liF6fgowph0JxBbYnAS7ZlqNYLf000Qnj4KjqPNW4GViKrEql2MgZnAsExhY9LSy8dnvA4C0qHEBgPrll0z0w==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@cbor-extract/cbor-extract-linux-arm64@2.2.0':
+    resolution: {integrity: sha512-rQvhNmDuhjTVXSPFLolmQ47/ydGOFXtbR7+wgkSY0bdOxCFept1hvg59uiLPT2fVDuJFuEy16EImo5tE2x3RsQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@cbor-extract/cbor-extract-linux-arm@2.2.0':
+    resolution: {integrity: sha512-QeBcBXk964zOytiedMPQNZr7sg0TNavZeuUCD6ON4vEOU/25+pLhNN6EDIKJ9VLTKaZ7K7EaAriyYQ1NQ05s/Q==}
+    cpu: [arm]
+    os: [linux]
+
+  '@cbor-extract/cbor-extract-linux-x64@2.2.0':
+    resolution: {integrity: sha512-cWLAWtT3kNLHSvP4RKDzSTX9o0wvQEEAj4SKvhWuOVZxiDAeQazr9A+PSiRILK1VYMLeDml89ohxCnUNQNQNCw==}
+    cpu: [x64]
+    os: [linux]
+
+  '@cbor-extract/cbor-extract-win32-x64@2.2.0':
+    resolution: {integrity: sha512-l2M+Z8DO2vbvADOBNLbbh9y5ST1RY5sqkWOg/58GkUPBYou/cuNZ68SGQ644f1CvZ8kcOxyZtw06+dxWHIoN/w==}
     cpu: [x64]
     os: [win32]
 
@@ -1737,70 +1770,70 @@ packages:
     resolution: {integrity: sha512-SkayRWUz7MvibjKO/MN8xuhEziyWPlKYZ5wrPdC9gDqvgiJR1BM95tY89jv/ypVDA+u5B3DhtXXYMpIQCSHUOg==}
 
   '@lit-protocol/auth-helpers@file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-T30QJLaU4pA6V8LJCqzNuWODmFDLiAUWXWyGauMp1XoNLCJmd33xDgIe4aJidYKhdXWsYY0m4ufNKKm8blijCA==, tarball: file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-EsF5k6haoUoPRJPPAId/qSV4Ec+bgoB2DbTnsztnH2+EPx2MF/KufPC47sitNdIIe/Q1TsW7IdjNoxzRJ5aCPw==, tarball: file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/constants@file:dist-packages/@lit-protocol-constants-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-5mdY9up3yhAoweYnlsUTon9ESs0dO+e/mPFNOJ4NJ5JfiyMA/uArF2sjGAoxNMIC6YMY/n/jbaVjfANl/yG72w==, tarball: file:dist-packages/@lit-protocol-constants-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-+auo+UhkX41ks+z5MiJjjWm/Ena1mX4czMS4G408KsDxOZc3Vqgt2eQSl6I4bbb+7Y6bFH9VOPBBhCHcsd4DjQ==, tarball: file:dist-packages/@lit-protocol-constants-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/contracts-sdk@file:dist-packages/@lit-protocol-contracts-sdk-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-Y8bE8AwtkS8JbI8B+FJ9tWdTAL7XUWggF3+KAfXbaV/aApfV/1wq/HAGmiZMbn/lWkiYM3JE6vjFfpJubCy0Iw==, tarball: file:dist-packages/@lit-protocol-contracts-sdk-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-qVXp2Z+jV1U5GgXrVTVLTLy2tySJQRFKvkrdIUJ6Gc3a9SsvT5RaQE4o35nW4g9bUTCU3LOJ31vmx6BJqc/xSA==, tarball: file:dist-packages/@lit-protocol-contracts-sdk-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
     peerDependencies:
       date-and-time: ^2.4.1
       multiformats: ^9.7.1
 
   '@lit-protocol/core@file:dist-packages/@lit-protocol-core-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-IM7JXrX0vpZxcKk3zj0cxlYkkw/UMg2LG/kF8qTWdbQ6yDBK8qWlIXlP21FstsdmZ8RkR+kNDGP4J1jdf9fbcA==, tarball: file:dist-packages/@lit-protocol-core-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-UwtoXkMF3HonCmVyDezym1JeQBO6T+D/uJ4mIlwKrysEk88Vkn73BqXaenP4sDzvLjS6hr+pFPexH8QqQ7JW1Q==, tarball: file:dist-packages/@lit-protocol-core-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/crypto@file:dist-packages/@lit-protocol-crypto-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-IE/aEf6nveUDDzKWcim9phpj2LebBNXsTVqOFthxe6IzbCP7r1uL+K4y92zpU31K4XNzZYR+AV0MfNZ0wyydEw==, tarball: file:dist-packages/@lit-protocol-crypto-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-tJHqk0083r9eNfi0wsUMUO8fMHyQYENjURsN/M9tbk9xe81dR2BJ7cXssh2XslO3ewqBIF/YY8QjqRPilm/jDg==, tarball: file:dist-packages/@lit-protocol-crypto-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/lit-auth-client@file:dist-packages/@lit-protocol-lit-auth-client-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-P4jDgWl8d3VP8HqvrkpFlq0iTyGSyi+4hUFRHa6rk2GP+4B0qEVgAPHUOoHjS81S/qVljWxfuvT7jN3HI7DaBg==, tarball: file:dist-packages/@lit-protocol-lit-auth-client-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-Qy86aEgQgVd1a5upkZzVFx3NapgbjwqknU2/pNw9zFoJwoCG1W3szt2D90ubrv+fLF/T2KZDsJ3hDwAHztn+xw==, tarball: file:dist-packages/@lit-protocol-lit-auth-client-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
     peerDependencies:
       '@simplewebauthn/browser': ^7.2.0
       '@simplewebauthn/typescript-types': ^7.0.0
 
   '@lit-protocol/lit-node-client-nodejs@file:dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-96m+8g8VorMHOsuijM7zuQdKWDUh08r+tPPUGwkGaIoLwkBoD8DV0M99EOaMF5jOCLZ7RDA0PEFIMntdE7S7Kg==, tarball: file:dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-+LMkPsR+MqFJDyuIH35A8fIKrTrSHwknYGetShAGpY1n4nR83OvlM2wzQqt6xgJdn5tX3CjAr+UfTKAF1UCeTg==, tarball: file:dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/lit-node-client@file:dist-packages/@lit-protocol-lit-node-client-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-zTzArAYkoW/GheuoAPxjC9b0IMB3gqqDno+T6P6pTb5jbB3iCHyeU5hpzJSaJY4tc1FVbj1cwh6vjFwWNLEqjg==, tarball: file:dist-packages/@lit-protocol-lit-node-client-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-YMSftlDYINiRiiTfqfg4SabvNN6v/Noyu6wNIzB3r/bUQ0KYl83MkElCHJZfU+/63i0zUjFeQ37Z/1g9c8igYA==, tarball: file:dist-packages/@lit-protocol-lit-node-client-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
     peerDependencies:
       tslib: ^2.3.0
 
   '@lit-protocol/misc@file:dist-packages/@lit-protocol-misc-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-F3GEn9k63pNcEkvgUK4Sy07/+2AmanikuJsi3SWsEkNZjOL5jmjOK6Q5by8QaUqk6lAjZiL209gB3o8AAIT8Kw==, tarball: file:dist-packages/@lit-protocol-misc-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-7GbDQlGHM6LQdieUq25vxF40AmwSXHvEPoZNamGN6R2fMUChLyf2gLE0Mz5gyMK/+2rmQlOlhQruQUqhK7gFQw==, tarball: file:dist-packages/@lit-protocol-misc-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/nacl@file:dist-packages/@lit-protocol-nacl-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-5K4Y9IESswez2EBvafMwtJrv1YiQbUm76glDBGA+z5L2SDeFSF9gSJmFSh7ByCEUcaUQBm8P/4xaMQO3oZvntA==, tarball: file:dist-packages/@lit-protocol-nacl-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-EuAAi4EYmi1zuVqqv5nv1w9Nb3YzwSVBJGdhxGt5JkQdHIsgzM69KrryeqLQFfYohSPz/h7s8S5FT/gqqDQ8DQ==, tarball: file:dist-packages/@lit-protocol-nacl-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/pkp-base@file:dist-packages/@lit-protocol-pkp-base-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-VZGflXLuEUe/Oj7Mhm98UWZEy2dBbMXqD1hOkaa+oynmzjuVbMzQwGWZHhD5oAtFdZsDsqJ51sL8TfshcIMn8Q==, tarball: file:dist-packages/@lit-protocol-pkp-base-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-BiedNLj6RxdOTjZldzvLIlq/88U/QunMoJ4rlzTkuzdhvLqTZzigCgk0Tvtwf/IyBt+VB2qp76f+jl+CrmKBaQ==, tarball: file:dist-packages/@lit-protocol-pkp-base-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/pkp-ethers@file:dist-packages/@lit-protocol-pkp-ethers-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-L3TL2VTyr2qxBMUc3D59oZlFJt5UqaWhjDfUzPj6hNCjoIjyelq0hsi/hpArab1Zi3FDKFtc06t2DZNpoWzWZg==, tarball: file:dist-packages/@lit-protocol-pkp-ethers-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-2isixhSM867AwIMES5CXohNDyYdSc9WdEuEgf38p3AoDosKWJ1/Qu7tF3TRpxoI/XrOW96kO1xPyUNjQN7gaPw==, tarball: file:dist-packages/@lit-protocol-pkp-ethers-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/types@file:dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-AWJyFS4jR5XL6WkrPB0ElOCAXe8621DYVdHPpt7a2AMQkRHuvN4xgD9S8NyqMuallGv4L6AaCHFCabiKD7f6DQ==, tarball: file:dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-4Fc7IjlCgnwWssRsPYbdse0mMC/3HXee2lMXHctQL0fwBFxA51cjQFDnWmz1+ICUjKkBXGTzN1sN251J9alv4A==, tarball: file:dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/uint8arrays@7.1.3':
     resolution: {integrity: sha512-7ngJk+NrisUY0FJnMJz0FWBSTeYWuJy+ENVD/yxlShwfhUXSCZ5HVtQMRqjA4PIRMH/QKoOEaOlN6me8LCwT6A==}
 
   '@lit-protocol/wasm@file:dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-L93yXSQeh+nfVs7fflx1J5ZTjX0rO2Fl9XLAr7rWHSXF7hWtKRD36OqLHAgovSatvZCni7LQ5pu/KN6vUtXQMA==, tarball: file:dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-Ig1bKBF5VMu7Ul6xERV4knB/2yvSn75zdUmuauhH5Qxpob6lUwaLpliexGZxQOsh3WOVLQXLmhbJuCqRTB2SKw==, tarball: file:dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@modelcontextprotocol/sdk@1.11.1':
@@ -3009,7 +3042,7 @@ packages:
     resolution: {integrity: sha512-YMIuocTgaVpqlgyds5NG+eJqfr+dfFkxdk33lJcFIRD30SZaGiA8vQ0ZPUHqcC9Azj0XZCRexz6nHXqEsn1aag==}
 
   '@storacha/client@file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz':
-    resolution: {integrity: sha512-Mm4v2szlcB6aqfRhtyGtyGvIToWKdiqgvJxaGAO4lyIemKXn4Z5lU5RjpRDfaStvE9EQTT9z402/Y5nA5bKUKQ==, tarball: file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz}
+    resolution: {integrity: sha512-kG7OuEFmvl0cAr8yNjgQYNg+xzmRpZpwXI9lXPi5ZU74xP5roBb1CKFFxQUwZpxRrekDSOILxguisICAsvNuSw==, tarball: file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz}
     version: 1.4.0
     engines: {node: '>=18'}
 
@@ -3857,9 +3890,16 @@ packages:
   carstream@2.3.0:
     resolution: {integrity: sha512-2YwFg5Kxs2tqVCJv7sthWbYoUpALCYBBfTdpQcpicV7ipi6bBb1h9M4MNb1vm+724f39lUNp5VWhW43IFxfPlA==}
 
+  cbor-extract@2.2.0:
+    resolution: {integrity: sha512-Ig1zM66BjLfTXpNgKpvBePq271BPOvu8MR0Jl080yG7Jsl+wAZunfrwiwA+9ruzm/WEdIV5QF/bjDZTqyAIVHA==}
+    hasBin: true
+
   cbor-web@10.0.3:
     resolution: {integrity: sha512-IWHUPUDxRlDzT6Saykzpy/0PckZjcPZcS/WQR1pWm+YX5IniAMB4Cih+AdxUss0CNs/XEBXWJsKfJWitx+1zGg==}
     engines: {node: '>=18'}
+
+  cbor-x@1.6.0:
+    resolution: {integrity: sha512-0kareyRwHSkL6ws5VXHEf8uY1liitysCVJjlmhaLG+IXLqhSaOO+t63coaso7yjwEzWZzLy8fJo06gZDVQM9Qg==}
 
   cbor@10.0.3:
     resolution: {integrity: sha512-72Jnj81xMsqepqdcSdf2+fflz/UDsThOHy5hj2MW5F5xzHL8Oa0KQ6I6V9CwVUPxg5pf+W9xp6W2KilaRXWWtw==}
@@ -5641,8 +5681,8 @@ packages:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
     engines: {node: '>=14'}
 
-  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-16794b0.tgz:
-    resolution: {integrity: sha512-KuNfceD5JAZG1cGeJxbGqe+UKksjfSDp33CLUTfdQvSHQ1D7YiihJCF8eSGBzGULgm2Hq6+nydhV4V/ZazLjpQ==, tarball: file:dist-packages/lilypad-wrapper-1.0.0-16794b0.tgz}
+  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-9b0b024.tgz:
+    resolution: {integrity: sha512-hYEdYWHeVXJu9oetRyq+M++G1YeI9gOf1jX3jDc/66AK/GJ8S8GG16Dhh+mRVd+acgxSL/4opUEBShp5mVt/5A==, tarball: file:dist-packages/lilypad-wrapper-1.0.0-9b0b024.tgz}
     version: 1.0.0
     engines: {node: '>=16.0.0'}
 
@@ -5661,8 +5701,8 @@ packages:
     resolution: {integrity: sha512-LWzX2KsqcB1wqQ4AHgYb4RsDXauQiqhjLk+6hjbaeHG4zpjjVAB6wC/gz6X0l+Du1cN3pUB5ZlrvTbhGSNnUQQ==}
     engines: {node: '>=18.0.0'}
 
-  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-16794b0.tgz:
-    resolution: {integrity: sha512-KrBH3unbLbgOy+uFN74SuTsenA2trhftL7ejLdXLiNU5xx3Cw1MxGCpmVMWXRumUyUPctqN1FoqumERpON7C/Q==, tarball: file:dist-packages/lit-wrapper-1.0.0-16794b0.tgz}
+  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-9b0b024.tgz:
+    resolution: {integrity: sha512-mmUX/bES4AwFBJ/s+yA4IINchU7j/VWDmV7ZZn501wakxEA1fwn/QQBhM8pN0vVxLm7/mYAv0E5jNcFnhFMLQA==, tarball: file:dist-packages/lit-wrapper-1.0.0-9b0b024.tgz}
     version: 1.0.0
 
   load-tsconfig@0.2.5:
@@ -6159,6 +6199,10 @@ packages:
   node-forge@1.3.1:
     resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
     engines: {node: '>= 6.13.0'}
+
+  node-gyp-build-optional-packages@5.1.1:
+    resolution: {integrity: sha512-+P72GAjVAbTxjjwUmwjVrqrdZROD4nf8KgpBoDxqXXTiYZZt/ud60dE5yvCSr9lRO8e8yv6kgJIC0K0PfZFVQw==}
+    hasBin: true
 
   node-gyp-build@4.8.4:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
@@ -7747,8 +7791,8 @@ packages:
     resolution: {integrity: sha512-TnbFSbcOCcDgjZ4piURLCbJ3nJhznVh9kw6F6iokjiFPl8ONxe9A6nMDVXDiNbrSfLILs6vB07F7wLBrwPYzJw==}
     engines: {node: '>=10.13.0'}
 
-  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-16794b0.tgz:
-    resolution: {integrity: sha512-0tj8tWXk9Q63oINx0CsSP+gi6z1xlOyyoiaibunItdm/kdnxQPeXMCEaIVpTokLctPIEHAaAduRs0ObbpsgjGQ==, tarball: file:dist-packages/web-storage-wrapper-1.0.0-16794b0.tgz}
+  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-9b0b024.tgz:
+    resolution: {integrity: sha512-amGletux5u4mj3iZpkwGqz+90zO3Py0nLE/pB2LTHDWKxdqltTE1+bAjjzXIKwxdPEm8LKfuzAIFoXBCLYONqg==, tarball: file:dist-packages/web-storage-wrapper-1.0.0-9b0b024.tgz}
     version: 1.0.0
 
   web-streams-polyfill@3.3.3:
@@ -8168,6 +8212,24 @@ snapshots:
     optional: true
 
   '@biomejs/cli-win32-x64@1.9.4':
+    optional: true
+
+  '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
+    optional: true
+
+  '@cbor-extract/cbor-extract-darwin-x64@2.2.0':
+    optional: true
+
+  '@cbor-extract/cbor-extract-linux-arm64@2.2.0':
+    optional: true
+
+  '@cbor-extract/cbor-extract-linux-arm@2.2.0':
+    optional: true
+
+  '@cbor-extract/cbor-extract-linux-x64@2.2.0':
+    optional: true
+
+  '@cbor-extract/cbor-extract-win32-x64@2.2.0':
     optional: true
 
   '@cspotcode/source-map-support@0.8.1':
@@ -11876,7 +11938,23 @@ snapshots:
       multiformats: 13.3.3
       uint8arraylist: 2.4.8
 
+  cbor-extract@2.2.0:
+    dependencies:
+      node-gyp-build-optional-packages: 5.1.1
+    optionalDependencies:
+      '@cbor-extract/cbor-extract-darwin-arm64': 2.2.0
+      '@cbor-extract/cbor-extract-darwin-x64': 2.2.0
+      '@cbor-extract/cbor-extract-linux-arm': 2.2.0
+      '@cbor-extract/cbor-extract-linux-arm64': 2.2.0
+      '@cbor-extract/cbor-extract-linux-x64': 2.2.0
+      '@cbor-extract/cbor-extract-win32-x64': 2.2.0
+    optional: true
+
   cbor-web@10.0.3: {}
+
+  cbor-x@1.6.0:
+    optionalDependencies:
+      cbor-extract: 2.2.0
 
   cbor@10.0.3:
     dependencies:
@@ -14315,7 +14393,7 @@ snapshots:
 
   lilconfig@3.1.3: {}
 
-  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-16794b0.tgz: {}
+  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-9b0b024.tgz: {}
 
   limiter@1.1.5: {}
 
@@ -14345,7 +14423,7 @@ snapshots:
       rfdc: 1.4.1
       wrap-ansi: 9.0.0
 
-  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-16794b0.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1):
+  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-9b0b024.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1):
     dependencies:
       '@lit-protocol/accs-schemas': 0.0.24
       '@lit-protocol/auth-helpers': file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz
@@ -15025,6 +15103,11 @@ snapshots:
       formdata-polyfill: 4.0.10
 
   node-forge@1.3.1: {}
+
+  node-gyp-build-optional-packages@5.1.1:
+    dependencies:
+      detect-libc: 2.0.4
+    optional: true
 
   node-gyp-build@4.8.4: {}
 
@@ -16972,7 +17055,7 @@ snapshots:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
 
-  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-16794b0.tgz(encoding@0.1.13):
+  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-9b0b024.tgz(encoding@0.1.13):
     dependencies:
       '@ipld/dag-ucan': 3.4.5
       '@noble/ed25519': 1.7.5

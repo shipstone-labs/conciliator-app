@@ -4,11 +4,13 @@ import { type Client, create } from '@storacha/client'
 import { StoreMemory } from '@storacha/client/stores/memory'
 import { parse } from '@storacha/client/proof'
 import { Signer } from '@storacha/client/principal/ed25519'
+import { extract } from '@storacha/client/delegation'
 import type {
   ListRequestOptions,
   UploadListSuccess,
 } from '@storacha/client/types'
 import * as DID from '@ipld/dag-ucan/did'
+export * as DID from '@ipld/dag-ucan/did'
 
 // import * as ed from '@noble/ed25519'
 // import { sha512 } from '@noble/hashes/sha512'
@@ -117,6 +119,25 @@ export async function createW3Client(): Promise<Client> {
   }
 }
 
+export async function delegatedClient(
+  delegationData: ArrayBuffer
+): Promise<Client> {
+  // Create client with memory store
+  const store = new StoreMemory()
+  const client = await create({ store })
+
+  // Import the delegation
+  const delegation = await extract(new Uint8Array(delegationData))
+  if (!delegation.ok) {
+    throw new Error('Failed to extract delegation')
+  }
+
+  // Create space with the delegation
+  const space = await client.addSpace(delegation.ok)
+  await client.setCurrentSpace(space.did())
+  return client
+}
+
 /**
  * Authenticate with the Web3.Storage service using an email
  * @param client - The Web3.Storage client instance
@@ -218,6 +239,8 @@ export const w3Storage = {
   authenticate: authenticateWithEmail,
   store: storeContent,
   list: listUploads,
+  delegatedClient,
+  DID,
 }
 
 export default w3Storage
