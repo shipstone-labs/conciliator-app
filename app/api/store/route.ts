@@ -182,14 +182,14 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       .doc('status')
     const auditTable = firestore.collection('ip').doc(id).collection('audit')
     await status.set({
-      status: 'Storing encrypted document in storacha',
+      status: 'Storing encrypted document in Storacha',
       creator: user.user.user_id,
       address: to,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })
     await auditTable.add({
-      status: 'Storing encrypted document in storacha',
+      status: 'Storing encrypted document in Storacha',
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })
@@ -232,7 +232,7 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
       }
     )
     const encryptedCid = await w3Client.uploadFile(encryptedBlob)
-    await setStatus('Storing downsampled encrypted document in storacha')
+    await setStatus('Storing downsampled encrypted document in Storacha')
     const downSampledEncryptedBlob = new Blob(
       [
         encode(
