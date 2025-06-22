@@ -78,6 +78,25 @@ const vocabularyMap = {
     '.ai':
       'Now you need to add the secret document that describes your intellectual property in detail. This is the core of your IP protection.',
   },
+
+  // Subscription page terms
+  'subscription.hero.title': {
+    '.net': 'Because Your Ideas Are Worth Protecting',
+    '.ai': 'Because Your Intellectual Property Needs Professional Protection',
+  },
+  'subscription.protect.cta': {
+    '.net': 'Protect My Idea Now',
+    '.ai': 'Secure My IP Now',
+  },
+  'subscription.innovative': {
+    '.net': 'Your IP Protection Should Be As Innovative As Your Ideas',
+    '.ai':
+      'Your IP Protection Should Be As Innovative As Your Intellectual Property',
+  },
+  'subscription.ready': {
+    '.net': 'Ready to Protect Your Innovative Ideas?',
+    '.ai': 'Ready to Protect Your Intellectual Property?',
+  },
 } as const
 
 export function useVocabulary() {
