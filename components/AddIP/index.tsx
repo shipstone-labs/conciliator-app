@@ -20,6 +20,7 @@ import { AddStepContent } from './AddStepContent'
 import { AddStepTerms } from './AddStepTerms'
 import { handleError } from '@/hooks/useIP'
 import { bytesToHex, type Hex, pad } from 'viem'
+import { useVocabulary } from '@/lib/vocabulary'
 
 export const firestoreIdToHex = (base64: string): Hex => {
   return bytesToHex(
@@ -38,6 +39,7 @@ export type AddDoc = Omit<IPDoc, 'id'> & {
 
 const AppIP = () => {
   const fb = getFirestore()
+  const { getTerm } = useVocabulary()
   // Removed user authentication check since it's handled by the main navigation
   const { litClient: _litClient, sessionSigs: _sessionSigs } = useSession([
     'stytchUser',
@@ -268,7 +270,7 @@ const AppIP = () => {
         >
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-bold text-primary">
-              Add Your Idea
+              {getTerm('page.add.title')}
             </CardTitle>
             <CardDescription className="text-foreground/90 mt-2 text-base">
               Complete all three steps below to create your secure idea page.

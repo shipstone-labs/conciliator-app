@@ -15,6 +15,7 @@ import type { AddDoc } from '@/components/AddIP'
 import type { EncryptResponse } from 'lit-wrapper'
 import { downsample } from '@/lib/downsample'
 import { bytesToHex, type Hex, pad } from 'viem'
+import { useVocabulary } from '@/lib/vocabulary'
 
 // Copy the helper function from the original component
 const firestoreIdToHex = (base64: string): Hex => {
@@ -31,6 +32,7 @@ export default function ProtectPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [localStatus, setLocalStatus] = useState<string>('')
+  const { getTerm } = useVocabulary()
 
   // Get required dependencies - exactly like the original
   const { litClient: _litClient, sessionSigs: _sessionSigs } = useSession([
@@ -288,7 +290,9 @@ export default function ProtectPage() {
       {/* Form Section */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold mb-2">Protect Your Idea</h2>
+          <h2 className="text-2xl font-bold mb-2">
+            {getTerm('page.add.title')}
+          </h2>
           <p className="text-muted-foreground">
             Start by providing basic information about your idea and uploading
             your confidential document.
