@@ -100,8 +100,15 @@ const vocabularyMap = {
 } as const
 
 export function useVocabulary() {
-  const isAISite = useFeature('ai')
+  const isAISiteFeature = useFeature('ai')
   const hasIntroducedIP = useRef(false)
+
+  // Check both feature flag and URL (fallback for PR previews where env vars aren't set)
+  const isAISite =
+    isAISiteFeature ||
+    (typeof window !== 'undefined' &&
+      (window.location.hostname.includes('conciliator-ai') ||
+        window.location.hostname.includes('app.safeidea.ai')))
 
   const getTerm = (
     key: keyof typeof vocabularyMap,
