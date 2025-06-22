@@ -78,6 +78,52 @@ const vocabularyMap = {
     '.ai':
       'Now you need to add the secret document that describes your intellectual property in detail. This is the core of your IP protection.',
   },
+
+  // Hero/marketing content
+  'hero.title': {
+    '.net': "Because They're Your Ideas",
+    '.ai': "Because It's Your Intellectual Property",
+  },
+  'hero.subtitle': {
+    '.net':
+      'Protect your intellectual property with advanced encryption, share it securely with partners, and protect your digital assets with our AI-powered agent.',
+    '.ai':
+      'Protect your intellectual property with advanced encryption, share it securely with partners, and defend your IP rights with our AI-powered monitoring agent.',
+  },
+  'hero.cta': {
+    '.net': 'Start Protecting Your Ideas',
+    '.ai': 'Start Protecting Your IP',
+  },
+  'hero.description.assets': {
+    '.net': 'ideas and digital assets',
+    '.ai': 'intellectual property and innovations',
+  },
+
+  // Service/feature descriptions
+  'feature.description': {
+    '.net':
+      "From protecting trade secrets to monitoring for infringement, we're developing tools to secure, prove ownership, and profit from your intellectual property.",
+    '.ai':
+      'From establishing prior art to monitoring for infringement, we provide comprehensive tools to secure, prove ownership, and enforce your IP rights.',
+  },
+
+  // How it works section
+  'howto.step2.title': {
+    '.net': 'Upload Idea',
+    '.ai': 'Upload IP Document',
+  },
+  'howto.step3.subtitle': {
+    '.net':
+      'SafeIdea AI Agents work for you to monitor the internet for unauthorized use of your intellectual property. Get comprehensive protection with continuous monitoring and detailed infringement reports.',
+    '.ai':
+      'SafeIdea AI Agents provide continuous monitoring of the internet for unauthorized use of your IP. Get comprehensive protection with automated scanning and detailed infringement reports.',
+  },
+
+  // CTA section
+  'cta.ready': {
+    '.net': 'Ready to protect your ideas?',
+    '.ai': 'Ready to protect your intellectual property?',
+  },
 } as const
 
 export function useVocabulary() {

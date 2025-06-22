@@ -157,9 +157,9 @@ function WelcomeHome() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Share your intellectual property with potential partners or
-                    investors under controlled conditions with time-limited
-                    access.
+                    Share your {getTerm('item').toLowerCase()} with potential
+                    partners or investors under controlled conditions with
+                    time-limited access.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start">
@@ -197,10 +197,11 @@ function WelcomeHome() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Protect your intellectual property with continuous
+                    Protect your {getTerm('item').toLowerCase()} with continuous
                     monitoring. Our AI Agents scan the internet for unauthorized
-                    use of your IP and provide comprehensive reports with
-                    evidence and recommended actions to defend your innovations.
+                    use of your {getTerm('item')} and provide comprehensive
+                    reports with evidence and recommended actions to defend your
+                    innovations.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start">

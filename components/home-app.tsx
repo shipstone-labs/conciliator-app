@@ -13,9 +13,24 @@ import {
 } from '@/components/ui/card'
 import WelcomeHome from './welcome-home'
 import { SubscriptionBanner } from './SubscriptionBanner'
+import { useVocabulary } from '@/lib/vocabulary'
+import { useFeature } from '@/hooks/useFeature'
 
 // Logged in version of the home page
 function LoggedInHome() {
+  const { getTerm } = useVocabulary()
+  const isAISite = useFeature('ai')
+
+  // Determine if we're on AI site
+  const isOnAISite =
+    isAISite ||
+    (typeof window !== 'undefined' &&
+      (window.location.hostname.includes('conciliator-ai') ||
+        window.location.hostname.includes('app.safeidea.ai')))
+
+  // Determine the Add Idea route based on the site
+  const addIdeaRoute = isOnAISite ? '/add-ip/protect' : '/add-ip'
+
   return (
     <>
       <SubscriptionBanner />
@@ -42,10 +57,11 @@ function LoggedInHome() {
           <CardContent>
             <p className="text-lg leading-relaxed text-foreground/90">
               SafeIdea is an open source, decentralized platform where creators
-              and thinkers can safeguard their ideas and digital assets. Our
-              technology is built on the Protocol Labs ecosystem—Filecoin, IPFS,
-              Storacha, and Lilypad—with encryption powered by LIT Protocol's
-              threshold cryptography.
+              and thinkers can safeguard their{' '}
+              {getTerm('hero.description.assets')}. Our technology is built on
+              the Protocol Labs ecosystem—Filecoin, IPFS, Storacha, and
+              Lilypad—with encryption powered by LIT Protocol's threshold
+              cryptography.
             </p>
             <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
@@ -58,8 +74,9 @@ function LoggedInHome() {
             <div className="mt-6 text-lg leading-relaxed text-foreground/90">
               <p>
                 Getting started is simple with our passwordless,
-                no-wallet-required access. Register a new idea, browse existing
-                assets, or dive right in!
+                no-wallet-required access. Register a new{' '}
+                {getTerm('item').toLowerCase()}, browse existing assets, or dive
+                right in!
               </p>
             </div>
           </CardContent>
@@ -68,25 +85,25 @@ function LoggedInHome() {
         {/* Button Section */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
           <Link
-            href="/add-ip"
+            href={addIdeaRoute}
             className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
             data-testid="home-add-idea-button"
           >
-            Add Idea
+            {getTerm('item.add')}
           </Link>
           <Link
             href="/list-ip/mine"
             className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
             data-testid="home-my-ideas-button"
           >
-            My Ideas
+            {getTerm('item.my')}
           </Link>
           <Link
             href="/list-ip"
             className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
             data-testid="home-explore-button"
           >
-            Explore Ideas
+            {getTerm('item.explore')}
           </Link>
         </div>
       </div>
