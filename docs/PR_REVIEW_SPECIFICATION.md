@@ -46,16 +46,26 @@ pnpm build
 ```
 
 ### Phase 3: Deployment Testing
+
+#### Browser Setup and Management
+**CRITICAL**: Always use a fresh Chrome instance for testing:
+```bash
+# 1. Clean up any existing Chrome processes
+pkill -f "Google Chrome"
+
+# 2. Verify port is free
+lsof -i :9222  # Should return nothing
+
+# 3. Start fresh Chrome instance
+open -na "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir="/tmp/chrome-debug"
+```
+
+#### Deployment URLs
 1. Identify deployment URLs:
    - Standard site: `pr-XXX---conciliator-55rclsk2qa-uc.a.run.app`
    - AI site: `pr-XXX---conciliator-ai-55rclsk2qa-uc.a.run.app`
 
-2. Connect to Chrome:
-   ```bash
-   open -na "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir="/tmp/chrome-debug"
-   ```
-
-3. Test systematically based on PR scope
+2. Test systematically based on PR scope
 
 ### Phase 4: Feature-Specific Testing
 
@@ -81,6 +91,47 @@ Create these documents in the working directory (not committed):
 2. Screenshots of key behaviors
 3. Issue classification by severity
 4. Clear pass/fail recommendation
+
+## Testing Hints
+
+### Browser Connection Management
+**IMPORTANT**: MCP Puppeteer connections can get stuck indefinitely. To avoid this:
+
+1. **Always close browser between tests**:
+   ```bash
+   pkill -f "chrome.*--remote-debugging-port=9222"
+   ```
+
+2. **Never wait for stuck connections**:
+   - If connection fails immediately, Chrome may not be on the expected port
+   - If connection hangs > 10 seconds, kill Chrome and restart
+   - Do NOT retry connections - restart fresh instead
+
+3. **Clean session pattern**:
+   ```bash
+   # Start of each test suite
+   pkill -f "Google Chrome"
+   lsof -i :9222  # Verify clean
+   
+   # End of each test suite
+   pkill -f "chrome.*--remote-debugging-port=9222"
+   ```
+
+### JavaScript Evaluation in Puppeteer
+Always use explicit `return` statements:
+```javascript
+// ❌ Wrong - returns undefined
+window.location.hostname
+
+// ✅ Correct - returns the value
+return window.location.hostname
+```
+
+### Environment Variable Testing
+To verify FEATURES env var is working:
+1. Check `/api/config` endpoint directly
+2. Compare FEATURES values between deployments
+3. Standard site should have `.net`, AI site should have `.ai`
 
 ## Communication Guidelines
 
@@ -120,23 +171,10 @@ A PR is ready to merge when:
 - ✅ Site-specific features work on correct variants
 - ✅ Clear documentation of what was tested
 
-## Example: PR #154 Review
-This PR demonstrated the complete review process:
-1. Initial review found vocabulary service incomplete (only on standard site)
-2. Fixed the issue by applying to AI site component
-3. Verified all features working correctly
-4. Documented findings and received approval to merge
-
 ## References
 - Session reports: Git history contains previous session reports
 - Test helpers: `/test/claude-sdk-mcp/` directory
 - Project documentation: `CLAUDE.md` files (root and project-specific)
 
-## Future Improvements
-- Pattern recognition for common issues
-- Test coverage metrics
-- Automated regression test suggestions
-
 ---
-*Last updated: June 22, 2025*
-*Based on PR #154 review experience*
+*Last updated: June 23, 2025*
