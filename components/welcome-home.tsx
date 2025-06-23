@@ -5,9 +5,12 @@ import { Logo } from './Logo'
 import { AuthButton } from './AuthButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SubscriptionBanner } from './SubscriptionBanner'
+import { useVocabulary } from '@/lib/vocabulary'
 
 // This is the logged-out version of the home page
 function WelcomeHome() {
+  const { getTerm } = useVocabulary()
+
   return (
     <>
       {/* Top-right Auth Button (below menubar) */}
@@ -39,18 +42,16 @@ function WelcomeHome() {
               <div className="space-y-4">
                 <h1 className="text-4xl tracking-tight font-extrabold text-foreground sm:text-5xl md:text-6xl">
                   <span className="block text-primary">
-                    Because They're Your Ideas
+                    {getTerm('hero.title')}
                   </span>
                 </h1>
                 <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
-                  Protect your intellectual property with advanced encryption,
-                  share it securely with partners, and protect your digital
-                  assets with our AI-powered agent.
+                  {getTerm('hero.subtitle')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 min-[400px]:gap-6 justify-center mt-6">
                   <div data-testid="welcome-auth-signup">
                     <AuthButton
-                      text="Start Protecting Your Ideas"
+                      text={getTerm('hero.cta')}
                       className="px-6 py-3 bg-primary hover:bg-primary/80 text-black font-medium rounded-md transition-all shadow-lg hover:shadow-primary/30 text-center text-base"
                     />
                   </div>
@@ -87,12 +88,10 @@ function WelcomeHome() {
                 Our Services
               </h2>
               <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-foreground sm:text-4xl">
-                Complete Protection for Your Intellectual Property
+                Complete Protection for Your {getTerm('item.full')}
               </p>
               <p className="mt-4 max-w-2xl text-xl text-muted-foreground lg:mx-auto">
-                From protecting trade secrets to monitoring for infringement,
-                we're developing tools to secure, prove ownership, and profit
-                from your intellectual property.
+                {getTerm('feature.description')}
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -157,9 +156,9 @@ function WelcomeHome() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Share your intellectual property with potential partners or
-                    investors under controlled conditions with time-limited
-                    access.
+                    Share your {getTerm('item').toLowerCase()} with potential
+                    partners or investors under controlled conditions with
+                    time-limited access.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start">
@@ -197,10 +196,11 @@ function WelcomeHome() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Protect your intellectual property with continuous
+                    Protect your {getTerm('item').toLowerCase()} with continuous
                     monitoring. Our AI Agents scan the internet for unauthorized
-                    use of your IP and provide comprehensive reports with
-                    evidence and recommended actions to defend your innovations.
+                    use of your {getTerm('item')} and provide comprehensive
+                    reports with evidence and recommended actions to defend your
+                    innovations.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start">
@@ -419,7 +419,7 @@ function WelcomeHome() {
             <div className="lg:flex lg:items-center lg:justify-between max-w-6xl mx-auto">
               <div>
                 <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-                  <span className="block">Ready to protect your ideas?</span>
+                  <span className="block">{getTerm('cta.ready')}</span>
                   <span className="block text-primary">
                     Start with a free year of protection today.
                   </span>
