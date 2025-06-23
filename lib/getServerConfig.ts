@@ -45,7 +45,12 @@ async function reformatEnvironment(): Promise<RawAppConfig> {
     if (
       key.startsWith('NEXT_PUBLIC_') ||
       isFileCoin ||
-      ['STYTCH_APP_ID', 'FIREBASE_CONFIG', 'STYTCH_PUBLIC_TOKEN'].includes(key)
+      [
+        'STYTCH_APP_ID',
+        'FIREBASE_CONFIG',
+        'STYTCH_PUBLIC_TOKEN',
+        'FEATURES',
+      ].includes(key)
     ) {
       // Remove the NEXT_PUBLIC_ prefix
       const newKey = isFileCoin

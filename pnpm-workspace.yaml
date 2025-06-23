@@ -1,49 +1,48 @@
 packages:
-  - "packages/*"
-
+  - packages/*
 catalog:
-  '@arethetypeswrong/cli': ^0.17.3
-  '@ariakit/react': ^0.3.6
-  '@ariakit/react-core': ^0.3.6
-  '@heroicons/react': ^2.0.17
-  '@inquirer/core': ^5.1.1
-  '@inquirer/prompts': ^3.3.0
-  '@ipld/car': ^5.4.0
-  '@ipld/dag-cbor': ^9.0.6
-  '@ipld/dag-json': ^10.2.3
-  '@ipld/dag-ucan': ^3.4.5
-  '@ipld/schema': ^6.0.6
-  '@ipld/unixfs': ^3.0.0
-  '@nx/js': 20.3.2
-  '@playwright/test': ^1.29.2
-  '@scure/bip39': ^1.2.1
-  '@storacha/one-webcrypto': ^1.0.1
-  '@tailwindcss/postcss': ^4.0.3
-  '@testing-library/react': ^14.1.2
-  '@testing-library/user-event': ^14.5.1
-  '@types/inquirer': ^9.0.4
-  '@types/react': ^18.2.37
-  '@types/react-dom': ^18.2.15
-  '@types/sinon': ^10.0.19
-  '@types/update-notifier': ^6.0.5
-  '@types/varint': ^6.0.1
-  '@types/ws': ^8.5.4
-  '@typescript-eslint/eslint-plugin': 8.26.1
-  '@typescript-eslint/parser': 8.26.1
-  '@ucanto/client': ^9.0.1
-  '@ucanto/core': ^10.3.1
-  '@ucanto/interface': '^10.2.0'
-  '@ucanto/principal': '^9.0.2'
-  '@ucanto/server': '^10.2.0'
-  '@ucanto/transport': ^9.2.0
-  '@ucanto/validator': ^9.1.0
-  '@vitejs/plugin-react': ^4.2.0
-  '@web-std/blob': ^3.0.5
-  '@web3-storage/did-mailto': ^2.1.0
-  '@web3-storage/sigv4': ^1.0.2
-  '@web3-storage/upload-api': ^19.0.0
-  '@web3-storage/content-claims': ^5.2.0
-  '@web3-storage/data-segment': ^5.3.0
+  "@arethetypeswrong/cli": ^0.17.3
+  "@ariakit/react": ^0.3.6
+  "@ariakit/react-core": ^0.3.6
+  "@heroicons/react": ^2.0.17
+  "@inquirer/core": ^5.1.1
+  "@inquirer/prompts": ^3.3.0
+  "@ipld/car": ^5.4.0
+  "@ipld/dag-cbor": ^9.0.6
+  "@ipld/dag-json": ^10.2.3
+  "@ipld/dag-ucan": ^3.4.5
+  "@ipld/schema": ^6.0.6
+  "@ipld/unixfs": ^3.0.0
+  "@nx/js": 20.3.2
+  "@playwright/test": ^1.29.2
+  "@scure/bip39": ^1.2.1
+  "@storacha/one-webcrypto": ^1.0.1
+  "@tailwindcss/postcss": ^4.0.3
+  "@testing-library/react": ^14.1.2
+  "@testing-library/user-event": ^14.5.1
+  "@types/inquirer": ^9.0.4
+  "@types/react": ^18.2.37
+  "@types/react-dom": ^18.2.15
+  "@types/sinon": ^10.0.19
+  "@types/update-notifier": ^6.0.5
+  "@types/varint": ^6.0.1
+  "@types/ws": ^8.5.4
+  "@typescript-eslint/eslint-plugin": 8.26.1
+  "@typescript-eslint/parser": 8.26.1
+  "@ucanto/client": ^9.0.1
+  "@ucanto/core": ^10.3.1
+  "@ucanto/interface": ^10.2.0
+  "@ucanto/principal": ^9.0.2
+  "@ucanto/server": ^10.2.0
+  "@ucanto/transport": ^9.2.0
+  "@ucanto/validator": ^9.1.0
+  "@vitejs/plugin-react": ^4.2.0
+  "@web-std/blob": ^3.0.5
+  "@web3-storage/did-mailto": ^2.1.0
+  "@web3-storage/sigv4": ^1.0.2
+  "@web3-storage/upload-api": ^19.0.0
+  "@web3-storage/content-claims": ^5.2.0
+  "@web3-storage/data-segment": ^5.3.0
   ansi-escapes: ^6.2.0
   ariakit-utils: 0.17.0-next.27
   ariakit-react-utils: 0.17.0-next.27
@@ -99,3 +98,27 @@ catalog:
   vite: ^5.0.0
   vitest: ^1.0.1
   watch: ^1.0.2
+overrides:
+  "@lit-protocol/access-control-conditions": file:./dist-packages/@lit-protocol-access-control-conditions-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/auth-browser": file:./dist-packages/@lit-protocol-auth-browser-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/auth-helpers": file:./dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/contracts-sdk": file:./dist-packages/@lit-protocol-contracts-sdk-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/core": file:./dist-packages/@lit-protocol-core-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/crypto": file:./dist-packages/@lit-protocol-crypto-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/lit-auth-client": file:./dist-packages/@lit-protocol-lit-auth-client-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/lit-node-client": file:./dist-packages/@lit-protocol-lit-node-client-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/lit-node-client-nodejs": file:./dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/logger": file:./dist-packages/@lit-protocol-logger-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/misc": file:./dist-packages/@lit-protocol-misc-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/misc-browser": file:./dist-packages/@lit-protocol-misc-browser-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/nacl": file:./dist-packages/@lit-protocol-nacl-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/pkp-base": file:./dist-packages/@lit-protocol-pkp-base-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/pkp-ethers": file:./dist-packages/@lit-protocol-pkp-ethers-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/types": file:./dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/wasm": file:./dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz
+  "@storacha/client": file:./dist-packages/@storacha-client-1.4.0-8f47eae0.tgz
+  lilypad-wrapper: workspace:*
+  lit-wrapper: workspace:*
+  web-storage-wrapper: workspace:*
+  "@lit-protocol/uint8arrays": file:./dist-packages/@lit-protocol-uint8arrays-7.1.3-2fcc53e2a.tgz
+  "@lit-protocol/constants": file:./dist-packages/@lit-protocol-constants-7.1.3-2fcc53e2a.tgz

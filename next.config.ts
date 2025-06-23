@@ -82,6 +82,15 @@ const nextConfig: NextConfig = {
         fullySpecified: false,
       },
     })
+
+    // Handle lit-wrapper package - prevent webpack from parsing its dependencies
+    config.module.rules.push({
+      test: /lit-wrapper.*\.js$/,
+      type: 'javascript/auto',
+      resolve: {
+        fullySpecified: false,
+      },
+    })
     // Handle browser-compatibility for Node.js built-ins
     // Provide empty implementations for Node.js built-ins
     if (!isServer) {
@@ -97,6 +106,9 @@ const nextConfig: NextConfig = {
         util: false,
         os: false,
         zlib: false,
+        // Add fallbacks for missing modules that lit-wrapper is trying to import
+        'typestub-ipfs-only-hash': false,
+        'siwe-recap': false,
       }
 
       // Map Node.js imports to browser-compatible versions
