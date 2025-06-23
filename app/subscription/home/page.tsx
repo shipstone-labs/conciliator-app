@@ -17,16 +17,18 @@ import {
   CheckIcon,
   PersonIcon,
 } from '@radix-ui/react-icons'
+import { useVocabulary } from '@/lib/vocabulary'
 
 export default function HomePage() {
   const router = useRouter()
+  const { getTerm } = useVocabulary()
 
   return (
     <div className="flex flex-col items-center">
       {/* Hero Section */}
       <section className="w-full max-w-4xl mx-auto text-center px-4 py-12 md:py-20">
         <h1 className="text-3xl md:text-4xl lg:text-5xl heading-solid-accent mb-4">
-          Because Your Ideas Are Worth Protecting
+          {getTerm('subscription.hero.title')}
         </h1>
         <p className="text-lg md:text-xl text-foreground/80 max-w-3xl mx-auto mb-8">
           Securely store your intellectual property with encryption, share it
@@ -39,7 +41,7 @@ export default function HomePage() {
             onClick={() => router.push('/subscription/assessment')}
             data-testid="plan-primary-cta"
           >
-            Protect My Idea Now
+            {getTerm('subscription.protect.cta')}
           </Button>
           <Button
             size="lg"
@@ -55,7 +57,7 @@ export default function HomePage() {
       {/* Key Benefits Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16">
         <h2 className="text-2xl md:text-3xl text-center mb-12 heading-gradient-subtle">
-          Your IP Protection Should Be As Innovative As Your Ideas
+          {getTerm('subscription.innovative')}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -158,7 +160,7 @@ export default function HomePage() {
       {/* Final CTA Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
         <h2 className="text-2xl md:text-3xl mb-4 heading-solid">
-          Ready to Protect Your Innovative Ideas?
+          {getTerm('subscription.ready')}
         </h2>
 
         <Button

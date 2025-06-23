@@ -18,9 +18,11 @@ import {
   EyeOpenIcon,
   LightningBoltIcon,
 } from '@radix-ui/react-icons'
+import { useVocabulary } from '@/lib/vocabulary'
 
 export default function HowItWorksPage() {
   const router = useRouter()
+  const { getTerm } = useVocabulary()
 
   // Track page visit
   useEffect(() => {
@@ -38,9 +40,7 @@ export default function HowItWorksPage() {
           How SafeIdea Works For You
         </h1>
         <p className="text-lg text-foreground/80 max-w-3xl mx-auto mb-8">
-          SafeIdea provides a complete ecosystem for protecting your
-          intellectual property at every stage—from initial documentation to
-          secure sharing and continuous protection.
+          {getTerm('how.intro.description')}
         </p>
       </section>
 
@@ -67,9 +67,7 @@ export default function HowItWorksPage() {
                 Document & Encrypt
               </h3>
               <p className="text-foreground/80 mb-4">
-                Upload your ideas, documents, and intellectual property assets
-                to our secure platform. We create an immutable timestamp proof
-                of existence that can be verified at any time.
+                {getTerm('how.document.description')}
               </p>
               <div className="flex flex-wrap gap-3 md:justify-end">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
@@ -131,10 +129,7 @@ export default function HowItWorksPage() {
                 Share Securely
               </h3>
               <p className="text-foreground/80 mb-4">
-                Share your ideas with potential partners, investors, or team
-                members under controlled conditions. Use our standard NDAs or
-                your own customized NDAs to enforce agreements with timestamped
-                proof of access.
+                {getTerm('how.share.description')}
               </p>
               <div className="flex flex-wrap gap-3">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
@@ -157,13 +152,10 @@ export default function HowItWorksPage() {
           >
             <div className="w-full md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
               <h3 className="text-xl font-semibold text-foreground mb-2">
-                Protect Your IP
+                {getTerm('how.protect.title')}
               </h3>
               <p className="text-foreground/80 mb-4">
-                Your ideas deserve protection. Our AI agents continuously
-                monitor the internet for unauthorized use of your intellectual
-                property, providing comprehensive reports and actionable
-                insights.
+                {getTerm('how.protect.description')}
               </p>
               <div className="flex flex-wrap gap-3 md:justify-end">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent">
@@ -219,15 +211,10 @@ export default function HowItWorksPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80 mb-4">
-                Create unforgeable documentation of when your intellectual
-                property was created and uploaded. This timestamp is permanently
-                stored on decentralized infrastructure, making it impossible to
-                tamper with.
+                {getTerm('how.timestamp.description')}
               </p>
               <p className="text-foreground/80">
-                <strong>Why it matters:</strong> In intellectual property
-                disputes, proving who created something first is often the key
-                to establishing ownership.
+                <strong>Why it matters:</strong> {getTerm('how.timestamp.why')}
               </p>
             </CardContent>
           </Card>
@@ -242,14 +229,10 @@ export default function HowItWorksPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80 mb-4">
-                Our system records exactly when someone accessed your
-                information and under what terms. This creates a clear chain of
-                evidence if your intellectual property is misused.
+                {getTerm('how.nda.misused')}
               </p>
               <p className="text-foreground/80">
-                <strong>Why it matters:</strong> Traditional NDAs are difficult
-                to enforce without proof that someone actually had access to
-                your information.
+                <strong>Why it matters:</strong> {getTerm('how.nda.why')}
               </p>
             </CardContent>
           </Card>
@@ -264,15 +247,10 @@ export default function HowItWorksPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80 mb-4">
-                Specialized AI agents trained on your intellectual property
-                continuously scan the internet for potential infringement,
-                providing you with detailed reports and evidence when
-                unauthorized use is detected.
+                {getTerm('how.ai.description')}
               </p>
               <p className="text-foreground/80">
-                <strong>Why it matters:</strong> Most creators don't have the
-                time or resources to continuously monitor the internet for
-                unauthorized use of their intellectual property.
+                <strong>Why it matters:</strong> {getTerm('how.ai.why')}
               </p>
             </CardContent>
           </Card>
@@ -292,9 +270,7 @@ export default function HowItWorksPage() {
                 own.
               </p>
               <p className="text-foreground/80">
-                <strong>Why it matters:</strong> In today's digital world, ideas
-                can be copied instantly. Having verifiable proof of creation is
-                essential for protecting your intellectual assets.
+                <strong>Why it matters:</strong> {getTerm('how.fraud.why')}
               </p>
             </CardContent>
           </Card>
@@ -316,11 +292,7 @@ export default function HowItWorksPage() {
               How is this different from a patent?
             </h3>
             <p className="text-foreground/80">
-              Patents are government-granted monopolies that require public
-              disclosure of your invention. SafeIdea complements patents by
-              protecting trade secrets, early-stage ideas, and digital assets
-              that may not qualify for patent protection, while maintaining
-              confidentiality.
+              {getTerm('how.patent.description')}
             </p>
           </div>
 
@@ -340,12 +312,7 @@ export default function HowItWorksPage() {
             <h3 className="text-xl font-semibold text-foreground mb-2">
               How do the AI agents work?
             </h3>
-            <p className="text-foreground/80">
-              Our AI agents are trained on your intellectual property documents
-              and business preferences. They can engage with potential
-              customers, explain your offering within the parameters you set,
-              and facilitate introductions for more complex negotiations.
-            </p>
+            <p className="text-foreground/80">{getTerm('how.ai.work')}</p>
           </div>
         </div>
       </section>
@@ -356,8 +323,7 @@ export default function HowItWorksPage() {
           Ready to Discover the Right Protection Plan?
         </h2>
         <p className="text-foreground/80 mb-8 max-w-2xl mx-auto">
-          Take our quick assessment to find the ideal protection level for your
-          intellectual property needs.
+          {getTerm('how.cta.description')}
         </p>
 
         <Button

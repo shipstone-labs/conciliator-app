@@ -15,9 +15,11 @@ import {
   EyeOpenIcon,
   ChatBubbleIcon,
 } from '@radix-ui/react-icons'
+import { useVocabulary } from '@/lib/vocabulary'
 
 export default function SecurePlanPage() {
   const router = useRouter()
+  const { getTerm } = useVocabulary()
 
   // Track page visit
   useEffect(() => {
@@ -45,11 +47,10 @@ export default function SecurePlanPage() {
           </div>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
-          Secure IP Protection Plan
+          {getTerm('plan.secure.title')}
         </h1>
         <p className="text-xl text-foreground/80 max-w-2xl mx-auto mb-8">
-          Enhanced protection with controlled sharing and NDA integration for
-          teams and businesses.
+          {getTerm('plan.secure.subtitle')}
         </p>
         <div className="text-3xl font-bold mb-6 pricing-blur">$19/month</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -90,9 +91,7 @@ export default function SecurePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Share your intellectual property with as many recipients as you
-                need, while maintaining complete control over access
-                permissions, expiration dates, and download restrictions.
+                {getTerm('secure.sharing.description')}
               </p>
             </CardContent>
           </Card>
@@ -107,9 +106,7 @@ export default function SecurePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Automatically require legally-binding non-disclosure agreements
-                before allowing access to your intellectual property. Track
-                agreement acceptance with timestamps and digital signatures.
+                {getTerm('secure.nda.description')}
               </p>
             </CardContent>
           </Card>
@@ -141,9 +138,7 @@ export default function SecurePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Get faster assistance with email and chat support from our
-                intellectual property specialists. Enjoy shorter response times
-                and priority issue resolution.
+                {getTerm('secure.support.description')}
               </p>
             </CardContent>
           </Card>
@@ -221,11 +216,7 @@ export default function SecurePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Perfect for startups and businesses that need to share
-                intellectual property with potential investors, partners, or
-                team members. The Secure plan provides the controls and legal
-                protections you need when involving others in your intellectual
-                property development.
+                {getTerm('secure.startup.description')}
               </p>
             </CardContent>
           </Card>
@@ -236,10 +227,7 @@ export default function SecurePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Ideal for teams working together on intellectual property assets
-                that require careful sharing and access management. Control who
-                can view, edit, or download your documents while maintaining a
-                clear record of all activities.
+                {getTerm('secure.teams.description')}
               </p>
             </CardContent>
           </Card>
@@ -250,10 +238,7 @@ export default function SecurePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Great for professionals who need to share confidential work with
-                clients while protecting their intellectual property. The NDA
-                integration ensures your work is legally protected when sharing
-                with clients, agencies, or other stakeholders.
+                {getTerm('secure.consultants.description')}
               </p>
             </CardContent>
           </Card>
@@ -304,7 +289,7 @@ export default function SecurePlanPage() {
             </div>
             <div className="flex-grow border-l border-border pl-6 pb-4">
               <p className="text-sm text-foreground/80">
-                Triple the storage space for all your IP documentation
+                {getTerm('secure.storage.comparison')}
               </p>
             </div>
             <div className="flex-shrink-0 w-1/3 pl-6 text-muted-foreground">
@@ -369,10 +354,7 @@ export default function SecurePlanPage() {
               How many team members can I add to my account?
             </h3>
             <p className="mt-2 text-sm text-foreground/80">
-              The Secure plan includes up to 5 team members who can collaborate
-              on your intellectual property. Each team member gets their own
-              login and access controls. Additional team members can be added
-              for $3/month per person.
+              {getTerm('secure.team.faq')}
             </p>
           </div>
 
@@ -382,10 +364,7 @@ export default function SecurePlanPage() {
               Are the NDAs legally binding?
             </h3>
             <p className="mt-2 text-sm text-foreground/80">
-              Yes, our NDAs are drafted by intellectual property attorneys and
-              are legally binding in most jurisdictions. We use digital
-              signature technology that complies with e-signature laws, and we
-              maintain comprehensive timestamp records of agreement acceptance.
+              {getTerm('secure.nda.faq')}
             </p>
           </div>
         </div>
@@ -394,12 +373,10 @@ export default function SecurePlanPage() {
       {/* CTA Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
-          Ready to Securely Share Your Intellectual Property?
+          {getTerm('cta.secure.share')}
         </h2>
         <p className="text-foreground/80 mb-8 max-w-2xl mx-auto">
-          The Secure plan gives you the perfect balance of protection and
-          collaboration capabilities for your intellectual property. Start
-          safely sharing your ideas today.
+          {getTerm('cta.secure.balance')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -16,9 +16,11 @@ import {
   LightningBoltIcon,
   BellIcon,
 } from '@radix-ui/react-icons'
+import { useVocabulary } from '@/lib/vocabulary'
 
 export default function CompletePlanPage() {
   const router = useRouter()
+  const { getTerm } = useVocabulary()
 
   // Track page visit
   useEffect(() => {
@@ -44,11 +46,10 @@ export default function CompletePlanPage() {
           Full Protection
         </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-          Complete IP Protection Plan
+          {getTerm('plan.complete.title')}
         </h1>
         <p className="text-xl text-foreground/80 max-w-2xl mx-auto mb-8">
-          Comprehensive protection with monitoring, AI-powered assistance, and
-          advanced security features.
+          {getTerm('complete.subtitle')}
         </p>
         <div className="text-3xl font-bold mb-6 pricing-blur">$29/month</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -89,10 +90,7 @@ export default function CompletePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Our system continuously scans the web for unauthorized use of
-                your intellectual property, identifying potential infringements
-                and providing quarterly reports to keep you informed of any
-                issues.
+                {getTerm('complete.monitoring.description')}
               </p>
             </CardContent>
           </Card>
@@ -107,10 +105,7 @@ export default function CompletePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Our specialized AI agents work 24/7 to monitor the internet for
-                unauthorized use of your intellectual property, providing
-                comprehensive reports with evidence and suggested actions when
-                potential infringement is detected.
+                {getTerm('complete.ai.description')}
               </p>
             </CardContent>
           </Card>
@@ -125,10 +120,7 @@ export default function CompletePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Receive instant notifications about important activities related
-                to your intellectual property, such as unauthorized access
-                attempts, potential infringements, sharing activity, and
-                licensing opportunities.
+                {getTerm('complete.alerts.description')}
               </p>
             </CardContent>
           </Card>
@@ -143,9 +135,7 @@ export default function CompletePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Get VIP access to our intellectual property specialists with
-                priority support channels and quarterly consultation sessions to
-                help optimize your IP protection and monetization strategy.
+                {getTerm('complete.priority.description')}
               </p>
             </CardContent>
           </Card>
@@ -239,11 +229,7 @@ export default function CompletePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Perfect for businesses with significant intellectual property
-                assets that need comprehensive protection and monitoring. The
-                Complete plan provides advanced security, monitoring, and
-                monetization features for organizations that see their IP as a
-                core business asset.
+                {getTerm('complete.business.description')}
               </p>
             </CardContent>
           </Card>
@@ -254,11 +240,7 @@ export default function CompletePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Ideal for protecting intellectual property of exceptional value,
-                where monitoring for unauthorized use and infringement is
-                critical. The Complete plan's monitoring capabilities help
-                identify potential IP theft and misuse across the web and
-                digital marketplaces.
+                {getTerm('complete.highvalue.description')}
               </p>
             </CardContent>
           </Card>
@@ -269,11 +251,7 @@ export default function CompletePlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Perfect for creators and organizations looking to actively
-                protect their intellectual property from unauthorized use. The
-                AI agent continuously monitors the internet for potential
-                infringement and provides comprehensive reports with evidence
-                and suggested actions.
+                {getTerm('complete.protection.description')}
               </p>
             </CardContent>
           </Card>
@@ -308,8 +286,7 @@ export default function CompletePlanPage() {
             </div>
             <div className="flex-grow border-l border-border pl-6 pb-4">
               <p className="text-sm text-foreground/80">
-                AI-powered agent that actively promotes your IP to potential
-                buyers
+                {getTerm('complete.ai.promotion')}
               </p>
             </div>
             <div className="flex-shrink-0 w-1/3 pl-6 text-muted-foreground">
@@ -323,7 +300,7 @@ export default function CompletePlanPage() {
             </div>
             <div className="flex-grow border-l border-border pl-6 pb-4">
               <p className="text-sm text-foreground/80">
-                More than 3x the storage of the Secure plan for all your IP
+                {getTerm('complete.storage.comparison')}
               </p>
             </div>
             <div className="flex-shrink-0 w-1/3 pl-6 text-muted-foreground">
@@ -362,27 +339,18 @@ export default function CompletePlanPage() {
               How does the IP monitoring work?
             </h3>
             <p className="mt-2 text-sm text-foreground/80">
-              Our system uses advanced AI and web crawling technology to scan
-              the internet for content similar to your protected intellectual
-              property. It analyzes websites, marketplaces, repositories, and
-              other digital platforms to identify potential unauthorized use.
-              You'll receive real-time alerts for significant matches and
-              quarterly comprehensive reports.
+              {getTerm('complete.monitoring.faq')}
             </p>
           </div>
 
           <div className="border border-border rounded-lg p-4 bg-card/50">
             <h3 className="font-medium flex items-center">
               <QuestionMarkCircledIcon className="mr-2 h-4 w-4 text-accent" />
-              Can I control how the AI agent represents my intellectual
-              property?
+              Can I control how the AI agent represents my{' '}
+              {getTerm('faq.neutral.protection')}?
             </h3>
             <p className="mt-2 text-sm text-foreground/80">
-              Yes, you have complete control over the AI agent. You can define
-              parameters including pricing requirements, potential use cases,
-              target industries, conversation boundaries, and presentation
-              style. You can also review and approve all leads before direct
-              contact is made.
+              {getTerm('complete.ai.control.faq')}
             </p>
           </div>
 
@@ -392,11 +360,7 @@ export default function CompletePlanPage() {
               What's included in the quarterly strategy consultation?
             </h3>
             <p className="mt-2 text-sm text-foreground/80">
-              Each quarter, you'll have a one-hour session with an intellectual
-              property specialist who will review your current protection
-              strategy, analyze any detected infringements, assess monetization
-              opportunities, and provide recommendations for optimizing your IP
-              portfolio management.
+              {getTerm('complete.consultation.faq')}
             </p>
           </div>
 
@@ -420,12 +384,10 @@ export default function CompletePlanPage() {
       {/* CTA Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-          Ready for Comprehensive IP Protection?
+          {getTerm('cta.complete.ready')}
         </h2>
         <p className="text-foreground/80 mb-8 max-w-2xl mx-auto">
-          The Complete plan offers the ultimate protection for your valuable
-          intellectual property, with monitoring, monetization, and expert
-          assistance all included.
+          {getTerm('cta.complete.ultimate')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

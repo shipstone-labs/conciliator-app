@@ -12,6 +12,7 @@ import {
   MinusIcon,
   MagnifyingGlassIcon,
 } from '@radix-ui/react-icons'
+import { useVocabulary } from '@/lib/vocabulary'
 
 // FAQ categories and questions
 const FAQ_CATEGORIES = [
@@ -224,6 +225,7 @@ function renderAnswer(answer: string, hasPrice?: boolean) {
 
 export default function FAQPage() {
   const router = useRouter()
+  const { getTerm } = useVocabulary()
   const [openQuestions, setOpenQuestions] = useState<Record<string, boolean>>(
     {}
   )
@@ -271,8 +273,7 @@ export default function FAQPage() {
           Frequently Asked Questions
         </h1>
         <p className="text-lg text-foreground/80 max-w-2xl mx-auto mb-8">
-          Find answers to common questions about SafeIdea's intellectual
-          property protection services.
+          {getTerm('faq.subtitle')}
         </p>
 
         {/* Search bar */}
@@ -374,9 +375,7 @@ export default function FAQPage() {
         <div className="text-center">
           <h2 className="text-xl font-bold mb-4">Didn't Find Your Answer?</h2>
           <p className="text-foreground/80 mb-6 max-w-2xl mx-auto">
-            Our support team is here to help. Contact us with any questions
-            about our plans, features, or intellectual property protection
-            strategies.
+            {getTerm('faq.contact.description')}
           </p>
           <Button variant="outline" asChild>
             <a href="mailto:info@safeidea.ai">Contact Support</a>
@@ -387,11 +386,10 @@ export default function FAQPage() {
       {/* CTA Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Ready to Protect Your Intellectual Property?
+          {getTerm('faq.cta.ready')}
         </h2>
         <p className="text-foreground/80 mb-8 max-w-2xl mx-auto">
-          Start securing your ideas today with our risk-free 30-day money-back
-          guarantee.
+          {getTerm('faq.cta.start')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
