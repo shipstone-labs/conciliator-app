@@ -14,9 +14,11 @@ import {
   EnvelopeClosedIcon,
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons'
+import { useVocabulary } from '@/lib/vocabulary'
 
 export default function BasicPlanPage() {
   const router = useRouter()
+  const { getTerm } = useVocabulary()
 
   // Track page visit
   useEffect(() => {
@@ -39,11 +41,10 @@ export default function BasicPlanPage() {
           <LockClosedIcon className="w-6 h-6 text-primary" />
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Basic IP Protection Plan
+          {getTerm('plan.basic.title')}
         </h1>
         <p className="text-xl text-foreground/80 max-w-2xl mx-auto mb-8">
-          Essential protection for establishing and securing your intellectual
-          property.
+          {getTerm('plan.basic.subtitle')}
         </p>
         <div className="text-3xl font-bold mb-6 pricing-blur">$9/month</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -84,9 +85,7 @@ export default function BasicPlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Military-grade encryption keeps your intellectual property
-                completely private. All documents are encrypted before they
-                leave your device, ensuring only you can access them.
+                {getTerm('protection.encryption.description')}
               </p>
             </CardContent>
           </Card>
@@ -101,9 +100,7 @@ export default function BasicPlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Create legally-defensible proof of when you created your
-                intellectual property. Our timestamps are cryptographically
-                secured and can be independently verified.
+                {getTerm('protection.timestamp.description')}
               </p>
             </CardContent>
           </Card>
@@ -118,9 +115,7 @@ export default function BasicPlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Store your documents, designs, code, and other intellectual
-                property assets in our secure cloud storage. All files remain
-                encrypted and are backed up redundantly.
+                {getTerm('protection.storage.description')}
               </p>
             </CardContent>
           </Card>
@@ -135,9 +130,7 @@ export default function BasicPlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Get help when you need it with our responsive email support
-                team. We're here to help you protect your intellectual property
-                and make the most of our platform.
+                {getTerm('protection.support.description')}
               </p>
             </CardContent>
           </Card>
@@ -199,11 +192,7 @@ export default function BasicPlanPage() {
             </CardHeader>
             <CardContent>
               <p className="text-foreground/80">
-                Perfect for individual creators looking to establish a clear
-                timeline of creation for their intellectual property. Whether
-                you're writing a book, creating designs, or developing a new
-                invention, the Basic plan helps you prove when you created your
-                work.
+                {getTerm('usecase.creators.description')}
               </p>
             </CardContent>
           </Card>
@@ -298,12 +287,11 @@ export default function BasicPlanPage() {
       {/* CTA Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Ready to Secure Your Intellectual Property?
+          {getTerm('cta.secure')}
         </h2>
         <p className="text-foreground/80 mb-8 max-w-2xl mx-auto">
-          The Basic plan is perfect for establishing secure documentation and
-          provenance for your intellectual property. Start protecting your ideas
-          today.
+          {getTerm('cta.establish.documentation')}{' '}
+          {getTerm('cta.protect.today')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

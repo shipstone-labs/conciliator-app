@@ -33,122 +33,118 @@ import {
   Share2Icon,
   GlobeIcon,
 } from '@radix-ui/react-icons'
-
-// Plan details
-const PLANS = [
-  {
-    id: 'basic',
-    name: 'Basic',
-    price: '$9/month',
-    description:
-      'Essential protection for solo creators with documentation needs',
-    icon: <LockClosedIcon className="w-6 h-6 text-primary" />,
-    features: {
-      encryption: true,
-      timestamp: true,
-      storage: '5GB',
-      sharing: 'Limited',
-      nda: false,
-      monitoring: false,
-      ai: false,
-      support: 'Email',
-    },
-    idealFor: 'Solo creators looking to establish idea provenance',
-    color: 'primary',
-    tagline: 'Secure Documentation',
-  },
-  {
-    id: 'secure',
-    name: 'Secure',
-    price: '$19/month',
-    description:
-      'Enhanced protection with controlled sharing and NDA integration',
-    icon: <Share2Icon className="w-6 h-6 text-secondary" />,
-    features: {
-      encryption: true,
-      timestamp: true,
-      storage: '15GB',
-      sharing: 'Unlimited',
-      nda: true,
-      monitoring: false,
-      ai: false,
-      support: 'Email + Chat',
-    },
-    idealFor: 'Teams and businesses sharing IP with partners',
-    color: 'secondary',
-    tagline: 'Most Popular',
-    recommended: true,
-  },
-  {
-    id: 'complete',
-    name: 'Complete',
-    price: '$29/month',
-    description:
-      'Comprehensive protection with monitoring and AI-powered assistance',
-    icon: <GlobeIcon className="w-6 h-6 text-accent" />,
-    features: {
-      encryption: true,
-      timestamp: true,
-      storage: '50GB',
-      sharing: 'Unlimited',
-      nda: true,
-      monitoring: true,
-      ai: true,
-      support: 'Priority',
-    },
-    idealFor: 'Businesses with valuable IP requiring continuous protection',
-    color: 'accent',
-    tagline: 'Full Protection',
-  },
-]
-
-// Feature descriptions for the table
-const FEATURE_INFO = {
-  encryption: {
-    name: 'End-to-End Encryption',
-    description:
-      'Military-grade encryption for all your intellectual property documents',
-  },
-  timestamp: {
-    name: 'Immutable Timestamps',
-    description:
-      'Cryptographic proof of existence that can be verified in court',
-  },
-  storage: {
-    name: 'Secure Storage',
-    description:
-      'Encrypted storage space for your documents and associated files',
-  },
-  sharing: {
-    name: 'Controlled Sharing',
-    description:
-      'Share your ideas with specific individuals under controlled conditions',
-  },
-  nda: {
-    name: 'NDA Integration',
-    description: 'Automatic NDA creation and tracking with digital signatures',
-  },
-  monitoring: {
-    name: 'IP Monitoring',
-    description:
-      'Automated scanning for unauthorized use of your intellectual property',
-  },
-  ai: {
-    name: 'AI Agent',
-    description:
-      'AI-powered agent that monitors the internet for unauthorized use of your IP and provides detailed reports',
-  },
-  support: {
-    name: 'Customer Support',
-    description:
-      'Access to our customer support team for any questions or issues',
-  },
-}
+import { useVocabulary } from '@/lib/vocabulary'
 
 export default function PlansPage() {
   const router = useRouter()
+  const { getTerm } = useVocabulary()
   const [recommendedPlan, setRecommendedPlan] = useState<string>('')
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards')
+
+  // Plan details
+  const PLANS = [
+    {
+      id: 'basic',
+      name: 'Basic',
+      price: '$9/month',
+      description: getTerm('plans.basic.description'),
+      icon: <LockClosedIcon className="w-6 h-6 text-primary" />,
+      features: {
+        encryption: true,
+        timestamp: true,
+        storage: '5GB',
+        sharing: 'Limited',
+        nda: false,
+        monitoring: false,
+        ai: false,
+        support: 'Email',
+      },
+      idealFor: getTerm('plans.basic.idealfor'),
+      color: 'primary',
+      tagline: 'Secure Documentation',
+    },
+    {
+      id: 'secure',
+      name: 'Secure',
+      price: '$19/month',
+      description: getTerm('plans.secure.description'),
+      icon: <Share2Icon className="w-6 h-6 text-secondary" />,
+      features: {
+        encryption: true,
+        timestamp: true,
+        storage: '15GB',
+        sharing: 'Unlimited',
+        nda: true,
+        monitoring: false,
+        ai: false,
+        support: 'Email + Chat',
+      },
+      idealFor: getTerm('plans.secure.idealfor'),
+      color: 'secondary',
+      tagline: 'Most Popular',
+      recommended: true,
+    },
+    {
+      id: 'complete',
+      name: 'Complete',
+      price: '$29/month',
+      description: getTerm('plans.complete.description'),
+      icon: <GlobeIcon className="w-6 h-6 text-accent" />,
+      features: {
+        encryption: true,
+        timestamp: true,
+        storage: '50GB',
+        sharing: 'Unlimited',
+        nda: true,
+        monitoring: true,
+        ai: true,
+        support: 'Priority',
+      },
+      idealFor: getTerm('plans.complete.idealfor'),
+      color: 'accent',
+      tagline: 'Full Protection',
+    },
+  ]
+
+  // Feature descriptions for the table
+  const FEATURE_INFO = {
+    encryption: {
+      name: 'End-to-End Encryption',
+      description: getTerm('plans.encryption.description'),
+    },
+    timestamp: {
+      name: 'Immutable Timestamps',
+      description:
+        'Cryptographic proof of existence that can be verified in court',
+    },
+    storage: {
+      name: 'Secure Storage',
+      description:
+        'Encrypted storage space for your documents and associated files',
+    },
+    sharing: {
+      name: 'Controlled Sharing',
+      description: getTerm('plans.sharing.description'),
+    },
+    nda: {
+      name: 'NDA Integration',
+      description:
+        'Automatic NDA creation and tracking with digital signatures',
+    },
+    monitoring: {
+      name: 'IP Monitoring',
+      description: getTerm('plans.monitoring.description'),
+    },
+    ai: {
+      name: 'AI Agent',
+      description: getTerm('plans.ai.description'),
+    },
+    support: {
+      name: 'Customer Support',
+      description:
+        'Access to our customer support team for any questions or issues',
+    },
+  }
 
   // Track page visit and load recommended plan
   useEffect(() => {
@@ -166,11 +162,10 @@ export default function PlansPage() {
       {/* Header Section */}
       <section className="w-full max-w-4xl mx-auto text-center px-4 py-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-heading-gradient-from to-heading-gradient-to bg-clip-text text-transparent">
-          Choose Your IP Protection Plan
+          {getTerm('plans.title')}
         </h1>
         <p className="text-lg text-foreground/80 max-w-2xl mx-auto mb-6">
-          Select the plan that best fits your intellectual property needs and
-          business goals.
+          {getTerm('plans.subtitle')}
         </p>
 
         {/* View mode toggle */}
@@ -454,11 +449,10 @@ export default function PlansPage() {
       {/* CTA Section */}
       <section className="w-full max-w-4xl mx-auto px-4 py-12 md:py-16 text-center border-t border-border/30 mt-8">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Ready to Protect Your Intellectual Property?
+          {getTerm('cta.secure')}
         </h2>
         <p className="text-foreground/80 mb-8 max-w-2xl mx-auto">
-          Start securing your ideas today with our risk-free trial. Cancel
-          anytime during the first 30 days for a full refund.
+          {getTerm('plans.cta.start')}
         </p>
 
         <Button
