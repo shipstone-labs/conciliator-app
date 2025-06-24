@@ -1,18 +1,35 @@
 import type { LitNodeClient, SessionSigsMap } from 'lit-wrapper'
+import { decode } from 'cbor-x'
 
 // IndexedDB schema for sharing data between main thread and service worker
 const DB_NAME = 'lit-key-store'
-const DB_VERSION = 1
+const DB_VERSION = 2 // Bumped for new schema
 const STORE_NAMES = {
   SESSION_SIGS: 'sessionSigs',
-  ENCRYPTED_KEYS: 'encryptedKeys',
-  KEY_METADATA: 'keyMetadata',
+  CRYPTO_KEYS: 'cryptoKeys', // New store for CryptoKey objects
+  MANIFESTS: 'manifests', // Store for manifest data
+  KEY_METADATA: 'keyMetadata', // Legacy, kept for migration
 }
 
+interface StoredCryptoKey {
+  id: string // Same as manifest ID or CID
+  cryptoKey: CryptoKey
+  iv: Uint8Array
+  algorithm: string
+  created: number
+}
+
+interface StoredManifest {
+  id: string // manifest-ID or CID
+  manifest: import('./car-streaming-format').MetadataV4
+  created: number
+}
+
+// Legacy interface for migration compatibility
 interface KeyMetadata {
   cid: string
-  dataToEncryptHash: `0x${string}` // Hash of the symmetric key (from LIT)
-  fileHash: `0x${string}` // Hash of the original file content
+  dataToEncryptHash: `0x${string}`
+  fileHash: `0x${string}`
   unifiedAccessControlConditions: any[]
   encryptedSymmetricKey: string
   createdAt: number
@@ -34,17 +51,25 @@ async function initDB(): Promise<IDBDatabase> {
         db.createObjectStore(STORE_NAMES.SESSION_SIGS)
       }
 
-      // Store for encrypted keys
-      if (!db.objectStoreNames.contains(STORE_NAMES.ENCRYPTED_KEYS)) {
-        const store = db.createObjectStore(STORE_NAMES.ENCRYPTED_KEYS, {
-          keyPath: 'cid',
+      // New store for CryptoKey objects
+      if (!db.objectStoreNames.contains(STORE_NAMES.CRYPTO_KEYS)) {
+        const store = db.createObjectStore(STORE_NAMES.CRYPTO_KEYS, {
+          keyPath: 'id',
         })
-        store.createIndex('dataToEncryptHash', 'dataToEncryptHash', {
-          unique: false,
-        })
+        store.createIndex('created', 'created', { unique: false })
       }
 
-      // Store for key metadata
+      // New store for manifests
+      if (!db.objectStoreNames.contains(STORE_NAMES.MANIFESTS)) {
+        const store = db.createObjectStore(STORE_NAMES.MANIFESTS, {
+          keyPath: 'id',
+        })
+        store.createIndex('created', 'created', { unique: false })
+      }
+
+      // Legacy stores - kept for migration (remove after migration)
+      // These stores are not actively used but kept to avoid errors
+
       if (!db.objectStoreNames.contains(STORE_NAMES.KEY_METADATA)) {
         const store = db.createObjectStore(STORE_NAMES.KEY_METADATA, {
           keyPath: 'cid',
@@ -57,7 +82,7 @@ async function initDB(): Promise<IDBDatabase> {
 
 // Main thread functions
 export class LitKeyManager {
-  private litClient: LitNodeClient
+  litClient: LitNodeClient // Made public for setupMainThreadKeyListener
   private db: IDBDatabase | null = null
 
   constructor(litClient: LitNodeClient) {
@@ -288,7 +313,7 @@ export class LitKeyManager {
     }
   }
 
-  private async getSessionSigs(): Promise<SessionSigsMap | null> {
+  async getSessionSigs(): Promise<SessionSigsMap | null> {
     if (!this.db) throw new Error('Database not initialized')
 
     const tx = this.db.transaction([STORE_NAMES.SESSION_SIGS], 'readonly')
@@ -314,166 +339,195 @@ export class LitKeyManager {
 // Service worker functions
 export class ServiceWorkerKeyManager {
   private db: IDBDatabase | null = null
-  private decryptedKeys = new Map<string, { key: CryptoKey; iv: Uint8Array }>()
 
   async init() {
     this.db = await initDB()
   }
 
-  // Called when service worker needs to decrypt a file
-  async getDecryptionKey(
-    cid: string
-  ): Promise<{ key: CryptoKey; iv: Uint8Array } | null> {
-    // Check cache first
-    const cached = this.decryptedKeys.get(cid)
-    if (cached) return cached
-
+  // Get manifest and corresponding CryptoKey
+  async getManifestAndKey(id: string): Promise<{
+    manifest: import('./car-streaming-format').MetadataV4
+    cryptoKey: CryptoKey
+    iv: Uint8Array
+  } | null> {
     if (!this.db) throw new Error('Database not initialized')
 
-    // Get metadata
-    const metadataTx = this.db.transaction(
-      [STORE_NAMES.KEY_METADATA],
-      'readonly'
+    try {
+      // First check if we have it cached in our stores
+      const cached = await this.getCachedManifestAndKey(id)
+      if (cached) return cached
+
+      // If it's a CID, fetch from IPFS and cache
+      if (!id.startsWith('manifest-')) {
+        const manifest = await this.fetchAndDecryptManifest(id)
+        if (manifest) {
+          // Cache the manifest and key
+          await this.cacheManifestAndKey(id, manifest)
+          return this.getCachedManifestAndKey(id)
+        }
+      }
+
+      return null
+    } catch (error) {
+      console.error('Failed to get manifest and key:', error)
+      return null
+    }
+  }
+
+  // Get cached manifest and key from IndexedDB
+  private async getCachedManifestAndKey(id: string): Promise<{
+    manifest: import('./car-streaming-format').MetadataV4
+    cryptoKey: CryptoKey
+    iv: Uint8Array
+  } | null> {
+    if (!this.db) return null
+
+    // Get manifest
+    const manifestTx = this.db.transaction([STORE_NAMES.MANIFESTS], 'readonly')
+    const manifestStore = manifestTx.objectStore(STORE_NAMES.MANIFESTS)
+    const manifestEntry = await new Promise<StoredManifest | undefined>(
+      (resolve, reject) => {
+        const request = manifestStore.get(id)
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
+      }
     )
-    const metadataStore = metadataTx.objectStore(STORE_NAMES.KEY_METADATA)
-    const metadata = await new Promise<any>((resolve, reject) => {
-      const request = metadataStore.get(cid)
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
 
-    if (!metadata) return null
+    if (!manifestEntry) return null
 
-    // Handle V4 metadata differently
-    if (metadata.version === 'V4') {
-      // For V4, we need to decrypt the metadata bundle first
-      // This requires coordination with the main thread
-      const keyData = await this.requestV4KeyFromMainThread(
-        cid,
-        metadata.metadataCID
-      )
-      if (!keyData) return null
-
-      // Import and cache
-      const key = await crypto.subtle.importKey(
-        'raw',
-        keyData.key,
-        { name: 'AES-CTR', length: 256 },
-        false,
-        ['decrypt']
-      )
-
-      const result = { key, iv: keyData.iv }
-      this.decryptedKeys.set(cid, result)
-      return result
-    }
-
-    // For V3, check if we have a pre-decrypted key
-    const keyTx = this.db.transaction([STORE_NAMES.ENCRYPTED_KEYS], 'readonly')
-    const keyStore = keyTx.objectStore(STORE_NAMES.ENCRYPTED_KEYS)
-    const encryptedKeyData = await new Promise<any>((resolve, reject) => {
-      const request = keyStore.get(cid)
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-
-    if (!encryptedKeyData) {
-      // Request key from main thread via BroadcastChannel
-      const keyData = await this.requestKeyFromMainThread(cid)
-      if (!keyData) return null
-
-      // Import and cache
-      const key = await crypto.subtle.importKey(
-        'raw',
-        keyData.key,
-        { name: 'AES-CTR', length: 256 },
-        false,
-        ['decrypt']
-      )
-
-      const result = { key, iv: keyData.iv }
-      this.decryptedKeys.set(cid, result)
-      return result
-    }
-
-    return null
-  }
-
-  private async requestV4KeyFromMainThread(
-    cid: string,
-    metadataCID: string
-  ): Promise<{ key: ArrayBuffer; iv: Uint8Array } | null> {
-    return new Promise((resolve) => {
-      const channel = new BroadcastChannel('lit-key-requests')
-      const timeout = setTimeout(() => {
-        channel.close()
-        resolve(null)
-      }, 5000)
-
-      channel.onmessage = (event) => {
-        if (event.data.cid === cid && event.data.key && event.data.iv) {
-          clearTimeout(timeout)
-          channel.close()
-          resolve({
-            key: event.data.key,
-            iv: new Uint8Array(event.data.iv),
-          })
-        }
+    // Get crypto key
+    const keyTx = this.db.transaction([STORE_NAMES.CRYPTO_KEYS], 'readonly')
+    const keyStore = keyTx.objectStore(STORE_NAMES.CRYPTO_KEYS)
+    const keyEntry = await new Promise<StoredCryptoKey | undefined>(
+      (resolve, reject) => {
+        const request = keyStore.get(id)
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
       }
+    )
 
-      // Request V4 key with metadata CID
-      channel.postMessage({ type: 'request-v4-key', cid, metadataCID })
-    })
+    if (!keyEntry) return null
+
+    return {
+      manifest: manifestEntry.manifest,
+      cryptoKey: keyEntry.cryptoKey,
+      iv: keyEntry.iv,
+    }
   }
 
-  private async requestKeyFromMainThread(
-    cid: string
-  ): Promise<{ key: ArrayBuffer; iv: Uint8Array } | null> {
-    return new Promise((resolve) => {
-      const channel = new BroadcastChannel('lit-key-requests')
-      const timeout = setTimeout(() => {
-        channel.close()
-        resolve(null)
-      }, 5000)
-
-      channel.onmessage = (event) => {
-        if (event.data.type === 'key-response' && event.data.cid === cid) {
-          clearTimeout(timeout)
-          channel.close()
-          resolve(
-            event.data.key
-              ? {
-                  key: event.data.key,
-                  iv: new Uint8Array(event.data.iv),
-                }
-              : null
-          )
-        }
-      }
-
-      channel.postMessage({ type: 'key-request', cid })
-    })
-  }
-
-  // Clean up old keys
-  async cleanup(maxAge: number = 24 * 60 * 60 * 1000) {
+  // Cache manifest and key after fetching from IPFS
+  private async cacheManifestAndKey(
+    id: string,
+    manifest: import('./car-streaming-format').MetadataV4
+  ): Promise<void> {
     if (!this.db) return
 
-    const now = Date.now()
-    const tx = this.db.transaction([STORE_NAMES.KEY_METADATA], 'readwrite')
-    const store = tx.objectStore(STORE_NAMES.KEY_METADATA)
-    const index = store.index('createdAt')
+    // Import the symmetric key as CryptoKey
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      manifest.symmetricKey,
+      { name: 'AES-CTR' },
+      false, // non-extractable
+      ['decrypt']
+    )
 
-    const range = IDBKeyRange.upperBound(now - maxAge)
-    const cursorRequest = index.openCursor(range)
+    // Store manifest
+    const manifestTx = this.db.transaction([STORE_NAMES.MANIFESTS], 'readwrite')
+    const manifestStore = manifestTx.objectStore(STORE_NAMES.MANIFESTS)
+    await new Promise<void>((resolve, reject) => {
+      const request = manifestStore.put({
+        id,
+        manifest: {
+          fileHash: manifest.fileHash,
+          dataToEncryptHash: manifest.dataToEncryptHash,
+          fileMetadata: manifest.fileMetadata,
+          chunks: manifest.chunks,
+        },
+        created: Date.now(),
+      } as StoredManifest)
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
 
-    cursorRequest.onsuccess = (event) => {
-      const cursor = (event.target as IDBRequest).result
-      if (cursor) {
-        cursor.delete()
-        cursor.continue()
+    // Store crypto key
+    const keyTx = this.db.transaction([STORE_NAMES.CRYPTO_KEYS], 'readwrite')
+    const keyStore = keyTx.objectStore(STORE_NAMES.CRYPTO_KEYS)
+    await new Promise<void>((resolve, reject) => {
+      const request = keyStore.put({
+        id,
+        cryptoKey,
+        iv: manifest.iv,
+        algorithm: 'AES-CTR',
+        created: Date.now(),
+      } as StoredCryptoKey)
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  // Fetch and decrypt manifest from IPFS (for CID-based downloads)
+  private async fetchAndDecryptManifest(
+    cid: string
+  ): Promise<import('./car-streaming-format').MetadataV4 | null> {
+    try {
+      // Fetch the CBOR file from IPFS
+      const response = await fetch(`/api/download/${cid}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch manifest from IPFS')
       }
+
+      const data = await response.arrayBuffer()
+      const { decode } = await import('cbor-x')
+      const decoded = decode(new Uint8Array(data)) as import(
+        './car-streaming-format'
+      ).ManifestV4
+
+      if (decoded.version !== 'LIT-ENCRYPTED-V4') {
+        throw new Error('Unsupported manifest version')
+      }
+
+      // Request decryption from main thread
+      const decryptedManifest = await this.requestManifestDecryption(
+        cid,
+        decoded.accessControlConditions,
+        decoded.encryptedManifest
+      )
+
+      return decryptedManifest
+    } catch (error) {
+      console.error('Failed to fetch and decrypt manifest:', error)
+      return null
     }
+  }
+
+  // Request manifest decryption from main thread
+  private async requestManifestDecryption(
+    cid: string,
+    accessControlConditions: any[],
+    encryptedManifest: string
+  ): Promise<import('./car-streaming-format').MetadataV4 | null> {
+    return new Promise((resolve) => {
+      const channel = new BroadcastChannel('lit-key-requests')
+      const timeout = setTimeout(() => {
+        channel.close()
+        resolve(null)
+      }, 5000)
+
+      channel.onmessage = (event) => {
+        if (event.data.type === 'manifest-response' && event.data.cid === cid) {
+          clearTimeout(timeout)
+          channel.close()
+          resolve(event.data.manifest || null)
+        }
+      }
+
+      channel.postMessage({
+        type: 'manifest-request',
+        cid,
+        accessControlConditions,
+        encryptedManifest,
+      })
+    })
   }
 }
 
@@ -482,43 +536,41 @@ export function setupMainThreadKeyListener(manager: LitKeyManager) {
   const channel = new BroadcastChannel('lit-key-requests')
 
   channel.onmessage = async (event) => {
-    if (event.data.type === 'key-request') {
-      const { cid } = event.data
+    if (event.data.type === 'manifest-request') {
+      const { cid, accessControlConditions, encryptedManifest } = event.data
       try {
-        const keyData = await manager.getDecryptedKey(cid)
+        // Decrypt the manifest using LIT
+        const sessionSigs = await manager.getSessionSigs()
+        if (!sessionSigs) {
+          throw new Error('No session signatures available')
+        }
+
+        // Parse the encrypted data
+        const encryptedData = JSON.parse(encryptedManifest)
+
+        // Decrypt with LIT
+        const decrypted = await manager.litClient.decrypt({
+          unifiedAccessControlConditions: accessControlConditions,
+          ciphertext: encryptedData.ciphertext,
+          dataToEncryptHash: encryptedData.dataToEncryptHash,
+          sessionSigs,
+          chain: 'filecoinCalibrationTestnet',
+        })
+
+        // Parse the decrypted manifest
+        const manifest = decode(new Uint8Array(decrypted.decryptedData))
+
         channel.postMessage({
-          type: 'key-response',
+          type: 'manifest-response',
           cid,
-          key: keyData?.key,
-          iv: keyData?.iv ? Array.from(keyData.iv) : null,
+          manifest,
         })
       } catch (error) {
-        console.error('Failed to decrypt key:', error)
+        console.error('Failed to decrypt manifest:', error)
         channel.postMessage({
-          type: 'key-response',
+          type: 'manifest-response',
           cid,
-          key: null,
-          iv: null,
-        })
-      }
-    } else if (event.data.type === 'request-v4-key') {
-      const { cid, metadataCID } = event.data
-      try {
-        // For V4, we need to fetch and decrypt the metadata bundle
-        const keyData = await manager.getV4DecryptedKey(cid, metadataCID)
-        channel.postMessage({
-          type: 'key-response',
-          cid,
-          key: keyData?.key,
-          iv: keyData?.iv ? Array.from(keyData.iv) : null,
-        })
-      } catch (error) {
-        console.error('Failed to decrypt V4 key:', error)
-        channel.postMessage({
-          type: 'key-response',
-          cid,
-          key: null,
-          iv: null,
+          manifest: null,
         })
       }
     }

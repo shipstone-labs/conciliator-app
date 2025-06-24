@@ -25,13 +25,13 @@ export interface UploadOptions {
 }
 
 export interface UploadResult {
-  cid: string // V3: manifest CID, V4: metadata CID (when LIT encrypted)
+  cid: string // When LIT is used: CID of the CBOR file with ACL + encrypted manifest
   encryptedKey: ArrayBuffer // V3: actual key, V4: empty (key in metadata)
   iv: Uint8Array // V3: actual IV, V4: empty (IV in metadata)
   dataToEncryptHash: `0x${string}` // Hash of the symmetric key
   fileHash: `0x${string}` // Hash of the original file
   // V4 optional fields
-  metadataBundle?: ArrayBuffer // Raw metadata bundle (may be RSA encrypted)
+  metadataBundle?: ArrayBuffer // Raw metadata bundle when LIT is not used
   encryptedMetadataBundle?: string // LIT-encrypted metadata (if LIT is used)
   bundleHash?: `0x${string}` // Hash from LIT encryption
   chunkCIDs?: string[] // Uploaded chunk CIDs
@@ -57,7 +57,7 @@ export class UploadWorkerClient {
 
   private async ensureWorker(): Promise<Worker> {
     if (!this.worker) {
-      this.worker = new Worker(new URL('./upload-worker.ts', import.meta.url), {
+      this.worker = new Worker('/workers/upload-worker.js', {
         type: 'module',
       })
     }
@@ -198,14 +198,24 @@ export class UploadWorkerClient {
 
                     // If LIT is available, also encrypt and upload to IPFS
                     if (this.keyManager && options.litClient) {
-                      // LIT flow: Encrypt → Send back to worker for IPFS upload
+                      // LIT flow: Encrypt metadata → Create CBOR with ACL → Upload
                       const { encryptedBundle, bundleHash } =
                         await this.keyManager.encryptMetadataBundle(
                           new Uint8Array(metadataBundle),
                           unifiedAccessControlConditions
                         )
 
-                      // Send encrypted bundle back to worker for IPFS upload
+                      // Create V4 CBOR structure with cleartext ACL
+                      const { encode } = await import('cbor-x')
+                      const v4Manifest = {
+                        version: 'LIT-ENCRYPTED-V4',
+                        accessControlConditions: unifiedAccessControlConditions,
+                        encryptedManifest: encryptedBundle,
+                        created: Date.now(),
+                      }
+                      const cborData = encode(v4Manifest)
+
+                      // Send CBOR back to worker for IPFS upload
                       const uploadResponse = await new Promise<{ cid: string }>(
                         (resolve, reject) => {
                           const uploadHandler = (
@@ -232,7 +242,7 @@ export class UploadWorkerClient {
                           worker.addEventListener('message', uploadHandler)
                           worker.postMessage({
                             type: 'upload-metadata',
-                            encryptedMetadata: encryptedBundle,
+                            encryptedMetadata: uint8ArrayToBase64(cborData),
                           } as WorkerMessage)
                         }
                       )

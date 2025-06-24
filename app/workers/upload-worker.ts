@@ -220,7 +220,7 @@ async function getOrGenerateEncryption(
 // Enhanced security (RSA) encrypts the entire bundle when enabled
 async function processAndUploadFilesV4(
   files: File[],
-  options: ProcessOptions,
+  _options: ProcessOptions,
   providedKey?: ArrayBuffer,
   providedIv?: Uint8Array,
   transportPublicKey?: ArrayBuffer // For RSA encryption of entire bundle
@@ -341,11 +341,6 @@ async function processAndUploadFilesV4(
       iv,
       fileHash,
       dataToEncryptHash,
-      network: 'filecoinCalibrationTestnet',
-      contractName: options.contractName,
-      contract: options.contract,
-      to: options.to,
-      unifiedAccessControlConditions: options.unifiedAccessControlConditions,
       fileMetadata: {
         name: file.name,
         size: file.size,

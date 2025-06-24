@@ -44,24 +44,20 @@ export interface ManifestV3 {
   created: number
 }
 
-// V4: Minimal public manifest
+// V4: Public wrapper with access control conditions
 export interface ManifestV4 {
   version: 'LIT-ENCRYPTED-V4'
-  metadataCID: string // CID of the metadata bundle (may be encrypted)
+  accessControlConditions: any[] // Cleartext - needed for LIT to decrypt
+  encryptedManifest: string // LIT-encrypted manifest data
   created: number
 }
 
-// V4: Metadata bundle (contains everything including key)
+// V4: Encrypted manifest (contains everything including key)
 export interface MetadataV4 {
   symmetricKey: Uint8Array // The actual AES key
   iv: Uint8Array // IV for file decryption
   fileHash: `0x${string}` // Hash of original file
   dataToEncryptHash: `0x${string}` // Hash of the symmetric key
-  network: string
-  contractName: string
-  contract: `0x${string}`
-  to: `0x${string}`
-  unifiedAccessControlConditions: any[]
   fileMetadata: {
     name: string
     size: number
@@ -160,11 +156,13 @@ export function getChunkUrl(
  * Create a V4 manifest
  */
 export async function createManifestV4(
-  metadataCID: string
+  accessControlConditions: any[],
+  encryptedManifest: string
 ): Promise<{ bytes: Uint8Array }> {
   const manifest: ManifestV4 = {
     version: 'LIT-ENCRYPTED-V4',
-    metadataCID,
+    accessControlConditions,
+    encryptedManifest,
     created: Date.now(),
   }
 
