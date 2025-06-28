@@ -10,13 +10,13 @@ import {
 
 export interface UploadOptions {
   files: File[]
-  delegation: ArrayBuffer
+  delegation: ArrayBufferLike
   contract: `0x${string}`
   contractName: string
   to: `0x${string}`
   unifiedAccessControlConditions: any
   onProgress?: (progress: number) => void
-  encryptionKey?: ArrayBuffer
+  encryptionKey?: ArrayBufferLike
   iv?: Uint8Array
   litClient?: LitNodeClient // Optional LIT client for key management
   sessionSigs?: SessionSigsMap // Optional session sigs (supports delegate sigs, relayer, etc.)
@@ -26,12 +26,12 @@ export interface UploadOptions {
 
 export interface UploadResult {
   cid: string // When LIT is used: CID of the CBOR file with ACL + encrypted manifest
-  encryptedKey: ArrayBuffer // V3: actual key, V4: empty (key in metadata)
+  encryptedKey: ArrayBufferLike // V3: actual key, V4: empty (key in metadata)
   iv: Uint8Array // V3: actual IV, V4: empty (IV in metadata)
   dataToEncryptHash: `0x${string}` // Hash of the symmetric key
   fileHash: `0x${string}` // Hash of the original file
   // V4 optional fields
-  metadataBundle?: ArrayBuffer // Raw metadata bundle when LIT is not used
+  metadataBundle?: ArrayBufferLike // Raw metadata bundle when LIT is not used
   encryptedMetadataBundle?: string // LIT-encrypted metadata (if LIT is used)
   bundleHash?: `0x${string}` // Hash from LIT encryption
   chunkCIDs?: string[] // Uploaded chunk CIDs
@@ -64,7 +64,7 @@ export class UploadWorkerClient {
     return this.worker
   }
 
-  async initialize(delegation: ArrayBuffer): Promise<void> {
+  async initialize(delegation: ArrayBufferLike): Promise<void> {
     if (this.initPromise) {
       return this.initPromise
     }
@@ -348,7 +348,7 @@ export class UploadWorkerClient {
 
 // Helper function to encrypt the AES key with another key (for secure storage)
 export async function encryptKey(
-  keyToEncrypt: ArrayBuffer,
+  keyToEncrypt: ArrayBufferLike,
   wrappingKey: CryptoKey
 ): Promise<ArrayBuffer> {
   // Generate IV for key wrapping
@@ -358,7 +358,7 @@ export async function encryptKey(
   const encryptedKey = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
     wrappingKey,
-    keyToEncrypt
+    new Uint8Array(keyToEncrypt)
   )
 
   // Combine IV and encrypted key for storage

@@ -3,7 +3,7 @@
  * Used for passing binary data through postMessage between workers and main thread
  */
 
-export function arrayBufferToBase64(buffer: ArrayBuffer): string {
+export function arrayBufferToBase64(buffer: ArrayBufferLike): string {
   const bytes = new Uint8Array(buffer)
   let binary = ''
   const chunkSize = 0x8000 // Process in chunks to avoid call stack issues

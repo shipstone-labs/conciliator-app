@@ -16,18 +16,23 @@ export const POST = withAPITracing(async function POST(req: NextRequest) {
   } = await req.json()
   const { id, did } = body
 
-  const firestore = getFirestore()
-  const checkDoc = await firestore.collection('id').doc(id).get()
-  if (checkDoc.exists) {
-    if (
-      (checkDoc.data()?.creator &&
-        checkDoc.data()?.creator !== user.user.user_id) ||
-      checkDoc.data()?.metadata?.tokenId != null
-    ) {
-      return new NextResponse(JSON.stringify({ error: 'ID already exists' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      })
+  if (id) {
+    const firestore = getFirestore()
+    const checkDoc = await firestore.collection('id').doc(id).get()
+    if (checkDoc.exists) {
+      if (
+        (checkDoc.data()?.creator &&
+          checkDoc.data()?.creator !== user.user.user_id) ||
+        checkDoc.data()?.metadata?.tokenId != null
+      ) {
+        return new NextResponse(
+          JSON.stringify({ error: 'ID already exists' }),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
+      }
     }
   }
 

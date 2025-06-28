@@ -2,9 +2,64 @@
 
 import { useState, useEffect } from 'react'
 import { UploadWorkerClient } from '@/app/workers/upload-worker-client'
-import type { Address } from 'viem'
+import type { Address, Hex } from 'viem'
+import { useConfig, useSession } from '@/components/AuthLayout'
+import { useStytch } from '@stytch/nextjs'
+import type { AuthMethod, SessionSigsMap } from 'lit-wrapper'
+import { getFirestore } from 'firebase/firestore'
+import { createW3Client } from 'web-storage-wrapper'
 
 export default function UploadPage() {
+  // Get required dependencies - exactly like the original
+  const { litClient: _litClient, sessionSigs: _sessionSigs } = useSession([
+    'stytchUser',
+    'fbUser',
+  ])
+  const [sessionSigs, setSessionSigs] = useState<{
+    authMethod: AuthMethod
+    pkpPublicKey: string
+    address: Address
+    sessionSigs: SessionSigsMap
+  }>()
+  const stytchClient = useStytch()
+  const [delegation, setDelegation] = useState<ArrayBufferLike>()
+  const config = useConfig()
+  const _fb = getFirestore()
+  const _storacha = useEffect(() => {
+    _sessionSigs.wait().then((sessionSigs) => {
+      console.log(sessionSigs)
+      setSessionSigs(sessionSigs)
+      setRecipientAddress(sessionSigs.address)
+    })
+  }, [_sessionSigs])
+  useEffect(() => {
+    createW3Client().then((client) => {
+      const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
+      const did = client.agent.did()
+      fetch('/api/ucan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session_jwt}`,
+        },
+        body: JSON.stringify({
+          did,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error('Failed to store invention')
+          }
+          return res.blob()
+        })
+        .then((data) => {
+          return data.bytes()
+        })
+        .then((data) => {
+          setDelegation(data.buffer)
+        })
+    })
+  })
   const [uploadClient, setUploadClient] = useState<UploadWorkerClient | null>(
     null
   )
@@ -15,9 +70,15 @@ export default function UploadPage() {
   const [error, setError] = useState<string | null>(null)
 
   // Access control settings
-  const [contractAddress, setContractAddress] = useState<Address>('0x')
-  const [contractName, setContractName] = useState('')
-  const [recipientAddress, setRecipientAddress] = useState<Address>('0x')
+  const [contractAddress, setContractAddress] = useState<Address>(
+    (config.CONTRACT as Hex) || '0x'
+  )
+  const [contractName, setContractName] = useState<string>(
+    (config.CONTRACT_NAME as string) || ''
+  )
+  const [recipientAddress, setRecipientAddress] = useState<Address>(
+    sessionSigs?.address || '0x'
+  )
   const [enhancedSecurity, setEnhancedSecurity] = useState(false)
 
   // Initialize upload client without LIT
@@ -80,11 +141,12 @@ export default function UploadPage() {
       }
 
       // Create a dummy UCAN delegation (you'll need to get this from your auth system)
-      const dummyDelegation = new ArrayBuffer(0)
-
+      if (!delegation) {
+        throw new Error('No Delegation')
+      }
       const result = await uploadClient.uploadFiles({
         files: selectedFiles,
-        delegation: dummyDelegation,
+        delegation,
         contract:
           contractAddress || '0x0000000000000000000000000000000000000000',
         contractName: contractName || 'Default',
