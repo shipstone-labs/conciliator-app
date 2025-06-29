@@ -8,6 +8,7 @@ import { useStytch } from '@stytch/nextjs'
 import type { AuthMethod, SessionSigsMap } from 'lit-wrapper'
 import { getFirestore } from 'firebase/firestore'
 import { createW3Client } from 'web-storage-wrapper'
+import { useAsyncData } from '@/app/hooks/useAsyncData'
 
 export default function UploadPage() {
   // Get required dependencies - exactly like the original
@@ -15,51 +16,82 @@ export default function UploadPage() {
     'stytchUser',
     'fbUser',
   ])
-  const [sessionSigs, setSessionSigs] = useState<{
+  const stytchClient = useStytch()
+  const config = useConfig()
+  const _fb = getFirestore()
+
+  // Create W3 client and get DID
+  const { data: w3Client } = useAsyncData(async () => createW3Client(), [], {
+    enabled: true,
+  })
+
+  // Store session state to avoid SSR issues
+  const [sessionJwt, setSessionJwt] = useState<string | null>(null)
+
+  // Get session JWT on client side only
+  useEffect(() => {
+    if (stytchClient?.session) {
+      const { session_jwt } = stytchClient.session.getTokens() || {}
+      setSessionJwt(session_jwt || null)
+    }
+  }, [stytchClient?.session])
+
+  // Fetch UCAN delegation using the custom hook
+  const {
+    data: delegation,
+    loading: delegationLoading,
+    error: delegationError,
+  } = useAsyncData(
+    async () => {
+      if (!w3Client || !sessionJwt) {
+        throw new Error('Missing W3 client or session JWT')
+      }
+
+      const did = w3Client.agent.did()
+      const response = await fetch('/api/ucan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionJwt}`,
+        },
+        body: JSON.stringify({ did }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch UCAN delegation')
+      }
+
+      return response.arrayBuffer()
+    },
+    [w3Client, sessionJwt],
+    {
+      enabled: !!w3Client && !!sessionJwt,
+      onError: (error) => {
+        console.error('Failed to fetch delegation:', error)
+      },
+    }
+  )
+
+  // Handle session sigs using useAsyncData
+  const { data: sessionSigs } = useAsyncData<{
     authMethod: AuthMethod
     pkpPublicKey: string
     address: Address
     sessionSigs: SessionSigsMap
-  }>()
-  const stytchClient = useStytch()
-  const [delegation, setDelegation] = useState<ArrayBufferLike>()
-  const config = useConfig()
-  const _fb = getFirestore()
-  const _storacha = useEffect(() => {
-    _sessionSigs.wait().then((sessionSigs) => {
-      console.log(sessionSigs)
-      setSessionSigs(sessionSigs)
-      setRecipientAddress(sessionSigs.address)
-    })
-  }, [_sessionSigs])
-  useEffect(() => {
-    createW3Client().then((client) => {
-      const { session_jwt } = stytchClient?.session?.getTokens?.() || {}
-      const did = client.agent.did()
-      fetch('/api/ucan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session_jwt}`,
-        },
-        body: JSON.stringify({
-          did,
-        }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error('Failed to store invention')
-          }
-          return res.blob()
-        })
-        .then((data) => {
-          return data.bytes()
-        })
-        .then((data) => {
-          setDelegation(data.buffer)
-        })
-    })
-  })
+  }>(
+    async () => {
+      const sigs = await _sessionSigs.wait()
+      return sigs
+    },
+    [_sessionSigs],
+    {
+      enabled: !!_sessionSigs,
+      onSuccess: (sessionSigs) => {
+        console.log(sessionSigs)
+        setRecipientAddress(sessionSigs.address)
+      },
+    }
+  )
   const [uploadClient, setUploadClient] = useState<UploadWorkerClient | null>(
     null
   )
@@ -284,6 +316,20 @@ export default function UploadPage() {
       >
         {isUploading ? `Uploading... ${uploadProgress}%` : 'Upload Files'}
       </button>
+
+      {delegationLoading && (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-600">Loading UCAN delegation...</p>
+        </div>
+      )}
+
+      {delegationError && (
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-yellow-600">
+            Warning: Failed to load delegation - {delegationError.message}
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">

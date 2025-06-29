@@ -1,383 +1,65 @@
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
-import replace from '@rollup/plugin-replace'
-import virtual from '@rollup/plugin-virtual'
-import alias from '@rollup/plugin-alias'
-
-// Create a global window shim
-const globals = `
-const window = globalThis;
-`
-
-// Crypto polyfill that works in all environments
-const cryptoPolyfill = `
-// Get crypto implementation based on environment
-const webCrypto = 
-  (typeof globalThis !== 'undefined' && globalThis.crypto) ||
-  (typeof global !== 'undefined' && global.crypto) ||
-  (typeof self !== 'undefined' && self.crypto) ||
-  (typeof window !== 'undefined' && window.crypto);
-
-if (!webCrypto) {
-  throw new Error('No crypto implementation available. In Node.js 19+, globalThis.crypto should be available. For older versions, you may need to polyfill it.');
-}
-
-// Create Node.js-compatible methods using Web Crypto API
-const randomBytes = (size) => {
-  const bytes = new Uint8Array(size);
-  webCrypto.getRandomValues(bytes);
-  return bytes;
-};
-
-// Basic createHash implementation for common algorithms
-const createHash = (algorithm) => {
-  const encoder = new TextEncoder();
-  let data = new Uint8Array(0);
-  
-  return {
-    update(input, encoding) {
-      const newData = typeof input === 'string' ? encoder.encode(input) : input;
-      const combined = new Uint8Array(data.length + newData.length);
-      combined.set(data);
-      combined.set(newData, data.length);
-      data = combined;
-      return this;
-    },
-    digest(encoding) {
-      const subtle = webCrypto.subtle || (webCrypto.webkitSubtle);
-      if (!subtle) {
-        throw new Error('Web Crypto API not fully supported');
-      }
-      
-      // Map Node.js algorithm names to Web Crypto names
-      const algorithmMap = {
-        'sha256': 'SHA-256',
-        'sha384': 'SHA-384',
-        'sha512': 'SHA-512',
-        'sha1': 'SHA-1'
-      };
-      
-      const webCryptoAlgorithm = algorithmMap[algorithm.toLowerCase()] || algorithm;
-      
-      return subtle.digest(webCryptoAlgorithm, data).then(buffer => {
-        const bytes = new Uint8Array(buffer);
-        if (encoding === 'hex') {
-          return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-        return bytes;
-      });
-    }
-  };
-};
-
-// Export crypto implementation
-export default {
-  ...webCrypto,
-  webcrypto: webCrypto,
-  randomBytes,
-  createHash,
-  getRandomValues: webCrypto.getRandomValues.bind(webCrypto)
-};
-
-export { webCrypto as webcrypto, randomBytes, createHash };
-`
 
 export default {
   input: './dist/index.js',
   output: {
     file: './dist/index.js',
     format: 'esm',
-    sourcemap: false, // Explicitly disable source maps to avoid conflicts with webpack
-    // Don't preserve modules - bundle everything
+    sourcemap: false,
     preserveModules: false,
-    // Make sure the output has no external imports
     inlineDynamicImports: true,
-    // Generate clean code that's less likely to confuse webpack
     generatedCode: {
       constBindings: true,
       arrowFunctions: true,
       objectShorthand: true,
     },
-    // Ensure imports are resolved
     hoistTransitiveImports: false,
   },
   plugins: [
-    // Add window global shim at the beginning of the bundle
-    {
-      name: 'globals',
-      banner() {
-        return globals
-      },
-    },
-    // Alias crypto imports to our polyfill - this needs to come BEFORE resolve
-    alias({
-      entries: [
-        // Core crypto handling
-        { find: 'crypto', replacement: 'virtual:crypto-polyfill' },
-        { find: 'node:crypto', replacement: 'virtual:crypto-polyfill' },
-        // File system
-        { find: 'fs', replacement: 'virtual:fs-stub' },
-        { find: 'node:fs', replacement: 'virtual:fs-stub' },
-        // Streams
-        { find: 'stream', replacement: 'virtual:stream-stub' },
-        { find: 'node:stream', replacement: 'virtual:stream-stub' },
-        // Path utilities
-        { find: 'path', replacement: 'virtual:path-stub' },
-        { find: 'node:path', replacement: 'virtual:path-stub' },
-        // Process
-        { find: 'process', replacement: 'virtual:process-stub' },
-        { find: 'node:process', replacement: 'virtual:process-stub' },
-        // Assertions
-        { find: 'assert', replacement: 'virtual:assert-stub' },
-        { find: 'node:assert', replacement: 'virtual:assert-stub' },
-        // Utilities
-        { find: 'util', replacement: 'virtual:util-stub' },
-        { find: 'node:util', replacement: 'virtual:util-stub' },
-        // Buffer
-        { find: 'buffer', replacement: 'virtual:buffer-stub' },
-        { find: 'node:buffer', replacement: 'virtual:buffer-stub' },
-        // Events
-        { find: 'events', replacement: 'virtual:events-stub' },
-        { find: 'node:events', replacement: 'virtual:events-stub' },
-        // OS
-        { find: 'os', replacement: 'virtual:os-stub' },
-        { find: 'node:os', replacement: 'virtual:os-stub' }
-      ]
-    }),
-    // Stub out modules that shouldn't be included in the worker bundle
-    virtual({
-      '@walletconnect/modal': 'export default {}',
-      'virtual:crypto-polyfill': cryptoPolyfill,
-      'virtual:fs-stub': `
-        export default {};
-        export const promises = {};
-        export const readFile = () => Promise.reject(new Error('fs not available'));
-        export const writeFile = () => Promise.reject(new Error('fs not available'));
-        export const readFileSync = () => { throw new Error('fs not available'); };
-        export const writeFileSync = () => { throw new Error('fs not available'); };
-      `,
-      'virtual:stream-stub': `
-        export class Readable {}
-        export class Writable {}
-        export class Transform {}
-        export class PassThrough {}
-        export class Stream {}
-        export default { Readable, Writable, Transform, PassThrough, Stream };
-      `,
-      'virtual:path-stub': `
-        export const sep = '/';
-        export const delimiter = ':';
-        export const join = (...parts) => parts.join('/').replace(/\\/+/g, '/');
-        export const resolve = (...parts) => '/' + join(...parts);
-        export const dirname = (path) => path.split('/').slice(0, -1).join('/') || '/';
-        export const basename = (path) => path.split('/').pop() || '';
-        export const extname = (path) => {
-          const base = basename(path);
-          const dot = base.lastIndexOf('.');
-          return dot > 0 ? base.slice(dot) : '';
-        };
-        export default { sep, delimiter, join, resolve, dirname, basename, extname };
-      `,
-      'virtual:process-stub': `
-        const events = new Map();
-        
-        export const env = {};
-        export const platform = 'browser';
-        export const versions = { node: undefined };
-        export const cwd = () => '/';
-        export const nextTick = (fn) => Promise.resolve().then(fn);
-        
-        // Event emitter methods for process
-        export const on = (event, listener) => {
-          if (!events.has(event)) events.set(event, []);
-          events.get(event).push(listener);
-          return process;
-        };
-        
-        export const once = (event, listener) => {
-          const onceWrapper = (...args) => {
-            off(event, onceWrapper);
-            listener(...args);
-          };
-          return on(event, onceWrapper);
-        };
-        
-        export const off = (event, listener) => {
-          if (!events.has(event)) return process;
-          const listeners = events.get(event);
-          const index = listeners.indexOf(listener);
-          if (index > -1) listeners.splice(index, 1);
-          return process;
-        };
-        
-        export const emit = (event, ...args) => {
-          if (!events.has(event)) return false;
-          events.get(event).forEach(listener => listener(...args));
-          return true;
-        };
-        
-        const process = { env, platform, versions, cwd, nextTick, on, once, off, emit };
-        export default process;
-      `,
-      'virtual:assert-stub': `
-        export default function assert(condition, message) {
-          if (!condition) throw new Error(message || 'Assertion failed');
-        }
-        export const ok = assert;
-        export const equal = (a, b, msg) => assert(a === b, msg);
-        export const notEqual = (a, b, msg) => assert(a !== b, msg);
-        export const strictEqual = (a, b, msg) => assert(a === b, msg);
-        export const notStrictEqual = (a, b, msg) => assert(a !== b, msg);
-      `,
-      'virtual:util-stub': `
-        export const promisify = (fn) => (...args) => new Promise((resolve, reject) => {
-          fn(...args, (err, result) => err ? reject(err) : resolve(result));
-        });
-        export const inherits = (ctor, superCtor) => {
-          ctor.super_ = superCtor;
-          ctor.prototype = Object.create(superCtor.prototype, {
-            constructor: { value: ctor, enumerable: false, writable: true, configurable: true }
-          });
-        };
-        export const deprecate = (fn, msg) => fn;
-        export const isArray = Array.isArray;
-        export const isBuffer = () => false;
-        
-        // Deep equality check
-        export const isDeepStrictEqual = (a, b) => {
-          if (a === b) return true;
-          if (a == null || b == null) return false;
-          if (typeof a !== typeof b) return false;
-          
-          if (typeof a === 'object') {
-            const keysA = Object.keys(a);
-            const keysB = Object.keys(b);
-            if (keysA.length !== keysB.length) return false;
-            
-            for (const key of keysA) {
-              if (!keysB.includes(key)) return false;
-              if (!isDeepStrictEqual(a[key], b[key])) return false;
-            }
-            return true;
-          }
-          return false;
-        };
-        
-        export default { promisify, inherits, deprecate, isArray, isBuffer, isDeepStrictEqual };
-      `,
-      'virtual:buffer-stub': `
-        export class Buffer extends Uint8Array {
-          static from(data, encoding) {
-            if (typeof data === 'string') {
-              return new TextEncoder().encode(data);
-            }
-            return new Uint8Array(data);
-          }
-          static alloc(size) {
-            return new Uint8Array(size);
-          }
-          static isBuffer(obj) {
-            return obj instanceof Uint8Array;
-          }
-          toString(encoding) {
-            return new TextDecoder().decode(this);
-          }
-        }
-        export default { Buffer };
-      `,
-      'virtual:events-stub': `
-        export class EventEmitter {
-          constructor() {
-            this._events = {};
-          }
-          on(event, listener) {
-            if (!this._events[event]) this._events[event] = [];
-            this._events[event].push(listener);
-            return this;
-          }
-          emit(event, ...args) {
-            if (!this._events[event]) return false;
-            this._events[event].forEach(listener => listener(...args));
-            return true;
-          }
-          off(event, listener) {
-            if (!this._events[event]) return this;
-            this._events[event] = this._events[event].filter(l => l !== listener);
-            return this;
-          }
-          once(event, listener) {
-            const onceWrapper = (...args) => {
-              this.off(event, onceWrapper);
-              listener(...args);
-            };
-            return this.on(event, onceWrapper);
-          }
-        }
-        export default EventEmitter;
-      `,
-      'virtual:os-stub': `
-        export const EOL = '\\n';
-        export const tmpdir = () => '/tmp';
-        export const homedir = () => '/home/user';
-        export const hostname = () => 'localhost';
-        export const platform = () => 'browser';
-        export const arch = () => 'browser';
-        export const cpus = () => [];
-        export const userInfo = () => ({
-          uid: -1,
-          gid: -1,
-          username: 'user',
-          homedir: '/home/user',
-          shell: null
-        });
-        export default { EOL, tmpdir, homedir, hostname, platform, arch, cpus, userInfo };
-      `,
-      // Add any other modules to stub here as needed
-    }),
-    // Explicitly resolve from this package's node_modules
     resolve({
-      // Don't prefer browser field - we want universal compatibility
-      browser: false,
-      preferBuiltins: false,
-      // Export conditions to support both environments
+      preferBuiltins: true, // Prefer Node.js built-ins
       exportConditions: ['node', 'import', 'module', 'default'],
-      // Resolve from the package's node_modules
       moduleDirectories: ['node_modules'],
-      // Include all file extensions
       extensions: ['.mjs', '.js', '.json', '.node', '.ts'],
-      // Force module resolution
       dedupe: [],
-      // Follow symlinks (important for pnpm)
       preserveSymlinks: false,
     }),
     commonjs({
-      // Include all node_modules
       include: /node_modules/,
-      // Transform CommonJS modules to ES6
       transformMixedEsModules: true,
-      // Handle dynamic requires
       ignoreDynamicRequires: false,
-      // Make sure CommonJS detection works
       defaultIsModuleExports: true,
     }),
     json(),
-    replace({
-      'process.env.NODE_ENV': JSON.stringify('production'),
-      'global.window': 'globalThis',
-      // Don't replace typeof window checks - we need those for environment detection
-      preventAssignment: true,
-    }),
-    // Uncomment to enable minification
-    // terser()
   ],
   onwarn(warning, warn) {
-    // Suppress circular dependency warnings
     if (warning.code === 'CIRCULAR_DEPENDENCY') return
-    // Suppress this is undefined warnings (common in browser code)
     if (warning.code === 'THIS_IS_UNDEFINED') return
     warn(warning)
   },
-  // We don't want ANY externals - everything should be bundled
-  external: [],
+  // Mark Node.js built-ins as external so they're not bundled
+  external: [
+    'crypto',
+    'fs',
+    'path',
+    'stream',
+    'util',
+    'os',
+    'events',
+    'assert',
+    'buffer',
+    'process',
+    'node:crypto',
+    'node:fs',
+    'node:path',
+    'node:stream',
+    'node:util',
+    'node:os',
+    'node:events',
+    'node:assert',
+    'node:buffer',
+    'node:process'
+  ],
 }

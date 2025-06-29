@@ -28,9 +28,9 @@ overrides:
   '@lit-protocol/uint8arrays': file:./dist-packages/@lit-protocol-uint8arrays-7.1.3-2fcc53e2a.tgz
   '@lit-protocol/wasm': file:./dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz
   '@storacha/client': file:./dist-packages/@storacha-client-1.4.0-8f47eae0.tgz
-  lilypad-wrapper: file:./dist-packages/lilypad-wrapper-1.0.0-1d38872.tgz
-  lit-wrapper: file:./dist-packages/lit-wrapper-1.0.0-1d38872.tgz
-  web-storage-wrapper: file:./dist-packages/web-storage-wrapper-1.0.0-1d38872.tgz
+  lilypad-wrapper: file:./dist-packages/lilypad-wrapper-1.0.0-ceeab93.tgz
+  lit-wrapper: file:./dist-packages/lit-wrapper-1.0.0-ceeab93.tgz
+  web-storage-wrapper: file:./dist-packages/web-storage-wrapper-1.0.0-ceeab93.tgz
 
 pnpmfileChecksum: sha256-J3QrVrMSGpoKlLwJ6zFIR0FnEiVgd+JY8SMWdH+WLoI=
 
@@ -206,14 +206,14 @@ importers:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lilypad-wrapper:
-        specifier: file:dist-packages/lilypad-wrapper-1.0.0-1d38872.tgz
-        version: file:dist-packages/lilypad-wrapper-1.0.0-1d38872.tgz
+        specifier: file:dist-packages/lilypad-wrapper-1.0.0-ceeab93.tgz
+        version: file:dist-packages/lilypad-wrapper-1.0.0-ceeab93.tgz
       lint-staged:
         specifier: ^15.5.2
         version: 15.5.2
       lit-wrapper:
-        specifier: file:dist-packages/lit-wrapper-1.0.0-1d38872.tgz
-        version: file:dist-packages/lit-wrapper-1.0.0-1d38872.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1)(typescript@5.8.3)
+        specifier: file:dist-packages/lit-wrapper-1.0.0-ceeab93.tgz
+        version: file:dist-packages/lit-wrapper-1.0.0-ceeab93.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1)(typescript@5.8.3)
       lucide-react:
         specifier: ^0.475.0
         version: 0.475.0(react@19.1.0)
@@ -281,8 +281,8 @@ importers:
         specifier: ^2.29.1
         version: 2.31.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@6.0.5)(zod@3.24.4)
       web-storage-wrapper:
-        specifier: file:dist-packages/web-storage-wrapper-1.0.0-1d38872.tgz
-        version: file:dist-packages/web-storage-wrapper-1.0.0-1d38872.tgz(encoding@0.1.13)
+        specifier: file:dist-packages/web-storage-wrapper-1.0.0-ceeab93.tgz
+        version: file:dist-packages/web-storage-wrapper-1.0.0-ceeab93.tgz(encoding@0.1.13)
       webpack:
         specifier: ^5.99.8
         version: 5.99.9(esbuild@0.25.5)
@@ -560,12 +560,17 @@ importers:
       '@storacha/client':
         specifier: file:../../dist-packages/@storacha-client-1.4.0-8f47eae0.tgz
         version: file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz(encoding@0.1.13)
+      multiformats:
+        specifier: ^13.3.1
+        version: 13.3.3
     dependenciesMeta:
       '@ipld/dag-ucan':
         injected: true
       '@noble/ed25519':
         injected: true
       '@storacha/client':
+        injected: true
+      multiformats:
         injected: true
     devDependencies:
       '@rollup/plugin-alias':
@@ -1875,15 +1880,15 @@ packages:
     resolution: {integrity: sha512-SkayRWUz7MvibjKO/MN8xuhEziyWPlKYZ5wrPdC9gDqvgiJR1BM95tY89jv/ypVDA+u5B3DhtXXYMpIQCSHUOg==}
 
   '@lit-protocol/auth-helpers@file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-kFH6WDWB7JInZjxnGkKgqEaYmLDIFCwNVqBTrHV7Raw//Nvgd6VJmK1nxUhb0ifGXLpF2YNrkgHD38rSqrQGpg==, tarball: file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-le/H4GJjTPAz+4+A96t3xJPvUhfd0z/GsdbCZhntpVHy5+I9sQ83pW5Wi1zMMwuTmTSMEWOe/oIk50bCLxeNqQ==, tarball: file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/constants@file:dist-packages/@lit-protocol-constants-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-PcCSwmLdZgCIOtcvhwLmVfp3k2RBJrjVAYQTShYGIhqEuQnyidqZJ6HcOvzSFWaQFyZ7zVHpoUmjuBwMQoqvew==, tarball: file:dist-packages/@lit-protocol-constants-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-NxzUdHo/ellm8N6FLsGIS31O80h5Z1EkB53F9+GSVV4DbG/5Gv4Z5NiVBFbxhBCbA2qA9p8bxSukeC8ZMPpR/w==, tarball: file:dist-packages/@lit-protocol-constants-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/contracts-sdk@file:dist-packages/@lit-protocol-contracts-sdk-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-TNfuX794StDjGP1hqMZUhcZDQEYgxMcH8Z+jAjVS5qOdoIu3GuhbDYMP6gaWyPrFZ77UVZneNTxVhR+IE60/fQ==, tarball: file:dist-packages/@lit-protocol-contracts-sdk-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-KLm+JEPpA7Bn4S5nda25eltYvqlwFLKMdCqGAi9hbdy6vsKfvl8yW8C5GbOrSVF1dLFoEwfJvXEctKtzxHMv/w==, tarball: file:dist-packages/@lit-protocol-contracts-sdk-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
     peerDependencies:
       date-and-time: ^2.4.1
@@ -1895,63 +1900,63 @@ packages:
       typescript: ^5.0.0
 
   '@lit-protocol/core@file:dist-packages/@lit-protocol-core-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-4rj0TmEF5of51/jByuwRNVenvhHa/aY3yamYPlLtY6BRDpJSHod0ad2q1BWgNakOwsiVEAIFlkCzeCE6Ru/ylA==, tarball: file:dist-packages/@lit-protocol-core-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-VtpsNZkpve4iW+jBlwhH0v5ah/lQObHsKMvgSOeae9oIelpKbRIXFyK83iFSAKX0KKVaidLaLvtbjXEzEWY8CA==, tarball: file:dist-packages/@lit-protocol-core-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/crypto@file:dist-packages/@lit-protocol-crypto-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-PAMIcXovaANJv37+0n3HJXIOu6a2GKCT0x+17FNt4XLVXl4mf2yHJmdll5vExFH3ittyMu7reee70F3urYWjvA==, tarball: file:dist-packages/@lit-protocol-crypto-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-2c0j8ISxh+jHWyJEKJdeByD+C5Hm4yax8sRiQdPUldYYF7KDIe2Z8SOtgwr00jFbVR61xyR+8Zjoojj56rVR2w==, tarball: file:dist-packages/@lit-protocol-crypto-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/lit-auth-client@file:dist-packages/@lit-protocol-lit-auth-client-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-4nbh5qF8wJ4TlEj1q1bYW1dzRy6B67jApi2ETElIFJJ6teF4I3BKGjfb5mo4e8xUvLvC499BwMA4KTEKLl1npQ==, tarball: file:dist-packages/@lit-protocol-lit-auth-client-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-/evyj/Zme+yZB9kDDqslBlD309F3bXqcmievLYexjWVe+Xbw3Xt+TDimUev3uxWvwocdIdwI8SEeIjn852l+bA==, tarball: file:dist-packages/@lit-protocol-lit-auth-client-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
     peerDependencies:
       '@simplewebauthn/browser': ^7.2.0
       '@simplewebauthn/typescript-types': ^7.0.0
 
   '@lit-protocol/lit-node-client-nodejs@file:dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-5zY+F3oCmr0wNSYegRqFotrZ9uIHA+3qJPCeL06mwZF/pqqWoT0hHDDRvrE2cxO/QfGNnu0kz0/ZzOr/vDSzow==, tarball: file:dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-J7DCFzwftbjmNbFJZIEhl2XIC4LpX8/U6Tb5AvbScyLV3a3etvFvQbDtrSWlMHl6wvWEkjWV0+9Jv76dpkp1QQ==, tarball: file:dist-packages/@lit-protocol-lit-node-client-nodejs-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/lit-node-client@file:dist-packages/@lit-protocol-lit-node-client-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-3E6Mcj3XRJoN1x0w3F5xNAviCZVF67tt0T+LxW5RoYDV80N1mmkq/PgJLH/F4xcNMgCdJm2XqTRDFsM1p7BuCA==, tarball: file:dist-packages/@lit-protocol-lit-node-client-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-RccRvHawBS4LrxpqxODGDPjzeORCcTHqAmwHu2nnfPruLTP03DF37JiJMY3pl6FrNvRZa73hNfOiJGcMGTNTdQ==, tarball: file:dist-packages/@lit-protocol-lit-node-client-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
     peerDependencies:
       tslib: ^2.3.0
 
   '@lit-protocol/logger@file:dist-packages/@lit-protocol-logger-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-KoPUWjbhrii9D8hajuNQkX26HqkqSeuRKw1l0LsXclpg6GlNW++s1cTy/wuFjh6JD8EOYgy9tW1LBl2186mgCg==, tarball: file:dist-packages/@lit-protocol-logger-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-pgyEvtU1IlLl08EGFEfQFKwQpVZS+iYwhfmMpUNVlxZYGFipTT1pGeHc6ZpQBPTjI+5DPd+N75rnCAs93Uu4qw==, tarball: file:dist-packages/@lit-protocol-logger-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/misc-browser@7.2.0':
     resolution: {integrity: sha512-HdE35c5cetrI4jMW6DWUbPEbfqV4DuNgBbN4IfUMP+HLBQXdzvKUHGSxispvXWljQFjqQeRcCXJxsdUwtR6Fuw==}
 
   '@lit-protocol/misc@file:dist-packages/@lit-protocol-misc-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-q1SEnP+uHL0TlDdOHMZ1ZF0ms3Scot0z5Ki4P5Y9ykoSN54x5xxZ5TTBchAXWGzmnLgles3httxxFC6/kR9wrQ==, tarball: file:dist-packages/@lit-protocol-misc-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-Z0CSelQSm5gPplcT0fM5BGK+JfZURsWYxZzwDUi6tLxxQUxMOhs0DTW85Du+x0sFlA1ggPz+YD4vG63kYpOMxQ==, tarball: file:dist-packages/@lit-protocol-misc-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/nacl@file:dist-packages/@lit-protocol-nacl-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-OzzfmCM2Sk/K+hLTXRGgLT8jyYiMR6dMAd4wFNAHYuDVtsT1gRGeioS0PxXnTe5Ll6POW/KptpuSe4jV7tsnXw==, tarball: file:dist-packages/@lit-protocol-nacl-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-BM3oanhtDhc1Uv4prAXi2YIW1cuzk3YUAtP5Oph1kAdIij7v1YpQBshGHiDEZXgu9HkKWUMWGEiG566rACvfqg==, tarball: file:dist-packages/@lit-protocol-nacl-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/pkp-base@file:dist-packages/@lit-protocol-pkp-base-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-zH/Q2Uitoghu1wKZEkMZajUxSSqxCLHdMhg/xzVPfjU/lGul79YHzBxHZTH2NZCnllw1C8XTbj5Eg899Dg2cFg==, tarball: file:dist-packages/@lit-protocol-pkp-base-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-weSX1GRE/hlS48ZiMyV0LBilh+bHZ3UdiRKBovDtBn+R6xPNtO3x+EHZ+gD37wZsQ5iTcX6mDwS8Y1m/XzJS3Q==, tarball: file:dist-packages/@lit-protocol-pkp-base-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/pkp-ethers@file:dist-packages/@lit-protocol-pkp-ethers-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-48Zp+FJxLA8H0Xeh4A1V8Ow2HPofdSlSENRhZY4X4Ine12u3jIaFQOOL1eurVY76kZ5I3PmkkTZvPohjJu6JBA==, tarball: file:dist-packages/@lit-protocol-pkp-ethers-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-LTlI++vKhzO5FIU6Tj00NAp8JKlbYx7v/aG4fXGQXOUPneIWXk6GG85pAA9ihCqrRUj0sWPPSuPz8aoBpgTwPg==, tarball: file:dist-packages/@lit-protocol-pkp-ethers-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/types@file:dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-t1OTKyANH3tPC5ruu41Ui18m03Kxuc9f904B+yah7Y+6WeHQz3WcxFBwvTDXHndj8ot6Pp1+lWPNdXcFLX8aRA==, tarball: file:dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-1jeOhKEWxbkkkXTpu7YFXuRI8DHaUgA5wHzc8Oe1ctgcjGZVtaX5o+s+iFs3uMhCEF0lFEgDuAfGzY/WkkUeqw==, tarball: file:dist-packages/@lit-protocol-types-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/uint8arrays@file:dist-packages/@lit-protocol-uint8arrays-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-M2/c4Zjxmb3NiX2Gf/1YkUqb2pXX/UHLVZA+U6USRIUO/DRz3c4vaycEWVGPM+CGdYhv09xQdJlzlQeIujQbFQ==, tarball: file:dist-packages/@lit-protocol-uint8arrays-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-VJC/563AtbPaaprKsRoaf3/w8QwKfWS5XPiAlroUyrz2onzw5AFf0gxrvrrSRpthkJnndQ/3376XnF7BgPiiTg==, tarball: file:dist-packages/@lit-protocol-uint8arrays-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@lit-protocol/wasm@file:dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz':
-    resolution: {integrity: sha512-GnS5CVbGY64k4nsaRDO9SHGlAC84/wVvEBvtQFOnPXaJM1HUeaWrqhLx3Go0O9Fmm3O4NAHyo3aKd02dDmBLFQ==, tarball: file:dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz}
+    resolution: {integrity: sha512-DCjYe96blZnwpWaFZUsliwNly0v0oPIFLrKc/mxJuMLKiJhjFYg+3Fo5FpaUWDxDHTKyWwH2rnzDGxXqgoLW2A==, tarball: file:dist-packages/@lit-protocol-wasm-7.1.3-2fcc53e2a.tgz}
     version: 7.1.3
 
   '@multiformats/murmur3@2.1.8':
@@ -3144,7 +3149,7 @@ packages:
     resolution: {integrity: sha512-YMIuocTgaVpqlgyds5NG+eJqfr+dfFkxdk33lJcFIRD30SZaGiA8vQ0ZPUHqcC9Azj0XZCRexz6nHXqEsn1aag==}
 
   '@storacha/client@file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz':
-    resolution: {integrity: sha512-JGHdHPSdtRlV4J/WJr6k9a2cOxI5ceZhwd27HhT8PdZQdSVqO7aRFe5QaZKIRyNCUagqfQd6sEUI2lhacIsl+Q==, tarball: file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz}
+    resolution: {integrity: sha512-Dl7blzDmpabRHf/k5akU7MgnbdHIseBf5A0PYR8lQSPFvjy61618NkvY5H5dYkBCUW4t21JZg3Iju1Imu82fUg==, tarball: file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz}
     version: 1.4.0
     engines: {node: '>=18'}
 
@@ -5780,8 +5785,8 @@ packages:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
     engines: {node: '>=14'}
 
-  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-1d38872.tgz:
-    resolution: {integrity: sha512-hYEdYWHeVXJu9oetRyq+M++G1YeI9gOf1jX3jDc/66AK/GJ8S8GG16Dhh+mRVd+acgxSL/4opUEBShp5mVt/5A==, tarball: file:dist-packages/lilypad-wrapper-1.0.0-1d38872.tgz}
+  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-ceeab93.tgz:
+    resolution: {integrity: sha512-hYEdYWHeVXJu9oetRyq+M++G1YeI9gOf1jX3jDc/66AK/GJ8S8GG16Dhh+mRVd+acgxSL/4opUEBShp5mVt/5A==, tarball: file:dist-packages/lilypad-wrapper-1.0.0-ceeab93.tgz}
     version: 1.0.0
     engines: {node: '>=16.0.0'}
 
@@ -5800,8 +5805,8 @@ packages:
     resolution: {integrity: sha512-LWzX2KsqcB1wqQ4AHgYb4RsDXauQiqhjLk+6hjbaeHG4zpjjVAB6wC/gz6X0l+Du1cN3pUB5ZlrvTbhGSNnUQQ==}
     engines: {node: '>=18.0.0'}
 
-  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-1d38872.tgz:
-    resolution: {integrity: sha512-UukkRY+/TUzkSpTeVz3/E1AJzEEytes80G8vDDWxipfo5/b7/mbsjgf4SMeWyVibAIMZzaaTV1BWaMn4pIpCnQ==, tarball: file:dist-packages/lit-wrapper-1.0.0-1d38872.tgz}
+  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-ceeab93.tgz:
+    resolution: {integrity: sha512-UukkRY+/TUzkSpTeVz3/E1AJzEEytes80G8vDDWxipfo5/b7/mbsjgf4SMeWyVibAIMZzaaTV1BWaMn4pIpCnQ==, tarball: file:dist-packages/lit-wrapper-1.0.0-ceeab93.tgz}
     version: 1.0.0
 
   load-tsconfig@0.2.5:
@@ -7857,8 +7862,8 @@ packages:
     resolution: {integrity: sha512-TnbFSbcOCcDgjZ4piURLCbJ3nJhznVh9kw6F6iokjiFPl8ONxe9A6nMDVXDiNbrSfLILs6vB07F7wLBrwPYzJw==}
     engines: {node: '>=10.13.0'}
 
-  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-1d38872.tgz:
-    resolution: {integrity: sha512-4+8iHnxpXEFFjW2M1+DBo3DqkYZm1B5Rri6xlH3B2ClEgVfnp1lonxAmeShtw7Ra8SZsmuF/c7VJYIjYd3GTEQ==, tarball: file:dist-packages/web-storage-wrapper-1.0.0-1d38872.tgz}
+  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-ceeab93.tgz:
+    resolution: {integrity: sha512-FdBK3wDVNWP7qyC3vSZNgJNVW+D85Ud3f/EIaEn78s+SEz3b7VtbHMzIL/TGBc6JoU1j51D/XbK8pMbBAXw8iQ==, tarball: file:dist-packages/web-storage-wrapper-1.0.0-ceeab93.tgz}
     version: 1.0.0
 
   web-streams-polyfill@3.3.3:
@@ -14443,7 +14448,7 @@ snapshots:
 
   lilconfig@3.1.3: {}
 
-  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-1d38872.tgz: {}
+  lilypad-wrapper@file:dist-packages/lilypad-wrapper-1.0.0-ceeab93.tgz: {}
 
   limiter@1.1.5: {}
 
@@ -14473,7 +14478,7 @@ snapshots:
       rfdc: 1.4.1
       wrap-ansi: 9.0.0
 
-  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-1d38872.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1)(typescript@5.8.3):
+  lit-wrapper@file:dist-packages/lit-wrapper-1.0.0-ceeab93.tgz(@simplewebauthn/typescript-types@7.4.0)(bufferutil@4.0.9)(date-and-time@2.4.3)(encoding@0.1.13)(multiformats@13.3.3)(tslib@2.8.1)(typescript@5.8.3):
     dependencies:
       '@lit-protocol/accs-schemas': 0.0.24
       '@lit-protocol/auth-helpers': file:dist-packages/@lit-protocol-auth-helpers-7.1.3-2fcc53e2a.tgz
@@ -17066,11 +17071,12 @@ snapshots:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
 
-  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-1d38872.tgz(encoding@0.1.13):
+  web-storage-wrapper@file:dist-packages/web-storage-wrapper-1.0.0-ceeab93.tgz(encoding@0.1.13):
     dependencies:
       '@ipld/dag-ucan': 3.4.5
       '@noble/ed25519': 1.7.5
       '@storacha/client': file:dist-packages/@storacha-client-1.4.0-8f47eae0.tgz(encoding@0.1.13)
+      multiformats: 13.3.3
     transitivePeerDependencies:
       - encoding
 

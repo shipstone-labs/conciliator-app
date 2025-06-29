@@ -110,8 +110,10 @@ const serviceConf = {
  */
 export async function createW3Client(): Promise<Client> {
   try {
+    const store = new StoreMemory()
     return await create({
       serviceConf,
+      store,
     })
   } catch (error) {
     console.error('Error creating W3 client:', error)
