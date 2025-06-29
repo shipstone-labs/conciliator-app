@@ -51,6 +51,7 @@ export function useAsyncData<T>(
     }
   }, [asyncFn, enabled, onSuccess, onError])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     isMountedRef.current = true
     fetchData()
@@ -58,7 +59,7 @@ export function useAsyncData<T>(
     return () => {
       isMountedRef.current = false
     }
-  }, [...deps, fetchData])
+  }, deps)
 
   return { data, loading, error, refetch: fetchData }
 }

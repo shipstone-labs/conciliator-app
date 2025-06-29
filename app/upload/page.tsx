@@ -5,10 +5,8 @@ import { UploadWorkerClient } from '@/app/workers/upload-worker-client'
 import type { Address, Hex } from 'viem'
 import { useConfig, useSession } from '@/components/AuthLayout'
 import { useStytch } from '@stytch/nextjs'
-import type { AuthMethod, SessionSigsMap } from 'lit-wrapper'
 import { getFirestore } from 'firebase/firestore'
 import { createW3Client } from 'web-storage-wrapper'
-import { useAsyncData } from '@/app/hooks/useAsyncData'
 
 export default function UploadPage() {
   // Get required dependencies - exactly like the original
@@ -20,78 +18,80 @@ export default function UploadPage() {
   const config = useConfig()
   const _fb = getFirestore()
 
-  // Create W3 client and get DID
-  const { data: w3Client } = useAsyncData(async () => createW3Client(), [], {
-    enabled: true,
-  })
+  // State for all async data
+  const [delegation, setDelegation] = useState<ArrayBuffer | null>(null)
+  const [sessionSigs, setSessionSigs] = useState<any>(null)
+  const [delegationLoading, setDelegationLoading] = useState(false)
+  const [delegationError, setDelegationError] = useState<Error | null>(null)
 
-  // Store session state to avoid SSR issues
-  const [sessionJwt, setSessionJwt] = useState<string | null>(null)
-
-  // Get session JWT on client side only
+  // Initialize everything in one effect
   useEffect(() => {
-    if (stytchClient?.session) {
-      const { session_jwt } = stytchClient.session.getTokens() || {}
-      setSessionJwt(session_jwt || null)
-    }
-  }, [stytchClient?.session])
+    let mounted = true
 
-  // Fetch UCAN delegation using the custom hook
-  const {
-    data: delegation,
-    loading: delegationLoading,
-    error: delegationError,
-  } = useAsyncData(
-    async () => {
-      if (!w3Client || !sessionJwt) {
-        throw new Error('Missing W3 client or session JWT')
+    const initialize = async () => {
+      if (!stytchClient?.session) return
+
+      try {
+        setDelegationLoading(true)
+        setDelegationError(null)
+
+        // Create W3 client
+        const w3Client = await createW3Client()
+
+        // Get session JWT (safe in async function)
+        const { session_jwt } = stytchClient.session.getTokens() || {}
+
+        // Fetch UCAN delegation
+        if (w3Client && session_jwt && mounted) {
+          const did = w3Client.agent.did()
+          const response = await fetch('/api/ucan', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session_jwt}`,
+            },
+            body: JSON.stringify({ did }),
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch UCAN delegation')
+          }
+
+          const delegationData = await response.arrayBuffer()
+          if (mounted) {
+            setDelegation(delegationData)
+          }
+        }
+
+        // Get session sigs
+        if (_sessionSigs && mounted) {
+          const sigs = await _sessionSigs.wait()
+          if (mounted) {
+            console.log(sigs)
+            setSessionSigs(sigs)
+            setRecipientAddress(sigs.address)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to initialize:', error)
+        if (mounted) {
+          setDelegationError(
+            error instanceof Error ? error : new Error('Unknown error')
+          )
+        }
+      } finally {
+        if (mounted) {
+          setDelegationLoading(false)
+        }
       }
-
-      const did = w3Client.agent.did()
-      const response = await fetch('/api/ucan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionJwt}`,
-        },
-        body: JSON.stringify({ did }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch UCAN delegation')
-      }
-
-      return response.arrayBuffer()
-    },
-    [w3Client, sessionJwt],
-    {
-      enabled: !!w3Client && !!sessionJwt,
-      onError: (error) => {
-        console.error('Failed to fetch delegation:', error)
-      },
     }
-  )
 
-  // Handle session sigs using useAsyncData
-  const { data: sessionSigs } = useAsyncData<{
-    authMethod: AuthMethod
-    pkpPublicKey: string
-    address: Address
-    sessionSigs: SessionSigsMap
-  }>(
-    async () => {
-      const sigs = await _sessionSigs.wait()
-      return sigs
-    },
-    [_sessionSigs],
-    {
-      enabled: !!_sessionSigs,
-      onSuccess: (sessionSigs) => {
-        console.log(sessionSigs)
-        setRecipientAddress(sessionSigs.address)
-      },
+    initialize()
+
+    return () => {
+      mounted = false
     }
-  )
+  }, [stytchClient?.session, _sessionSigs])
   const [uploadClient, setUploadClient] = useState<UploadWorkerClient | null>(
     null
   )
