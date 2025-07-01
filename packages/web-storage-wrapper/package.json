@@ -4,10 +4,12 @@
   "description": "Isolated wrapper for Web3 Storage client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "browser": "dist/index.js",
+  "browser": "dist/browser.js",
   "type": "module",
   "exports": {
     ".": {
+      "browser": "./dist/browser.js",
+      "node": "./dist/index.js",
       "import": "./dist/index.js",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
@@ -22,7 +24,8 @@
   "dependencies": {
     "@ipld/dag-ucan": "3.4.5",
     "@noble/ed25519": "1.7.5",
-    "@storacha/client": "^1.4.0"
+    "@storacha/client": "^1.4.0",
+    "multiformats": "^13.3.1"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",

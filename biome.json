@@ -21,7 +21,8 @@
       "db.json",
       "packages/firebase-functions/lib/**",
       "hardhat",
-      "submods"
+      "submods",
+      "public/download-service-worker.js"
     ]
   },
   "formatter": {
