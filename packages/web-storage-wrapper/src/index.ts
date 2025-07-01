@@ -140,6 +140,22 @@ export async function delegatedClient(
   return client
 }
 
+export async function delegateClient(
+  client: Client,
+  delegationData: ArrayBuffer
+): Promise<Client> {
+  // Import the delegation
+  const delegation = await extract(new Uint8Array(delegationData))
+  if (!delegation.ok) {
+    throw new Error('Failed to extract delegation')
+  }
+
+  // Create space with the delegation
+  const space = await client.addSpace(delegation.ok)
+  await client.setCurrentSpace(space.did())
+  return client
+}
+
 /**
  * Authenticate with the Web3.Storage service using an email
  * @param client - The Web3.Storage client instance
@@ -242,6 +258,7 @@ export const w3Storage = {
   store: storeContent,
   list: listUploads,
   delegatedClient,
+  delegateClient,
   DID,
 }
 

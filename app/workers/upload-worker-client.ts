@@ -10,7 +10,8 @@ import {
 
 export interface UploadOptions {
   files: File[]
-  delegation: ArrayBufferLike
+  sessionToken?: string // JWT token for auth
+  firebaseToken?: string // Firebase token if needed
   contract: `0x${string}`
   contractName: string
   to: `0x${string}`
@@ -57,14 +58,18 @@ export class UploadWorkerClient {
 
   private async ensureWorker(): Promise<Worker> {
     if (!this.worker) {
-      this.worker = new Worker('/workers/upload-worker.js', {
+      this.worker = new Worker(new URL('./upload-worker.ts', import.meta.url), {
         type: 'module',
       })
     }
     return this.worker
   }
 
-  async initialize(delegation: ArrayBufferLike): Promise<void> {
+  async initialize(options: {
+    delegation?: ArrayBufferLike
+    sessionToken?: string
+    firebaseToken?: string
+  }): Promise<void> {
     if (this.initPromise) {
       return this.initPromise
     }
@@ -84,11 +89,21 @@ export class UploadWorkerClient {
         }
 
         worker.addEventListener('message', handleMessage)
-        // Encode delegation to base64
-        worker.postMessage({
-          type: 'init',
-          delegation: arrayBufferToBase64(delegation),
-        } as WorkerMessage)
+
+        const message: WorkerMessage = { type: 'init' }
+
+        if (options.sessionToken) {
+          // New flow: pass session token to worker
+          message.sessionToken = options.sessionToken
+          if (options.firebaseToken) {
+            message.firebaseToken = options.firebaseToken
+          }
+        } else {
+          reject(new Error('Either delegation or sessionToken is required'))
+          return
+        }
+
+        worker.postMessage(message)
       })
     })()
 
@@ -98,7 +113,6 @@ export class UploadWorkerClient {
   async uploadFiles(options: UploadOptions): Promise<UploadResult> {
     const {
       files,
-      delegation,
       contract,
       contractName,
       to,
@@ -109,7 +123,10 @@ export class UploadWorkerClient {
     } = options
 
     // Ensure initialized
-    await this.initialize(delegation)
+    await this.initialize({
+      sessionToken: options.sessionToken,
+      firebaseToken: options.firebaseToken,
+    })
 
     return (async () => {
       const worker = await this.ensureWorker()

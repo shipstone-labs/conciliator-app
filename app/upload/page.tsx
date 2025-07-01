@@ -6,7 +6,8 @@ import type { Address, Hex } from 'viem'
 import { useConfig, useSession } from '@/components/AuthLayout'
 import { useStytch } from '@stytch/nextjs'
 import { getFirestore } from 'firebase/firestore'
-import { createW3Client } from 'web-storage-wrapper'
+import { getAuth } from 'firebase/auth'
+import { parseMetadataV4 } from '@/app/workers/car-streaming-format'
 
 export default function UploadPage() {
   // Get required dependencies - exactly like the original
@@ -18,70 +19,21 @@ export default function UploadPage() {
   const config = useConfig()
   const _fb = getFirestore()
 
-  // State for all async data
-  const [delegation, setDelegation] = useState<ArrayBuffer | null>(null)
+  // State for session data
   const [sessionSigs, setSessionSigs] = useState<any>(null)
-  const [delegationLoading, setDelegationLoading] = useState(false)
-  const [delegationError, setDelegationError] = useState<Error | null>(null)
 
-  // Initialize everything in one effect
+  // Initialize session sigs
   useEffect(() => {
     let mounted = true
 
     const initialize = async () => {
-      if (!stytchClient?.session) return
-
-      try {
-        setDelegationLoading(true)
-        setDelegationError(null)
-
-        // Create W3 client
-        const w3Client = await createW3Client()
-
-        // Get session JWT (safe in async function)
-        const { session_jwt } = stytchClient.session.getTokens() || {}
-
-        // Fetch UCAN delegation
-        if (w3Client && session_jwt && mounted) {
-          const did = w3Client.agent.did()
-          const response = await fetch('/api/ucan', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${session_jwt}`,
-            },
-            body: JSON.stringify({ did }),
-          })
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch UCAN delegation')
-          }
-
-          const delegationData = await response.arrayBuffer()
-          if (mounted) {
-            setDelegation(delegationData)
-          }
-        }
-
-        // Get session sigs
-        if (_sessionSigs && mounted) {
-          const sigs = await _sessionSigs.wait()
-          if (mounted) {
-            console.log(sigs)
-            setSessionSigs(sigs)
-            setRecipientAddress(sigs.address)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to initialize:', error)
+      // Get session sigs
+      if (_sessionSigs && mounted) {
+        const sigs = await _sessionSigs.wait()
         if (mounted) {
-          setDelegationError(
-            error instanceof Error ? error : new Error('Unknown error')
-          )
-        }
-      } finally {
-        if (mounted) {
-          setDelegationLoading(false)
+          console.log(sigs)
+          setSessionSigs(sigs)
+          setRecipientAddress(sigs.address)
         }
       }
     }
@@ -91,7 +43,7 @@ export default function UploadPage() {
     return () => {
       mounted = false
     }
-  }, [stytchClient?.session, _sessionSigs])
+  }, [_sessionSigs])
   const [uploadClient, setUploadClient] = useState<UploadWorkerClient | null>(
     null
   )
@@ -100,6 +52,7 @@ export default function UploadPage() {
   const [uploadResult, setUploadResult] = useState<any>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [parsedMetadata, setParsedMetadata] = useState<string>('')
 
   // Access control settings
   const [contractAddress, setContractAddress] = useState<Address>(
@@ -119,6 +72,24 @@ export default function UploadPage() {
     const upClient = new UploadWorkerClient()
     setUploadClient(upClient)
   }, [])
+
+  // Parse metadata when upload result changes
+  useEffect(() => {
+    const parseMetadata = async () => {
+      if (uploadResult?.metadataBundle) {
+        try {
+          const metadata = await parseMetadataV4(
+            new Uint8Array(uploadResult.metadataBundle)
+          )
+          setParsedMetadata(JSON.stringify(metadata, null, 2))
+        } catch (error) {
+          console.error('Failed to parse metadata:', error)
+          setParsedMetadata('Error parsing metadata bundle')
+        }
+      }
+    }
+    parseMetadata()
+  }, [uploadResult])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -172,13 +143,16 @@ export default function UploadPage() {
         })
       }
 
-      // Create a dummy UCAN delegation (you'll need to get this from your auth system)
-      if (!delegation) {
-        throw new Error('No Delegation')
+      // Get session JWT
+      const { session_jwt } = stytchClient?.session?.getTokens() || {}
+      if (!session_jwt) {
+        throw new Error('No session token available')
       }
+
       const result = await uploadClient.uploadFiles({
         files: selectedFiles,
-        delegation,
+        sessionToken: session_jwt,
+        firebaseToken: await getAuth().currentUser?.getIdToken(),
         contract:
           contractAddress || '0x0000000000000000000000000000000000000000',
         contractName: contractName || 'Default',
@@ -319,20 +293,6 @@ export default function UploadPage() {
           : 'Upload Files'}
       </button>
 
-      {delegationLoading && (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-blue-600">Loading UCAN delegation...</p>
-        </div>
-      )}
-
-      {delegationError && (
-        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-yellow-600">
-            Warning: Failed to load delegation - {delegationError.message}
-          </p>
-        </div>
-      )}
-
       {error && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-600">{error}</p>
@@ -376,19 +336,7 @@ export default function UploadPage() {
                   </p>
                   <textarea
                     readOnly
-                    value={
-                      uploadResult.metadataBundle
-                        ? JSON.stringify(
-                            JSON.parse(
-                              new TextDecoder().decode(
-                                uploadResult.metadataBundle
-                              )
-                            ),
-                            null,
-                            2
-                          )
-                        : 'No manifest available'
-                    }
+                    value={parsedMetadata || 'No manifest available'}
                     className="w-full h-64 p-2 text-xs font-mono bg-white border border-gray-300 rounded"
                     onClick={(e) => e.currentTarget.select()}
                   />

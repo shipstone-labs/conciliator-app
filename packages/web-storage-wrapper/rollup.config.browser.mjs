@@ -4,6 +4,7 @@ import json from '@rollup/plugin-json'
 import replace from '@rollup/plugin-replace'
 import virtual from '@rollup/plugin-virtual'
 import alias from '@rollup/plugin-alias'
+import path from 'node:path'
 
 // Create a global window shim
 const globals = `
@@ -13,20 +14,37 @@ const window = globalThis;
 // Crypto polyfill that works in all environments
 const cryptoPolyfill = `
 // Get crypto implementation based on environment
-const webCrypto = 
-  (typeof globalThis !== 'undefined' && globalThis.crypto) ||
-  (typeof global !== 'undefined' && global.crypto) ||
-  (typeof self !== 'undefined' && self.crypto) ||
-  (typeof window !== 'undefined' && window.crypto);
+// Check in order of most to least likely in browser environments
+let webCrypto;
 
-if (!webCrypto) {
-  throw new Error('No crypto implementation available. In Node.js 19+, globalThis.crypto should be available. For older versions, you may need to polyfill it.');
+if (typeof window !== 'undefined' && window.crypto) {
+  webCrypto = window.crypto;
+} else if (typeof globalThis !== 'undefined' && globalThis.crypto) {
+  webCrypto = globalThis.crypto;
+} else if (typeof self !== 'undefined' && self.crypto) {
+  webCrypto = self.crypto;
+} else if (typeof global !== 'undefined' && global.crypto) {
+  webCrypto = global.crypto;
 }
 
-// For browser environments, we only expose the Web Crypto API
-// This ensures libraries use their browser code paths with async crypto
-// Do NOT expose Node.js-style APIs like createHash as they would be async
-// and break code expecting synchronous behavior
+// In browser environments, crypto should always be available
+// If not, it might be SSR or a very old browser
+if (!webCrypto && typeof window !== 'undefined') {
+  // We're in a browser but crypto is missing
+  console.error('Web Crypto API not found. This browser may not support crypto operations.');
+}
+
+// For SSR, we can't throw immediately as the code might not use crypto
+// Let consuming code handle the missing crypto gracefully
+if (!webCrypto) {
+  console.warn('Crypto not available during initialization. This is expected during SSR.');
+  // Create a stub that will throw when actually used
+  webCrypto = new Proxy({}, {
+    get() {
+      throw new Error('Crypto operations are not available in this environment. This typically happens during SSR.');
+    }
+  });
+}
 
 // Export only Web Crypto implementation
 export default webCrypto;
@@ -34,7 +52,7 @@ export { webCrypto as webcrypto };
 `
 
 export default {
-  input: './dist/index.js',
+  input: './dist/tsc/index.js',
   output: {
     file: './dist/browser.js',
     format: 'esm',
@@ -65,18 +83,50 @@ export default {
       name: 'pre-transform-crypto',
       transform(code, id) {
         // Skip virtual modules
-        if (id.startsWith('\0') || id.includes('virtual:')) return null;
-        
+        if (id.startsWith('\0') || id.includes('virtual:')) return null
+
         // Replace require('crypto') with a reference that won't be processed by commonjs
-        if (code.includes("require('crypto')") || code.includes('require("crypto")')) {
-          code = code.replace(/require\(['"]crypto['"]\)/g, '__CRYPTO_POLYFILL__');
+        if (
+          code.includes("require('crypto')") ||
+          code.includes('require("crypto")')
+        ) {
+          code = code.replace(
+            /require\(['"]crypto['"]\)/g,
+            '__CRYPTO_POLYFILL__'
+          )
         }
-        return { code, map: null };
-      }
+        return { code, map: null }
+      },
     },
     // Alias crypto imports to our polyfill - this needs to come BEFORE resolve
     alias({
       entries: [
+        // Force multiformats to use browser versions
+        {
+          find: /^multiformats\/hashes\/sha2$/,
+          replacement: path.resolve(
+            './node_modules/multiformats/dist/src/hashes/sha2-browser.js'
+          ),
+        },
+        {
+          find: /^multiformats\/hashes\/sha1$/,
+          replacement: path.resolve(
+            './node_modules/multiformats/dist/src/hashes/sha1-browser.js'
+          ),
+        },
+        // Also handle direct file imports
+        {
+          find: /.*\/multiformats\/dist\/src\/hashes\/sha2\.js$/,
+          replacement: path.resolve(
+            './node_modules/multiformats/dist/src/hashes/sha2-browser.js'
+          ),
+        },
+        {
+          find: /.*\/multiformats\/dist\/src\/hashes\/sha1\.js$/,
+          replacement: path.resolve(
+            './node_modules/multiformats/dist/src/hashes/sha1-browser.js'
+          ),
+        },
         // Core crypto handling
         { find: 'crypto', replacement: 'virtual:crypto-polyfill' },
         { find: 'node:crypto', replacement: 'virtual:crypto-polyfill' },
@@ -106,8 +156,8 @@ export default {
         { find: 'node:events', replacement: 'virtual:events-stub' },
         // OS
         { find: 'os', replacement: 'virtual:os-stub' },
-        { find: 'node:os', replacement: 'virtual:os-stub' }
-      ]
+        { find: 'node:os', replacement: 'virtual:os-stub' },
+      ],
     }),
     // Stub out modules that shouldn't be included in the worker bundle
     virtual({
@@ -329,7 +379,7 @@ export default {
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
       'global.window': 'globalThis',
-      '__CRYPTO_POLYFILL__': '_virtual_virtual_cryptoPolyfill',
+      __CRYPTO_POLYFILL__: '_virtual_virtual_cryptoPolyfill',
       // Don't replace typeof window checks - we need those for environment detection
       preventAssignment: true,
     }),

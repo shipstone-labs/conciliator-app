@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, copyFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 async function build() {
@@ -43,6 +43,11 @@ async function build() {
           .replace(/did:web:up\.storacha\.network/g, 'did:web:web3.storage')
       )
     }
+
+    // Step 4: Copy index.d.ts from dist/tsc to dist
+    console.log('📄 Copying TypeScript declaration file...')
+    copyFileSync(resolve('./dist/tsc/index.d.ts'), resolve('./dist/index.d.ts'))
+    console.log('✅ TypeScript declaration file copied')
 
     console.log('✅ web-storage-wrapper built successfully!')
   } catch (error) {

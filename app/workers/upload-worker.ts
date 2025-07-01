@@ -1,4 +1,4 @@
-import { delegatedClient } from 'web-storage-wrapper'
+import { createW3Client, delegateClient } from 'web-storage-wrapper'
 import {
   CHUNK_SIZE,
   createMetadataV4,
@@ -14,7 +14,8 @@ import {
 
 interface WorkerMessage {
   type: 'init' | 'process-file' | 'upload' | 'upload-metadata'
-  delegation?: string // base64 encoded
+  sessionToken?: string // JWT token for auth
+  firebaseToken?: string // Firebase token if needed
   file?: File
   files?: File[]
   encryptionKey?: string // base64 encoded
@@ -44,12 +45,11 @@ interface WorkerResponse {
   error?: string
 }
 
-let client: Awaited<ReturnType<typeof delegatedClient>> | undefined
+let client: Awaited<ReturnType<typeof createW3Client>> | undefined
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   const {
     type,
-    delegation,
     file,
     files,
     encryptionKey,
@@ -63,12 +63,35 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   try {
     switch (type) {
       case 'init': {
-        if (!delegation) {
-          throw new Error('Delegation is required for initialization')
+        if (event.data.sessionToken) {
+          // New flow: create client and fetch delegation
+          client = await createW3Client()
+          const did = client.agent.did()
+
+          // Fetch UCAN delegation from API
+          const response = await fetch('/api/ucan', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${event.data.sessionToken}`,
+            },
+            body: JSON.stringify({ did }),
+          })
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch delegation: ${response.statusText}`
+            )
+          }
+
+          const delegationBuffer = await response.arrayBuffer()
+          await delegateClient(client, delegationBuffer)
+        } else {
+          throw new Error(
+            'Either delegation or sessionToken is required for initialization'
+          )
         }
-        // Decode base64 delegation
-        const delegationBuffer = base64ToArrayBuffer(delegation)
-        client = await delegatedClient(delegationBuffer)
+
         self.postMessage({ type: 'ready' } as WorkerResponse)
         break
       }
@@ -320,6 +343,7 @@ async function processAndUploadFilesV4(
           }
           const chunkCid = await client.uploadFile(chunkFile, {
             onUploadProgress,
+            fetchWithUploadProgress: globalThis.fetch,
           })
 
           current += chunkFile.size
