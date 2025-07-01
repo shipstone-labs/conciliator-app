@@ -314,7 +314,9 @@ export default function UploadPage() {
           hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed
           transition-colors duration-200"
       >
-        {isUploading ? `Uploading... ${uploadProgress}%` : 'Upload Files'}
+        {isUploading
+          ? `Uploading... ${Math.round(uploadProgress)}%`
+          : 'Upload Files'}
       </button>
 
       {delegationLoading && (

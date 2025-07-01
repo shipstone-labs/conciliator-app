@@ -273,13 +273,14 @@ async function processAndUploadFilesV4(
           buffer = newBuffer
 
           // Report progress
-          self.postMessage({
-            type: 'progress',
-            progress: ((offset + buffer.length) / file.size) * 100,
-          } as WorkerResponse)
+          // self.postMessage({
+          //   type: 'progress',
+          //   progress: ((offset + buffer.length) / file.size) * 100,
+          // } as WorkerResponse)
         }
 
         // Process complete chunks
+        let current = 0
         while (buffer.length >= chunkSize || (done && buffer.length > 0)) {
           const chunkData = buffer.slice(0, Math.min(chunkSize, buffer.length))
 
@@ -302,7 +303,30 @@ async function processAndUploadFilesV4(
             `${file.name}.chunk${chunkIndex}`,
             { type: 'application/octet-stream' }
           )
-          const chunkCid = await client.uploadFile(chunkFile)
+          const onUploadProgress = (status: {
+            total: number
+            loaded: number
+            lengthComputable: boolean
+          }) => {
+            console.log(
+              status.total,
+              status.loaded,
+              Math.round((100 * status.loaded) / status.total)
+            )
+            self.postMessage({
+              type: 'progress',
+              progress: ((offset + status.loaded + current) / file.size) * 100,
+            } as WorkerResponse)
+          }
+          const chunkCid = await client.uploadFile(chunkFile, {
+            onUploadProgress,
+          })
+
+          current += chunkFile.size
+          self.postMessage({
+            type: 'progress',
+            progress: ((offset + current) / file.size) * 100,
+          } as WorkerResponse)
 
           // Store chunk info
           chunks.push({

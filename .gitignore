@@ -57,3 +57,5 @@ working-together.md
 .npmignore.content
 .npmignore.original
 package.json.original
+public/workers/*
+public/download-service-worker.js*
