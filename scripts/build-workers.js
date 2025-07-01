@@ -24,16 +24,16 @@ const commonConfig = {
     '.ts': 'ts',
     '.js': 'js',
   },
-  alias: {
-    'web-storage-wrapper': path.resolve(
-      __dirname,
-      '../packages/web-storage-wrapper/dist/browser.js'
-    ),
-    'lit-wrapper': path.resolve(
-      __dirname,
-      '../packages/lit-wrapper/dist/browser.js'
-    ),
-  },
+  // alias: {
+  //   'web-storage-wrapper': path.resolve(
+  //     __dirname,
+  //     '../node_modules/web-storage-wrapper/dist/browser.js'
+  //   ),
+  //   'lit-wrapper': path.resolve(
+  //     __dirname,
+  //     '../node_modules/lit-wrapper/dist/browser.js'
+  //   ),
+  // },
   external: [
     // Mark Node.js built-ins as external to avoid bundling them
     'fs',
