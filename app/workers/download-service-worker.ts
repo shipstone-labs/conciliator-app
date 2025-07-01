@@ -86,6 +86,14 @@ async function handleDownload(
   }
 }
 
+function cidAsURL(cid?: string) {
+  if (!cid) {
+    throw new Error('Invalid CID')
+  }
+  const [seg0, ...segs] = cid.split('/')
+  return `https://${seg0}.ipfs.w3s.link/${segs.join('/')}`
+}
+
 // Unified handler for manifest-based downloads
 async function handleManifestDownload(
   manifest: MetadataV4,
@@ -130,9 +138,7 @@ async function handleManifestDownload(
       try {
         for (const chunkRequest of neededChunks) {
           // Fetch encrypted chunk
-          const chunkResponse = await fetch(
-            `/api/ipfs/${chunkRequest.chunk.cid}`
-          )
+          const chunkResponse = await fetch(cidAsURL(chunkRequest.chunk.cid))
           if (!chunkResponse.ok) {
             throw new Error(
               `Failed to fetch chunk ${chunkRequest.chunk.cid}: ${chunkResponse.status}`

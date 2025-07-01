@@ -2652,6 +2652,13 @@
       return new Response("Failed to decrypt file", { status: 500 });
     }
   }
+  function cidAsURL(cid) {
+    if (!cid) {
+      throw new Error("Invalid CID");
+    }
+    const [seg0, ...segs] = cid.split("/");
+    return `https://${seg0}.ipfs.w3s.link/${segs.join("/")}`;
+  }
   async function handleManifestDownload(manifest, cryptoKey, iv, rangeStart, rangeEnd) {
     const fileSize = manifest.fileMetadata.size;
     const effectiveRangeEnd = rangeEnd ?? fileSize - 1;
@@ -2684,9 +2691,7 @@
       async start(controller) {
         try {
           for (const chunkRequest of neededChunks) {
-            const chunkResponse = await fetch(
-              `/api/ipfs/${chunkRequest.chunk.cid}`
-            );
+            const chunkResponse = await fetch(cidAsURL(chunkRequest.chunk.cid));
             if (!chunkResponse.ok) {
               throw new Error(
                 `Failed to fetch chunk ${chunkRequest.chunk.cid}: ${chunkResponse.status}`
