@@ -3,10 +3,10 @@ import { LitKeyManager } from './lit-key-manager'
 import type { LitNodeClient, SessionSigsMap } from 'lit-wrapper'
 import {
   arrayBufferToBase64,
-  base64ToArrayBuffer,
-  uint8ArrayToBase64,
   base64ToUint8Array,
+  uint8ArrayToBase64,
 } from './base64-utils'
+import type { FileItem, UploadProgress } from './upload-worker-types'
 
 export interface UploadOptions {
   files: File[]
@@ -16,26 +16,13 @@ export interface UploadOptions {
   contractName: string
   to: `0x${string}`
   unifiedAccessControlConditions: any
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: UploadProgress) => void
   encryptionKey?: ArrayBufferLike
   iv?: Uint8Array
   litClient?: LitNodeClient // Optional LIT client for key management
   sessionSigs?: SessionSigsMap // Optional session sigs (supports delegate sigs, relayer, etc.)
   enhancedSecurity?: boolean // Enable ephemeral key encryption for worker transport
-  dontReturnMetadata?: boolean // Skip returning metadata bundle when using LIT
-}
-
-export interface UploadResult {
-  cid: string // When LIT is used: CID of the CBOR file with ACL + encrypted manifest
-  encryptedKey: ArrayBufferLike // V3: actual key, V4: empty (key in metadata)
-  iv: Uint8Array // V3: actual IV, V4: empty (IV in metadata)
-  dataToEncryptHash: `0x${string}` // Hash of the symmetric key
-  fileHash: `0x${string}` // Hash of the original file
-  // V4 optional fields
-  metadataBundle?: ArrayBufferLike // Raw metadata bundle when LIT is not used
-  encryptedMetadataBundle?: string // LIT-encrypted metadata (if LIT is used)
-  bundleHash?: `0x${string}` // Hash from LIT encryption
-  chunkCIDs?: string[] // Uploaded chunk CIDs
+  returnMetadata?: boolean // Skip returning metadata bundle when using LIT
 }
 
 export class UploadWorkerClient {
@@ -110,7 +97,7 @@ export class UploadWorkerClient {
     return this.initPromise
   }
 
-  async uploadFiles(options: UploadOptions): Promise<UploadResult> {
+  async uploadFiles(options: UploadOptions): Promise<Array<FileItem>> {
     const {
       files,
       contract,
@@ -120,6 +107,7 @@ export class UploadWorkerClient {
       onProgress,
       encryptionKey,
       iv,
+      returnMetadata,
     } = options
 
     // Ensure initialized
@@ -154,7 +142,7 @@ export class UploadWorkerClient {
         transportPublicKey = exportedPublicKey
       }
 
-      return new Promise<UploadResult>((resolve, reject) => {
+      return new Promise<Array<FileItem>>((resolve, reject) => {
         const handleMessage = async (event: MessageEvent<WorkerResponse>) => {
           switch (event.data.type) {
             case 'progress':
@@ -167,159 +155,67 @@ export class UploadWorkerClient {
               worker.removeEventListener('message', handleMessage)
               if (event.data.result) {
                 // Decode base64 responses back to binary
-                let result = {
-                  ...event.data.result,
-                  encryptedKey: base64ToArrayBuffer(
-                    event.data.result.encryptedKey
-                  ),
-                  iv: base64ToUint8Array(event.data.result.iv),
-                  metadataBundle: event.data.result.metadataBundle
-                    ? base64ToArrayBuffer(event.data.result.metadataBundle)
-                    : undefined,
-                }
-
-                // Decrypt the key if enhanced security was used
-                if (options.enhancedSecurity && transportPrivateKey) {
-                  const decryptedKey = await crypto.subtle.decrypt(
-                    { name: 'RSA-OAEP' },
-                    transportPrivateKey,
-                    result.encryptedKey
-                  )
-                  result = {
-                    ...result,
-                    encryptedKey: decryptedKey,
-                  }
-                }
-
-                // Check if this is a V4 response with metadata bundle
-                if (result.metadataBundle) {
-                  // V4: Handle metadata bundle
-                  if (this.keyManager && options.litClient) {
-                    // Decrypt RSA if enhanced security was used
-                    let metadataBundle = result.metadataBundle
+                const result: Array<FileItem> = []
+                for (const { metadataBuffer: _metadataBuffer, ...rest } of event
+                  .data.result) {
+                  let metadataBuffer: Uint8Array | undefined = _metadataBuffer
+                  let dataToEncryptHash: string | undefined
+                  if (metadataBuffer) {
                     if (options.enhancedSecurity && transportPrivateKey) {
-                      metadataBundle = await crypto.subtle.decrypt(
-                        { name: 'RSA-OAEP' },
-                        transportPrivateKey,
-                        result.metadataBundle
-                      )
-                    }
-
-                    // Include the metadata bundle in the result (unless opted out)
-                    if (!options.dontReturnMetadata) {
-                      result = {
-                        ...result,
-                        metadataBundle, // May be RSA encrypted or plaintext
-                      }
-                    }
-
-                    // If LIT is available, also encrypt and upload to IPFS
-                    if (this.keyManager && options.litClient) {
-                      // LIT flow: Encrypt metadata → Create CBOR with ACL → Upload
-                      const { encryptedBundle, bundleHash } =
-                        await this.keyManager.encryptMetadataBundle(
-                          new Uint8Array(metadataBundle),
-                          unifiedAccessControlConditions
+                      metadataBuffer = new Uint8Array(
+                        await crypto.subtle.decrypt(
+                          { name: 'RSA-OAEP' },
+                          transportPrivateKey,
+                          metadataBuffer
                         )
-
-                      // Create V4 CBOR structure with cleartext ACL
-                      const { encode } = await import('cbor-x')
-                      const v4Manifest = {
-                        version: 'LIT-ENCRYPTED-V4',
-                        accessControlConditions: unifiedAccessControlConditions,
-                        encryptedManifest: encryptedBundle,
-                        created: Date.now(),
-                      }
-                      const cborData = encode(v4Manifest)
-
-                      // Send CBOR back to worker for IPFS upload
-                      const uploadResponse = await new Promise<{ cid: string }>(
-                        (resolve, reject) => {
-                          const uploadHandler = (
-                            event: MessageEvent<WorkerResponse>
-                          ) => {
-                            if (
-                              event.data.type === 'complete' &&
-                              event.data.result?.cid
-                            ) {
-                              worker.removeEventListener(
-                                'message',
-                                uploadHandler
-                              )
-                              resolve({ cid: event.data.result.cid })
-                            } else if (event.data.type === 'error') {
-                              worker.removeEventListener(
-                                'message',
-                                uploadHandler
-                              )
-                              reject(new Error(event.data.error))
-                            }
-                          }
-
-                          worker.addEventListener('message', uploadHandler)
-                          worker.postMessage({
-                            type: 'upload-metadata',
-                            encryptedMetadata: uint8ArrayToBase64(cborData),
-                          } as WorkerMessage)
-                        }
                       )
-
-                      // Store reference for future retrieval
-                      await this.keyManager.storeV4Metadata(
-                        uploadResponse.cid,
-                        uploadResponse.cid, // Same CID for both
-                        bundleHash,
-                        unifiedAccessControlConditions
-                      )
-
-                      // Update result with CID (but keep metadata bundle)
-                      result = {
-                        ...result,
-                        cid: uploadResponse.cid,
-                        encryptedMetadataBundle: encryptedBundle, // LIT-encrypted version (string)
-                        // metadataBundle already set above
-                      }
+                    }
+                    if (this.keyManager && options.litClient) {
+                      const {
+                        ciphertext,
+                        dataToEncryptHash: _dataToEncryptHash,
+                      } = await options.litClient.encrypt({
+                        unifiedAccessControlConditions,
+                        dataToEncrypt: metadataBuffer,
+                      })
+                      dataToEncryptHash = _dataToEncryptHash
+                      metadataBuffer = base64ToUint8Array(ciphertext)
                     } else {
-                      // No LIT: Just return bundle, no CID
-                      result = {
-                        ...result,
-                        cid: '', // App decides how to store
-                      }
+                      metadataBuffer = undefined
                     }
                   }
-                } else {
-                  // V3: Handle key separately
-                  if (this.keyManager && options.litClient) {
-                    // Combine key and IV for storage
-                    const combinedKey = new Uint8Array(32 + result.iv.length)
-                    combinedKey.set(new Uint8Array(result.encryptedKey), 0)
-                    combinedKey.set(result.iv, 32)
-
-                    // Encrypt with LIT protocol
-                    const { encryptedKey: encryptedSymmetricKey, keyHash } =
-                      await this.keyManager.encryptSymmetricKey(
-                        combinedKey.buffer,
-                        result.dataToEncryptHash,
-                        unifiedAccessControlConditions
-                      )
-
-                    // Store metadata with both hashes
-                    await this.keyManager.storeKeyMetadata(
-                      result.cid,
-                      keyHash, // Hash of the symmetric key (from LIT)
-                      result.dataToEncryptHash, // Hash of the original file
-                      unifiedAccessControlConditions,
-                      encryptedSymmetricKey
-                    )
-                  }
+                  result.push({ metadataBuffer, dataToEncryptHash, ...rest })
                 }
+
+                // Send CBOR back to worker for IPFS upload
+                const uploadResponse = await new Promise<Array<FileItem>>(
+                  (resolve, reject) => {
+                    const uploadHandler = (
+                      event: MessageEvent<WorkerResponse>
+                    ) => {
+                      if (event.data.type === 'complete' && event.data.result) {
+                        worker.removeEventListener('message', uploadHandler)
+                        resolve(event.data.result)
+                      } else if (event.data.type === 'error') {
+                        worker.removeEventListener('message', uploadHandler)
+                        reject(new Error(event.data.error))
+                      }
+                    }
+
+                    worker.addEventListener('message', uploadHandler)
+                    worker.postMessage({
+                      type: 'upload-metadata',
+                      encryptedMetadatas: result,
+                    } as WorkerMessage)
+                  }
+                )
 
                 // Store session sigs for service worker access
                 if (options.sessionSigs && this.keyManager) {
                   await this.keyManager.storeSessionSigs(options.sessionSigs)
                 }
 
-                resolve(result)
+                resolve(uploadResponse)
               } else {
                 reject(new Error('Upload completed without result'))
               }
@@ -349,6 +245,8 @@ export class UploadWorkerClient {
           transportPublicKey: transportPublicKey
             ? arrayBufferToBase64(transportPublicKey)
             : undefined,
+          useLit: this.keyManager != null,
+          returnMetadata,
         } as WorkerMessage)
       })
     })()

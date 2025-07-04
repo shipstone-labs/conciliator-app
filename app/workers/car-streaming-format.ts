@@ -26,29 +26,12 @@ export interface ChunkInfo {
   counter: number // AES-CTR counter for this chunk
 }
 
-export interface ManifestV3 {
-  version: 'LIT-ENCRYPTED-V3'
-  network: string
-  contractName: string
-  contract: `0x${string}`
-  to: `0x${string}`
-  dataToEncryptHash: `0x${string}`
-  unifiedAccessControlConditions: any[]
-  fileMetadata: {
-    name: string
-    size: number
-    type: string
-    chunkSize: number
-  }
-  chunks: ChunkInfo[]
-  created: number
-}
-
 // V4: Public wrapper with access control conditions
 export interface ManifestV4 {
   version: 'LIT-ENCRYPTED-V4'
   accessControlConditions: any[] // Cleartext - needed for LIT to decrypt
-  encryptedManifest: string // LIT-encrypted manifest data
+  dataToEncryptHash: string
+  encryptedManifest: Uint8Array // LIT-encrypted manifest data
   created: number
 }
 
@@ -57,7 +40,6 @@ export interface MetadataV4 {
   symmetricKey: Uint8Array // The actual AES key
   iv: Uint8Array // IV for file decryption
   fileHash: `0x${string}` // Hash of original file
-  dataToEncryptHash: `0x${string}` // Hash of the symmetric key
   fileMetadata: {
     name: string
     size: number
@@ -93,7 +75,7 @@ export function getChunkByteRange(
  * Get chunks needed for a byte range with their internal ranges
  */
 export function getChunksForByteRange(
-  manifest: ManifestV3,
+  manifest: MetadataV4,
   start: number,
   end: number
 ): Array<{ chunk: ChunkInfo; start: number; end: number }> {
@@ -107,39 +89,6 @@ export function getChunksForByteRange(
   }
 
   return needed
-}
-
-/**
- * Create a manifest for uploaded chunks
- */
-export async function createManifestV3(
-  metadata: Omit<ManifestV3, 'version' | 'created'>
-): Promise<{ bytes: Uint8Array }> {
-  const manifest: ManifestV3 = {
-    version: 'LIT-ENCRYPTED-V3',
-    created: Date.now(),
-    ...metadata,
-  }
-
-  // Encode as CBOR
-  const { encode } = await import('cbor-x')
-  const bytes = encode(manifest)
-
-  return { bytes }
-}
-
-/**
- * Parse a manifest from bytes
- */
-export async function parseManifestV3(bytes: Uint8Array): Promise<ManifestV3> {
-  const { decode } = await import('cbor-x')
-  const manifest = decode(bytes) as ManifestV3
-
-  if (manifest.version !== 'LIT-ENCRYPTED-V3') {
-    throw new Error('Invalid manifest version')
-  }
-
-  return manifest
 }
 
 /**
@@ -157,11 +106,13 @@ export function getChunkUrl(
  */
 export async function createManifestV4(
   accessControlConditions: any[],
-  encryptedManifest: string
+  encryptedManifest: Uint8Array,
+  dataToEncryptHash: string
 ): Promise<{ bytes: Uint8Array }> {
   const manifest: ManifestV4 = {
     version: 'LIT-ENCRYPTED-V4',
     accessControlConditions,
+    dataToEncryptHash,
     encryptedManifest,
     created: Date.now(),
   }
@@ -212,7 +163,7 @@ export async function parseMetadataV4(bytes: Uint8Array): Promise<MetadataV4> {
  * Fetch only required chunks for a byte range
  */
 export async function fetchChunksForRange(
-  manifest: ManifestV3,
+  manifest: MetadataV4,
   start: number,
   end: number,
   gateway = '/api/download'

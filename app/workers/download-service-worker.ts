@@ -107,18 +107,7 @@ async function handleManifestDownload(
 
   // Get chunks needed for this range
   const neededChunks = getChunksForByteRange(
-    {
-      version: 'LIT-ENCRYPTED-V3', // Use V3 format for compatibility
-      network: '',
-      contractName: '',
-      contract: '0x0000000000000000000000000000000000000000',
-      to: '0x0000000000000000000000000000000000000000',
-      dataToEncryptHash: manifest.dataToEncryptHash,
-      unifiedAccessControlConditions: [],
-      fileMetadata: manifest.fileMetadata,
-      chunks: manifest.chunks,
-      created: Date.now(),
-    },
+    manifest,
     rangeStart,
     effectiveRangeEnd
   )

@@ -8,6 +8,7 @@ import { useStytch } from '@stytch/nextjs'
 import { getFirestore } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { parseMetadataV4 } from '@/app/workers/car-streaming-format'
+import type { UploadProgress } from '../workers/upload-worker-types'
 
 export default function UploadPage() {
   // Get required dependencies - exactly like the original
@@ -48,7 +49,11 @@ export default function UploadPage() {
     null
   )
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
+    progress: 0,
+    speed: 0,
+    unit: undefined,
+  })
   const [uploadResult, setUploadResult] = useState<any>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -104,7 +109,7 @@ export default function UploadPage() {
 
     setIsUploading(true)
     setError(null)
-    setUploadProgress(0)
+    setUploadProgress({ progress: 0, speed: 0, unit: undefined })
 
     try {
       // Create access control conditions
@@ -143,16 +148,22 @@ export default function UploadPage() {
         })
       }
 
+      const firebaseToken = await getAuth().currentUser?.getIdToken()
+      if (!firebaseToken) {
+        throw new Error('No firebase token available')
+      }
       // Get session JWT
-      const { session_jwt } = stytchClient?.session?.getTokens() || {}
-      if (!session_jwt) {
+      const { session_jwt: sessionToken } =
+        stytchClient?.session?.getTokens() || {}
+      if (!sessionToken) {
         throw new Error('No session token available')
       }
 
       const result = await uploadClient.uploadFiles({
         files: selectedFiles,
-        sessionToken: session_jwt,
-        firebaseToken: await getAuth().currentUser?.getIdToken(),
+        sessionToken,
+        firebaseToken,
+        sessionSigs,
         contract:
           contractAddress || '0x0000000000000000000000000000000000000000',
         contractName: contractName || 'Default',
@@ -289,7 +300,7 @@ export default function UploadPage() {
           transition-colors duration-200"
       >
         {isUploading
-          ? `Uploading... ${Math.round(uploadProgress)}%`
+          ? `Uploading... ${uploadProgress.progress.toFixed(2)}%${uploadProgress.speed && uploadProgress.unit ? ` (${uploadProgress.speed.toFixed(2)}${uploadProgress.unit}/s)` : ''}`
           : 'Upload Files'}
       </button>
 

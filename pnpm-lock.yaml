@@ -199,6 +199,9 @@ importers:
       firebase-admin:
         specifier: ^13.3.0
         version: 13.4.0(encoding@0.1.13)
+      hash-wasm:
+        specifier: ^4.12.0
+        version: 4.12.0
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -5514,6 +5517,9 @@ packages:
   hash-base@3.0.5:
     resolution: {integrity: sha512-vXm0l45VbcHEVlTCzs8M+s0VeYsB2lnlAaThoLKGXr3bE/VWDOelNUnycUPEhKEaXARL2TEFjBOyUiM6+55KBg==}
     engines: {node: '>= 0.10'}
+
+  hash-wasm@4.12.0:
+    resolution: {integrity: sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ==}
 
   hash.js@1.1.7:
     resolution: {integrity: sha512-taOaskGt4z4SOANNseOviYDvjEJinIkRgmp7LbKP2YTTmVxWBl87s/uzK9r+44BclBSp2X7K1hqeNfz9JbBeXA==}
@@ -14968,6 +14974,8 @@ snapshots:
     dependencies:
       inherits: 2.0.4
       safe-buffer: 5.2.1
+
+  hash-wasm@4.12.0: {}
 
   hash.js@1.1.7:
     dependencies:

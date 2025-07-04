@@ -1,51 +1,23 @@
 import { createW3Client, delegateClient } from 'web-storage-wrapper'
 import {
   CHUNK_SIZE,
+  createManifestV4,
   createMetadataV4,
   type ChunkInfo,
   type MetadataV4,
 } from './car-streaming-format'
-import {
-  arrayBufferToBase64,
-  base64ToArrayBuffer,
-  uint8ArrayToBase64,
-  base64ToUint8Array,
-} from './base64-utils'
-
-interface WorkerMessage {
-  type: 'init' | 'process-file' | 'upload' | 'upload-metadata'
-  sessionToken?: string // JWT token for auth
-  firebaseToken?: string // Firebase token if needed
-  file?: File
-  files?: File[]
-  encryptionKey?: string // base64 encoded
-  iv?: string // base64 encoded
-  contract?: `0x${string}`
-  contractName?: string
-  to?: `0x${string}`
-  unifiedAccessControlConditions?: any
-  transportPublicKey?: string // base64 encoded
-  encryptedMetadata?: string // For uploading LIT-encrypted metadata
-}
-
-interface WorkerResponse {
-  type: 'ready' | 'progress' | 'complete' | 'error'
-  progress?: number
-  result?: {
-    cid: string // For V3 this is manifest CID, for V4 this is metadata CID (when LIT encrypted)
-    encryptedKey: string // base64 encoded
-    iv: string // base64 encoded
-    dataToEncryptHash: `0x${string}` // Hash of the symmetric key
-    fileHash: `0x${string}` // Hash of the original file
-    metadataBundle?: string // base64 encoded - V4: The complete metadata bundle to be encrypted by browser
-    encryptedMetadataBundle?: string // V4: LIT-encrypted metadata (if LIT is used)
-    bundleHash?: `0x${string}` // V4: Hash from LIT encryption
-    chunkCIDs?: string[] // V4: The uploaded chunk CIDs
-  }
-  error?: string
-}
+import type {
+  FileItem,
+  FileStats,
+  UploadProgress,
+  WorkerMessage,
+  WorkerResponse,
+} from './upload-worker-types'
+import { createSHA256 } from 'hash-wasm'
+import type { Hex } from 'viem'
 
 let client: Awaited<ReturnType<typeof createW3Client>> | undefined
+const ASSUMED_METADATA_LENGTH = 1024
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   const {
@@ -58,6 +30,9 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     contractName,
     to,
     unifiedAccessControlConditions,
+    returnMetadata,
+    transportPublicKey,
+    useLit,
   } = event.data
 
   try {
@@ -115,13 +90,6 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
         }
 
         // Decode binary data from base64
-        const decodedEncryptionKey = encryptionKey
-          ? base64ToArrayBuffer(encryptionKey)
-          : undefined
-        const decodedIv = iv ? base64ToUint8Array(iv) : undefined
-        const decodedTransportPublicKey = event.data.transportPublicKey
-          ? base64ToArrayBuffer(event.data.transportPublicKey)
-          : undefined
 
         // Always use V4 for better privacy (encrypted metadata)
         const result = await processAndUploadFilesV4(
@@ -131,25 +99,17 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
             contractName,
             to,
             unifiedAccessControlConditions,
+            returnMetadata: returnMetadata ?? false,
+            useLit: useLit ?? false,
           },
-          decodedEncryptionKey,
-          decodedIv,
-          decodedTransportPublicKey // Optional RSA encryption on top
+          encryptionKey,
+          iv,
+          transportPublicKey // Optional RSA encryption on top
         )
-
-        // Encode binary data to base64 for response
-        const encodedResult = {
-          ...result,
-          encryptedKey: arrayBufferToBase64(result.encryptedKey),
-          iv: uint8ArrayToBase64(result.iv),
-          metadataBundle: result.metadataBundle
-            ? arrayBufferToBase64(result.metadataBundle)
-            : undefined,
-        }
 
         self.postMessage({
           type: 'complete',
-          result: encodedResult,
+          result,
         } as WorkerResponse)
         break
       }
@@ -162,24 +122,43 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           throw new Error('No encrypted metadata provided')
         }
 
+        const result: Array<FileItem> = []
+
         try {
-          // The encryptedMetadata is the full JSON-stringified LIT encrypted object
-          // We store it as-is to preserve all the metadata needed for decryption
-          const metadataBytes = new TextEncoder().encode(
-            event.data.encryptedMetadata
-          )
-
-          // Create a File object from the encrypted data
-          const metadataFile = new File([metadataBytes], 'metadata.enc', {
-            type: 'application/json',
-          })
-
-          // Upload to IPFS
-          const cid = await client.uploadFile(metadataFile)
-
+          for (const file of event.data.encryptedMetadata) {
+            const { metadataBuffer, dataToEncryptHash, fileMetadata } = file
+            if (!metadataBuffer || !dataToEncryptHash) {
+              result.push(file)
+              continue
+            }
+            const { bytes: manifest } = await createManifestV4(
+              unifiedAccessControlConditions,
+              metadataBuffer,
+              dataToEncryptHash
+            )
+            const metadataFile = new File([manifest], fileMetadata.name, {
+              type: 'application/cbor',
+            })
+            file.stats.total += manifest.byteLength - ASSUMED_METADATA_LENGTH
+            self.postMessage({
+              type: 'progress',
+              progress: calcStats(
+                event.data.encryptedMetadata.map(({ stats }) => stats)
+              ),
+            } as WorkerResponse)
+            const cid = await client.uploadFile(metadataFile)
+            file.stats.saved += manifest.byteLength
+            self.postMessage({
+              type: 'progress',
+              progress: calcStats(
+                event.data.encryptedMetadata.map(({ stats }) => stats)
+              ),
+            } as WorkerResponse)
+            result.push({ ...file, cid: cid.toString() })
+          }
           self.postMessage({
             type: 'complete',
-            result: { cid: cid.toString() },
+            result,
           } as WorkerResponse)
         } catch (error) {
           throw new Error(
@@ -205,12 +184,14 @@ interface ProcessOptions {
   contractName: string
   to: `0x${string}`
   unifiedAccessControlConditions: any
+  returnMetadata: boolean
+  useLit: boolean
 }
 
 // Removed old processAndUploadFiles - using only V3 format
 
 async function getOrGenerateEncryption(
-  providedKey?: ArrayBuffer,
+  providedKey?: Uint8Array,
   providedIv?: Uint8Array
 ): Promise<{ key: CryptoKey; iv: Uint8Array }> {
   let key: CryptoKey
@@ -239,45 +220,80 @@ async function getOrGenerateEncryption(
   return { key, iv }
 }
 
+const units = ['B', 'KB', 'MB', 'GB', 'TB']
+function calcStats(stats: Array<FileStats>): UploadProgress {
+  let grandTotal = 0
+  let grandSaved = 0
+  let grandStart = undefined
+  for (const { total, saved, start } of stats) {
+    grandTotal += total
+    grandSaved += saved
+    grandStart = start
+  }
+  const progress = (100 * grandSaved) / grandTotal
+  let speed = grandStart ? (1000 * grandSaved) / grandStart : 0
+  let unitIndex = 0
+  while (speed > 1024) {
+    speed /= 1024
+    unitIndex++
+  }
+  const unit = units[unitIndex]
+  return { progress, speed: unit ? speed : 0, unit }
+}
+
 // V4 implementation - metadata bundle contains symmetric key & IV
 // Enhanced security (RSA) encrypts the entire bundle when enabled
 async function processAndUploadFilesV4(
   files: File[],
   _options: ProcessOptions,
-  providedKey?: ArrayBuffer,
+  providedKey?: Uint8Array,
   providedIv?: Uint8Array,
-  transportPublicKey?: ArrayBuffer // For RSA encryption of entire bundle
-): Promise<{
-  cid: string
-  encryptedKey: ArrayBuffer
-  iv: Uint8Array
-  dataToEncryptHash: `0x${string}`
-  fileHash: `0x${string}`
-  metadataBundle?: ArrayBuffer
-  chunkCIDs?: string[]
-}> {
+  transportPublicKey?: Uint8Array // For RSA encryption of entire bundle
+): Promise<Array<FileItem>> {
   if (!client) {
     throw new Error('Client not initialized')
   }
 
-  // Generate or use provided encryption key
-  const { key, iv } = await getOrGenerateEncryption(providedKey, providedIv)
-
-  const allMetadata: MetadataV4[] = []
-
+  const allMetadata: Array<{ file: File; item: FileItem }> = []
+  const start = Date.now()
   for (const file of files) {
+    let chunkSize = CHUNK_SIZE
+    while (file.size / chunkSize > 16) {
+      chunkSize <<= 1
+    }
+    while (chunkSize > 100 * 1024 * 1024) {
+      chunkSize >>= 1
+    }
+    allMetadata.push({
+      file,
+      item: {
+        stats: {
+          total: file.size + (_options.useLit ? ASSUMED_METADATA_LENGTH : 0),
+          saved: 0,
+          start,
+        },
+        fileMetadata: {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          chunkSize,
+        },
+      },
+    })
+  }
+  for (const { file, item } of allMetadata) {
+    // Generate or use provided encryption key
+    const { key, iv } = await getOrGenerateEncryption(providedKey, providedIv)
+
     // Calculate hash of original file data
-    const fileBuffer = await file.arrayBuffer()
-    const hashBuffer = await crypto.subtle.digest('SHA-256', fileBuffer)
-    const fileHash = `0x${Array.from(new Uint8Array(hashBuffer))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')}` as `0x${string}`
+    const sha = await createSHA256()
 
     // Process file in chunks (same as V3)
     const chunks: ChunkInfo[] = []
-    const chunkSize = CHUNK_SIZE
-    let offset = 0
+    const chunkSize = item.fileMetadata.chunkSize
+    const stats = item.stats
     let chunkIndex = 0
+    let offset = 0
 
     // Create file stream for chunking
     const stream = file.stream()
@@ -289,17 +305,12 @@ async function processAndUploadFilesV4(
         const { done, value } = await reader.read()
 
         if (value) {
+          sha.update(value)
           // Append to buffer
           const newBuffer = new Uint8Array(buffer.length + value.length)
           newBuffer.set(buffer)
           newBuffer.set(value, buffer.length)
           buffer = newBuffer
-
-          // Report progress
-          // self.postMessage({
-          //   type: 'progress',
-          //   progress: ((offset + buffer.length) / file.size) * 100,
-          // } as WorkerResponse)
         }
 
         // Process complete chunks
@@ -320,36 +331,41 @@ async function processAndUploadFilesV4(
             chunkData
           )
 
+          stats.total += encryptedChunk.byteLength - chunkData.byteLength
+
           // Upload encrypted chunk
           const chunkFile = new File(
             [encryptedChunk],
             `${file.name}.chunk${chunkIndex}`,
             { type: 'application/octet-stream' }
           )
+
           const onUploadProgress = (status: {
             total: number
             loaded: number
             lengthComputable: boolean
           }) => {
-            console.log(
-              status.total,
-              status.loaded,
-              Math.round((100 * status.loaded) / status.total)
-            )
+            stats.saved = current + status.loaded
             self.postMessage({
               type: 'progress',
-              progress: ((offset + status.loaded + current) / file.size) * 100,
+              progress: calcStats(
+                allMetadata.map(({ item: { stats } }) => stats)
+              ),
             } as WorkerResponse)
           }
+
           const chunkCid = await client.uploadFile(chunkFile, {
             onUploadProgress,
             fetchWithUploadProgress: globalThis.fetch,
           })
 
           current += chunkFile.size
+          stats.saved = current
           self.postMessage({
             type: 'progress',
-            progress: ((offset + current) / file.size) * 100,
+            progress: calcStats(
+              allMetadata.map(({ item: { stats } }) => stats)
+            ),
           } as WorkerResponse)
 
           // Store chunk info
@@ -377,98 +393,46 @@ async function processAndUploadFilesV4(
     // Export the key for storage
     const exportedKey = await crypto.subtle.exportKey('raw', key)
 
-    // Calculate hash of the symmetric key
-    const keyHashBuffer = await crypto.subtle.digest('SHA-256', exportedKey)
-    const dataToEncryptHash = `0x${Array.from(new Uint8Array(keyHashBuffer))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')}` as `0x${string}`
-
     // Create metadata bundle
     const metadata: MetadataV4 = {
       symmetricKey: new Uint8Array(exportedKey),
       iv,
-      fileHash,
-      dataToEncryptHash,
-      fileMetadata: {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        chunkSize: CHUNK_SIZE,
-      },
+      fileHash: sha.digest('hex') as Hex,
+      fileMetadata: item.fileMetadata,
       chunks,
     }
 
-    allMetadata.push(metadata)
-  }
-
-  // Handle multiple files
-  let finalMetadata: MetadataV4
-  if (allMetadata.length === 1) {
-    finalMetadata = allMetadata[0]
-  } else {
-    // For multiple files, create a combined metadata
-    finalMetadata = {
-      ...allMetadata[0],
-      fileMetadata: {
-        name: 'Multiple files',
-        size: allMetadata.reduce((sum, m) => sum + m.fileMetadata.size, 0),
-        type: 'multipart/mixed',
-        chunkSize: CHUNK_SIZE,
-      },
-      chunks: allMetadata.flatMap((m) => m.chunks),
-    }
-  }
-
-  // Encode metadata as CBOR
-  const { bytes: metadataBytes } = await createMetadataV4(finalMetadata)
-
-  // Apply enhanced security (RSA encryption) if requested
-  let metadataToReturn: ArrayBuffer
-  if (transportPublicKey) {
-    // Import the public key
-    const publicKey = await crypto.subtle.importKey(
-      'spki',
-      transportPublicKey,
-      {
-        name: 'RSA-OAEP',
-        hash: 'SHA-256',
-      },
-      false,
-      ['encrypt']
-    )
-
     // Encrypt the entire metadata bundle (including key and IV) with RSA
-    metadataToReturn = await crypto.subtle.encrypt(
-      { name: 'RSA-OAEP' },
-      publicKey,
-      metadataBytes
-    )
-  } else {
-    // Standard flow - return plaintext metadata bundle
-    // Browser will encrypt this with LIT before storage
-    const buffer = metadataBytes.buffer.slice(
-      metadataBytes.byteOffset,
-      metadataBytes.byteOffset + metadataBytes.byteLength
-    )
-    // Ensure it's an ArrayBuffer, not SharedArrayBuffer
-    metadataToReturn =
-      buffer instanceof ArrayBuffer ? buffer : new ArrayBuffer(0)
-  }
+    let { bytes: metadataBuffer } = await createMetadataV4(metadata)
+    if (transportPublicKey) {
+      // Import the public key
+      const publicKey = await crypto.subtle.importKey(
+        'spki',
+        transportPublicKey,
+        {
+          name: 'RSA-OAEP',
+          hash: 'SHA-256',
+        },
+        false,
+        ['encrypt']
+      )
 
-  // Extract all chunk CIDs
-  const chunkCIDs = finalMetadata.chunks.map((chunk) => chunk.cid)
+      // Encrypt the entire metadata bundle (including key and IV) with RSA
+      metadataBuffer = new Uint8Array(
+        await crypto.subtle.encrypt(
+          { name: 'RSA-OAEP' },
+          publicKey,
+          metadataBuffer
+        )
+      )
+    }
+    item.metadata = metadata
+    item.metadataBuffer = metadataBuffer
+  }
 
   // Return metadata bundle and chunk info
   // Browser will handle LIT encryption and manifest creation
-  return {
-    cid: '', // Placeholder - browser will generate final CID after LIT encryption
-    encryptedKey: new ArrayBuffer(0), // Key is in metadata bundle
-    iv: new Uint8Array(0), // IV is in metadata bundle
-    dataToEncryptHash: finalMetadata.dataToEncryptHash,
-    fileHash: finalMetadata.fileHash,
-    metadataBundle: metadataToReturn,
-    chunkCIDs,
-  }
+  return allMetadata.map(({ item }) => item)
 }
 
 // Export types for use in main thread

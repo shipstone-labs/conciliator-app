@@ -1,5 +1,10 @@
 import type { LitNodeClient, SessionSigsMap } from 'lit-wrapper'
 import { decode } from 'cbor-x'
+import {
+  type ManifestV4,
+  type MetadataV4,
+  parseMetadataV4,
+} from './car-streaming-format'
 
 // IndexedDB schema for sharing data between main thread and service worker
 const DB_NAME = 'lit-key-store'
@@ -21,7 +26,7 @@ interface StoredCryptoKey {
 
 interface StoredManifest {
   id: string // manifest-ID or CID
-  manifest: import('./car-streaming-format').MetadataV4
+  manifest: MetadataV4
   created: number
 }
 
@@ -251,7 +256,6 @@ export class LitKeyManager {
     })
 
     // Parse decrypted metadata
-    const { parseMetadataV4 } = await import('./car-streaming-format')
     const decryptedMetadata = await parseMetadataV4(
       new Uint8Array(decrypted.decryptedData)
     )
@@ -346,7 +350,7 @@ export class ServiceWorkerKeyManager {
 
   // Get manifest and corresponding CryptoKey
   async getManifestAndKey(id: string): Promise<{
-    manifest: import('./car-streaming-format').MetadataV4
+    manifest: MetadataV4
     cryptoKey: CryptoKey
     iv: Uint8Array
   } | null> {
@@ -376,7 +380,7 @@ export class ServiceWorkerKeyManager {
 
   // Get cached manifest and key from IndexedDB
   private async getCachedManifestAndKey(id: string): Promise<{
-    manifest: import('./car-streaming-format').MetadataV4
+    manifest: MetadataV4
     cryptoKey: CryptoKey
     iv: Uint8Array
   } | null> {
@@ -418,7 +422,7 @@ export class ServiceWorkerKeyManager {
   // Cache manifest and key after fetching from IPFS
   private async cacheManifestAndKey(
     id: string,
-    manifest: import('./car-streaming-format').MetadataV4
+    manifest: MetadataV4
   ): Promise<void> {
     if (!this.db) return
 
@@ -437,12 +441,7 @@ export class ServiceWorkerKeyManager {
     await new Promise<void>((resolve, reject) => {
       const request = manifestStore.put({
         id,
-        manifest: {
-          fileHash: manifest.fileHash,
-          dataToEncryptHash: manifest.dataToEncryptHash,
-          fileMetadata: manifest.fileMetadata,
-          chunks: manifest.chunks,
-        },
+        manifest,
         created: Date.now(),
       } as StoredManifest)
       request.onsuccess = () => resolve()
@@ -468,7 +467,7 @@ export class ServiceWorkerKeyManager {
   // Fetch and decrypt manifest from IPFS (for CID-based downloads)
   private async fetchAndDecryptManifest(
     cid: string
-  ): Promise<import('./car-streaming-format').MetadataV4 | null> {
+  ): Promise<MetadataV4 | null> {
     try {
       // Fetch the CBOR file from IPFS
       const response = await fetch(`/api/download/${cid}`)
@@ -477,10 +476,7 @@ export class ServiceWorkerKeyManager {
       }
 
       const data = await response.arrayBuffer()
-      const { decode } = await import('cbor-x')
-      const decoded = decode(new Uint8Array(data)) as import(
-        './car-streaming-format'
-      ).ManifestV4
+      const decoded = decode(new Uint8Array(data)) as ManifestV4
 
       if (decoded.version !== 'LIT-ENCRYPTED-V4') {
         throw new Error('Unsupported manifest version')
@@ -504,8 +500,8 @@ export class ServiceWorkerKeyManager {
   private async requestManifestDecryption(
     cid: string,
     accessControlConditions: any[],
-    encryptedManifest: string
-  ): Promise<import('./car-streaming-format').MetadataV4 | null> {
+    encryptedManifest: Uint8Array
+  ): Promise<MetadataV4 | null> {
     return new Promise((resolve) => {
       const channel = new BroadcastChannel('lit-key-requests')
       const timeout = setTimeout(() => {
