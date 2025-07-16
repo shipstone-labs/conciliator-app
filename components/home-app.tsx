@@ -11,15 +11,18 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import WelcomeHome from './welcome-home'
 import { SubscriptionBanner } from './SubscriptionBanner'
 import { useVocabulary } from '@/lib/vocabulary'
 import { useFeature } from '@/hooks/useFeature'
 
-// Logged in version of the home page
+// Logged in version of the home page (now shown to everyone)
 function LoggedInHome() {
+  const { user, isInitialized } = useStytchUser()
   const { getTerm } = useVocabulary()
   const isAISite = useFeature('ai')
+
+  // Check if user is authenticated
+  const isAuthenticated = isInitialized && user
 
   // Determine if we're on AI site
   const isOnAISite =
@@ -84,20 +87,42 @@ function LoggedInHome() {
 
         {/* Button Section */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
-          <Link
-            href={addIdeaRoute}
-            className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
-            data-testid="home-add-idea-button"
-          >
-            {getTerm('item.add')}
-          </Link>
-          <Link
-            href="/list-ip/mine"
-            className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
-            data-testid="home-my-ideas-button"
-          >
-            {getTerm('item.my')}
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href={addIdeaRoute}
+              className="px-8 py-4 bg-primary hover:bg-primary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-primary/30 hover:scale-105 text-center"
+              data-testid="home-add-idea-button"
+            >
+              {getTerm('item.add')}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="px-8 py-4 bg-primary/50 text-black/50 font-medium rounded-xl shadow-lg cursor-not-allowed text-center"
+              data-testid="home-add-idea-button"
+            >
+              {getTerm('item.add')} (Sign In Required)
+            </button>
+          )}
+          {isAuthenticated ? (
+            <Link
+              href="/list-ip/mine"
+              className="px-8 py-4 bg-accent hover:bg-accent/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-accent/30 hover:scale-105 text-center"
+              data-testid="home-my-ideas-button"
+            >
+              {getTerm('item.my')}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="px-8 py-4 bg-accent/50 text-black/50 font-medium rounded-xl shadow-lg cursor-not-allowed text-center"
+              data-testid="home-my-ideas-button"
+            >
+              {getTerm('item.my')} (Sign In Required)
+            </button>
+          )}
           <Link
             href="/list-ip"
             className="px-8 py-4 bg-secondary hover:bg-secondary/80 text-black font-medium rounded-xl transition-all shadow-lg hover:shadow-secondary/30 hover:scale-105 text-center"
@@ -111,21 +136,10 @@ function LoggedInHome() {
   )
 }
 
-// This is the main component that decides which version to show
+// This is the main component that always shows the early version welcome page
 function HomeApp() {
-  const { user, isInitialized } = useStytchUser()
-
-  // If not initialized, show nothing
-  if (!isInitialized) {
-    return null
-  }
-
-  // Show the appropriate version based on login status
-  if (user) {
-    return <LoggedInHome />
-  }
-
-  return <WelcomeHome />
+  // Always show LoggedInHome (early version) for everyone
+  return <LoggedInHome />
 }
 
 function RootHomeApp() {
