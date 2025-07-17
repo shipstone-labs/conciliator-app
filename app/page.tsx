@@ -2,14 +2,14 @@
 
 import { useStytchUser } from '@stytch/nextjs'
 import HomeApp from '@/components/home-app'
-import SubscriptionHome from '@/app/subscription/home/page'
+import LoggedOutHomeApp from '@/components/logged-out-home-app'
 
 export default function Home() {
   const { user, isInitialized } = useStytchUser()
 
-  // If not authenticated, show subscription home page
+  // If not authenticated, show the logged-out home app experience
   if (isInitialized && !user) {
-    return <SubscriptionHome />
+    return <LoggedOutHomeApp />
   }
 
   // If authenticated or still initializing, show the regular home app
