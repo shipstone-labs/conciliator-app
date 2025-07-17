@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useStytchUser } from '@stytch/nextjs'
 import { useUserSubscription } from '@/app/subscription/SubscriptionStorage'
 import { Cross2Icon } from '@radix-ui/react-icons'
+import { AuthButton } from './AuthButton'
 
 interface SubscriptionBannerProps {
   /**
@@ -84,14 +85,21 @@ export function SubscriptionBanner({
       <div className="container mx-auto flex items-center justify-between">
         <p className="text-foreground text-sm">{message}</p>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant={buttonVariant}
-            onClick={() => router.push(upgradeUrl)}
-            data-testid="subscription-banner-action"
-          >
-            {buttonText}
-          </Button>
+          {!user ? (
+            <AuthButton
+              text={buttonText}
+              className="h-8 px-3 text-sm bg-primary hover:bg-primary/80 text-primary-foreground font-medium rounded-md"
+            />
+          ) : (
+            <Button
+              size="sm"
+              variant={buttonVariant}
+              onClick={() => router.push(upgradeUrl)}
+              data-testid="subscription-banner-action"
+            >
+              {buttonText}
+            </Button>
+          )}
 
           {closable && (
             <button

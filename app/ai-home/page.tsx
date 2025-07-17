@@ -227,7 +227,7 @@ export default function AIHomePage() {
 
         {/* Footer */}
         <footer className="mt-16 text-center text-sm text-muted-foreground">
-          <p>© 2025 SafeIdea, LLC. All rights reserved.</p>
+          <p>© 2025 SafeIdea LLC. All rights reserved.</p>
         </footer>
       </div>
     </div>
