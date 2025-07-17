@@ -215,7 +215,9 @@ export const AddStepTerms = memo(
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                <span>Creating Your Idea Page...</span>
+                <span>
+                  Creating Your Idea Page - this takes a couple minutes
+                </span>
               </>
             ) : (
               'Create Your Idea Page'

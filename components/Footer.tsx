@@ -14,7 +14,7 @@ export function Footer() {
           <div className="flex flex-col items-center md:flex-row md:justify-between">
             <div className="mb-4 md:mb-0">
               <span className="text-foreground/60 text-sm">
-                © 2025 SafeIdea, LLC. All rights reserved.
+                © 2025 SafeIdea LLC. All rights reserved.
               </span>
             </div>
             <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center md:justify-end">

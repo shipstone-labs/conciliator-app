@@ -1,117 +1,84 @@
-# SafeIdea Platform
+# Conciliator - SafeIdea Platform
 
-SafeIdea is an open-source platform for creators to securely store, share, and protect their ideas and digital intellectual property using blockchain technology and AI monitoring.
+A decentralized platform for protecting and monitoring digital intellectual property using blockchain technology and AI.
 
-## What We Offer
+**Try it out at [safeidea.net](https://safeidea.net)**
 
-* **Secure Storage**: Protect your ideas with blockchain-based encryption via Filecoin and Storacha
-* **Controlled Sharing**: Share your ideas with cryptographically verifiable access controls
-* **AI Guard Agent**: Monitor and protect against unauthorized use of your intellectual property
-* **Multi-page Creation Flow**: Three-step process to protect, share, and guard your ideas
+## Overview
 
-## Architecture
+Conciliator implements the SafeIdea protocol - infrastructure that bridges cryptographic ownership with practical control of digital assets. Built for the era where AI agents need to autonomously transact with digital content, we provide creators with tools to protect, share, and monitor their intellectual property without intermediaries.
 
-SafeIdea uses Web3 technologies to ensure your intellectual property remains secure:
+## Core Features
 
-* **Storage**: Filecoin and Storacha for decentralized, encrypted storage
-* **Access Control**: LIT Protocol for token-gated encryption and access management
-* **Authentication**: Stytch OTP with LIT PKP wallets - no crypto wallet required
-* **AI Processing**: Lilypad for decentralized AI computation
-* **Smart Contracts**: Custom IPDocV8 token on Filecoin
+* **Encrypted Storage**: Blockchain-based encryption via Filecoin and Storacha
+* **Access Control**: Token-gated encryption using LIT Protocol
+* **AI Monitoring**: Automated detection of unauthorized IP usage
+* **Legal Evidence**: Generate court-admissible documentation for IP protection
+* **No Wallet Required**: Stytch OTP authentication with LIT PKP wallets
 
-## Technology Stack
+## Tech Stack
 
 * **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
-* **Backend**: Next.js API Routes, Firebase Admin SDK
 * **Blockchain**: Ethers.js, Viem, LIT Protocol SDK
-* **Storage**: Storacha Client, Firebase Storage
-* **Authentication**: Stytch Next.js SDK
+* **Storage**: Storacha Client, IPFS, Filecoin
+* **AI**: Lilypad for decentralized computation
+* **Auth**: Stytch Next.js SDK
+* **Backend**: Firebase (Firestore, Storage, Functions)
 * **Monitoring**: OpenTelemetry, Google Cloud Trace
-* **Deployment**: Google Cloud Run
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-* Node.js 22.13.1 (recommended via mise)
+* Node.js 22.13.1 (use mise for version management)
 * PNPM 10.11.0
-* Google Cloud Platform account with Cloud Run enabled
-* Firebase project with Firestore, Auth, and Storage configured
+* Google Cloud Platform account
+* Firebase project
 
-### Installation
+### Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/shipstone-labs/conciliator-app.git
-   cd conciliator-app
-   ```
+```bash
+# Clone and install
+git clone https://github.com/shipstone-labs/conciliator-app.git
+cd conciliator-app
+mise install
+pnpm install
 
-2. Install mise for version management:
-   ```bash
-   # Install mise first, then:
-   mise install
-   ```
+# Configure environment
+cp .env.local.example .env.local
+cp hardhat/.env.example hardhat/.env
+# Fill in required environment variables
 
-3. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+# Deploy contracts
+cd hardhat
+npm install
+npx hardhat compile
+npx hardhat run scripts/deploy.js --network hyperspace
+# Update .env with deployed contract address
+npx hardhat run scripts/verify.js --network hyperspace
 
-4. Set up environment variables:
-   ```bash
-   cp .env.local.example .env.local
-   cp hardhat/.env.example hardhat/.env
-   # Fill in all required environment variables
-   ```
+# Start development
+pnpm dev
+```
 
-5. Deploy smart contracts:
-   ```bash
-   cd hardhat
-   npm install
-   npx hardhat compile
-   npx hardhat run scripts/deploy.js --network hyperspace
-   # Note the deployed contract address and update .env files
-   npx hardhat run scripts/verify.js --network hyperspace
-   ```
-
-6. Start development server:
-   ```bash
-   pnpm dev
-   ```
-
-## Project Structure
+## Architecture
 
 ```
 /app                    # Next.js 15 App Router
-├── add-ip/            # Multi-page IP creation flow
-│   ├── protect/       # Step 1: Basic protection setup
-│   ├── share/         # Step 2: Sharing configuration
-│   └── guard/         # Step 3: AI monitoring setup
 ├── api/               # API endpoints
 ├── details/[id]/      # IP detail views
-├── discovery/[id]/    # Interactive Q&A for exploring ideas
-├── list-ip/           # Dashboard for managing IP
-├── subscription/      # Subscription management
-└── ai-home/           # AI-enhanced landing page
+├── discovery/[id]/    # Interactive Q&A for ideas
+├── list-ip/           # Dashboard
+└── ai-home/           # Landing page
 
-/components            # Reusable React components
-/hooks                 # Custom React hooks
-/lib                   # Shared utilities and types
-/browser-testing       # Visual regression and automated testing
-/docs                  # Documentation
+/components            # React components
+/hooks                 # Custom hooks
+/lib                   # Utilities and types
+/hardhat              # Smart contracts
+/browser-testing      # Automated testing
 ```
 
-## Testing
-
-The project includes comprehensive testing infrastructure:
-
-* **Pre-commit Testing**: Run `./pre-commit-testing.sh` before committing
-* **Visual Regression**: Automated screenshot comparison across devices
-* **MCP Puppeteer**: Automated IP creation testing with Claude Code SDK
-
-## Environment Variables
-
-Key environment variables required:
+## Key Environment Variables
 
 ```env
 # LIT Protocol
@@ -124,7 +91,7 @@ STORACHA_AGENT_KEY=
 STORACHA_AGENT_DID=
 STORACHA_AGENT_PROOF=
 
-# Stytch Authentication
+# Stytch
 STYTCH_APP_ID=
 STYTCH_APP_SECRET=
 NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=
@@ -133,56 +100,53 @@ NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN=
 FIREBASE_SA=
 FIREBASE_PROJECT_ID=
 NEXT_PUBLIC_FIREBASE_CONFIG=
+```
 
-# AI Services
-COMPLETION_API_KEY=
-IMAGE_API_KEY=
+## Testing
+
+```bash
+# Pre-commit tests
+./pre-commit-testing.sh
+
+# Visual regression
+pnpm test:visual
+
+# MCP Puppeteer tests
+pnpm test:mcp
 ```
 
 ## Deployment
 
-### Google Cloud Run
-
 ```bash
-# Build and deploy using Cloud Build
-gcloud builds submit --config cloudbuild.yaml
-
-# Or use the deployment script
+# Google Cloud Run
 ./gcp-deploy.sh
-```
 
-### Local Development with Docker
-
-```bash
-# Build dependencies image
-docker-compose build dependencies
-
-# Run development environment
+# Docker local
 docker-compose up
 ```
 
 ## Recent Updates (June 2025)
 
-Development velocity has significantly increased over the past three weeks, with major architectural improvements and feature additions based on user feedback.
-
-* **Multi-Page Add IP Flow**: Implemented new three-step process for creating protected ideas (Protect → Share → Guard)
-* **AI Guard Agent**: Beta site evaluators have been helpful in guiding the needs of creators and inventors with intellectual property. The new AI Guard agent was strongly requested, and we're implementing an early version this week
-* **Focus Shift**: Transitioned from monetization to IP protection and monitoring based on user needs
-* **Testing Infrastructure**: Added comprehensive visual regression testing and automated IP creation testing
-* **Performance**: Improved blockchain operation handling and session management
-* **Claude PR Assistant**: Integrated automated PR reviews using Claude AI
-* **File Upload**: Increased file size limits and refined supported formats for IP documentation
+* **AI Guard Agent**: Early version implementing FHE-based IP monitoring
+* **Improved Testing**: Visual regression and automated IP creation testing
+* **Performance**: Enhanced blockchain operation handling and session management
+* **Claude PR Assistant**: Automated PR reviews
+* **File Upload**: Increased limits and refined format support
 
 ## Known Issues
 
-* Silent failures during blockchain operations need better error handling
-* Session timeouts affect longer test runs (~20% failure rate)
-* TypeScript compilation errors in pre-commit hooks (use `--no-verify` as workaround)
+* Blockchain operation error handling needs improvement
+* Session timeouts affect test runs (~20% failure rate)
+* TypeScript compilation errors in pre-commit hooks (workaround: `--no-verify`)
+
+## Contributing
+
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for guidelines.
 
 ## Support
 
-For questions about SafeIdea, please contact us at [dev@safeidea.ai](mailto:dev@safeidea.ai)
+Contact: [dev@safeidea.ai](mailto:dev@safeidea.ai)
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+Apache License 2.0 - see [LICENSE](LICENSE)
