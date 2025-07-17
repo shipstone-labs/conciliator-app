@@ -12,7 +12,6 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import WelcomeHome from './welcome-home'
-import { SubscriptionBanner } from './SubscriptionBanner'
 import { useVocabulary } from '@/lib/vocabulary'
 import { useFeature } from '@/hooks/useFeature'
 
@@ -33,8 +32,6 @@ function LoggedInHome() {
 
   return (
     <>
-      <SubscriptionBanner />
-
       <div className="flex flex-col items-center min-h-screen px-6 pt-12 pb-16">
         {/* Logo Section */}
         <div className="mb-8" data-testid="home-logo">
