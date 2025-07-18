@@ -4,11 +4,13 @@ import { type Client, create } from '@storacha/client'
 import { StoreMemory } from '@storacha/client/stores/memory'
 import { parse } from '@storacha/client/proof'
 import { Signer } from '@storacha/client/principal/ed25519'
+import { extract } from '@storacha/client/delegation'
 import type {
   ListRequestOptions,
   UploadListSuccess,
 } from '@storacha/client/types'
 import * as DID from '@ipld/dag-ucan/did'
+export * as DID from '@ipld/dag-ucan/did'
 
 // import * as ed from '@noble/ed25519'
 // import { sha512 } from '@noble/hashes/sha512'
@@ -108,13 +110,50 @@ const serviceConf = {
  */
 export async function createW3Client(): Promise<Client> {
   try {
+    const store = new StoreMemory()
     return await create({
       serviceConf,
+      store,
     })
   } catch (error) {
     console.error('Error creating W3 client:', error)
     throw error
   }
+}
+
+export async function delegatedClient(
+  delegationData: ArrayBuffer
+): Promise<Client> {
+  // Create client with memory store
+  const store = new StoreMemory()
+  const client = await create({ store })
+
+  // Import the delegation
+  const delegation = await extract(new Uint8Array(delegationData))
+  if (!delegation.ok) {
+    throw new Error('Failed to extract delegation')
+  }
+
+  // Create space with the delegation
+  const space = await client.addSpace(delegation.ok)
+  await client.setCurrentSpace(space.did())
+  return client
+}
+
+export async function delegateClient(
+  client: Client,
+  delegationData: ArrayBuffer
+): Promise<Client> {
+  // Import the delegation
+  const delegation = await extract(new Uint8Array(delegationData))
+  if (!delegation.ok) {
+    throw new Error('Failed to extract delegation')
+  }
+
+  // Create space with the delegation
+  const space = await client.addSpace(delegation.ok)
+  await client.setCurrentSpace(space.did())
+  return client
 }
 
 /**
@@ -218,6 +257,9 @@ export const w3Storage = {
   authenticate: authenticateWithEmail,
   store: storeContent,
   list: listUploads,
+  delegatedClient,
+  delegateClient,
+  DID,
 }
 
 export default w3Storage
