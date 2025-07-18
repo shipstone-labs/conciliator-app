@@ -40,7 +40,7 @@ export const SortedProducts = memo(
         <div key={product.id} className="flex flex-col">
           <div className="flex items-center space-x-2 p-3 border bg-muted/30 rounded-xl cursor-pointer hover:bg-muted/40 transition-colors">
             <Select
-              value={value?.[index]?.id || defaultPrices[0].id}
+              value={value?.[index]?.id || defaultPrices[index].id}
               onValueChange={(_priceValue: string) => {
                 const priceValue = _priceValue === '__none__' ? '' : _priceValue
                 const newPrice = sortedPrices.find(
